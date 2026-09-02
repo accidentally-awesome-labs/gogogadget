@@ -1,0 +1,283 @@
+package templates
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// ExampleNoticeItem is the view row for example_notices.
+// The handler maps query rows onto it, so this package depends on nothing
+// generated and adding a column cannot silently change what the table renders.
+type ExampleNoticeItem struct {
+	ID        int64
+	Name      string
+	CreatedAt time.Time
+}
+
+// ExampleNoticesListData is the read surface state.
+// One page of rows, the search term, the pager position, the base URL every
+// control links back to, and the form that shares the page.
+//
+// Writable marks the surface whose route scope owns the mutations — the app
+// page for a tenant-scoped table, the staff page for a platform one — so the
+// other surface renders the same table with no write controls. Admin marks the
+// staff layout, where showing a control additionally requires the viewer's
+// write role.
+type ExampleNoticesListData struct {
+	Items      []ExampleNoticeItem
+	Query      string
+	Page       int
+	TotalPages int
+	BaseURL    string
+	Writable   bool
+	Admin      bool
+	Form       ExampleNoticeFormData
+}
+
+// ExampleNoticeFormData is the create/edit form state. ID 0 is a create, and WriteURL
+// is the prefix the form posts to, which is not always the page's own URL.
+type ExampleNoticeFormData struct {
+	ID       int64
+	Name     string
+	NameErr  string
+	WriteURL string
+}
+
+// exampleNoticesWritable is the one place that decides whether write controls render.
+// Default deny: an unset context inside the admin layout renders read-only, so
+// a support-role viewer sees the table and not controls that would 403.
+func exampleNoticesWritable(ctx context.Context, d ExampleNoticesListData) bool {
+	if !d.Writable {
+		return false
+	}
+	if d.Admin {
+		return AdminWrite(ctx)
+	}
+	return true
+}
+
+templ ExampleNoticesPage(d ExampleNoticesListData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-notice.title")})
+	if exampleNoticesWritable(ctx, d) {
+		@ExampleNoticeForm(d.Form)
+	}
+	// The search box stays OUTSIDE the swap target: it morphs the table
+	// container on every keystroke, and a control inside the box it replaces is
+	// re-created mid-word, which loses the caret.
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "example-notice.toolbar_label")}) {
+		@exampleNoticesSearch(d)
+	}
+	<div id="example-notice-table-container">
+		@ExampleNoticesTable(d)
+	</div>
+}
+
+// AdminExampleNoticesPage is the staff surface. It is the write surface for a platform
+// table and a read surface for a tenant-scoped one; the handler says which by
+// setting Writable, and exampleNoticesWritable adds the write-role check.
+templ AdminExampleNoticesPage(d ExampleNoticesListData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-notice.admin_title")})
+	if exampleNoticesWritable(ctx, d) {
+		@ExampleNoticeForm(d.Form)
+	}
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "example-notice.toolbar_label")}) {
+		@exampleNoticesSearch(d)
+	}
+	<div id="example-notice-table-container">
+		@ExampleNoticesTable(d)
+	</div>
+}
+
+templ exampleNoticesSearch(d ExampleNoticesListData) {
+	@ui.SearchInput(ui.SearchInputOpts{
+		Name: "q", Value: d.Query,
+		Placeholder: i18n.T(ctx, "example-notice.search_placeholder"),
+		AriaLabel:   i18n.T(ctx, "example-notice.search_label"),
+		GetURL:      d.BaseURL, Target: "#example-notice-table-container",
+		IndicatorID: "example-notice-search-indicator",
+	})
+}
+
+// ExampleNoticesTable is the search and pager fragment.
+// The CONTENTS of the table container, never the box itself: both controls swap
+// innerMorph, so a fragment repeating its own wrapper would leave a second
+// element carrying the same id.
+templ ExampleNoticesTable(d ExampleNoticesListData) {
+	@ui.DataTable(exampleNoticesTable(ctx, d)) {
+		for _, item := range d.Items {
+			<tr id={ fmt.Sprintf("example-notice-%d", item.ID) } data-testid="example-notice-row">
+				<td class="px-4 py-3 font-medium">{ item.Name }</td>
+				<td class="px-4 py-3 text-fg-muted">{ item.CreatedAt.Format("Jan 2, 2006") }</td>
+				if exampleNoticesWritable(ctx, d) {
+					<td class="px-4 py-3">
+						<div class="card-actions">
+							@ui.ButtonLink(ui.ButtonLinkOpts{
+								Label: i18n.T(ctx, "example-notice.edit"),
+								Href:  fmt.Sprintf("%s?edit=%d", d.BaseURL, item.ID),
+								Size:  ui.SizeXS,
+							})
+							// The request rides on the dialog's confirm control,
+							// so the delete contract (closest tr, outerHTML,
+							// 200-empty) is unchanged while the prompt stays
+							// translatable and assertable. hx-confirm calls
+							// window.confirm and can be neither.
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID: fmt.Sprintf("example-notice-delete-%d", item.ID),
+								// The row's subject is in the trigger's name:
+								// forty controls all called "Delete" are
+								// indistinguishable to a screen reader.
+								TriggerLabel: i18n.T(ctx, "example-notice.delete_row", item.Name),
+								TriggerIcon:  ui.IconDelete,
+								Title:        i18n.T(ctx, "example-notice.delete_title"),
+								Message:      i18n.T(ctx, "example-notice.delete_confirm"),
+								ConfirmLabel: i18n.T(ctx, "example-notice.delete_action"),
+								CancelLabel:  i18n.T(ctx, "example-notice.cancel"),
+								Kind:         ui.KindDanger,
+								HX: ui.HX{
+									Delete: fmt.Sprintf("%s/%d", d.BaseURL, item.ID),
+									Target: "closest tr", Swap: "outerHTML",
+								},
+							})
+						</div>
+					</td>
+				}
+			</tr>
+		}
+	}
+}
+
+// exampleNoticesTable assembles the list and its slots.
+// Empty and Pagination are passed in every state: a caller that renders the
+// table only when rows exist takes the pager away with the rows.
+func exampleNoticesTable(ctx context.Context, d ExampleNoticesListData) ui.DataTableOpts {
+	columns := []ui.Column{
+		{Key: "name", Label: i18n.T(ctx, "example-notice.col_name")},
+		{Key: "created", Label: i18n.T(ctx, "example-notice.col_created")},
+	}
+	if exampleNoticesWritable(ctx, d) {
+		columns = append(columns, ui.Column{Key: "actions", Label: i18n.T(ctx, "example-notice.col_actions"), Align: ui.AlignEnd})
+	}
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "example-notice.caption"),
+		HiddenCaption: true,
+		Columns:       columns,
+		RowCount:      len(d.Items),
+		Empty:         exampleNoticesEmpty(d),
+		Pagination:    exampleNoticesPager(d),
+		Attrs:         ui.Attrs{ID: "example-notice-table", TestID: "example-notice-table"},
+	}
+}
+
+// exampleNoticesEmpty separates "nothing exists yet" from
+// "your search matched nothing". Offering "add your first one" to somebody
+// whose query missed is the wrong answer to the wrong question.
+templ exampleNoticesEmpty(d ExampleNoticesListData) {
+	if d.Query != "" {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline, Filtered: true,
+			Title:      i18n.T(ctx, "example-notice.filtered_empty_title"),
+			Body:       i18n.T(ctx, "example-notice.filtered_empty_body", d.Query),
+			ClearURL:   d.BaseURL,
+			ClearLabel: i18n.T(ctx, "example-notice.clear_search"),
+			Target:     "#example-notice-table-container",
+		})
+	} else {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline,
+			Title: i18n.T(ctx, "example-notice.empty_title"),
+			Body:  exampleNoticesEmptyBody(ctx, d),
+		})
+	}
+}
+
+// exampleNoticesEmptyBody says what to do next, which depends on whether this surface
+// has the form. Pointing at a control that is not rendered here — the app page
+// of a platform table, or the staff page of a tenant-scoped one — is worse
+// than saying nothing.
+func exampleNoticesEmptyBody(ctx context.Context, d ExampleNoticesListData) string {
+	if exampleNoticesWritable(ctx, d) {
+		return i18n.T(ctx, "example-notice.empty_body")
+	}
+	return i18n.T(ctx, "example-notice.empty_body_readonly")
+}
+
+templ exampleNoticesPager(d ExampleNoticesListData) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page: d.Page, TotalPages: d.TotalPages,
+		BaseURL: d.BaseURL + "?q=" + d.Query, Target: "#example-notice-table-container",
+		Numbered: true,
+		Labels:   exampleNoticesPagerLabels(ctx),
+	})
+}
+
+// exampleNoticesPagerLabels is the shared pager vocabulary plus
+// the per-number link name. Without it a screen reader hears only the digit,
+// which in a row of digits says nothing about what the control does.
+func exampleNoticesPagerLabels(ctx context.Context) ui.PagerLabels {
+	labels := pagerLabels(ctx)
+	labels.Page = func(page int) string { return i18n.T(ctx, "example-notice.pagination_page", page) }
+	return labels
+}
+
+templ ExampleNoticeForm(d ExampleNoticeFormData) {
+	<div id="example-notice-form">
+		if d.NameErr != "" {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4"}}) {
+				{ i18n.T(ctx, "example-notice.fix_error") }
+			}
+		}
+		@ui.Form(ui.FormOpts{
+			Target: "#example-notice-form", Swap: "innerHTML",
+			Attrs: ui.Attrs{
+				Class:  "card max-w-lg space-y-4",
+				TestID: "example-notice-form",
+				HX:     ui.HX{Post: exampleNoticeFormAction(d), Disable: true},
+			},
+		}) {
+			@ui.Field(ui.FieldOpts{Name: "name", Label: i18n.T(ctx, "example-notice.field_name"), Error: d.NameErr, Required: true}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "name", Value: d.Name, Required: true, Error: d.NameErr,
+					Placeholder: i18n.T(ctx, "example-notice.field_placeholder"),
+				})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{
+					Label: exampleNoticeSubmitLabel(ctx, d), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				})
+				// The indicator is a sibling, not a child of the button: htmx
+				// flags the requesting element, so any .htmx-indicator inside it
+				// shows, and the button keeps an accessible name that is only
+				// its label.
+				@ui.Spinner(ui.SpinnerOpts{})
+				@ui.ButtonLink(ui.ButtonLinkOpts{Label: i18n.T(ctx, "example-notice.cancel"), Href: d.WriteURL})
+			}
+		}
+	</div>
+}
+
+// ExampleNoticeFormPage is the non-htmx 422 target: the form on its own
+// page, so a client without JavaScript still sees the validation message.
+templ ExampleNoticeFormPage(d ExampleNoticeFormData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-notice.title")})
+	@ExampleNoticeForm(d)
+}
+
+// exampleNoticeFormAction posts to the collection for a create and to
+// the row for an edit, which is the contract the handlers implement.
+func exampleNoticeFormAction(d ExampleNoticeFormData) string {
+	if d.ID == 0 {
+		return d.WriteURL
+	}
+	return fmt.Sprintf("%s/%d", d.WriteURL, d.ID)
+}
+
+func exampleNoticeSubmitLabel(ctx context.Context, d ExampleNoticeFormData) string {
+	if d.ID == 0 {
+		return i18n.T(ctx, "example-notice.create")
+	}
+	return i18n.T(ctx, "example-notice.save")
+}

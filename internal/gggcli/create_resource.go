@@ -260,8 +260,19 @@ func buildResourceModule(
 	}
 	manifest := base
 	manifest.Title = spec.HumanPlural
+	// The description names what this invocation actually emitted. A --no-ui
+	// slice that advertises templates is a manifest describing a different
+	// module, and `ggg catalog`/`ggg info` print it verbatim.
+	parts := []string{"queries", "migration"}
+	if spec.hasGo() {
+		parts = append(parts, "transport")
+	}
+	if spec.uiRead() {
+		parts = append(parts, "templates")
+	}
+	parts = append(parts, "declarations")
 	manifest.Description = "The project-local " + spec.humanSingular + " slice: the " + spec.table +
-		" table with its queries, migration, transport, templates and declarations."
+		" table with its " + joinWords(parts) + "."
 
 	payloads := map[string][]byte{
 		"internal/db/queries/" + spec.table + ".sql": []byte(spec.queriesSQL()),
@@ -538,6 +549,18 @@ func unexported(value string) string {
 	runes := []rune(name)
 	runes[0] = unicode.ToLower(runes[0])
 	return string(runes)
+}
+
+// joinWords renders a list as prose: "a, b and c".
+func joinWords(items []string) string {
+	switch len(items) {
+	case 0:
+		return ""
+	case 1:
+		return items[0]
+	default:
+		return strings.Join(items[:len(items)-1], ", ") + " and " + items[len(items)-1]
+	}
 }
 
 // sentenceCase upper-cases the first rune and leaves the rest alone, which is

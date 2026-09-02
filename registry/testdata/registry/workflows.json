@@ -1,6 +1,7 @@
 {
   "items": [
     "registry/modules/workflow/example-feed/module.json",
+    "registry/modules/workflow/example-notice/module.json",
     "registry/modules/workflow/example-ping/module.json",
     "registry/modules/workflow/example-resource/module.json"
   ],

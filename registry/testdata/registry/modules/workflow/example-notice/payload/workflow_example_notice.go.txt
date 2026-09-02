@@ -1,0 +1,245 @@
+package web
+
+import (
+	"errors"
+	"math"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/jackc/pgx/v5"
+)
+
+// exampleNoticePageSize is the rows-per-page of the read surfaces.
+const exampleNoticePageSize = 20
+
+// exampleNoticeFormInput is the HTML form body.
+// The JSON transport has its own request type; both run the same validator, so
+// the two transports cannot disagree about what a valid name is.
+type exampleNoticeFormInput struct {
+	Name string `form:"name"`
+}
+
+// validateExampleNoticeName is the name rule every transport runs: required,
+// 80 characters or fewer after trimming. It returns the cleaned value and a
+// message, empty when valid.
+func validateExampleNoticeName(name string) (string, string) {
+	name = strings.TrimSpace(name)
+	switch {
+	case name == "":
+		return name, "Name is required."
+	case len(name) > 80:
+		return name, "Name must be 80 characters or fewer."
+	default:
+		return name, ""
+	}
+}
+
+// GET /app/example-notices
+//
+// The app read surface. Read only: the mutations live on the other surface,
+// so this one renders the table without write controls.
+func (s *Server) handleExampleNotices(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	total, err := s.q.CountExampleNotices(ctx, query)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	rows, err := s.q.ListExampleNotices(ctx, sqlc.ListExampleNoticesParams{Query: query, Lim: exampleNoticePageSize, Off: int32((pageNumber - 1) * exampleNoticePageSize)})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	// An explicit view row rather than the query row: the template package then
+	// depends on nothing generated, and adding a column cannot silently change
+	// what the table renders.
+	items := make([]templates.ExampleNoticeItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, templates.ExampleNoticeItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
+	}
+	data := templates.ExampleNoticesListData{
+		Items: items, Query: query, Page: pageNumber,
+		TotalPages: max(int(math.Ceil(float64(total)/exampleNoticePageSize)), 1),
+		BaseURL:    "/app/example-notices",
+		Writable:   false,
+		Admin:      false,
+	}
+	pageData := Page{Title: "Example notices", Layout: templates.LayoutApp}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleNoticesTable(data))
+		return
+	}
+	s.Render(w, r, pageData, templates.ExampleNoticesPage(data))
+}
+
+// GET /admin/example-notices
+//
+// The staff read surface. Search, pagination, and the create/edit form on
+// one page: ?edit=<id> loads a row into that form, so editing needs neither
+// a second route nor a second template.
+func (s *Server) handleAdminExampleNotices(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	total, err := s.q.CountExampleNotices(ctx, query)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	rows, err := s.q.ListExampleNotices(ctx, sqlc.ListExampleNoticesParams{Query: query, Lim: exampleNoticePageSize, Off: int32((pageNumber - 1) * exampleNoticePageSize)})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	// An explicit view row rather than the query row: the template package then
+	// depends on nothing generated, and adding a column cannot silently change
+	// what the table renders.
+	items := make([]templates.ExampleNoticeItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, templates.ExampleNoticeItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
+	}
+	data := templates.ExampleNoticesListData{
+		Items: items, Query: query, Page: pageNumber,
+		TotalPages: max(int(math.Ceil(float64(total)/exampleNoticePageSize)), 1),
+		BaseURL:    "/admin/example-notices",
+		Writable:   true,
+		Admin:      true,
+	}
+	data.Form.WriteURL = "/admin/example-notices"
+	if raw := r.URL.Query().Get("edit"); raw != "" {
+		id, parseErr := strconv.ParseInt(raw, 10, 64)
+		if parseErr != nil {
+			s.handleNotFound(w, r)
+			return
+		}
+		// A row outside the caller's tenant is a 404, never a 403: a 403 would
+		// confirm that the id exists.
+		row, getErr := s.q.GetExampleNoticeByID(ctx, id)
+		if errors.Is(getErr, pgx.ErrNoRows) {
+			s.handleNotFound(w, r)
+			return
+		}
+		if getErr != nil {
+			s.renderError(w, r, getErr.Error())
+			return
+		}
+		data.Form.ID, data.Form.Name = row.ID, row.Name
+	}
+	pageData := Page{Title: "Example notices", Layout: templates.LayoutAdmin}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleNoticesTable(data))
+		return
+	}
+	s.Render(w, r, pageData, templates.AdminExampleNoticesPage(data))
+}
+
+// renderExampleNoticeFormError re-renders the form with 422:
+// the fragment for htmx, which swaps it into #example-notice-form, and the standalone
+// form page otherwise. The write URL is set here rather than by four callers
+// that could each forget it.
+func (s *Server) renderExampleNoticeFormError(w http.ResponseWriter, r *http.Request, form templates.ExampleNoticeFormData) {
+	form.WriteURL = "/admin/example-notices"
+	w.WriteHeader(http.StatusUnprocessableEntity)
+	pageData := Page{Title: "Example notices", Layout: templates.LayoutAdmin}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleNoticeForm(form))
+		return
+	}
+	s.Render(w, r, pageData, templates.ExampleNoticeFormPage(form))
+}
+
+// POST /admin/example-notices
+func (s *Server) handleExampleNoticeCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := identity.UserFrom(ctx)
+	var input exampleNoticeFormInput
+	if err := decodeForm(r, &input); err != nil {
+		s.renderExampleNoticeFormError(w, r, templates.ExampleNoticeFormData{})
+		return
+	}
+	name, nameErr := validateExampleNoticeName(input.Name)
+	if nameErr != "" {
+		s.renderExampleNoticeFormError(w, r, templates.ExampleNoticeFormData{Name: name, NameErr: nameErr})
+		return
+	}
+	row, err := s.q.CreateExampleNotice(ctx, name)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	s.logAudit(ctx, "", user.UserID, "example_notice.created", map[string]any{"id": row.ID, "name": row.Name})
+	Toast(w, "success", "Example notice created")
+	Navigate(w, r, "/admin/example-notices")
+}
+
+// POST /admin/example-notices/{id}
+func (s *Server) handleExampleNoticeUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := identity.UserFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.handleNotFound(w, r)
+		return
+	}
+	var input exampleNoticeFormInput
+	if decodeErr := decodeForm(r, &input); decodeErr != nil {
+		s.renderExampleNoticeFormError(w, r, templates.ExampleNoticeFormData{ID: id})
+		return
+	}
+	name, nameErr := validateExampleNoticeName(input.Name)
+	if nameErr != "" {
+		s.renderExampleNoticeFormError(w, r, templates.ExampleNoticeFormData{ID: id, Name: name, NameErr: nameErr})
+		return
+	}
+	// The tenant predicate is in the UPDATE, so a cross-tenant id matches no
+	// row and arrives here as ErrNoRows: one round trip, no existence leak.
+	row, err := s.q.UpdateExampleNotice(ctx, sqlc.UpdateExampleNoticeParams{ID: id, Name: name})
+	if errors.Is(err, pgx.ErrNoRows) {
+		s.handleNotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	s.logAudit(ctx, "", user.UserID, "example_notice.updated", map[string]any{"id": row.ID, "name": row.Name})
+	Toast(w, "success", "Example notice updated")
+	Navigate(w, r, "/admin/example-notices")
+}
+
+// DELETE /admin/example-notices/{id}
+//
+// Row swap: 200 with an empty body, and htmx removes the tr.
+func (s *Server) handleExampleNoticeDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := identity.UserFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.handleNotFound(w, r)
+		return
+	}
+	affected, err := s.q.DeleteExampleNotice(ctx, id)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	if affected == 0 {
+		s.handleNotFound(w, r)
+		return
+	}
+	s.logAudit(ctx, "", user.UserID, "example_notice.deleted", map[string]any{"id": id})
+	Toast(w, "success", "Example notice deleted")
+	w.WriteHeader(http.StatusOK)
+}

@@ -1,0 +1,346 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/workflow/example-notice",
+    "kind": "workflow",
+    "name": "example-notice",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example notices",
+    "description": "The project-local example notice slice: the example_notices table with its queries, migration, transport, templates and declarations.",
+    "requires": [
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "registry/modules/workflow/example-notice/payload/example_notices.sql.txt",
+        "target": "internal/db/queries/example_notices.sql",
+        "class": "query",
+        "sha256": "7b6187648465983d0bf4f72fb2d446d138c6f461303687674a069aca3ed4bae9",
+        "rewrite_module": false,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-notice/payload/example-notice.templ.txt",
+        "target": "internal/web/templates/example-notice.templ",
+        "class": "templ",
+        "sha256": "ed9e9cdd877edbee9cbe03d80d4721d01bf6a4fee14e6ee0c31a5a23aec73d32",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-notice/payload/workflow_example_notice.go.txt",
+        "target": "internal/web/workflow_example_notice.go",
+        "class": "go",
+        "sha256": "bb1bce34ade541f1d5a2aea7219c6ea6c1631d54ff68e1442313922e202a1712",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-notice/payload/workflow_example_notice_test.go.txt",
+        "target": "internal/web/workflow_example_notice_test.go",
+        "class": "test",
+        "sha256": "16896b01ff3e0e0e689884d1ef6bd3e123cf8081c1f37b0d8f4557658599d5b5",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "routes": [
+        "example-notice.admin",
+        "example-notice.create",
+        "example-notice.delete",
+        "example-notice.index",
+        "example-notice.update"
+      ],
+      "queries": [
+        "CountExampleNotices",
+        "CreateExampleNotice",
+        "DeleteExampleNotice",
+        "GetExampleNoticeByID",
+        "ListExampleNotices",
+        "UpdateExampleNotice"
+      ],
+      "data": [
+        "example_notices"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "example-notice.admin",
+          "method": "GET",
+          "pattern": "/admin/example-notices",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminExampleNotices"
+        },
+        {
+          "id": "example-notice.create",
+          "method": "POST",
+          "pattern": "/admin/example-notices",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleExampleNoticeCreate"
+        },
+        {
+          "id": "example-notice.delete",
+          "method": "DELETE",
+          "pattern": "/admin/example-notices/{id}",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleExampleNoticeDelete"
+        },
+        {
+          "id": "example-notice.index",
+          "method": "GET",
+          "pattern": "/app/example-notices",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleNotices"
+        },
+        {
+          "id": "example-notice.update",
+          "method": "POST",
+          "pattern": "/admin/example-notices/{id}",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleExampleNoticeUpdate"
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountExampleNotices",
+          "table": "example_notices"
+        },
+        {
+          "name": "CreateExampleNotice",
+          "table": "example_notices"
+        },
+        {
+          "name": "DeleteExampleNotice",
+          "table": "example_notices"
+        },
+        {
+          "name": "GetExampleNoticeByID",
+          "table": "example_notices"
+        },
+        {
+          "name": "ListExampleNotices",
+          "table": "example_notices"
+        },
+        {
+          "name": "UpdateExampleNotice",
+          "table": "example_notices"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.example-notice",
+          "area": "admin",
+          "route_id": "example-notice.admin",
+          "label_key": "example-notice.admin_nav"
+        },
+        {
+          "id": "nav.app.example-notice",
+          "area": "app",
+          "route_id": "example-notice.index",
+          "label_key": "example-notice.nav"
+        }
+      ],
+      "visual": [
+        {
+          "id": "example-notice",
+          "path": "/app/example-notices",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]"
+          ]
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "ggg.example_notice",
+        "kind": "immutable",
+        "source": "registry/modules/workflow/example-notice/payload/example_notice.sql",
+        "sha256": "01eb44c35b7011df2eed9e4ed1f1f69b639303b8e2f591e8bd5eca715a7d217e"
+      }
+    ],
+    "environment": [],
+    "locales": {
+      "en": {
+        "example-notice.admin_nav": "Example notices",
+        "example-notice.admin_title": "Example notices (all organizations)",
+        "example-notice.cancel": "Cancel",
+        "example-notice.caption": "Example notices",
+        "example-notice.clear_search": "Clear search",
+        "example-notice.col_actions": "Actions",
+        "example-notice.col_created": "Created",
+        "example-notice.col_name": "Name",
+        "example-notice.create": "Create example notice",
+        "example-notice.delete_action": "Delete permanently",
+        "example-notice.delete_confirm": "Delete this example notice? This cannot be undone.",
+        "example-notice.delete_row": "Delete %s",
+        "example-notice.delete_title": "Delete example notice",
+        "example-notice.edit": "Edit",
+        "example-notice.empty_body": "Add your first example notice with the form above.",
+        "example-notice.empty_body_readonly": "No example notices have been created yet.",
+        "example-notice.empty_title": "No example notices yet",
+        "example-notice.field_name": "Name",
+        "example-notice.field_placeholder": "Name",
+        "example-notice.filtered_empty_body": "No example notice matches “%s”.",
+        "example-notice.filtered_empty_title": "No matches",
+        "example-notice.fix_error": "Please fix the error below.",
+        "example-notice.nav": "Example notices",
+        "example-notice.pagination_page": "Page %d",
+        "example-notice.save": "Save changes",
+        "example-notice.search_label": "Search example notices",
+        "example-notice.search_placeholder": "Search example notices…",
+        "example-notice.title": "Example notices",
+        "example-notice.toolbar_label": "Example notice list controls"
+      },
+      "es": {
+        "example-notice.admin_nav": "Example notices",
+        "example-notice.admin_title": "Example notices (todas las organizaciones)",
+        "example-notice.cancel": "Cancelar",
+        "example-notice.caption": "Example notices",
+        "example-notice.clear_search": "Borrar la búsqueda",
+        "example-notice.col_actions": "Acciones",
+        "example-notice.col_created": "Creado",
+        "example-notice.col_name": "Nombre",
+        "example-notice.create": "Crear example notice",
+        "example-notice.delete_action": "Eliminar definitivamente",
+        "example-notice.delete_confirm": "¿Eliminar este example notice? Esta acción no se puede deshacer.",
+        "example-notice.delete_row": "Eliminar %s",
+        "example-notice.delete_title": "Eliminar example notice",
+        "example-notice.edit": "Editar",
+        "example-notice.empty_body": "Añade tu primer example notice con el formulario de arriba.",
+        "example-notice.empty_body_readonly": "Todavía no se ha creado ningún example notice.",
+        "example-notice.empty_title": "Todavía no hay example notices",
+        "example-notice.field_name": "Nombre",
+        "example-notice.field_placeholder": "Nombre",
+        "example-notice.filtered_empty_body": "Ningún example notice coincide con «%s».",
+        "example-notice.filtered_empty_title": "Sin coincidencias",
+        "example-notice.fix_error": "Corrige el error que aparece a continuación.",
+        "example-notice.nav": "Example notices",
+        "example-notice.pagination_page": "Página %d",
+        "example-notice.save": "Guardar cambios",
+        "example-notice.search_label": "Buscar example notices",
+        "example-notice.search_placeholder": "Buscar example notices…",
+        "example-notice.title": "Example notices",
+        "example-notice.toolbar_label": "Controles de la lista de example notices"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [
+      {
+        "table": "example_notices",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "free"
+  }
+}

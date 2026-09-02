@@ -140,10 +140,10 @@ func TestExampleClosuresCoverEveryKindInDependencyOrder(t *testing.T) {
 	}
 	want := []string{
 		"element", "component", "page",
-		// Three workflow closures: the job-backed example, plus the two
-		// resource-generator shapes — the full slice and the narrowed
-		// platform/API-only one.
-		"workflow", "workflow", "workflow",
+		// Four workflow closures: the job-backed example, plus the three
+		// resource-generator shapes — the full slice, the narrowed
+		// platform/API-only one, and platform with its UI.
+		"workflow", "workflow", "workflow", "workflow",
 		"system", "system", "system",
 	}
 	if !slices.Equal(kinds, want) {

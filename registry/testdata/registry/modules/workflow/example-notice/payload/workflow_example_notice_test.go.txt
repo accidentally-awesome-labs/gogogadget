@@ -1,0 +1,18 @@
+package web
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestExampleNoticeNameValidation(t *testing.T) {
+	if name, message := validateExampleNoticeName("  Launch  "); name != "Launch" || message != "" {
+		t.Fatalf("validateExampleNoticeName(padded) = (%q, %q), want (\"Launch\", \"\")", name, message)
+	}
+	if _, message := validateExampleNoticeName("   "); message == "" {
+		t.Fatal("validateExampleNoticeName accepted a blank name")
+	}
+	if _, message := validateExampleNoticeName(strings.Repeat("x", 81)); message == "" {
+		t.Fatal("validateExampleNoticeName accepted a name over the length limit")
+	}
+}

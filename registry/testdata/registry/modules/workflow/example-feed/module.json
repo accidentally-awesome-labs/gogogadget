@@ -7,7 +7,7 @@
     "revision": 1,
     "contract": 1,
     "title": "Example feeds",
-    "description": "The project-local example feed slice: the example_feeds table with its queries, migration, transport, templates and declarations.",
+    "description": "The project-local example feed slice: the example_feeds table with its queries, migration, transport and declarations.",
     "requires": [
       {
         "id": "ggg/system/api",

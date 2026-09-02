@@ -830,11 +830,19 @@ func TestCreateResourceEmptyStateMatchesTheSurface(t *testing.T) {
 //     CRUD, search wiring, locales, navigation, visual baseline.
 //   - example-feed (--scope platform --no-ui --api) is the narrowed one: no
 //     templates, no locales, no navigation, a read-only JSON transport, no
-//     validator and therefore no emitted unit test, an empty audit organization
-//     and a trimmed dependency and requirement set. That combination is what
-//     broke when the unit test and the validator ended up on different gates —
-//     it parsed and gofmt'd cleanly and did not compile — so it is on a
-//     compiler now rather than only in an AST cross-check.
+//     validator and therefore no emitted unit test, and a trimmed dependency
+//     and requirement set. That combination is what broke when the unit test
+//     and the validator ended up on different gates — it parsed and gofmt'd
+//     cleanly and did not compile — so it is on a compiler now rather than
+//     only in an AST cross-check.
+//   - example-notice (--scope platform, no flags) is the third because the
+//     first two leave real branches uncompiled. It is the only shape that
+//     reaches the bare single-argument sqlc calls (Get/Create/Delete on a
+//     table with no tenant predicate), the empty audit organization —
+//     auditOrg()'s "" branch, which also removes a local and so sits in the
+//     same defect class as N1 — the platform templates (admin write surface,
+//     Writable=false app page, read-only empty body) and the import set with
+//     neither time nor the api package.
 var exampleResourceFixtures = []struct {
 	module   string
 	mutation CreateMutation
@@ -846,6 +854,10 @@ var exampleResourceFixtures = []struct {
 	{
 		module:   "example-feed",
 		mutation: CreateMutation{Name: "example-feed", Scope: "platform", API: true, NoUI: true},
+	},
+	{
+		module:   "example-notice",
+		mutation: CreateMutation{Name: "example-notice", Scope: "platform"},
 	},
 }
 
@@ -859,6 +871,16 @@ func TestCreateResourceMatchesExampleFixtures(t *testing.T) {
 		t.Run(fixture.module, func(t *testing.T) {
 			files, _ := buildResource(t, fixture.mutation)
 			dir := resourceFixtureRegistry + "/registry/modules/workflow/" + fixture.module
+
+			// Checked before either branch: the update mode writes every key
+			// it is given, so a generator that started emitting outside the
+			// fixture directory would scatter files through the tree and only
+			// be caught on the next assert run.
+			for name := range files {
+				if !strings.HasPrefix(name, dir+"/") {
+					t.Fatalf("the generator wrote %s, which is outside the fixture directory", name)
+				}
+			}
 
 			if os.Getenv("GGG_UPDATE_RESOURCE_FIXTURE") != "" {
 				if err := os.RemoveAll(filepath.Join(root, filepath.FromSlash(dir))); err != nil {
@@ -878,9 +900,6 @@ func TestCreateResourceMatchesExampleFixtures(t *testing.T) {
 			}
 
 			for name, want := range files {
-				if !strings.HasPrefix(name, dir+"/") {
-					t.Fatalf("the generator wrote %s, which is outside the fixture directory", name)
-				}
 				got, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(name)))
 				if err != nil {
 					t.Fatalf("read %s: %v", name, err)
@@ -970,6 +989,74 @@ func TestExampleResourceFixturesDoNotCollide(t *testing.T) {
 				claim(t, "openapi operation", operation.OperationID, fixture.module)
 			}
 		}
+	}
+}
+
+// The platform-with-UI fixture exists for the branches the other two leave
+// uncompiled, so those are what it pins.
+func TestExampleNoticeFixtureIsThePlatformUIShape(t *testing.T) {
+	files, manifest := buildResource(t, exampleResourceFixtures[2].mutation)
+	const dir = resourceFixtureRegistry + "/registry/modules/workflow/example-notice"
+	transport := string(files[dir+"/payload/workflow_example_notice.go.txt"])
+
+	// The empty audit organization: a global change must not land in the
+	// acting staff member's own tenant feed.
+	for _, action := range []string{"created", "updated", "deleted"} {
+		want := `s.logAudit(ctx, "", user.UserID, "example_notice.` + action + `"`
+		if !strings.Contains(transport, want) {
+			t.Fatalf("the fixture does not compile the empty audit organization: missing %q", want)
+		}
+	}
+	if strings.Contains(transport, "org.OrgID") || strings.Contains(transport, "identity.OrgFrom") {
+		t.Fatal("a platform mutation still reads an organization")
+	}
+
+	// The bare single-argument sqlc calls, which only a table with no tenant
+	// predicate produces and which no other fixture reaches.
+	for _, want := range []string{
+		"s.q.GetExampleNoticeByID(ctx, id)",
+		"s.q.CreateExampleNotice(ctx, name)",
+		"s.q.DeleteExampleNotice(ctx, id)",
+		"s.q.CountExampleNotices(ctx, query)",
+	} {
+		if !strings.Contains(transport, want) {
+			t.Fatalf("the fixture does not compile the bare sqlc form %q:\n%s", want, transport)
+		}
+	}
+
+	// The import set with neither time nor the api package.
+	for _, absent := range []string{`"time"`, "internal/api", "encoding/json"} {
+		if strings.Contains(transport, absent) {
+			t.Fatalf("the no-api import branch is not exercised: transport still imports %s", absent)
+		}
+	}
+	if manifest.OpenAPI != nil {
+		t.Fatal("a resource without --api declared an OpenAPI slice")
+	}
+
+	// The platform templates: the app page is the read surface, the staff page
+	// is the write surface, and the empty state has both bodies.
+	templ := string(files[dir+"/payload/example-notice.templ.txt"])
+	for _, want := range []string{
+		"templ AdminExampleNoticesPage(",
+		"func exampleNoticesWritable(ctx context.Context, d ExampleNoticesListData) bool {",
+		"func exampleNoticesEmptyBody(ctx context.Context, d ExampleNoticesListData) string {",
+	} {
+		if !strings.Contains(templ, want) {
+			t.Fatalf("the platform templates are missing %q", want)
+		}
+	}
+	if !strings.Contains(transport, "Writable:   false") || !strings.Contains(transport, "Writable:   true") {
+		t.Fatalf("the fixture does not compile both surfaces: one read-only, one writable:\n%s", transport)
+	}
+	if !slices.Equal(manifest.Tests.GoPackages, []string{"internal/web"}) {
+		t.Fatalf("tests.go_packages = %v, want internal/web: the shape emits a validator to test",
+			manifest.Tests.GoPackages)
+	}
+	// The emitted test must be reachable by the validator's -run ^TestExample.
+	unit := string(files[dir+"/payload/workflow_example_notice_test.go.txt"])
+	if !strings.Contains(unit, "func TestExampleNoticeNameValidation(t *testing.T) {") {
+		t.Fatalf("the emitted test is not named for the validator's filter:\n%s", unit)
 	}
 }
 

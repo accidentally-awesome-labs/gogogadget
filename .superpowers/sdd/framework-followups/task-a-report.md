@@ -641,3 +641,163 @@ $ go run ./cmd/ggg registry validate
    substring-based and fails closed; a generated resource declares a `runtime.visual` baseline
    nobody has captured; no `content/docs/` page describes `ggg create` yet; `materializeManifest`
    returning the completed manifest changes what every `ggg create` kind reports in its plan.
+
+
+---
+
+# Fix round 4 — corrections to the round-3 claims, and the third closure
+
+Two of round 3's coverage claims were wrong. Both are corrected below from measurement rather
+than restated, and the branches they falsely claimed are now genuinely compiled.
+
+## R1 — the two closures did NOT cover the sqlc call-arity split
+
+Round 3 said the two fixtures covered "the sqlc call-arity split (platform's
+Count/Get/Create/Delete take bare values where org passes Params structs)". That was false.
+Measured against the committed fixtures at the time:
+
+| fixture | emitted `s.q.…` calls |
+| --- | --- |
+| `example-feed` | `ListExampleFeeds` — struct, and nothing else |
+| `example-resource` | seven struct calls plus exactly one bare: `CountAllExampleResources(ctx, query)` |
+
+So one bare form was compiled, and it was the *admin-wide count* on a tenant-scoped table — not
+the platform forms at all. Platform's bare `Get`/`Create`/`Delete`
+(`create_resource_source.go` `getArgs`/`createArgs`/`deleteArgs`) come from platform **with** UI,
+which neither fixture was.
+
+**Now:** `example-notice` (`--scope platform`, no flags) compiles them. Measured after this round:
+
+```
+example-notice
+    CountExampleNotices     BARE: query
+    CreateExampleNotice     BARE: name
+    DeleteExampleNotice     BARE: id
+    GetExampleNoticeByID    BARE: id
+    ListExampleNotices      STRUCT
+    UpdateExampleNotice     STRUCT      (two fields, no tenant)
+```
+
+All twelve variants the six argument builders can produce — tenanted and untenanted for list,
+count, get, create, update and delete — are now compiled by some closure.
+
+## R2 — the fixtures did NOT cover the audit organization or every import branch
+
+Also false as stated. Corrected:
+
+- **Audit organization.** `auditOrg()`'s `""` branch never reached a compiler: `example-feed` has
+  no write path and emits no `logAudit` at all, and `example-resource` emits only `org.OrgID`.
+  Since the N2 fix *removes* a local (`org` is no longer declared for a platform mutation), an
+  error there is an unused-variable or undefined-identifier failure — the N1 defect class, sitting
+  outside compiler coverage. **Now:** `example-notice` emits
+  `s.logAudit(ctx, "", user.UserID, …)` three times and declares no `org` at all, so both branches
+  are compiled and the removed local is proved removed.
+- **Import branches.** Both fixtures set `--api`, so neither exercised `apiRead() == false`. Three
+  distinct import sets are compiled now, measured:
+
+  | fixture | imports |
+  | --- | --- |
+  | `example-resource` | context, encoding/json, errors, math, net/http, strconv, strings, time + api, sqlc, identity, search, templates, pgx — the maximal set |
+  | `example-feed` | net/http, strconv, time + api, sqlc — the minimal handler set |
+  | `example-notice` | errors, math, net/http, strconv, strings + sqlc, identity, templates, pgx — UI without the API, so no time, no api, no encoding/json, no search, no context |
+
+- **And a third inaccuracy I found while measuring, which the review did not raise:** rounds 2 and
+  3 both said "20 reachable shapes". It is **18** — 8 flag combinations × 3 scopes minus 6 refused
+  (`--api` with `--scope user` × 3, `--search` with `--scope platform` × 3), which
+  `resourceShapes()` confirms as `{org: 8, platform: 5, user: 5}`. Standing compiler coverage is
+  therefore 3 of 18, not 2 of 20.
+
+## The third closure
+
+`registry/testdata/registry/modules/workflow/example-notice/` — six files, byte-for-byte what the
+generator emits for `--scope platform` with no flags. Its own table (`example_notices`) and
+migration (`ggg.example_notice` → `0027_ggg_example_notice.sql`).
+
+It picks up, in one shape: the four bare sqlc calls above, the empty audit organization, the
+platform templates (admin write surface, `Writable=false` app page, read-only empty body via
+`exampleNoticesEmptyBody`), the no-`time`/no-`api` import branch, and a resource with no OpenAPI
+slice at all. Its routes are the C1 shape under a compiler:
+
+```
+GET    /app/example-notices        app     admin_write=false  handleExampleNotices
+GET    /admin/example-notices      admin   admin_write=false  handleAdminExampleNotices
+POST   /admin/example-notices      admin   admin_write=true   handleExampleNoticeCreate
+POST   /admin/example-notices/{id} admin   admin_write=true   handleExampleNoticeUpdate
+DELETE /admin/example-notices/{id} admin   admin_write=true   handleExampleNoticeDelete
+```
+
+It declares `tests.go_packages: ["internal/web"]` and its emitted test is
+`TestExampleNoticeNameValidation`, which the validator's `-run ^TestExample` filter reaches:
+
+```
+ggg/workflow/example-notice
+  closure: ggg/workflow/example-notice
+  installed 5 file(s)
+  compiled ./... and generated 30 file(s)
+  module tests passed in ./internal/web
+  removed; 1854 tree entries restored, 25 aggregate(s) differ only in the lock-identity header, 1 migration(s) retained
+```
+
+`TestExampleResourceFixturesDoNotCollide` extends to the three-way case by construction — it
+carries one `seen` map across every entry of `exampleResourceFixtures`, so adding the third entry
+checks it against both existing ones on module id, table, sqlc method, route id, method+pattern,
+handler, navigation id, visual id, i18n key, migration id, OpenAPI tag, schema and operationId.
+`example-notice` owns `example_notices`, `ggg.example_notice`, the five routes above, the
+`example-notice.*` locale keys and the `example-notice` visual baseline; it declares no OpenAPI, so
+it cannot collide there.
+
+## The two minor observations
+
+- **Module description.** It unconditionally claimed "transport, templates and declarations". It
+  is now assembled from what the invocation actually emitted (`joinWords` over
+  queries/migration/[transport]/[templates]/declarations), so `--no-ui` no longer advertises
+  templates. This is what `ggg catalog` and `ggg info` print verbatim. `example-feed`'s manifest
+  changed accordingly — the only change to it this round.
+- **Fixture update branch.** The outside-the-directory guard is hoisted above both branches. The
+  update mode writes every key it is handed, so a generator that started emitting outside the
+  fixture directory would have scattered files through the tree and only been caught on the next
+  assert run.
+
+## Commands run
+
+```
+$ GGG_UPDATE_RESOURCE_FIXTURE=1 go test ./internal/gggcli -run TestCreateResourceMatchesExampleFixtures -v
+--- PASS: .../example-resource   --- PASS: .../example-feed   --- PASS: .../example-notice
+$ git diff --stat HEAD -- registry/testdata/registry/modules/workflow/example-resource
+(empty — the org closure is byte-unchanged again)
+
+$ go test ./internal/gggcli ./internal/modkit -count=1
+ok  github.com/gogogadget/gogogadget/internal/gggcli   0.403s
+ok  github.com/gogogadget/gogogadget/internal/modkit   6.599s
+$ go vet ./internal/gggcli ./internal/modkit; gofmt -l internal/gggcli internal/modkit   → clean
+
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline
+registry 71dbdcab7e52183da6959dea0f5656cf3072557e90afd94cf2f9ee798b8d9afb   # no drift
+
+$ go run ./cmd/ggg registry validate
+  info  example_closure_verified workflow closure ggg/workflow/example-feed:     installed 3, regenerated 28, compiled, 1854 restored, retained 0027_ggg_example_feed.sql
+  info  example_closure_verified workflow closure ggg/workflow/example-notice:   installed 5, regenerated 30, compiled, 1854 restored, retained 0027_ggg_example_notice.sql
+  info  example_closure_verified workflow closure ggg/workflow/example-resource: installed 5, regenerated 30, compiled, 1854 restored, retained 0027_ggg_example_resource.sql
+  ... all 10 closures verified, exit 0
+```
+
+## What remains outside standing compiler coverage — stated exactly this time
+
+Three of eighteen reachable shapes are compiled. The generator's remaining conditional branches,
+enumerated rather than summarised:
+
+1. **`--scope user` (5 shapes).** The tenant expression `user.UserID` instead of `org.OrgID`, and
+   the `Fields: map[string]string{"user_id": userID}` search document. The *arity* is identical to
+   org's — both are tenanted — so what is uncompiled is which identity local supplies the value.
+   Covered by `TestCreateResourceSearchScopesUserRowsByOwner`, the AST symbol gate, and a by-hand
+   compile probe recorded in round 2.
+2. **`--no-ui --search` without `--api` (2 shapes: org, user).** The only shape whose Go file is
+   just the two search helpers, with `context` + `search` and no handlers. Its import set is the
+   one no closure compiles.
+3. Every other reachable shape is a permutation of branches at least one of the three closures
+   compiles, and is covered by the AST symbol/handler resolution gate plus the declaration
+   assertions.
+
+A fourth closure would buy (1) or (2) for a fourth table. I have not added one: both are smaller
+deltas than the three already there, and item 2's shape emits no handler at all, so its compile
+surface is two functions.

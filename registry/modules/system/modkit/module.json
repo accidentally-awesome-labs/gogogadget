@@ -100,7 +100,7 @@
         "source": "internal/gggcli/create_resource.go",
         "target": "internal/gggcli/create_resource.go",
         "class": "go",
-        "sha256": "00613aac109762e14bf5f4ac5d3e55004d33a61591ec7058efa15ef5b1bd1629",
+        "sha256": "956997a8b67c6eb544b478aca2722caeee2f4166a063fb4b6649707b0ebdaf34",
         "rewrite_module": true,
         "contract": true
       },
@@ -116,7 +116,7 @@
         "source": "internal/gggcli/create_resource_test.go",
         "target": "internal/gggcli/create_resource_test.go",
         "class": "test",
-        "sha256": "4bd1eed68c3a9d7cb449853eee2b73c4a0c36c6804934fd00755f0cf1e01a88e",
+        "sha256": "d36fa9d1532302c868c166a90fb4f16185e7cd58311395b1fc4e1cf460c5afec",
         "rewrite_module": true,
         "contract": true
       },
@@ -412,7 +412,7 @@
         "source": "internal/modkit/example_test.go",
         "target": "internal/modkit/example_test.go",
         "class": "test",
-        "sha256": "b89d1edba406b6a4322f9fb15e87748c524342cd60f2374d430d2e87a30c64a2",
+        "sha256": "db8afe76e8e35182767b9dc0896bb8b0507e1d4cae4c5e6feb79f9788bf52859",
         "rewrite_module": true,
         "contract": false
       },
