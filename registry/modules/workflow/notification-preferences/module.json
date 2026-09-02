@@ -4,7 +4,7 @@
     "id": "ggg/workflow/notification-preferences",
     "kind": "workflow",
     "name": "notification-preferences",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Notification preference saving",
     "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
@@ -59,6 +59,14 @@
     },
     "files": [
       {
+        "source": "e2e/notification-preferences.spec.ts",
+        "target": "e2e/notification-preferences.spec.ts",
+        "class": "test",
+        "sha256": "ad720be0d7447142ab627ed531754adae3c474248f147346f7e35a9592d48c56",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_notification_preferences.go",
         "target": "internal/web/workflow_notification_preferences.go",
         "class": "go",
@@ -99,6 +107,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/notification-preferences.spec.ts"
       ]
     },
     "data": [],

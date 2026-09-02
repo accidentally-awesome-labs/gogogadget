@@ -4,7 +4,7 @@
     "id": "ggg/page/admin-overview",
     "kind": "page",
     "name": "admin-overview",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin overview",
     "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
@@ -67,6 +67,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-overview.spec.ts",
+        "target": "e2e/admin-overview.spec.ts",
+        "class": "test",
+        "sha256": "5d93cecf7244590303d18a5e1b8e6cfdd905ba67dbfd2a60d74681e5f90ba3ee",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/admin_test.go",
         "target": "internal/web/admin_test.go",
@@ -200,6 +208,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-overview.spec.ts"
       ]
     },
     "data": [],

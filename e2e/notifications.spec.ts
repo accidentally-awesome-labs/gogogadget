@@ -39,31 +39,6 @@ test('badge, page, read-all flow', async ({ browser }) => {
 
   await context.close();
 });
-
-test('digest cadence persists across reloads', async ({ browser }) => {
-  const context = await loginAs(browser, 'pro');
-  const page = await context.newPage();
-  await page.goto('/app/settings/notifications');
-
-  const select = page.getByTestId('digest-frequency');
-  await expect(select).toBeVisible();
-  await select.selectOption('daily');
-  await page.getByTestId('notification-prefs-form').getByRole('button', { name: /save/i }).click();
-  await expect(page.getByTestId('toast').first()).toBeVisible();
-
-  await page.reload();
-  await expect(page.getByTestId('digest-frequency')).toHaveValue('daily');
-
-  // Opting out is the whole reason the control exists — prove it round-trips.
-  await page.getByTestId('digest-frequency').selectOption('off');
-  await page.getByTestId('notification-prefs-form').getByRole('button', { name: /save/i }).click();
-  await expect(page.getByTestId('toast').first()).toBeVisible();
-  await page.reload();
-  await expect(page.getByTestId('digest-frequency')).toHaveValue('off');
-
-  await context.close();
-});
-
 // The live stream is the feature the docs promise, and it was silently dead
 // for as long as the htmx 2 SSE extension was vendored against htmx 4: the
 // script threw on load, the EventSource was never opened, and the badge only

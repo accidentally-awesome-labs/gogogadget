@@ -4,11 +4,25 @@
     "id": "ggg/workflow/project-export",
     "kind": "workflow",
     "name": "project-export",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Project CSV export",
     "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
     "requires": [
+      {
+        "id": "ggg/page/files",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/projects",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/audit",
         "contract": {
@@ -63,6 +77,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/export.spec.ts",
+        "target": "e2e/export.spec.ts",
+        "class": "test",
+        "sha256": "7193122fc4de375a40d12c99ebe2d3a2582cdcbb80b11cc15467edd4f501ceb7",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/jobs/export_csv.go",
         "target": "internal/jobs/export_csv.go",
@@ -127,6 +149,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/export.spec.ts"
       ]
     },
     "data": [],

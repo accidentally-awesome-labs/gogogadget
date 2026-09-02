@@ -4,11 +4,18 @@
     "id": "ggg/workflow/admin-user-governance",
     "kind": "workflow",
     "name": "admin-user-governance",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin user governance",
     "description": "Administrator mutations on a user account: disable or re-enable it and grant or revoke staff role, both audited.",
     "requires": [
+      {
+        "id": "ggg/page/admin-users",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/audit",
         "contract": {
@@ -56,6 +63,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-user-governance.spec.ts",
+        "target": "e2e/admin-user-governance.spec.ts",
+        "class": "test",
+        "sha256": "96eccd7c090458bb8d4ed4e7b5d4d0d12d6aeeb862332425f209376c84321359",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/workflow_admin_user_governance.go",
         "target": "internal/web/workflow_admin_user_governance.go",
@@ -115,6 +130,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-user-governance.spec.ts"
       ]
     },
     "data": [],

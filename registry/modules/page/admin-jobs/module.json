@@ -4,7 +4,7 @@
     "id": "ggg/page/admin-jobs",
     "kind": "page",
     "name": "admin-jobs",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin job queue",
     "description": "The background job queue with state, attempt count, and dead-letter detail.",
@@ -46,6 +46,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-jobs.spec.ts",
+        "target": "e2e/admin-jobs.spec.ts",
+        "class": "test",
+        "sha256": "e119ac0e6b44fb1f216a8cd58ee33f3fc49ed817c08b559210196db68308249c",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/admin_viewers_test.go",
         "target": "internal/web/admin_viewers_test.go",
@@ -160,6 +168,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-jobs.spec.ts"
       ]
     },
     "data": [],

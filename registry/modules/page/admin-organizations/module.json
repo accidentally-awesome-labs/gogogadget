@@ -17,6 +17,14 @@
     "environment": [],
     "files": [
       {
+        "source": "e2e/admin-organizations.spec.ts",
+        "target": "e2e/admin-organizations.spec.ts",
+        "class": "test",
+        "sha256": "6c6839309736e179937938b7b84fd844c5c299f8ca942b27584b7df6e4ff9d0c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "class": "go",
         "contract": false,
         "rewrite_module": true,
@@ -43,7 +51,7 @@
         "admin.orgs.col_name": "Nombre",
         "admin.orgs.col_plan": "Plan",
         "admin.orgs.col_slug": "Slug",
-        "admin.orgs.empty": "A\u00fan no hay organizaciones.",
+        "admin.orgs.empty": "Aún no hay organizaciones.",
         "admin.orgs.title": "Organizaciones"
       }
     },
@@ -80,7 +88,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "navigation": [
         {
@@ -116,6 +124,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-organizations.spec.ts"
       ]
     },
     "title": "Admin organizations list"

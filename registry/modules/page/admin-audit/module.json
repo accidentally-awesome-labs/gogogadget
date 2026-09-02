@@ -4,7 +4,7 @@
     "id": "ggg/page/admin-audit",
     "kind": "page",
     "name": "admin-audit",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin audit log",
     "description": "The platform-wide audit log with actor, action, and target filters.",
@@ -44,6 +44,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-audit.spec.ts",
+        "target": "e2e/admin-audit.spec.ts",
+        "class": "test",
+        "sha256": "533bebb430136cf2f2673a55ed59e00c89657d2cbcf248fb5729362606ab96ae",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/handlers_admin_audit.go",
         "target": "internal/web/handlers_admin_audit.go",
@@ -135,6 +143,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-audit.spec.ts"
       ]
     },
     "data": [],

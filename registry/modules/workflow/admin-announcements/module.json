@@ -20,6 +20,14 @@
     "environment": [],
     "files": [
       {
+        "source": "e2e/admin-announcements.spec.ts",
+        "target": "e2e/admin-announcements.spec.ts",
+        "class": "test",
+        "sha256": "1cfd5cecc0c6a497956e350e777dc75a30b197c542817f98f5bf1a787549072a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "class": "go",
         "contract": false,
         "rewrite_module": true,
@@ -40,6 +48,13 @@
           "min": 1
         },
         "id": "ggg/page/admin-announcements"
+      },
+      {
+        "id": "ggg/page/dashboard",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       },
       {
         "contract": {
@@ -70,7 +85,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "routes": [
         {
@@ -146,6 +161,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-announcements.spec.ts"
       ]
     },
     "title": "Admin announcement mutations"

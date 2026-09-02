@@ -4,11 +4,18 @@
     "id": "ggg/workflow/account-export",
     "kind": "workflow",
     "name": "account-export",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Personal data export",
     "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",
     "requires": [
+      {
+        "id": "ggg/page/settings-account",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/audit",
         "contract": {
@@ -68,6 +75,14 @@
     },
     "files": [
       {
+        "source": "e2e/account-export.spec.ts",
+        "target": "e2e/account-export.spec.ts",
+        "class": "test",
+        "sha256": "65166274f7ff7b1190b7c705b3d0fb9b11f1ee81024e369527ba575954148d7b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/account_data_test.go",
         "target": "internal/web/account_data_test.go",
         "class": "test",
@@ -116,6 +131,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/account-export.spec.ts"
       ]
     },
     "data": [],

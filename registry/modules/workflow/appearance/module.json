@@ -4,11 +4,39 @@
     "id": "ggg/workflow/appearance",
     "kind": "workflow",
     "name": "appearance",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Theme preference",
     "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",
     "requires": [
+      {
+        "id": "ggg/page/dashboard",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/home",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/pricing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/settings-account",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/i18n",
         "contract": {
@@ -49,6 +77,22 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/appearance.spec.ts",
+        "target": "e2e/appearance.spec.ts",
+        "class": "test",
+        "sha256": "51b0f4b7c6c405c059ef680cd4ddb1ee256a23dbe6d0c402dc71a4a57b1ffbfa",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "e2e/locale.spec.ts",
+        "target": "e2e/locale.spec.ts",
+        "class": "test",
+        "sha256": "1a44869f29ddcd5f1cd59ef96aa04858965507fc6097f959c3f767c8f51e307b",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/appearance.go",
         "target": "internal/web/appearance.go",
@@ -124,6 +168,10 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/appearance.spec.ts",
+        "e2e/locale.spec.ts"
       ]
     },
     "data": [],

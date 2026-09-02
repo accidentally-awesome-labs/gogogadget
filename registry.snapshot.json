@@ -668,7 +668,7 @@
     },
     {
       "path": "registry/modules/page/activity/module.json",
-      "sha256": "52751142456ec1008780ccca7c2198508b73c2415702e6884f5981358381740c"
+      "sha256": "da85d7d71e47144aa6d9c795e7d34f378ab46307f1cdfe2bfe6ef8c85dd1e052"
     },
     {
       "path": "registry/modules/page/admin-announcements/module.json",
@@ -676,7 +676,7 @@
     },
     {
       "path": "registry/modules/page/admin-audit/module.json",
-      "sha256": "ce3477632ab18e113ffcc2c9cdc0cc6e4a2b754679606c4dc30730cd09e2afd6"
+      "sha256": "1c62f57f6cc15c2dad310c4093c90c26e579024481a59d72048c31c435d965f5"
     },
     {
       "path": "registry/modules/page/admin-content-editor/module.json",
@@ -700,7 +700,7 @@
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
-      "sha256": "615dabfe4b9460d0c54cc8213e1fd86f0f94e3fdfc53fc737a91f2809bdd1b6d"
+      "sha256": "fd149eacc50dda21413e08c853115edbfd93b735b458bc92e41edc339b5535b6"
     },
     {
       "path": "registry/modules/page/admin-media/module.json",
@@ -708,11 +708,11 @@
     },
     {
       "path": "registry/modules/page/admin-organizations/module.json",
-      "sha256": "a11112bb466aab080ed2e81aee5f506bff0f6b6ed99f0bc8b6e7502f44d67a6a"
+      "sha256": "8e1465c2eae61988fef75a7b04717553472159a2bf34e94806fcee69abfaaf73"
     },
     {
       "path": "registry/modules/page/admin-overview/module.json",
-      "sha256": "a05d5aa4b9e85fb140de945d2acd1537e92e5716d54351875256a28cefe979e3"
+      "sha256": "3d32888f98df5d99f81b4f89c3ee3233099dedfe7411955dfca025ba1cd41359"
     },
     {
       "path": "registry/modules/page/admin-schedules/module.json",
@@ -720,7 +720,7 @@
     },
     {
       "path": "registry/modules/page/admin-users/module.json",
-      "sha256": "069c6e17615c26e33c88b040c7db8a726ba8525ce7b57490f00a5a65421d261c"
+      "sha256": "da51e085b65db6e485943f26315c835a7408aac2de6d259fa669764d7b118dfc"
     },
     {
       "path": "registry/modules/page/blog/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "aa9668568155cc662720e5d0b849fa983e9b681058e962eda071114cde708cb6"
+      "sha256": "3c05fc56bc6a2ccd1d6efc40880d6ec37cd791d084dc8356d80fd696fdd5ee89"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e/module.json",
-      "sha256": "d9516df823e1578a3c324aafdfa72868bcef4a2dd33f73e43444e46c7c1c261f"
+      "sha256": "b3b3e549dcc4adf5ef2d8ba3adf03c4301b618f8feb4fa09079c70871e6329ee"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "b69bd3a75b152feff681911ba66f9e4474b11b73059f030ea454a3f05af2c3df"
+      "sha256": "d790e5634274c39cd5bfe1fd292fc10d9b5f52671f548f21c7eeaf2ed316625b"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1148,23 +1148,23 @@
     },
     {
       "path": "registry/modules/workflow/account-delete/module.json",
-      "sha256": "599bba004718bcd127e064bf40e4509058a16feede3763ef6b44579244702ce3"
+      "sha256": "8e10a76f6b2eb5564ccd30f45bf5e68df1a2ba7761b6b4c44f56e6bf559a2403"
     },
     {
       "path": "registry/modules/workflow/account-export/module.json",
-      "sha256": "9c9691b34139120f044791ae28dbd3de99893c3c6f662a95a6d37d49e949bb7f"
+      "sha256": "c5b3ffe26080a1fb589412c471fd84a84b570884b0996d5fb44ce0fe9b49e238"
     },
     {
       "path": "registry/modules/workflow/admin-announcements/module.json",
-      "sha256": "43703810d12445d8534b4d80627ff84e122a7124e3edebb28e129b8041f310e0"
+      "sha256": "d978245f55c7e7dbe3ed5e85eb29e3cc97d9101d9904dfc115558275cb98c5c4"
     },
     {
       "path": "registry/modules/workflow/admin-content/module.json",
-      "sha256": "e92e0e48fa1fb2cf7181d353469ca1223062602c523ff0f1c3351deaeaeccfc5"
+      "sha256": "2ddd40521dd65abbf740d05bba946f050fecd96b1897d5e7f13486f3baf23e3b"
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",
-      "sha256": "2854c77f3fe9ded27cad2a601b4135fc9e59564331bff96885ca8f3ac322f245"
+      "sha256": "de6312ff4ce9d02ba2f93cf5cd99090d962b2ee66514c02e815f4d5c1265f352"
     },
     {
       "path": "registry/modules/workflow/admin-job-requeue/module.json",
@@ -1176,11 +1176,11 @@
     },
     {
       "path": "registry/modules/workflow/admin-schedules/module.json",
-      "sha256": "d453ce0e2bd97971bfeb61591c90d76574fd959346b4bf2dd02f1a65f2baf539"
+      "sha256": "0c30ee83a96c39602795ce6842b9f91a1120a5c10020425bf22e696c2686c44f"
     },
     {
       "path": "registry/modules/workflow/admin-user-governance/module.json",
-      "sha256": "98647fb27724231b6ed87efc847e2537d8c7935664bf8a9a408341528a187ccd"
+      "sha256": "848908d8bbb1a73cfec0b1ae9cc0364d249d339388490f824f41fd9bd03ea959"
     },
     {
       "path": "registry/modules/workflow/api-ai-chat/module.json",
@@ -1196,15 +1196,15 @@
     },
     {
       "path": "registry/modules/workflow/appearance/module.json",
-      "sha256": "859fb3c0f828d0755ba086571a0bccb9d9f71add8f0af2ac3f6ec45c1b4ee062"
+      "sha256": "0e8e838f8cd1ca01cac7ea30904fb6aeb047831ddb8ce689f426c074a2e02d7d"
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "8136419b24a3aec2860a0d29018a1eec47cef93cbc8d7e4bb5deb128d6bdc76f"
+      "sha256": "c6b8920551c29a4cabe5cf8692e730b5256ae97244a7b1a1e5c7adc24fd5d03d"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
-      "sha256": "9c41db840f0ddd8ff42ab3b683967df5e0be53ffb6b40f753baba021d1671031"
+      "sha256": "fd040d7988236dc41e1295cd9bbb80a3a16bb41fb9eb2da1d35e9954231a24a6"
     },
     {
       "path": "registry/modules/workflow/billing-webhook/module.json",
@@ -1216,7 +1216,7 @@
     },
     {
       "path": "registry/modules/workflow/files/module.json",
-      "sha256": "062301532673c2fa787f0ba5c4f368ffda9d929f177431f6b311cb4b96e7f6a2"
+      "sha256": "e45f54a3801deaa94f41b8717635972fdc5f247e646d5b394d77a03cbc5dd84c"
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
@@ -1224,15 +1224,15 @@
     },
     {
       "path": "registry/modules/workflow/impersonation/module.json",
-      "sha256": "746ede9b86968b98118c50c26eca38e53842e4f4caf452ce74a43212cbfba867"
+      "sha256": "d943b4c62f2414f334551905cd5684a7e98cdef87101e2da1943e40658ad7e80"
     },
     {
       "path": "registry/modules/workflow/notification-inbox/module.json",
-      "sha256": "4d1cf4f6e2bf739132c5d52f69d5fdb785a65e8adaa6cd3a9463624047941b4a"
+      "sha256": "d3b74a895a866306ba61456afde91a0641cfa6becce0821b3f634453ce272af8"
     },
     {
       "path": "registry/modules/workflow/notification-preferences/module.json",
-      "sha256": "97bddce53757b6c302606a91e897a00639656ae8c2006a66c4c838de47947639"
+      "sha256": "31aabe17e87f894fda1ff8ccd1849c598540286ebfac6ce6fec42690eb3e958d"
     },
     {
       "path": "registry/modules/workflow/openapi-contract/module.json",
@@ -1244,15 +1244,15 @@
     },
     {
       "path": "registry/modules/workflow/outbound-webhooks/module.json",
-      "sha256": "af5405389ae06179e2c6e53ecc8ae1873f027d7bfc0e678c9a03fdeef7fd7907"
+      "sha256": "9727e5fbb3a084a5644bdef6c1f6805d2547a6578e104583234eb020e3f9dd76"
     },
     {
       "path": "registry/modules/workflow/project-export/module.json",
-      "sha256": "46c7b2d5e223f08d977e96d50ae260e01d5c7b8e1826057722559ad17a4de4c5"
+      "sha256": "d4c728fc72cb3c7b6ba24e383a294797a0918f850acdc0ac4f57081d4603752c"
     },
     {
       "path": "registry/modules/workflow/projects/module.json",
-      "sha256": "c7ed8ee92cf71f1279d631a0ca9b1e4c0aca83e83a57b7601a6f2e626272d0d2"
+      "sha256": "bb10db61f03d142486cb98a317cb955e330c07a3c2d960a737ea8e24eacfd8c0"
     },
     {
       "path": "registry/modules/workflow/seo-discovery/module.json",

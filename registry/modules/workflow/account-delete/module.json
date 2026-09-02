@@ -4,7 +4,7 @@
     "id": "ggg/workflow/account-delete",
     "kind": "workflow",
     "name": "account-delete",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Account deletion",
     "description": "GDPR self-serve account deletion: email confirmation and sole-admin guard, then provider delete before local delete, with sole-member organizations removed alongside the user.",
@@ -80,6 +80,14 @@
     },
     "files": [
       {
+        "source": "e2e/account-delete.spec.ts",
+        "target": "e2e/account-delete.spec.ts",
+        "class": "test",
+        "sha256": "61df2dff18272bfa40897704477890ee42c29acc2ca2362e453bb69fb354c71e",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_account_delete.go",
         "target": "internal/web/workflow_account_delete.go",
         "class": "go",
@@ -120,6 +128,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/account-delete.spec.ts"
       ]
     },
     "data": [],

@@ -4,13 +4,83 @@
     "id": "ggg/system/e2e",
     "kind": "system",
     "name": "e2e",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "E2E",
     "description": "Project scaffold ownership for e2e.",
     "requires": [
       {
+        "id": "ggg/page/blog",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/changelog",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/dashboard",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/docs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/docs-index",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/docs-search",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/home",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/pricing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/projects",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/seo-discovery",
         "contract": {
           "min": 1,
           "max": 1
@@ -40,58 +110,10 @@
         "contract": false
       },
       {
-        "source": "e2e/account.spec.ts",
-        "target": "e2e/account.spec.ts",
-        "class": "test",
-        "sha256": "5a51bfbe63b0f7c89dda9f72a1fdd1ee8ce5e0ae61e4a577469324fe615a81ac",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/admin.spec.ts",
-        "target": "e2e/admin.spec.ts",
-        "class": "test",
-        "sha256": "8b0771ed632679fc292f057e35b7c52fe08ee0770f46445d4fdad46217cf4fc6",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/auth.spec.ts",
-        "target": "e2e/auth.spec.ts",
-        "class": "test",
-        "sha256": "132951f90b00207d078817ba5d68a6ced444ae09e1fa6766d5a7e700d334b234",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/billing.spec.ts",
-        "target": "e2e/billing.spec.ts",
-        "class": "test",
-        "sha256": "ad0900c86114e12c68559524914e8f372b15130aa323c3f08bac8a8272cbd22c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
         "source": "e2e/csp.spec.ts",
         "target": "e2e/csp.spec.ts",
         "class": "test",
         "sha256": "8d13e9573ebbebfba34c934e5a75cc883504384b9b31519d808a8d006e48d916",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/export.spec.ts",
-        "target": "e2e/export.spec.ts",
-        "class": "test",
-        "sha256": "7193122fc4de375a40d12c99ebe2d3a2582cdcbb80b11cc15467edd4f501ceb7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/files.spec.ts",
-        "target": "e2e/files.spec.ts",
-        "class": "test",
-        "sha256": "a2c0ca5b8044043eb96b6e3c6e76d170ab29a6c1b15862dc2d275ae245cf32e8",
         "rewrite_module": false,
         "contract": false
       },
@@ -112,14 +134,6 @@
         "contract": false
       },
       {
-        "source": "e2e/impersonation.spec.ts",
-        "target": "e2e/impersonation.spec.ts",
-        "class": "test",
-        "sha256": "1a3cbd68f7496bef5a1296e552948b945f0da8b34aaa806c4f5f8e062f5adf98",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
         "source": "e2e/keyboard.spec.ts",
         "target": "e2e/keyboard.spec.ts",
         "class": "test",
@@ -136,26 +150,10 @@
         "contract": false
       },
       {
-        "source": "e2e/locale.spec.ts",
-        "target": "e2e/locale.spec.ts",
-        "class": "test",
-        "sha256": "1a44869f29ddcd5f1cd59ef96aa04858965507fc6097f959c3f767c8f51e307b",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
         "source": "e2e/mobile.spec.ts",
         "target": "e2e/mobile.spec.ts",
         "class": "test",
         "sha256": "d00d188cf3ded1c9a66baf52589d2d8fc4217843e42b657f52d8396252520440",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/notifications.spec.ts",
-        "target": "e2e/notifications.spec.ts",
-        "class": "test",
-        "sha256": "6d1042485f0da408d4f666275b2d69a758219ec5e9380c38ddd65af93ce4ae36",
         "rewrite_module": false,
         "contract": false
       },
@@ -188,14 +186,6 @@
         "target": "e2e/progressive.spec.ts",
         "class": "test",
         "sha256": "e1001cc45115df3311dbd272c56c6f80dc556766edd2af519d5ca147b1c470d7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "e2e/projects.spec.ts",
-        "target": "e2e/projects.spec.ts",
-        "class": "test",
-        "sha256": "8bbf1dcfbce817ae428909647cba3c3ece2f6bd1097803c5e1f3a858e6794675",
         "rewrite_module": false,
         "contract": false
       },
@@ -1816,14 +1806,6 @@
         "contract": false
       },
       {
-        "source": "e2e/webhooks.spec.ts",
-        "target": "e2e/webhooks.spec.ts",
-        "class": "test",
-        "sha256": "782e50177eb4295963f9d9ec66d1436fe4be5f39f76632355bca8bcfdc86a219",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
         "source": "scripts/smoke.sh",
         "target": "scripts/smoke.sh",
         "class": "script",
@@ -1865,24 +1847,13 @@
       "e2e": [
         "e2e/a11y-states.spec.ts",
         "e2e/a11y.spec.ts",
-        "e2e/account.spec.ts",
-        "e2e/admin.spec.ts",
-        "e2e/auth.spec.ts",
-        "e2e/billing.spec.ts",
         "e2e/csp.spec.ts",
-        "e2e/export.spec.ts",
-        "e2e/files.spec.ts",
-        "e2e/impersonation.spec.ts",
         "e2e/keyboard.spec.ts",
         "e2e/loading.spec.ts",
-        "e2e/locale.spec.ts",
         "e2e/mobile.spec.ts",
-        "e2e/notifications.spec.ts",
         "e2e/progressive.spec.ts",
-        "e2e/projects.spec.ts",
         "e2e/public.spec.ts",
-        "e2e/visual.spec.ts",
-        "e2e/webhooks.spec.ts"
+        "e2e/visual.spec.ts"
       ],
       "visual": [
         "e2e/visual.spec.ts"

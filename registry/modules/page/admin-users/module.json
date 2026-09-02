@@ -17,6 +17,14 @@
     "environment": [],
     "files": [
       {
+        "source": "e2e/admin-users.spec.ts",
+        "target": "e2e/admin-users.spec.ts",
+        "class": "test",
+        "sha256": "2e85d92628c6e4f4702e1f4313b49c1b993eb8b97a5b36a2d6320cb3f82e033c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "class": "go",
         "contract": false,
         "rewrite_module": true,
@@ -47,12 +55,12 @@
         "admin.users.impersonate": "Impersonate",
         "admin.users.role_admin": "Admin",
         "admin.users.role_aria": "Staff role for %s",
-        "admin.users.role_last_admin": "This is the last admin \u2014 promote someone else first.",
-        "admin.users.role_none": "\u2014",
+        "admin.users.role_last_admin": "This is the last admin — promote someone else first.",
+        "admin.users.role_none": "—",
         "admin.users.role_support": "Support",
         "admin.users.row_actions_aria": "Actions for %s",
         "admin.users.search_aria": "Search users",
-        "admin.users.search_placeholder": "Search by email\u2026",
+        "admin.users.search_placeholder": "Search by email…",
         "admin.users.status_active": "active",
         "admin.users.status_disabled": "disabled",
         "admin.users.title": "Users"
@@ -60,28 +68,28 @@
       "es": {
         "admin.users.col_actions": "Acciones",
         "admin.users.col_email": "Correo",
-        "admin.users.col_joined": "Se uni\u00f3",
+        "admin.users.col_joined": "Se unió",
         "admin.users.col_name": "Nombre",
         "admin.users.col_role": "Rol de equipo",
         "admin.users.col_status": "Estado",
-        "admin.users.confirm_disable": "\u00bfDeshabilitar a %s? Perder\u00e1 el acceso de inmediato.",
-        "admin.users.confirm_enable": "\u00bfReactivar a %s?",
+        "admin.users.confirm_disable": "¿Deshabilitar a %s? Perderá el acceso de inmediato.",
+        "admin.users.confirm_enable": "¿Reactivar a %s?",
         "admin.users.disable": "Deshabilitar",
         "admin.users.disable_row": "Deshabilitar a %s",
-        "admin.users.disable_title": "\u00bfDeshabilitar esta cuenta?",
-        "admin.users.empty": "Ning\u00fan usuario coincide.",
+        "admin.users.disable_title": "¿Deshabilitar esta cuenta?",
+        "admin.users.empty": "Ningún usuario coincide.",
         "admin.users.enable": "Reactivar",
         "admin.users.enable_row": "Reactivar a %s",
-        "admin.users.enable_title": "\u00bfReactivar esta cuenta?",
+        "admin.users.enable_title": "¿Reactivar esta cuenta?",
         "admin.users.impersonate": "Suplantar",
         "admin.users.role_admin": "Administrador",
         "admin.users.role_aria": "Rol de equipo de %s",
-        "admin.users.role_last_admin": "Es el \u00faltimo administrador: asciende a otra persona primero.",
-        "admin.users.role_none": "\u2014",
+        "admin.users.role_last_admin": "Es el último administrador: asciende a otra persona primero.",
+        "admin.users.role_none": "—",
         "admin.users.role_support": "Soporte",
         "admin.users.row_actions_aria": "Acciones para %s",
         "admin.users.search_aria": "Buscar usuarios",
-        "admin.users.search_placeholder": "Buscar por correo\u2026",
+        "admin.users.search_placeholder": "Buscar por correo…",
         "admin.users.status_active": "activo",
         "admin.users.status_disabled": "deshabilitado",
         "admin.users.title": "Usuarios"
@@ -120,7 +128,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "navigation": [
         {
@@ -156,6 +164,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-users.spec.ts"
       ]
     },
     "title": "Admin users list"

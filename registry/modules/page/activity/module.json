@@ -4,7 +4,7 @@
     "id": "ggg/page/activity",
     "kind": "page",
     "name": "activity",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Activity feed",
     "description": "The organization's audit trail rendered for members, with search and pagination.",
@@ -49,6 +49,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/activity.spec.ts",
+        "target": "e2e/activity.spec.ts",
+        "class": "test",
+        "sha256": "dc79eb2f07b01fa4f0febbf5b1a5b3771967cb49d7c4fe9b67699bf17456a952",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/activity_test.go",
         "target": "internal/web/activity_test.go",
@@ -149,6 +157,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/activity.spec.ts"
       ]
     },
     "data": [],

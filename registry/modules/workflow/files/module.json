@@ -4,7 +4,7 @@
     "id": "ggg/workflow/files",
     "kind": "workflow",
     "name": "files",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "File upload, download and delete",
     "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",
@@ -72,6 +72,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/files.spec.ts",
+        "target": "e2e/files.spec.ts",
+        "class": "test",
+        "sha256": "a2c0ca5b8044043eb96b6e3c6e76d170ab29a6c1b15862dc2d275ae245cf32e8",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/db/queries/files.sql",
         "target": "internal/db/queries/files.sql",
@@ -190,6 +198,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/files.spec.ts"
       ]
     },
     "data": [

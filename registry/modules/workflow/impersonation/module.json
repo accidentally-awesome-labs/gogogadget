@@ -4,11 +4,25 @@
     "id": "ggg/workflow/impersonation",
     "kind": "workflow",
     "name": "impersonation",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Administrator impersonation",
     "description": "The admin \"view as user\" flow: reason interstitial, session start, cookie-scoped identity override, and exit.",
     "requires": [
+      {
+        "id": "ggg/page/admin-overview",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/page/admin-users",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/audit",
         "contract": {
@@ -70,6 +84,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/impersonation.spec.ts",
+        "target": "e2e/impersonation.spec.ts",
+        "class": "test",
+        "sha256": "1a3cbd68f7496bef5a1296e552948b945f0da8b34aaa806c4f5f8e062f5adf98",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/handlers_impersonation.go",
         "target": "internal/web/handlers_impersonation.go",
@@ -155,6 +177,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/impersonation.spec.ts"
       ]
     },
     "data": [],

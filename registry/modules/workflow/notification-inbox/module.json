@@ -4,11 +4,18 @@
     "id": "ggg/workflow/notification-inbox",
     "kind": "workflow",
     "name": "notification-inbox",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Notification inbox read state",
     "description": "Marks notifications read one-at-a-time or in bulk and serves the fragments that support it: the sidebar unread badge and the server-sent-events unread stream.",
     "requires": [
+      {
+        "id": "ggg/page/dashboard",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/page/notifications",
         "contract": {
@@ -58,6 +65,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/notifications.spec.ts",
+        "target": "e2e/notifications.spec.ts",
+        "class": "test",
+        "sha256": "d1c6259554af65f1387ee7f77552ed4bd1fb170b27556de9b22a1ec2d5ce1b0b",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/workflow_notification_inbox.go",
         "target": "internal/web/workflow_notification_inbox.go",
@@ -153,6 +168,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/notifications.spec.ts"
       ]
     },
     "data": [],

@@ -104,6 +104,28 @@ keeping a second literal map, so a module that adds a persona cannot leave the
 helper behind. Each persona owns disjoint orgs and rows, so `fullyParallel`
 specs never mutate each other's fixtures.
 
+Every spec belongs to the module whose surface it drives, declared in that
+module's `files` and `tests.e2e`. `ggg/workflow/billing-checkout` brings
+`e2e/billing.spec.ts`; `ggg/workflow/admin-flags` brings
+`e2e/admin-flags.spec.ts`. Only the cross-cutting sweeps — accessibility,
+keyboard, progressive enhancement, loading, mobile, CSP, visual and the public
+site — stay with `ggg/system/e2e`, because they assert shell and platform
+behaviour rather than one feature. A profile that installs no billing
+therefore installs no billing spec.
+
+That rule is mechanical, not aspirational.
+`TestEveryDeclaredE2ESpecIsReachableFromItsOwner` reads the literal navigation
+targets out of every declared spec (`page.goto('…')` and the `request` verbs;
+computed targets come from the generated inventory and are skipped) and
+resolves each app, admin or public path against the same route table the
+router is generated from. If the declaring module cannot reach that route
+through itself or its transitive `requires`, the spec is an orphan — a
+derivative would install the test and 404 on a page nobody installed — and the
+test fails naming the spec, the path and the owner. Its sibling,
+`TestEveryE2ESpecOnDiskHasExactlyOneOwner`, refuses a spec that no manifest
+advertises. Splitting a spec along module lines is the normal fix; declaring
+the missing `requires` is the other.
+
 Assertion discipline, by convention:
 
 - retrying assertions only — `await expect(locator).toBeVisible()`, never a

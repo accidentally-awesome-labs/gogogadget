@@ -4,7 +4,7 @@
     "id": "ggg/workflow/admin-flags",
     "kind": "workflow",
     "name": "admin-flags",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin feature flag mutations",
     "description": "Creating, toggling, rolling out, deleting and per-organization overriding of feature flags, with cache invalidation and audit entries.",
@@ -65,6 +65,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-flags.spec.ts",
+        "target": "e2e/admin-flags.spec.ts",
+        "class": "test",
+        "sha256": "3c02598b8182f78596f5b94f2902ac0d7f1f03361bd49ad32cca245ce88a3f60",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/workflow_admin_flags.go",
         "target": "internal/web/workflow_admin_flags.go",
@@ -196,6 +204,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-flags.spec.ts"
       ]
     },
     "data": [],

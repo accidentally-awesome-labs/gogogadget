@@ -155,16 +155,4 @@ test.describe('projects', () => {
     await expect(trigger).toBeFocused();
     await context.close();
   });
-
-  test('activity page paginates', async ({ browser }) => {
-    const context = await loginAs(browser, 'pro');
-    const page = await context.newPage();
-    await page.goto('/app/activity');
-
-    await expect(page.getByText('Page 1 of')).toBeVisible();
-    await page.getByRole('link', { name: 'Next →' }).click();
-    await expect(page.getByText('Page 2 of')).toBeVisible();
-    await expect(page).toHaveURL(/page=2/);
-    await context.close();
-  });
 });

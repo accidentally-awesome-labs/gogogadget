@@ -4,7 +4,7 @@
     "id": "ggg/workflow/admin-schedules",
     "kind": "workflow",
     "name": "admin-schedules",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Admin schedule mutations",
     "description": "Creating, enabling, running now and deleting recurring schedules, validated against the schedulable job kinds and audited.",
@@ -70,6 +70,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/admin-schedules.spec.ts",
+        "target": "e2e/admin-schedules.spec.ts",
+        "class": "test",
+        "sha256": "4d0c920da1f2c240c1785dbe32267af98bcac91ae824c4ab56906fcce9b97618",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/web/workflow_admin_schedules.go",
         "target": "internal/web/workflow_admin_schedules.go",
@@ -165,6 +173,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/admin-schedules.spec.ts"
       ]
     },
     "data": [],

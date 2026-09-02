@@ -4,7 +4,7 @@
     "id": "ggg/workflow/outbound-webhooks",
     "kind": "workflow",
     "name": "outbound-webhooks",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Outbound webhook management",
     "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
@@ -64,6 +64,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "e2e/webhooks.spec.ts",
+        "target": "e2e/webhooks.spec.ts",
+        "class": "test",
+        "sha256": "782e50177eb4295963f9d9ec66d1436fe4be5f39f76632355bca8bcfdc86a219",
+        "rewrite_module": false,
+        "contract": false
+      },
       {
         "source": "internal/jobs/webhooks_deliver.go",
         "target": "internal/jobs/webhooks_deliver.go",
@@ -192,6 +200,9 @@
     "tests": {
       "go_packages": [
         "internal/web"
+      ],
+      "e2e": [
+        "e2e/webhooks.spec.ts"
       ]
     },
     "data": [],
