@@ -4,7 +4,7 @@
     "id": "ggg/system/mail-smtp",
     "kind": "system",
     "name": "mail-smtp",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "SMTP mail",
     "description": "Self-hosted SMTP delivery, with Mailpit for local development.",
@@ -133,7 +133,8 @@
                 "volumes": [],
                 "health": {
                   "kind": "tcp",
-                  "port": 1025
+                  "port": 1025,
+                  "command": "wget -qO- http://127.0.0.1:8025/"
                 }
               }
             },

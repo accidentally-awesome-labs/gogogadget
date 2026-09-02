@@ -484,6 +484,11 @@ type LocalServiceHealth struct {
 	Kind string `json:"kind"`
 	Port int    `json:"port"`
 	Path string `json:"path,omitempty"`
+	// Command overrides the generic nc/wget probe with the image's own
+	// healthcheck tool (pg_isready for postgres, a vendor health endpoint for
+	// object stores). Declared per target because images differ in what they
+	// ship; the generator never guesses.
+	Command string `json:"command,omitempty"`
 }
 
 // RouteContribution declares a concrete generated route.

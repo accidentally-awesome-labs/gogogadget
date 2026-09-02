@@ -4,7 +4,7 @@
     "id": "ggg/system/observability-log",
     "kind": "system",
     "name": "observability-log",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "observability-log",
     "description": "observability-log adapter",
@@ -69,10 +69,11 @@
             {
               "id": "log",
               "title": "log",
-              "mode": "development",
+              "mode": "self-hosted",
               "environments": [
                 "development",
-                "test"
+                "test",
+                "production"
               ],
               "automation": "manual",
               "docs_url": "https://gogogadget.dev/docs/providers/observability-log",

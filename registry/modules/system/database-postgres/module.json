@@ -4,7 +4,7 @@
     "id": "ggg/system/database-postgres",
     "kind": "system",
     "name": "database-postgres",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Database Postgres",
     "description": "database-postgres infrastructure capability.",
@@ -153,7 +153,8 @@
                 ],
                 "health": {
                   "kind": "tcp",
-                  "port": 5432
+                  "port": 5432,
+                  "command": "pg_isready -U postgres"
                 }
               }
             },

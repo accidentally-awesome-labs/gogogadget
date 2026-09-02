@@ -896,7 +896,7 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "59274a15949d2872ecf7675b41dedb0a2b53c38011634a981fa243f6bca638b1"
+      "sha256": "f7df7be96058eedd93d719e6f78eefa36d1f3c46ef869e6f70d802d08c3f37cb"
     },
     {
       "path": "registry/modules/system/database/module.json",
@@ -984,7 +984,7 @@
     },
     {
       "path": "registry/modules/system/mail-smtp/module.json",
-      "sha256": "eea5cf1cffc95cb1117ab82e9bc6b898dc0900d88cb529d3f4ba00b7a89fbe64"
+      "sha256": "b62b787c8b908b41fd9a43e041819950382550df9ef7ff51344b9f4ac1ae9514"
     },
     {
       "path": "registry/modules/system/mail/module.json",
@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "1d99ad096812a0351e196315120f3fa0c1d9129b1bcf8e22531fd1e83982f55f"
+      "sha256": "97413c99e45de55df8677f56ad0d784a6745214323e75181532848b2f8ceab3a"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1012,7 +1012,7 @@
     },
     {
       "path": "registry/modules/system/observability-log/module.json",
-      "sha256": "c2167ad21fd9b3b45894ced918f0b8791f0aef4c44deefeb5e77c8ad624e2a37"
+      "sha256": "0a47ba93c0378a10bcbacf3a7f72db644ac0f3e3d22a03429cd5a88a62da3dd3"
     },
     {
       "path": "registry/modules/system/observability-sentry/module.json",
@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/project-base/module.json",
-      "sha256": "d5bf44bd22358e741a2ffd3190615cd6f44a33e140401a7f33f40724531c7f2c"
+      "sha256": "1e3099369b0ac1c507a68323a88d55b355ad470c8a53fc1287d841b98cc2bd12"
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
@@ -1100,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/storage-s3/module.json",
-      "sha256": "0b29ca094fbda2de8ebbb042327422158aa1f7d68885ea4d10e801594cb06852"
+      "sha256": "d0a6370c38e1f7bbece6adea03383bad345f56cff0c60f2e9ab739fe2ee48d5c"
     },
     {
       "path": "registry/modules/system/storage/module.json",
@@ -1276,7 +1276,7 @@
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "a825b75a89dc6d065edb45879c413459f87479fe42094a15fea611b0af3ee81a"
+      "sha256": "1669f3e7b04f1994ab9a9fa563140ed0fe38aea467a30c322365889207c16c53"
     },
     {
       "path": "registry/profiles/saas.json",
@@ -1292,7 +1292,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "a37c7a85aa1162ab83a442edfd4e2bd4a4095ed15fcec9d7d9592ccea8f2527a"
+      "sha256": "42da4f7da299aec00c7f829ec7e124e1e897c832a35f6d71cceb9c2de9d39287"
     },
     {
       "path": "registry/schema/project.schema.json",

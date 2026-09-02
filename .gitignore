@@ -9,3 +9,6 @@ e2e/test-results/
 # Local server binaries
 /server
 /.worktrees
+
+# CLI-managed local state: env values, provider state, journals
+.ggg/

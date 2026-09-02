@@ -1,8 +1,15 @@
+name: gogogadget-development
 services:
     app:
         build: .
         env_file:
             - .ggg/env/development.env
+        ports:
+            - 8080:8080
+        environment:
+            APP_ENV: development
+            APP_URL: http://localhost:8080
+            DATABASE_URL: postgres://postgres:postgres@ggg-system-database-postgres-docker-postgres:5432/gogogadget?sslmode=disable
         depends_on:
             ggg-system-database-postgres-docker-postgres:
                 condition: service_healthy
@@ -19,7 +26,7 @@ services:
         healthcheck:
             test:
                 - CMD-SHELL
-                - nc -z 127.0.0.1 5432
+                - pg_isready -U postgres
             interval: 2s
             timeout: 2s
             retries: 30

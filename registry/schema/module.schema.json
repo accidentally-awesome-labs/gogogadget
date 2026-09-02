@@ -2026,6 +2026,9 @@
         },
         "path": {
           "type": "string"
+        },
+        "command": {
+          "type": "string"
         }
       },
       "required": [

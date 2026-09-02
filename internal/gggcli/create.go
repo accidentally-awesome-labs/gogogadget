@@ -38,7 +38,7 @@ func (c *Controller) previewCreate(ctx context.Context, mutation CreateMutation)
 	if err != nil {
 		return Plan{}, err
 	}
-	registry, ok := mutableProjectRegistry(project)
+	registry, ok := c.mutableProjectRegistry(project)
 	if !ok {
 		return Plan{}, refusalError(fmt.Errorf("project has no mutable directory registry"))
 	}
@@ -73,14 +73,20 @@ func (c *Controller) previewCreate(ctx context.Context, mutation CreateMutation)
 	return plan, nil
 }
 
-func mutableProjectRegistry(project modkit.Project) (modkit.ProjectRegistry, bool) {
+func (c *Controller) mutableProjectRegistry(project modkit.Project) (modkit.ProjectRegistry, bool) {
 	for _, registry := range project.Registries {
 		if registry.Source == "directory" && registry.Namespace != "ggg" {
 			return registry, true
 		}
 	}
+	// A project-local registry is a self-contained directory: it carries its
+	// own registry.json. The self-hosting root (registry.json beside the
+	// project intent) is the published catalog, never a `ggg create` target.
 	for _, registry := range project.Registries {
-		if registry.Source == "directory" && filepath.Clean(registry.Path) == "registry" {
+		if registry.Source != "directory" || registry.Path == "" || registry.Path == "." {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(c.rootDir(), filepath.FromSlash(registry.Path), "registry.json")); err == nil {
 			return registry, true
 		}
 	}
@@ -115,6 +121,9 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	if slug == "" {
 		return nil, nil, usageError("create name must contain letters or digits")
 	}
+	// Migration payloads live outside the files list; they are written beside
+	// the manifest after materialization.
+	migrationBodies := map[string][]byte{}
 	manifest := modkit.Manifest{
 		ID: registry.Namespace + "/" + string(moduleKind) + "/" + slug, Kind: moduleKind, Name: slug,
 		Revision: 1, Contract: 1, Title: titleWords(name), Description: "Project-local " + kind + " " + titleWords(name) + ".",
@@ -153,8 +162,18 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 		}
 		base := "internal/" + packageName
 		payloads[base+"/resource.go"] = []byte("package " + packageName + "\n\n// Resource is one " + titleWords(name) + " row.\ntype Resource struct { ID string }\n\nconst Route = \"" + route + "\"\n")
-		payloads["internal/db/migrations/"+snake(slug)+".sql"] = []byte("-- +goose Up\nCREATE TABLE " + table + " (id text PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now());\n\n-- +goose Down\n-- forward-only migration\n")
-		manifest.Claims.Packages = []string{base}
+		// The migration enters the manifest ledger, not the file list: the
+		// allocator assigns its installed %04d_ sequence at sync, goose can
+		// parse it, and removal knows the schema payload belongs to this
+		// module.
+		migrationBody := []byte("-- +goose Up\nCREATE TABLE " + table + " (id text PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now());\n\n-- +goose Down\n-- forward-only migration\n")
+		migrationSum := sha256.Sum256(migrationBody)
+		migrationSource := "registry/modules/" + string(moduleKind) + "/" + slug + "/payload/" + snake(slug) + ".sql"
+		manifest.Migrations = append(manifest.Migrations, modkit.ManifestMigration{
+			ID: registry.Namespace + "." + snake(slug), Kind: modkit.MigrationImmutable,
+			Source: migrationSource, SHA256: hex.EncodeToString(migrationSum[:]),
+		})
+		migrationBodies[migrationSource] = migrationBody
 		manifest.Data = []modkit.DataDeclaration{{Table: table, Scope: modkit.DataScope(mutation.Scope), Export: true, AccountDelete: modkit.DeleteManual, OrganizationDelete: modkit.DeleteManual}}
 		manifest.Claims.Data = []string{table}
 	case "job":
@@ -180,6 +199,9 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	files, err := materializeManifest(registry.Path, manifest, payloads)
 	if err != nil {
 		return nil, nil, runtimeError(err)
+	}
+	for source, body := range migrationBodies {
+		files[filepath.ToSlash(filepath.Join(registry.Path, source))] = body
 	}
 	return files, &manifest, nil
 }

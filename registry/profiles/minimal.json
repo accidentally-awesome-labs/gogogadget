@@ -9,180 +9,60 @@
     "title": "Minimal GoGoGadget",
     "description": "The smallest compilable GoGoGadget web application and required provider seams.",
     "members": [
-      "ggg/component/accordion",
-      "ggg/component/activity-item",
-      "ggg/component/alert-dialog",
-      "ggg/component/aspect-ratio",
-      "ggg/component/attachment",
-      "ggg/component/back-link",
-      "ggg/component/badge",
       "ggg/component/banner",
-      "ggg/component/breadcrumbs",
-      "ggg/component/calendar",
-      "ggg/component/card",
-      "ggg/component/carousel",
-      "ggg/component/center",
-      "ggg/component/char-counter",
-      "ggg/component/chart",
-      "ggg/component/chat-log",
-      "ggg/component/chat-message",
-      "ggg/component/checkbox",
-      "ggg/component/checkbox-group",
-      "ggg/component/collapsible",
-      "ggg/component/color-input",
-      "ggg/component/column-header",
-      "ggg/component/combobox",
-      "ggg/component/command",
-      "ggg/component/comment",
-      "ggg/component/comment-thread",
-      "ggg/component/composer",
-      "ggg/component/confirm-action",
-      "ggg/component/container",
-      "ggg/component/context-menu",
-      "ggg/component/cursor-pagination",
-      "ggg/component/data-grid",
-      "ggg/component/data-table",
-      "ggg/component/date-field",
-      "ggg/component/date-range-field",
-      "ggg/component/date-time-field",
-      "ggg/component/delivery-status",
-      "ggg/component/description-list",
-      "ggg/component/dialog",
-      "ggg/component/disclosure",
-      "ggg/component/drawer",
-      "ggg/component/dropdown-menu",
-      "ggg/component/empty-state",
-      "ggg/component/error-state",
       "ggg/component/field",
-      "ggg/component/field-error",
-      "ggg/component/fieldset",
-      "ggg/component/file-dropzone",
-      "ggg/component/file-input",
       "ggg/component/form",
-      "ggg/component/form-actions",
-      "ggg/component/grid",
-      "ggg/component/hint",
-      "ggg/component/hover-card",
-      "ggg/component/inline",
-      "ggg/component/input-addon",
-      "ggg/component/input-group",
-      "ggg/component/kanban",
-      "ggg/component/key-value",
-      "ggg/component/label",
-      "ggg/component/list",
-      "ggg/component/markdown-editor",
-      "ggg/component/member-item",
-      "ggg/component/mention-chip",
-      "ggg/component/menubar",
-      "ggg/component/meter",
-      "ggg/component/metric",
-      "ggg/component/multi-select",
-      "ggg/component/nav-tabs",
-      "ggg/component/navigation-menu",
-      "ggg/component/notice",
-      "ggg/component/notification-item",
-      "ggg/component/number-input",
-      "ggg/component/onboarding-checklist",
-      "ggg/component/otp-input",
-      "ggg/component/page-header",
-      "ggg/component/pagination",
-      "ggg/component/panels",
-      "ggg/component/password-input",
-      "ggg/component/plan-card",
-      "ggg/component/popover",
-      "ggg/component/progress-bar",
-      "ggg/component/progress-circle",
-      "ggg/component/questionnaire",
-      "ggg/component/radio-group",
-      "ggg/component/range-input",
-      "ggg/component/row-actions",
-      "ggg/component/scroll-area",
-      "ggg/component/search-input",
-      "ggg/component/secret-reveal",
-      "ggg/component/section",
-      "ggg/component/section-header",
-      "ggg/component/select",
-      "ggg/component/selection-bar",
-      "ggg/component/settings-section",
-      "ggg/component/skeleton",
-      "ggg/component/skip-link",
-      "ggg/component/slug-input",
-      "ggg/component/split",
-      "ggg/component/stack",
-      "ggg/component/stat-group",
-      "ggg/component/status-dot",
-      "ggg/component/steps",
-      "ggg/component/sticky-bar",
-      "ggg/component/switch",
-      "ggg/component/tab-panels",
-      "ggg/component/table",
-      "ggg/component/table-card",
-      "ggg/component/table-empty",
-      "ggg/component/table-of-contents",
-      "ggg/component/table-toolbar",
-      "ggg/component/tags-input",
       "ggg/component/terminal-page",
       "ggg/component/text-input",
-      "ggg/component/textarea",
       "ggg/component/theme-toggle",
-      "ggg/component/tile",
-      "ggg/component/time-field",
-      "ggg/component/timeline",
-      "ggg/component/toast",
       "ggg/component/toast-region",
-      "ggg/component/toolbar",
-      "ggg/component/tooltip",
-      "ggg/component/tree",
-      "ggg/component/usage-card",
-      "ggg/element/avatar",
-      "ggg/element/avatar-group",
-      "ggg/element/button",
-      "ggg/element/button-group",
-      "ggg/element/button-link",
-      "ggg/element/code",
-      "ggg/element/copy-button",
-      "ggg/element/divider",
-      "ggg/element/heading",
-      "ggg/element/icon",
-      "ggg/element/icon-button",
-      "ggg/element/kbd",
-      "ggg/element/link",
-      "ggg/element/prose",
-      "ggg/element/separator",
-      "ggg/element/spinner",
-      "ggg/element/text",
-      "ggg/element/toggle-button",
-      "ggg/element/toggle-group",
-      "ggg/element/truncate",
       "ggg/element/ui-core",
-      "ggg/element/visually-hidden",
+      "ggg/system/analytics",
       "ggg/system/apphost",
-      "ggg/system/ci-github",
+      "ggg/system/audit-export",
+      "ggg/system/billing",
+      "ggg/system/cache",
       "ggg/system/cli-ui",
       "ggg/system/config",
       "ggg/system/database",
-      "ggg/system/dev-tools",
-      "ggg/system/docker",
       "ggg/system/feature-flags",
+      "ggg/system/identity",
+      "ggg/system/identity-session",
+      "ggg/system/llm",
       "ggg/system/mail",
       "ggg/system/modkit",
+      "ggg/system/notifications",
       "ggg/system/observability",
       "ggg/system/project-base",
-      "ggg/system/project-docs",
+      "ggg/system/rate-limit",
+      "ggg/system/realtime",
+      "ggg/system/search",
       "ggg/system/server",
       "ggg/system/static",
-      "ggg/system/storage"
+      "ggg/system/storage",
+      "ggg/system/telemetry",
+      "ggg/system/usage",
+      "ggg/system/webhooks"
     ],
     "required_provider_slots": [
       "ggg/analytics",
+      "ggg/audit-export",
       "ggg/billing",
+      "ggg/cache",
       "ggg/database",
       "ggg/feature-flags",
       "ggg/identity",
       "ggg/llm",
       "ggg/mail",
+      "ggg/notifications",
       "ggg/observability",
-      "ggg/storage"
+      "ggg/rate-limit",
+      "ggg/realtime",
+      "ggg/search",
+      "ggg/storage",
+      "ggg/telemetry",
+      "ggg/usage",
+      "ggg/webhooks"
     ],
     "provider_defaults": {
       "ggg/analytics": {
@@ -195,8 +75,22 @@
           "target": "local"
         },
         "production": {
-          "adapter": "ggg/system/analytics-posthog",
-          "target": "posthog"
+          "adapter": "ggg/system/analytics-noop",
+          "target": "local"
+        }
+      },
+      "ggg/audit-export": {
+        "development": {
+          "adapter": "ggg/system/audit-export-noop",
+          "target": "noop"
+        },
+        "test": {
+          "adapter": "ggg/system/audit-export-noop",
+          "target": "noop"
+        },
+        "production": {
+          "adapter": "ggg/system/audit-export-otlp",
+          "target": "otlp"
         }
       },
       "ggg/billing": {
@@ -211,6 +105,20 @@
         "production": {
           "adapter": "ggg/system/billing-polar",
           "target": "polar"
+        }
+      },
+      "ggg/cache": {
+        "development": {
+          "adapter": "ggg/system/cache-memory",
+          "target": "memory"
+        },
+        "test": {
+          "adapter": "ggg/system/cache-memory",
+          "target": "memory"
+        },
+        "production": {
+          "adapter": "ggg/system/cache-redis",
+          "target": "upstash"
         }
       },
       "ggg/database": {
@@ -279,8 +187,8 @@
           "target": "filesystem"
         },
         "production": {
-          "adapter": "ggg/system/mail-resend",
-          "target": "resend"
+          "adapter": "ggg/system/mail-smtp",
+          "target": "smtp"
         }
       },
       "ggg/observability": {
@@ -293,8 +201,50 @@
           "target": "log"
         },
         "production": {
-          "adapter": "ggg/system/observability-sentry",
-          "target": "sentry"
+          "adapter": "ggg/system/observability-log",
+          "target": "log"
+        }
+      },
+      "ggg/rate-limit": {
+        "development": {
+          "adapter": "ggg/system/rate-limit-memory",
+          "target": "memory"
+        },
+        "test": {
+          "adapter": "ggg/system/rate-limit-memory",
+          "target": "memory"
+        },
+        "production": {
+          "adapter": "ggg/system/rate-limit-redis",
+          "target": "upstash"
+        }
+      },
+      "ggg/realtime": {
+        "development": {
+          "adapter": "ggg/system/realtime-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/realtime-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/realtime-postgres",
+          "target": "postgres"
+        }
+      },
+      "ggg/search": {
+        "development": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
         }
       },
       "ggg/storage": {
@@ -309,6 +259,62 @@
         "production": {
           "adapter": "ggg/system/storage-s3",
           "target": "r2"
+        }
+      },
+      "ggg/telemetry": {
+        "development": {
+          "adapter": "ggg/system/telemetry-noop",
+          "target": "stdout"
+        },
+        "test": {
+          "adapter": "ggg/system/telemetry-noop",
+          "target": "stdout"
+        },
+        "production": {
+          "adapter": "ggg/system/telemetry-otlp",
+          "target": "otlp"
+        }
+      },
+      "ggg/usage": {
+        "development": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        }
+      },
+      "ggg/webhooks": {
+        "development": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
+        }
+      },
+      "ggg/notifications": {
+        "development": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
         }
       }
     },

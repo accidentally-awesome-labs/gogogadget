@@ -37,13 +37,15 @@ func emitComposeRegistry(_ context.Context, _ string, lock Lock, graph []Manifes
 	return GenerateComposeFiles(lock, graph)
 }
 
+type selectedService struct {
+	name    string
+	slot    string
+	adapter string
+	target  ServiceTarget
+	service LocalService
+}
+
 func renderCompose(environment string, lock Lock, modules map[string]Manifest) (string, error) {
-	type selectedService struct {
-		name    string
-		adapter string
-		target  ServiceTarget
-		service LocalService
-	}
 	selected := make([]selectedService, 0)
 	serviceNames := map[string]string{}
 	hostPorts := map[int]string{}
@@ -100,15 +102,31 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 			}
 			volumeNames[volumeName] = name
 		}
-		selected = append(selected, selectedService{name: name, adapter: choice.Adapter, target: *target, service: *target.LocalService})
+		selected = append(selected, selectedService{name: name, slot: slot, adapter: choice.Adapter, target: *target, service: *target.LocalService})
 	}
 
+	// A distinct compose project per environment keeps container, network, and
+	// volume names from the development and test stacks from colliding, even
+	// though both files declare the same service roles.
 	root := &yaml.Node{Kind: yaml.MappingNode}
+	appendYAMLMap(root, "name", yamlScalar("gogogadget-"+environment))
 	services := &yaml.Node{Kind: yaml.MappingNode}
 	appendYAMLMap(root, "services", services)
 	app := &yaml.Node{Kind: yaml.MappingNode}
 	appendYAMLMap(app, "build", yamlScalar("."))
 	appendYAMLMap(app, "env_file", yamlSequence(".ggg/env/"+environment+".env"))
+	if owner, exists := hostPorts[appPort]; exists {
+		return "", fmt.Errorf("compose %s: app port %d collides with %s", environment, appPort, owner)
+	}
+	hostPorts[appPort] = "app"
+	appendYAMLMap(app, "ports", yamlSequence(strconv.Itoa(appPort)+":"+strconv.Itoa(appPort)))
+	appEnv := &yaml.Node{Kind: yaml.MappingNode}
+	appendYAMLMap(appEnv, "APP_ENV", yamlScalar(environment))
+	appendYAMLMap(appEnv, "APP_URL", yamlScalar("http://localhost:"+strconv.Itoa(appPort)))
+	if url := databaseURL(selected); url != "" {
+		appendYAMLMap(appEnv, "DATABASE_URL", yamlScalar(url))
+	}
+	appendYAMLMap(app, "environment", appEnv)
 	if len(selected) > 0 {
 		depends := &yaml.Node{Kind: yaml.MappingNode}
 		for _, item := range selected {
@@ -152,9 +170,13 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 			appendYAMLMap(node, "volumes", mounts)
 		}
 		health := &yaml.Node{Kind: yaml.MappingNode}
-		command := "nc -z 127.0.0.1 " + strconv.Itoa(item.service.Health.Port)
-		if item.service.Health.Kind == "http" {
+		command := ""
+		if item.service.Health.Command != "" {
+			command = item.service.Health.Command
+		} else if item.service.Health.Kind == "http" {
 			command = "wget -qO- http://127.0.0.1:" + strconv.Itoa(item.service.Health.Port) + item.service.Health.Path
+		} else {
+			command = "nc -z 127.0.0.1 " + strconv.Itoa(item.service.Health.Port)
 		}
 		appendYAMLMap(health, "test", yamlSequence("CMD-SHELL", command))
 		appendYAMLMap(health, "interval", yamlScalar("2s"))
@@ -171,6 +193,38 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 		return "", err
 	}
 	return string(data), nil
+}
+
+// appPort is the host and container port the generated app service publishes.
+const appPort = 8080
+
+// databaseURL derives the in-network DATABASE_URL from the selected database
+// adapter's local service declaration, so the compose app reaches the same
+// Postgres the environment selected without hardcoded credentials.
+func databaseURL(selected []selectedService) string {
+	for _, item := range selected {
+		if item.slot != "ggg/database" {
+			continue
+		}
+		user, password, name := "postgres", "postgres", "gogogadget"
+		port := 5432
+		for _, variable := range item.service.Environment {
+			switch variable.Key {
+			case "POSTGRES_USER":
+				user = variable.Value
+			case "POSTGRES_PASSWORD":
+				password = variable.Value
+			case "POSTGRES_DB":
+				name = variable.Value
+			}
+		}
+		if len(item.service.Ports) > 0 {
+			port = item.service.Ports[0].Container
+		}
+		return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			user, password, item.name, port, name)
+	}
+	return ""
 }
 
 func providerSelectionForEnvironment(selections ProviderSelections, environment string) ProviderSelection {

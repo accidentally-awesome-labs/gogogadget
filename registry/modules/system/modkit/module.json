@@ -92,7 +92,7 @@
         "source": "internal/gggcli/create.go",
         "target": "internal/gggcli/create.go",
         "class": "go",
-        "sha256": "6b28a324b22317c0029a5aa474bcbceb57b6eb83354fa23ebef991b00fc16160",
+        "sha256": "6aaa62440ffa18b2a5c4eed4c363beab5cc09c20f3382b9b75d3fa8fcc02f701",
         "rewrite_module": true,
         "contract": true
       },
@@ -212,7 +212,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "2b7e26f251271b593ee1826c9e4b6932f9c63588d51b386ed5f432e01024f914",
+        "sha256": "4ca538dd490e743f5cb5a3c86a404214249929ac2402758030af95cab1fa606b",
         "rewrite_module": true,
         "contract": true
       },
@@ -284,7 +284,7 @@
         "source": "internal/modkit/compose.go",
         "target": "internal/modkit/compose.go",
         "class": "go",
-        "sha256": "873c74dac990ac5d8f1d049f5352c1463480def7ad5a5772d637e9d7c76d7aa2",
+        "sha256": "83115a7c63272285be0a15eeef9227a0ff799215ceb3eb7b8d19ce0a8b6922c5",
         "rewrite_module": true,
         "contract": true
       },
@@ -444,7 +444,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "b65f214143bf0f252c84eea2254d9ccc13480a8c74e6f695a0c6a88c160bb586",
+        "sha256": "53e9000711bfa3073fee8ecce3edfc06160b9c958b78b8ba8c733040ca7bd031",
         "rewrite_module": true,
         "contract": true
       },

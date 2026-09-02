@@ -95,6 +95,28 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 	if environment == "test" {
 		compose = "compose.test.yaml"
 	}
+	// Compose parses env_file for every subcommand, so the per-environment
+	// file must exist before anything invokes compose. It is created empty and
+	// mode 0600: `ggg provider configure` fills it, and it is gitignored.
+	switch mutation.Task {
+	case "services", "dev", "db", "setup":
+		if mutation.Task != "setup" || mutation.Action == "" {
+			for _, name := range []string{"development", "test"} {
+				if mutation.Task != "setup" && name != environment {
+					continue
+				}
+				path := filepath.Join(root, ".ggg", "env", name+".env")
+				if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
+					if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+						return Result{}, runtimeError(err)
+					}
+					if err := os.WriteFile(path, nil, 0o600); err != nil {
+						return Result{}, runtimeError(err)
+					}
+				}
+			}
+		}
+	}
 
 	var err error
 	switch mutation.Task {

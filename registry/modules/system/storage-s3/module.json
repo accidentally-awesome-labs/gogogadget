@@ -4,7 +4,7 @@
     "id": "ggg/system/storage-s3",
     "kind": "system",
     "name": "storage-s3",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "S3-compatible storage",
     "description": "S3-compatible object storage with MinIO self-hosting and Cloudflare R2 managed targets.",
@@ -169,6 +169,7 @@
                 "health": {
                   "kind": "http",
                   "port": 9000,
+                  "command": "wget -qO- http://127.0.0.1:9000/minio/health/live",
                   "path": "/minio/health/live"
                 }
               }
