@@ -4,13 +4,20 @@
     "id": "ggg/page/activity",
     "kind": "page",
     "name": "activity",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Activity feed",
     "description": "The organization's audit trail rendered for members, with search and pagination.",
     "requires": [
       {
         "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

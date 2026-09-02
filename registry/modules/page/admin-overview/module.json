@@ -4,13 +4,20 @@
     "id": "ggg/page/admin-overview",
     "kind": "page",
     "name": "admin-overview",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Admin overview",
     "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
     "requires": [
       {
         "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

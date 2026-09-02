@@ -61,7 +61,7 @@ export const moduleTests = [
     "capabilities": []
   },
   {
-    "module": "ggg/system/e2e",
+    "module": "ggg/system/e2e-sweeps",
     "e2e": [
       "e2e/a11y-states.spec.ts",
       "e2e/a11y.spec.ts",

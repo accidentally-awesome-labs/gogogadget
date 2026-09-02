@@ -4,11 +4,18 @@
     "id": "ggg/page/admin-jobs",
     "kind": "page",
     "name": "admin-jobs",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Admin job queue",
     "description": "The background job queue with state, attempt count, and dead-letter detail.",
     "requires": [
+      {
+        "id": "ggg/system/e2e",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/jobs",
         "contract": {

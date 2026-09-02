@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "fcb6df4839363ccb87c819db356f661b0a1f2e7874083566b9d3aa02de32cea3",
+        "sha256": "05e4484b50939fe0e8bc973ea2b911c75b405ebd5dc6998bf60f184dc0e385e5",
         "rewrite_module": false,
         "contract": false
       },

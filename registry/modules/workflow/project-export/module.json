@@ -4,7 +4,7 @@
     "id": "ggg/workflow/project-export",
     "kind": "workflow",
     "name": "project-export",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Project CSV export",
     "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
@@ -25,6 +25,13 @@
       },
       {
         "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

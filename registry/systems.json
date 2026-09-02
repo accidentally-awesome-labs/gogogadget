@@ -29,6 +29,7 @@
     "registry/modules/system/deploy-fly/module.json",
     "registry/modules/system/dev-tools/module.json",
     "registry/modules/system/docker/module.json",
+    "registry/modules/system/e2e-sweeps/module.json",
     "registry/modules/system/e2e/module.json",
     "registry/modules/system/feature-flags-launchdarkly/module.json",
     "registry/modules/system/feature-flags-postgres/module.json",

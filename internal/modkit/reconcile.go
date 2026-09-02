@@ -196,6 +196,7 @@ func reconcilePlannedState(
 			)
 		}
 	}
+	graphOwners := graphFileOwnership(graph.modules)
 	if !hasLock {
 		ownership := lockedFileOwnership(Lock{}, false)
 		files := make(map[string][]LockedFile, len(graph.modules))
@@ -351,7 +352,7 @@ func reconcilePlannedState(
 	states := make(map[string]reconciledModule, len(graph.modules))
 	changes := make([]Change, 0, len(payloads))
 	diagnostics := make([]Diagnostic, 0)
-	ownership := lockedFileOwnership(existing, true)
+	ownership := applyOwnershipTransfers(lockedFileOwnership(existing, true), graphOwners)
 	for _, module := range graph.modules {
 		if err := ctx.Err(); err != nil {
 			return Lock{}, nil, nil, nil, nil, err
@@ -433,6 +434,14 @@ func reconcilePlannedState(
 			}
 			for _, oldFile := range oldModule.Files {
 				if _, exists := newTargets[oldFile.Path]; exists {
+					continue
+				}
+				if next, claimed := graphOwners[oldFile.Path]; claimed && next != module.ID {
+					// Ownership moved, the file did not. Deleting it here would
+					// race the new owner's write in the same plan, and refusing
+					// on a local modification here would report the wrong
+					// module: the new owner's classifier sees the same base
+					// digest and still refuses.
 					continue
 				}
 				_, digest, missing, err := CurrentTargetState(root, oldFile.Path)

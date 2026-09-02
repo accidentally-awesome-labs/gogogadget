@@ -178,20 +178,20 @@ transitive closure itself.
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `ggg/page/activity` | Activity feed | `ggg/system/audit` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/activity` | Activity feed | `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-announcements` | Admin announcements list | `ggg/system/announcements` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-audit` | Admin audit log | `ggg/system/audit` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-audit` | Admin audit log | `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-content` | Admin content list | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-content-editor` | Admin content editor | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
 | `ggg/page/admin-content-preview` | Admin content preview | `ggg/system/content` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
 | `ggg/page/admin-flag-detail` | Admin feature flag detail | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-flags` | Admin feature flags list | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-jobs` | Admin job queue | `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-jobs` | Admin job queue | `ggg/system/e2e` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-media` | Admin media library | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-organizations` | Admin organizations list | `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-overview` | Admin overview | `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-organizations` | Admin organizations list | `ggg/system/e2e` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-overview` | Admin overview | `ggg/system/billing` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/admin-schedules` | Admin schedules list | `ggg/system/i18n` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-users` | Admin users list | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-users` | Admin users list | `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/page/blog` | Blog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
 | `ggg/page/changelog` | Changelog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
 | `ggg/page/dashboard` | App dashboard | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
@@ -219,36 +219,36 @@ transitive closure itself.
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `ggg/workflow/account-delete` | Account deletion | `ggg/page/settings-account` `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
-| `ggg/workflow/account-export` | Personal data export | `ggg/page/settings-account` `ggg/system/audit` `ggg/system/identity` `ggg/system/notifications` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-announcements` | Admin announcement mutations | `ggg/page/admin-announcements` `ggg/page/dashboard` `ggg/system/announcements` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-content` | Admin content mutations | `ggg/page/admin-content` `ggg/page/blog` `ggg/system/audit` `ggg/system/content` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-flags` | Admin feature flag mutations | `ggg/page/admin-flags` `ggg/system/audit` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/account-delete` | Account deletion | `ggg/page/home` `ggg/page/settings-account` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
+| `ggg/workflow/account-export` | Personal data export | `ggg/page/settings-account` `ggg/system/audit` `ggg/system/e2e` `ggg/system/identity` `ggg/system/notifications` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-announcements` | Admin announcement mutations | `ggg/page/admin-announcements` `ggg/page/dashboard` `ggg/system/announcements` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-content` | Admin content mutations | `ggg/page/admin-content` `ggg/page/blog` `ggg/system/audit` `ggg/system/content` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-flags` | Admin feature flag mutations | `ggg/page/admin-flags` `ggg/system/audit` `ggg/system/e2e` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/workflow/admin-job-requeue` | Admin job requeue | `ggg/page/admin-jobs` `ggg/system/audit` `ggg/system/jobs` `ggg/system/server` | `free` |
 | `ggg/workflow/admin-media` | Admin media mutations | `ggg/page/admin-media` `ggg/system/audit` `ggg/system/content` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` `ggg/workflow/admin-content` | `free` |
-| `ggg/workflow/admin-schedules` | Admin schedule mutations | `ggg/page/admin-schedules` `ggg/system/audit` `ggg/system/i18n` `ggg/system/jobs` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-user-governance` | Admin user governance | `ggg/page/admin-users` `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-schedules` | Admin schedule mutations | `ggg/page/admin-schedules` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/jobs` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-user-governance` | Admin user governance | `ggg/page/admin-audit` `ggg/page/admin-flags` `ggg/page/admin-overview` `ggg/page/admin-users` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/workflow/api-ai-chat` | AI chat API | `ggg/system/api` `ggg/system/llm` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
 | `ggg/workflow/api-projects` | Projects API | `ggg/system/api` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
 | `ggg/workflow/api-token-lifecycle` | API token creation and revocation | `ggg/page/settings-api-tokens` `ggg/system/api` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `retain-data` |
-| `ggg/workflow/appearance` | Theme preference | `ggg/page/dashboard` `ggg/page/home` `ggg/page/pricing` `ggg/page/settings-account` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
-| `ggg/workflow/auth-session` | Sign-in, sign-up and sign-out | `ggg/page/dashboard` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
-| `ggg/workflow/billing-checkout` | Checkout and billing portal | `ggg/page/settings-billing` `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/appearance` | Theme preference | `ggg/page/dashboard` `ggg/page/home` `ggg/page/pricing` `ggg/page/settings-account` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
+| `ggg/workflow/auth-session` | Sign-in, sign-up and sign-out | `ggg/page/dashboard` `ggg/page/projects` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
+| `ggg/workflow/billing-checkout` | Checkout and billing portal | `ggg/page/settings-billing` `ggg/system/billing` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
 | `ggg/workflow/billing-webhook` | Billing provider webhook | `ggg/system/billing` `ggg/system/database` `ggg/system/organizations` `ggg/system/server` | `major-version-only` |
 | `ggg/workflow/dev-session` | Zero-account dev session | `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/files` | File upload, download and delete | `ggg/page/files` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` | `free` |
+| `ggg/workflow/files` | File upload, download and delete | `ggg/page/files` `ggg/system/audit` `ggg/system/database` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` | `free` |
 | `ggg/workflow/identity-webhook-sync` | Identity provider sync | `ggg/system/identity` `ggg/system/organizations` `ggg/system/server` | `free` |
-| `ggg/workflow/impersonation` | Administrator impersonation | `ggg/page/admin-overview` `ggg/page/admin-users` `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/notification-inbox` | Notification inbox read state | `ggg/page/dashboard` `ggg/page/notifications` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/notification-preferences` | Notification preference saving | `ggg/page/settings-notifications` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `retain-data` |
+| `ggg/workflow/impersonation` | Administrator impersonation | `ggg/page/admin-overview` `ggg/page/admin-users` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/notification-inbox` | Notification inbox read state | `ggg/page/dashboard` `ggg/page/notifications` `ggg/page/projects` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/notification-preferences` | Notification preference saving | `ggg/page/settings-notifications` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `retain-data` |
 | `ggg/workflow/openapi-contract` | OpenAPI description | `ggg/system/api` `ggg/system/server` | `free` |
 | `ggg/workflow/organization-export` | Organization data export | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/outbound-webhooks` | Outbound webhook management | `ggg/page/settings-webhooks` `ggg/system/audit` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `retain-data` |
-| `ggg/workflow/project-export` | Project CSV export | `ggg/page/files` `ggg/page/projects` `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/page/project-new` `ggg/page/projects` `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
+| `ggg/workflow/outbound-webhooks` | Outbound webhook management | `ggg/page/settings-webhooks` `ggg/system/audit` `ggg/system/e2e` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `retain-data` |
+| `ggg/workflow/project-export` | Project CSV export | `ggg/page/files` `ggg/page/projects` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/page/project-new` `ggg/page/projects` `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (77)
+## Systems (78)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -278,7 +278,8 @@ transitive closure itself.
 | `ggg/system/deploy-fly` | Deploy Fly | `ggg/system/project-base` | `free` |
 | `ggg/system/dev-tools` | Dev Tools | `ggg/system/project-base` | `free` |
 | `ggg/system/docker` | Docker | `ggg/system/project-base` | `free` |
-| `ggg/system/e2e` | E2E | `ggg/page/blog` `ggg/page/changelog` `ggg/page/dashboard` `ggg/page/docs` `ggg/page/docs-index` `ggg/page/docs-search` `ggg/page/home` `ggg/page/pricing` `ggg/page/projects` `ggg/system/project-base` `ggg/workflow/seo-discovery` | `free` |
+| `ggg/system/e2e` | E2E harness | `ggg/system/project-base` | `free` |
+| `ggg/system/e2e-sweeps` | E2E cross-cutting sweeps | `ggg/page/admin-jobs` `ggg/page/admin-media` `ggg/page/blog` `ggg/page/changelog` `ggg/page/dashboard` `ggg/page/docs` `ggg/page/docs-index` `ggg/page/docs-search` `ggg/page/home` `ggg/page/pricing` `ggg/page/projects` `ggg/system/e2e` `ggg/workflow/seo-discovery` | `free` |
 | `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/feature-flags-postgres` | Feature Flags Postgres | `ggg/system/feature-flags` | `free` |
 | `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |

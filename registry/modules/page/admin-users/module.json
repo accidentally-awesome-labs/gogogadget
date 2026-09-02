@@ -100,6 +100,13 @@
     "removal_policy": "free",
     "requires": [
       {
+        "id": "ggg/system/e2e",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "contract": {
           "max": 1,
           "min": 1
@@ -128,7 +135,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 2,
+    "revision": 3,
     "runtime": {
       "navigation": [
         {

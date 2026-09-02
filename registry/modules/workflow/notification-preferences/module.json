@@ -4,13 +4,20 @@
     "id": "ggg/workflow/notification-preferences",
     "kind": "workflow",
     "name": "notification-preferences",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Notification preference saving",
     "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
     "requires": [
       {
         "id": "ggg/page/settings-notifications",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

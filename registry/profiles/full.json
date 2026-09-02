@@ -216,6 +216,7 @@
       "ggg/system/dev-tools",
       "ggg/system/docker",
       "ggg/system/e2e",
+      "ggg/system/e2e-sweeps",
       "ggg/system/feature-flags",
       "ggg/system/feature-flags-launchdarkly",
       "ggg/system/feature-flags-postgres",

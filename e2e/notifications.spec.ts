@@ -39,6 +39,7 @@ test('badge, page, read-all flow', async ({ browser }) => {
 
   await context.close();
 });
+
 // The live stream is the feature the docs promise, and it was silently dead
 // for as long as the htmx 2 SSE extension was vendored against htmx 4: the
 // script threw on load, the EventSource was never opened, and the badge only

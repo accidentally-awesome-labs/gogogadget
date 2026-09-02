@@ -4,7 +4,7 @@
     "id": "ggg/workflow/appearance",
     "kind": "workflow",
     "name": "appearance",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Theme preference",
     "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",
@@ -32,6 +32,13 @@
       },
       {
         "id": "ggg/page/settings-account",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

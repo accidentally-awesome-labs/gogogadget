@@ -54,6 +54,13 @@ test.describe('auth', () => {
     await context.close();
   });
 
+  // This case clicks through to /app/projects and /app/settings/account.
+  // ggg/workflow/auth-session requires ggg/page/projects for the first;
+  // ggg/page/settings-account requires auth-session back, so the second edge
+  // cannot be declared without a dependency cycle. Both destinations are
+  // reached by clicking shell links, which the orphan gate in
+  // internal/modkit/e2e_ownership_test.go does not resolve — the exception is
+  // stated here rather than left silent.
   test('app nav swaps only #content, leaving the shell and body-level portals alive', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();

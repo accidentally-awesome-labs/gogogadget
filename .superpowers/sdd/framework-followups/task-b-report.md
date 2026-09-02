@@ -255,3 +255,223 @@ run for confidence.)
    `e2e/package.json` and `e2e/package-lock.json` are unchanged.
 4. `.superpowers/sdd/framework-followups/task-c-brief.md` is untracked in this worktree
    and belongs to another slice; it is deliberately not part of my commit.
+
+
+---
+
+# Task B — fix round 1
+
+Every item in `task-b-review-findings.md` is implemented. Nothing was deferred.
+
+## C1 — `ggg/system/e2e` split into a leaf harness and a sweeps module
+
+The finding was correct and it was the real defect: nothing in the catalog
+required `ggg/system/e2e`, so the 23 modules I had just made spec owners shipped
+specs into trees with no `playwright.config.ts`, no `helpers.ts` and no
+`package.json`.
+
+- **`ggg/system/e2e`** is now the harness and a leaf: it owns
+  `e2e/playwright.config.ts`, `e2e/global-setup.ts`, `e2e/helpers.ts`,
+  `e2e/package.json`, `e2e/package-lock.json` and requires only
+  `ggg/system/project-base`. `tests` is empty. Title/description updated to say so.
+- **`ggg/system/e2e-sweeps`** (new, `registry/modules/system/e2e-sweeps/module.json`)
+  owns the nine cross-cutting suites plus all 204 `e2e/visual.spec.ts-snapshots/*.png`,
+  and carries `tests.e2e` (9), `tests.visual` (1) and `tests.accessibility` (2).
+  Its `requires` are `ggg/system/e2e` plus the pages its sweeps navigate:
+  `page/blog`, `page/changelog`, `page/dashboard`, `page/docs`, `page/docs-index`,
+  `page/docs-search`, `page/home`, `page/pricing`, `page/projects`,
+  `workflow/seo-discovery`, and — newly found by the I3 array extractor —
+  `page/admin-jobs` and `page/admin-media`, which `a11y.spec.ts` scans through its
+  `scanOnlyPages` array.
+- Registered in `registry/systems.json` and added to `profile/saas` and
+  `profile/full` (the two profiles that carried `ggg/system/e2e`).
+- All 23 spec-owning modules now `requires ggg/system/e2e`. The harness is a leaf,
+  so no cycle is possible (whole-graph check: 296 modules, 0 cycles, 0 dangling ids).
+
+The 213-file transfer from `ggg/system/e2e` to `ggg/system/e2e-sweeps` was applied
+in a **single** `registry build && sync --offline` — the first real use of the I4
+engine fix.
+
+## C2 — harness reachability is now enforced
+
+`TestEveryE2ESpecOnDiskHasExactlyOneOwner` resolves the module owning
+`e2e/playwright.config.ts` and requires every declaring module to reach it.
+`specOwnership` now builds `reach` for every catalog module, not only spec owners.
+
+Proof (dropped `ggg/system/e2e` from `ggg/page/activity`, then reverted):
+
+```
+--- FAIL: TestEveryE2ESpecOnDiskHasExactlyOneOwner (0.06s)
+    e2e_ownership_test.go:131: e2e/activity.spec.ts is owned by ggg/page/activity,
+    which cannot install the harness e2e/playwright.config.ts (owned by
+    ggg/system/e2e): the spec would land in a tree with no playwright config,
+    helpers or package.json. Add ggg/system/e2e to its requires.
+```
+
+## I1 — missing `requires` declared
+
+| module | added | driven by |
+|---|---|---|
+| `ggg/workflow/admin-user-governance` | `page/admin-overview`, `page/admin-flags`, `page/admin-audit` | the support-staff loop over `['/admin', '/admin/users', '/admin/flags', '/admin/audit']` |
+| `ggg/workflow/notification-inbox` | `page/projects` | the SSE test clicks Projects to prove one connection survives boosted nav |
+| `ggg/workflow/account-delete` | `page/home` | deletion hard-redirects home (`toHaveURL(/\/$/)`) |
+| `ggg/workflow/auth-session` | `page/projects` | the shell-nav case clicks through to `/app/projects` |
+
+`auth-session → page/settings-account` is the declared exception: the same test also
+clicks to `/app/settings/account`, and `ggg/page/settings-account` requires
+`auth-session` back, so the edge is a dependency cycle. It is now stated in three
+places rather than left silent — a comment above that test in `e2e/auth.spec.ts`,
+the limitations paragraph in `content/docs/testing.md`, and here.
+
+## I2 — the resolver is method-aware
+
+`surfaceTable` now holds one `http.ServeMux` per method and keys declarers on
+`method + " " + pattern`. One mux per method rather than method-qualified patterns
+in a single mux, so a probe never depends on how `ServeMux` reports a method
+mismatch. `navTarget{method, path}` carries the method from the call site:
+`.goto` and `request.get`/`fetch` are GET, `request.post`/`put`/`patch`/`delete`/`head`
+map to their verbs.
+
+`ggg/workflow/admin-flags` is no longer credited with serving `GET /admin/flags`
+because it declares `POST /admin/flags`. Proof (dropped its
+`requires ggg/page/admin-flags`, then reverted):
+
+```
+--- FAIL: TestEveryDeclaredE2ESpecIsReachableFromItsOwner (0.09s)
+    e2e_ownership_test.go:81: orphan e2e test: e2e/admin-flags.spec.ts is owned by
+    ggg/workflow/admin-flags but navigates GET /admin/flags, which route
+    "/admin/flags" declares in [ggg/page/admin-flags] — no module
+    ggg/workflow/admin-flags can reach. …
+```
+
+The same self-match previously shielded `admin-announcements`, `admin-schedules`
+and `admin-content`; all three already declare their page module, so their edges
+are now genuinely defended rather than incidentally green.
+
+## I3 — array literals are extracted
+
+`pathArrayLiteral` matches an array whose elements are all string literals and
+collects every element starting with `/` as a GET target. This is what surfaced
+`/admin/jobs` and `/admin/media` in `a11y.spec.ts` (C1's two extra requires) and
+what makes the support-staff loop enforceable. Proof (dropped
+`ggg/page/admin-audit` from `admin-user-governance`, then reverted):
+
+```
+--- FAIL: TestEveryDeclaredE2ESpecIsReachableFromItsOwner (0.08s)
+    e2e_ownership_test.go:81: orphan e2e test: e2e/admin-user-governance.spec.ts is
+    owned by ggg/workflow/admin-user-governance but navigates GET /admin/audit,
+    which route "/admin/audit" declares in [ggg/page/admin-audit] — no module
+    ggg/workflow/admin-user-governance can reach. …
+```
+
+## I4 — in-place ownership transfer works in one pass
+
+`internal/modkit/target_plan.go`:
+
+- `graphFileOwnership(modules)` names the owner of every authored target in the
+  selected graph. It does **not** re-check exclusivity: `preflightNamespaces`
+  already refuses `target namespace %q collision between A and B`, and it runs at
+  `plan.go:296`, before `reconcilePlannedState` at `plan.go:368`, on the single
+  planning path. The comment names that dependency, since it is what makes the
+  relaxation sound.
+- `applyOwnershipTransfers(lockOwners, graphOwners)` moves lock ownership to the
+  new owner when the graph moved it. **The recorded base digest is carried over
+  untouched**, which is what keeps local work safe.
+
+`internal/modkit/reconcile.go`:
+
+- `graphOwners` is computed once before the lock branch.
+- the dropped-file loop now `continue`s when another module in the new graph claims
+  the target: deleting it there would race the new owner's write in the same plan,
+  and refusing on a local modification there would name the wrong module.
+- `ownership` is `applyOwnershipTransfers(lockedFileOwnership(existing, true), graphOwners)`.
+
+Three tests in `internal/modkit/target_transfer_test.go`, over a fixture where one
+target moves owner between two refs with byte-identical payloads:
+
+- `TestSyncTransfersTargetOwnershipInOnePass` — exactly one change for the target,
+  `ChangeUnchanged` under the new owner, old owner locks nothing, new owner locks it
+  `clean`. Verified to bite: with `applyOwnershipTransfers` neutered it fails with
+  `target internal/modules/optional.go is owned by ggg/page/optional, not ggg/component/card`.
+- `TestSyncRefusesTargetClaimedByTwoModules` — both modules keep the claim; `Plan`
+  refuses naming the target and both claimants (preflight's `collision` message).
+- `TestSyncRefusesTransferOverLocallyModifiedTarget` — the file is edited locally
+  before the transfer; `Plan` refuses with `is locally modified` instead of
+  overwriting it.
+
+The concern I filed last round is therefore closed, not just documented.
+
+## M1, M2, M3
+
+- **M1** — the false claim is gone. `content/docs/testing.md` now states the three
+  real blind spots: click navigation (including the `toHaveURL`/`waitForURL`
+  destination), computed targets, and adapter-served paths. The same list is the
+  header comment of the test.
+- **M2** — recorded. `billing.spec.ts` asserts `/app/billing/confirm`, declared by
+  `ggg/system/billing-local`, an environment-selected adapter. It is not a literal
+  navigation (it is a `toHaveURL` regex) so the extractor never sees it, and
+  crediting or refusing an adapter-declared route needs a deliberate
+  per-environment answer. Called out in the docs limitations paragraph and the test
+  comment; not papered over.
+- **M3** — blank line restored between the two remaining tests in
+  `notifications.spec.ts`.
+
+## Files changed in this round
+
+- `internal/modkit/target_plan.go`, `internal/modkit/reconcile.go` — the transfer fix
+- `internal/modkit/target_transfer_test.go` (new) — three transfer tests
+- `internal/modkit/e2e_ownership_test.go` — method-aware resolver, array-literal
+  extraction, harness reachability, honest limitation comment
+- `registry/modules/system/e2e-sweeps/module.json` (new), `registry/modules/system/e2e/module.json`,
+  `registry/systems.json`, `registry/profiles/{saas,full}.json`
+- `registry/modules/system/modkit/module.json` — owns the new test file
+- the 23 spec-owner manifests — `requires ggg/system/e2e`, plus I1's four edges
+- `e2e/auth.spec.ts` (exception comment), `e2e/notifications.spec.ts` (M3)
+- `content/docs/testing.md` (M1/M2)
+- generated: `gogogadget.lock.json`, `registry.snapshot.json`, `e2e/generated/inventory.ts`,
+  `content/docs/module-reference.md`, `*_registry_gen.*` digest headers
+
+## Commands run
+
+```
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline
+registry 775245b93dfa6954c2be1ac6af635320d26f6c283ad91ea4816e2c0ebf8bf198
+  update    lock       gogogadget.lock.json
+registry 775245b93dfa6954c2be1ac6af635320d26f6c283ad91ea4816e2c0ebf8bf198
+
+$ go test ./internal/modkit ./internal/gggcli -count=1
+ok  	github.com/gogogadget/gogogadget/internal/modkit	7.245s
+ok  	github.com/gogogadget/gogogadget/internal/gggcli	0.503s
+
+$ gofmt -l internal/modkit/     # no output
+$ go vet ./internal/modkit ./internal/gggcli   # no output
+
+$ go run ./cmd/ggg info ggg/system/e2e
+ggg/system/e2e  E2E harness
+requires       ggg/system/project-base
+  file e2e/global-setup.ts … e2e/playwright.config.ts        (5 files, no specs)
+
+$ go run ./cmd/ggg info ggg/system/e2e-sweeps
+ggg/system/e2e-sweeps  E2E cross-cutting sweeps
+requires  ggg/page/admin-jobs, ggg/page/admin-media, ggg/page/blog, ggg/page/changelog,
+          ggg/page/dashboard, ggg/page/docs, ggg/page/docs-index, ggg/page/docs-search,
+          ggg/page/home, ggg/page/pricing, ggg/page/projects, ggg/system/e2e,
+          ggg/workflow/seo-discovery
+
+$ cd e2e && npx playwright test --list | tail -1
+Total: 669 tests in 34 files
+
+$ cd e2e && npx playwright test --project=chromium --reporter=line     auth.spec.ts notifications.spec.ts admin-user-governance.spec.ts admin-flags.spec.ts
+  15 passed (14.7s)
+```
+
+Each of the three new gates was proven to bite by mutation and then reverted (C2,
+I2, I3 above); `go test` is green again after every revert.
+
+## Remaining note
+
+`ggg registry validate` is still not run here — it compiles derivative trees for
+every example closure and is the parent's final gate. This round adds one module to
+the catalog and 27 `requires` edges, none of which any `registry/testdata` or
+`registry/external-testdata` fixture references, so the example closures should be
+unaffected.

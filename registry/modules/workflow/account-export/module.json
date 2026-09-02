@@ -4,7 +4,7 @@
     "id": "ggg/workflow/account-export",
     "kind": "workflow",
     "name": "account-export",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Personal data export",
     "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",
@@ -18,6 +18,13 @@
       },
       {
         "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/e2e",
         "contract": {
           "min": 1,
           "max": 1

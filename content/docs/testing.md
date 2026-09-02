@@ -107,24 +107,47 @@ specs never mutate each other's fixtures.
 Every spec belongs to the module whose surface it drives, declared in that
 module's `files` and `tests.e2e`. `ggg/workflow/billing-checkout` brings
 `e2e/billing.spec.ts`; `ggg/workflow/admin-flags` brings
-`e2e/admin-flags.spec.ts`. Only the cross-cutting sweeps — accessibility,
-keyboard, progressive enhancement, loading, mobile, CSP, visual and the public
-site — stay with `ggg/system/e2e`, because they assert shell and platform
-behaviour rather than one feature. A profile that installs no billing
-therefore installs no billing spec.
+`e2e/admin-flags.spec.ts`. A profile that installs no billing therefore
+installs no billing spec.
+
+Ownership splits three ways:
+
+- `ggg/system/e2e` is the **harness** — `playwright.config.ts`,
+  `global-setup.ts`, `helpers.ts`, `package.json`, `package-lock.json` — and
+  requires nothing but `ggg/system/project-base`. Every spec-owning module
+  requires it, because every spec imports `@playwright/test` and `./helpers`.
+- `ggg/system/e2e-sweeps` owns the nine cross-cutting suites (accessibility,
+  keyboard, progressive enhancement, loading, mobile, CSP, visual, public
+  site) and `visual.spec.ts-snapshots/`. They assert shell and platform
+  behaviour rather than one feature, so they stay together — and the module
+  requires every page they sweep.
+- every other spec belongs to its feature module.
 
 That rule is mechanical, not aspirational.
-`TestEveryDeclaredE2ESpecIsReachableFromItsOwner` reads the literal navigation
-targets out of every declared spec (`page.goto('…')` and the `request` verbs;
-computed targets come from the generated inventory and are skipped) and
-resolves each app, admin or public path against the same route table the
-router is generated from. If the declaring module cannot reach that route
-through itself or its transitive `requires`, the spec is an orphan — a
-derivative would install the test and 404 on a page nobody installed — and the
-test fails naming the spec, the path and the owner. Its sibling,
-`TestEveryE2ESpecOnDiskHasExactlyOneOwner`, refuses a spec that no manifest
-advertises. Splitting a spec along module lines is the normal fix; declaring
-the missing `requires` is the other.
+`TestEveryDeclaredE2ESpecIsReachableFromItsOwner` extracts the literal
+navigation targets from every declared spec — `page.goto('…')`, the `request`
+verbs, and the string arrays a `for (const path of […])` loop walks — and
+resolves each method and app/admin/public path against the same route table the
+router is generated from. If the declaring module cannot reach the module
+serving that route, through itself or its transitive `requires`, the spec is an
+orphan — a derivative would install the test and 404 on a page nobody
+installed — and the test fails naming the spec, the path and the owner.
+`TestEveryE2ESpecOnDiskHasExactlyOneOwner` adds the other two halves: exactly
+one owner per spec, and every owner must reach the harness.
+
+Three things the gate deliberately does not see, so a green run is not read as
+more than it is: **click navigation** (`getByRole('link', …).click()` and the
+`toHaveURL`/`waitForURL` it lands on), **computed targets** (`surface.path`
+from the generated inventory, template literals with a substitution), and
+**adapter-served paths** such as billing-local's `/app/billing/confirm`, where
+which adapter is active is a per-environment project decision. A few `requires`
+edges exist for the first case and are not defended by the test.
+
+Splitting a spec along module lines is the normal fix for an orphan; declaring
+the missing `requires` is the other. One exception is declared rather than
+fixed: `auth.spec.ts` (owned by `ggg/workflow/auth-session`) clicks through to
+`/app/settings/account`, and `ggg/page/settings-account` requires
+`auth-session` back, so the edge cannot be added without a dependency cycle.
 
 Assertion discipline, by convention:
 

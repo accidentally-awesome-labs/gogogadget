@@ -44,6 +44,43 @@ func lockedFileOwnership(lock Lock, present bool) map[string]lockedOwner {
 	return owners
 }
 
+// graphFileOwnership names the module that owns each authored target in the
+// selected graph. Exclusivity is not re-checked here: preflightNamespaces
+// already refuses a target two selected modules both claim ("target namespace
+// %q collision"), and it runs before reconciliation on the single planning
+// path. That guarantee is what makes the transfer rule below unambiguous.
+func graphFileOwnership(modules []Manifest) map[string]string {
+	owners := make(map[string]string, len(modules))
+	for _, module := range modules {
+		for _, file := range module.Files {
+			owners[file.Target] = module.ID
+		}
+	}
+	return owners
+}
+
+// applyOwnershipTransfers hands lock ownership to a target's new owner when
+// the catalog moved it between modules in this same plan. Moving a file's
+// owner is a manifest edit, not a file move, so without this every derivative
+// that already synced the old owner would refuse forever with no migration
+// path.
+//
+// It is safe because the new claim is exclusive: a differing owner therefore
+// means the previous one dropped the target in this plan. The recorded base
+// digest is carried over untouched, so a locally modified file is still
+// refused by classifyAuthoredTarget rather than silently overwritten by its
+// new owner.
+func applyOwnershipTransfers(owners map[string]lockedOwner, graphOwners map[string]string) map[string]lockedOwner {
+	for target, owner := range owners {
+		next, claimed := graphOwners[target]
+		if !claimed || next == owner.module {
+			continue
+		}
+		owners[target] = lockedOwner{module: next, base: owner.base}
+	}
+	return owners
+}
+
 func classifyAuthoredTarget(root, module string, file ManifestFile, content []byte, owners map[string]lockedOwner) (Change, error) {
 	info, missing, err := lstatProjectPath(root, file.Target)
 	if err != nil {
