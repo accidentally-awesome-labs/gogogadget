@@ -466,6 +466,10 @@ gadgetworks/system/audit-export-ledger
 EXIT=0  (11 closures)
 ```
 
+## Commits (fix round)
+
+- `80ebb22` — fix(registry): make the template'''s publisher gate runnable and its adapter refuse
+
 ## Remaining honest caveat
 
 The workflow itself is still executed only by a publisher, not by this
