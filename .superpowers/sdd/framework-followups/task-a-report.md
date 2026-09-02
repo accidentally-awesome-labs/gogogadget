@@ -159,11 +159,13 @@ That last run is the real proof: the emitted SQL went through sqlc, the emitted 
 templ, the whole derivative through `go build ./...`, the emitted test through `go test`, and the
 tree came back byte for byte after removal with only the immutable migration retained.
 
-## Commit
+## Commits
 
-`a1a8cfbb8091cabe266934f20b8c2bd2585701e8` — *feat(gggcli): make `ggg create resource` emit the
-projects-pattern slice*. The report was amended in, so this is the hash `git log -1`
-reports in the worktree; the pre-amend hash was `4114c9d`.
+- `25bb87f81373146962b7fbba8b1d0cd1e030f8aa` — *feat(gggcli): make `ggg create resource` emit the
+  projects-pattern slice*. All code, tests, the example closure, the validator change and the
+  refreshed generated aggregates.
+- One follow-up commit recording these hashes in this report (a report cannot contain its own
+  commit's hash).
 
 ## Concerns
 
