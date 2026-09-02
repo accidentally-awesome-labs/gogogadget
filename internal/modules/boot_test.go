@@ -110,6 +110,7 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"POLAR_PRODUCT_PRO":            "prod_pro",
 		"POLAR_PRODUCT_TEAM":           "prod_team",
 		"RESEND_API_KEY":               "re_test",
+		"NEON_API_KEY":                 "neon_test",
 		"STORAGE_R2_ACCESS_KEY_ID":     "ak_fixture",
 		"STORAGE_R2_ACCOUNT_ID":        "acct_fixture",
 		"STORAGE_R2_BUCKET":            "bucket_fixture",

@@ -22,22 +22,19 @@ type entry struct {
 	lastSeen time.Time
 }
 
-// Keyed holds one token bucket per key, sweeping keys that go quiet so the
-// map cannot grow without bound.
+// Keyed holds one token bucket per key. Stale entries are swept lazily on
+// each Allow call, so no background goroutine is needed.
 type Keyed struct {
-	mu      sync.Mutex
-	entries map[string]*entry
-	rate    rate.Limit
-	burst   int
+	mu       sync.Mutex
+	entries  map[string]*entry
+	rate     rate.Limit
+	burst    int
+	lastSlew time.Time
 }
 
-// NewKeyed starts a limiter with the given refill rate and burst. The
-// returned value owns a background sweeper for its lifetime; callers are
-// expected to build one per process, not per request.
+// NewKeyed starts a limiter with the given refill rate and burst.
 func NewKeyed(r rate.Limit, burst int) *Keyed {
-	kl := &Keyed{entries: make(map[string]*entry), rate: r, burst: burst}
-	go kl.janitor()
-	return kl
+	return &Keyed{entries: make(map[string]*entry), rate: r, burst: burst, lastSlew: time.Now()}
 }
 
 // PerMinute is the common construction: n requests per minute, bursting to
@@ -50,6 +47,7 @@ func PerMinute(n int) *Keyed {
 // Allow reports whether the key may spend a token now.
 func (kl *Keyed) Allow(key string) bool {
 	kl.mu.Lock()
+	kl.sweepLocked()
 	e, ok := kl.entries[key]
 	if !ok {
 		e = &entry{limiter: rate.NewLimiter(kl.rate, kl.burst)}
@@ -60,18 +58,17 @@ func (kl *Keyed) Allow(key string) bool {
 	return e.limiter.Allow()
 }
 
-// janitor sweeps entries idle for >10 minutes.
-func (kl *Keyed) janitor() {
-	tick := time.NewTicker(5 * time.Minute)
-	defer tick.Stop()
-	for range tick.C {
-		cutoff := time.Now().Add(-10 * time.Minute)
-		kl.mu.Lock()
-		for key, e := range kl.entries {
-			if e.lastSeen.Before(cutoff) {
-				delete(kl.entries, key)
-			}
+// sweepLocked evicts entries idle for >10 minutes, at most once per minute.
+// The caller must hold kl.mu.
+func (kl *Keyed) sweepLocked() {
+	if time.Since(kl.lastSlew) < time.Minute {
+		return
+	}
+	kl.lastSlew = time.Now()
+	cutoff := time.Now().Add(-10 * time.Minute)
+	for key, e := range kl.entries {
+		if e.lastSeen.Before(cutoff) {
+			delete(kl.entries, key)
 		}
-		kl.mu.Unlock()
 	}
 }

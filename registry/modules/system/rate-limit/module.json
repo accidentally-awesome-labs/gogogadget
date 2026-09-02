@@ -1,17 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/ratelimit"
-      ],
-      "provider_slots": [
-        "ggg/rate-limit"
-      ]
-    },
+    "id": "ggg/system/rate-limit",
+    "kind": "system",
+    "name": "rate-limit",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Request rate limiting",
+    "description": "Per-key token-bucket limiter with a bursting budget, used to shield the application from a single abusive client.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
@@ -22,20 +35,9 @@
           "version": "v0.15.0"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Per-key token-bucket limiter with a bursting budget, used to shield the application from a single abusive client.",
-    "docs": [],
-    "environment": [
-      {
-        "default": "100",
-        "description": "Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard",
-        "field": "RateLimitPerMinute",
-        "key": "RATE_LIMIT_RPM",
-        "min": 1,
-        "type": "int"
-      }
-    ],
     "files": [
       {
         "source": "internal/ratelimit/contract.go",
@@ -46,44 +48,30 @@
         "contract": true
       },
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
         "source": "internal/ratelimit/ratelimit.go",
-        "target": "internal/ratelimit/ratelimit.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/ratelimit/ratelimit.go",
+        "class": "go",
+        "sha256": "b23063a7fa736a1248496501f3a6b8d2bc3c81c9d25ad935757029bd570569b5",
         "rewrite_module": true,
-        "sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
-        "source": "internal/ratelimit/ratelimit_test.go",
-        "target": "internal/ratelimit/ratelimit_test.go"
-      }
-    ],
-    "id": "ggg/system/rate-limit",
-    "kind": "system",
-    "migrations": [],
-    "name": "rate-limit",
-    "removal_policy": "major-version-only",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/apphost"
+        "contract": true
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/config"
+        "source": "internal/ratelimit/ratelimit_test.go",
+        "target": "internal/ratelimit/ratelimit_test.go",
+        "class": "test",
+        "sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {
+      "packages": [
+        "internal/ratelimit"
+      ],
+      "provider_slots": [
+        "ggg/rate-limit"
+      ]
+    },
     "runtime": {
       "provider_slots": [
         {
@@ -98,12 +86,24 @@
         }
       ]
     },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "RATE_LIMIT_RPM",
+        "field": "RateLimitPerMinute",
+        "type": "int",
+        "description": "Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard",
+        "default": "100",
+        "min": 1
+      }
+    ],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/ratelimit"
       ]
     },
-    "title": "Request rate limiting"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
 }

@@ -736,7 +736,7 @@
     },
     {
       "path": "registry/modules/page/dev-gallery/module.json",
-      "sha256": "f6edbe59a9f7b7354fd0b24ff0676e07bc0923459f9feef420a71e71b9ea107a"
+      "sha256": "905e9558ba92370dde583bf9d1daa5971248ad4368cae177f9b95e9410479cbe"
     },
     {
       "path": "registry/modules/page/docs-index/module.json",
@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "2799436cb4ce94a8a47a295ad8855371421ffdce1c1e9b3e42ddcfa8864af15d"
+      "sha256": "bc5f9b30dd8ed6f389b46240c892f373a60388e8b15a87e4edabf09219eca86f"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
@@ -1044,7 +1044,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
-      "sha256": "26aa9ae22b047e702a9af6d9668f038b0d3039b9dfa9acdf07a126c48d5e0230"
+      "sha256": "f6c8ed5f4a1e23bf9cfa050d11b26443db247f4bd19989ca68c93573cd841a02"
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",
