@@ -816,74 +816,196 @@ func TestCreateResourceEmptyStateMatchesTheSurface(t *testing.T) {
 	}
 }
 
-// The example closure under registry/testdata is the compile proof: `ggg
-// registry validate` installs it, runs sqlc and templ over it, builds the
-// derivative and runs its test. That proof is only about this generator if the
-// fixture is byte-for-byte what the generator emits, which is what this
-// asserts. Set GGG_UPDATE_RESOURCE_FIXTURE=1 to rewrite it after a deliberate
-// change, then re-run `go run ./cmd/ggg registry validate`.
-func TestCreateResourceMatchesExampleFixture(t *testing.T) {
+// exampleResourceFixtures are the shapes registry/testdata publishes as
+// installable closures, and they are the generator's only standing compiler
+// coverage: `ggg registry validate` installs each one, runs sqlc and templ over
+// it, builds the derivative, runs whatever tests it declares, removes it and
+// asserts the tree came back byte for byte.
+//
+// Two shapes rather than one, because they exercise disjoint halves of the
+// generator and one of them is where a defect actually shipped:
+//
+//   - example-resource (--scope org --api --admin --search) is the full slice:
+//     browser read page, four app-scope mutations, staff read surface, JSON
+//     CRUD, search wiring, locales, navigation, visual baseline.
+//   - example-feed (--scope platform --no-ui --api) is the narrowed one: no
+//     templates, no locales, no navigation, a read-only JSON transport, no
+//     validator and therefore no emitted unit test, an empty audit organization
+//     and a trimmed dependency and requirement set. That combination is what
+//     broke when the unit test and the validator ended up on different gates —
+//     it parsed and gofmt'd cleanly and did not compile — so it is on a
+//     compiler now rather than only in an AST cross-check.
+var exampleResourceFixtures = []struct {
+	module   string
+	mutation CreateMutation
+}{
+	{
+		module:   "example-resource",
+		mutation: CreateMutation{Name: "example-resource", Scope: "org", API: true, Admin: true, Search: true},
+	},
+	{
+		module:   "example-feed",
+		mutation: CreateMutation{Name: "example-feed", Scope: "platform", API: true, NoUI: true},
+	},
+}
+
+// The fixtures are only a statement about this generator if they are
+// byte-for-byte what it emits. Set GGG_UPDATE_RESOURCE_FIXTURE=1 to rewrite
+// them after a deliberate change, then re-run `go run ./cmd/ggg registry
+// validate`.
+func TestCreateResourceMatchesExampleFixtures(t *testing.T) {
 	root := repositoryRoot(t)
-	files, _ := buildResource(t, CreateMutation{
-		Name: "example-resource", Scope: "org", API: true, Admin: true, Search: true,
-	})
-	const dir = resourceFixtureRegistry + "/registry/modules/workflow/example-resource"
+	for _, fixture := range exampleResourceFixtures {
+		t.Run(fixture.module, func(t *testing.T) {
+			files, _ := buildResource(t, fixture.mutation)
+			dir := resourceFixtureRegistry + "/registry/modules/workflow/" + fixture.module
 
-	if os.Getenv("GGG_UPDATE_RESOURCE_FIXTURE") != "" {
-		if err := os.RemoveAll(filepath.Join(root, filepath.FromSlash(dir))); err != nil {
-			t.Fatal(err)
-		}
-		for name, body := range files {
-			full := filepath.Join(root, filepath.FromSlash(name))
-			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-				t.Fatal(err)
+			if os.Getenv("GGG_UPDATE_RESOURCE_FIXTURE") != "" {
+				if err := os.RemoveAll(filepath.Join(root, filepath.FromSlash(dir))); err != nil {
+					t.Fatal(err)
+				}
+				for name, body := range files {
+					full := filepath.Join(root, filepath.FromSlash(name))
+					if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(full, body, 0o644); err != nil {
+						t.Fatal(err)
+					}
+				}
+				t.Logf("rewrote %d fixture file(s) under %s", len(files), dir)
+				return
 			}
-			if err := os.WriteFile(full, body, 0o644); err != nil {
-				t.Fatal(err)
+
+			for name, want := range files {
+				if !strings.HasPrefix(name, dir+"/") {
+					t.Fatalf("the generator wrote %s, which is outside the fixture directory", name)
+				}
+				got, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(name)))
+				if err != nil {
+					t.Fatalf("read %s: %v", name, err)
+				}
+				if string(got) != string(want) {
+					t.Fatalf("%s differs from what the generator emits; "+
+						"re-run with GGG_UPDATE_RESOURCE_FIXTURE=1 if the change is deliberate", name)
+				}
+			}
+			entries := walkFixture(t, filepath.Join(root, filepath.FromSlash(dir)), dir)
+			expected := make([]string, 0, len(files))
+			for name := range files {
+				expected = append(expected, name)
+			}
+			sort.Strings(expected)
+			if !slices.Equal(entries, expected) {
+				t.Fatalf("fixture files = %v, want exactly %v", entries, expected)
+			}
+
+			// The fixture is only installable if its own manifest parses as
+			// one, which is the same check the catalog loader runs.
+			var document struct {
+				Schema int             `json:"schema"`
+				Module modkit.Manifest `json:"module"`
+			}
+			if err := json.Unmarshal(files[dir+"/module.json"], &document); err != nil {
+				t.Fatalf("fixture manifest does not parse: %v", err)
+			}
+			if got, want := document.Module.ID, "ggg/workflow/"+fixture.module; got != want {
+				t.Fatalf("fixture module id = %q, want %q", got, want)
+			}
+			if err := modkit.ValidateManifest(document.Module); err != nil {
+				t.Fatalf("fixture manifest is invalid: %v", err)
+			}
+		})
+	}
+}
+
+// The two fixtures must not overlap on anything the registry treats as a
+// global name, or the second one would refuse to install beside the first
+// rather than exercising anything. Checked here because the collision would
+// otherwise surface deep inside `registry validate` as a preflight refusal.
+func TestExampleResourceFixturesDoNotCollide(t *testing.T) {
+	seen := map[string]string{}
+	claim := func(t *testing.T, kind, value, owner string) {
+		t.Helper()
+		key := kind + " " + value
+		if previous, taken := seen[key]; taken {
+			t.Fatalf("%s is claimed by both %s and %s", key, previous, owner)
+		}
+		seen[key] = owner
+	}
+	for _, fixture := range exampleResourceFixtures {
+		_, manifest := buildResource(t, fixture.mutation)
+		claim(t, "module", manifest.ID, fixture.module)
+		for _, table := range manifest.Claims.Data {
+			claim(t, "table", table, fixture.module)
+		}
+		for _, query := range manifest.Claims.Queries {
+			claim(t, "query", query, fixture.module)
+		}
+		for _, route := range manifest.Runtime.Routes {
+			claim(t, "route", route.ID, fixture.module)
+			claim(t, "pattern", route.Method+" "+route.Pattern, fixture.module)
+			claim(t, "handler", route.Handler, fixture.module)
+		}
+		for _, entry := range manifest.Runtime.Navigation {
+			claim(t, "navigation", entry.ID, fixture.module)
+		}
+		for _, item := range manifest.Runtime.Visual {
+			claim(t, "visual", item.ID, fixture.module)
+		}
+		for key := range manifest.Locales["en"] {
+			claim(t, "i18n", key, fixture.module)
+		}
+		for _, migration := range manifest.Migrations {
+			claim(t, "migration", migration.ID, fixture.module)
+		}
+		if manifest.OpenAPI != nil {
+			for _, tag := range manifest.OpenAPI.Tags {
+				claim(t, "openapi tag", tag.Name, fixture.module)
+			}
+			for name := range manifest.OpenAPI.Components["schemas"] {
+				claim(t, "openapi schema", name, fixture.module)
+			}
+			for _, operation := range manifest.OpenAPI.Operations {
+				claim(t, "openapi operation", operation.OperationID, fixture.module)
 			}
 		}
-		t.Logf("rewrote %d fixture file(s) under %s", len(files), dir)
-		return
 	}
+}
 
-	for name, want := range files {
-		if !strings.HasPrefix(name, dir+"/") {
-			t.Fatalf("the generator wrote %s, which is outside the fixture directory", name)
-		}
-		got, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(name)))
-		if err != nil {
-			t.Fatalf("read %s: %v", name, err)
-		}
-		if string(got) != string(want) {
-			t.Fatalf("%s differs from what the generator emits; "+
-				"re-run with GGG_UPDATE_RESOURCE_FIXTURE=1 if the change is deliberate", name)
-		}
-	}
-	entries := walkFixture(t, filepath.Join(root, filepath.FromSlash(dir)), dir)
-	expected := make([]string, 0, len(files))
-	for name := range files {
-		expected = append(expected, name)
-	}
-	sort.Strings(expected)
-	if !slices.Equal(entries, expected) {
-		t.Fatalf("fixture files = %v, want exactly %v", entries, expected)
-	}
+// The narrowed fixture is the one whose declaration set the AST check cannot
+// fully prove, so what makes it worth compiling is pinned here.
+func TestExampleFeedFixtureIsTheNarrowedShape(t *testing.T) {
+	files, manifest := buildResource(t, exampleResourceFixtures[1].mutation)
 
-	// The fixture is only installable if its own manifest parses as one, which
-	// is the same check the catalog loader runs.
-	var document struct {
-		Schema int             `json:"schema"`
-		Module modkit.Manifest `json:"module"`
+	if got := targets(manifest); !slices.Equal(got, []string{
+		"internal/db/queries/example_feeds.sql", "internal/web/workflow_example_feed.go",
+	}) {
+		t.Fatalf("targets = %v, want only the query file and the transport", got)
 	}
-	raw := files[dir+"/module.json"]
-	if err := json.Unmarshal(raw, &document); err != nil {
-		t.Fatalf("fixture manifest does not parse: %v", err)
+	if len(manifest.Tests.GoPackages) != 0 {
+		t.Fatalf("tests.go_packages = %v, want none: the shape emits no validator to test",
+			manifest.Tests.GoPackages)
 	}
-	if got, want := document.Module.ID, "ggg/workflow/example-resource"; got != want {
-		t.Fatalf("fixture module id = %q, want %q", got, want)
+	if got := routeIDs(manifest); !slices.Equal(got, []string{"api.example-feed.list"}) {
+		t.Fatalf("routes = %v, want only the read route", got)
 	}
-	if err := modkit.ValidateManifest(document.Module); err != nil {
-		t.Fatalf("fixture manifest is invalid: %v", err)
+	if len(manifest.Dependencies.Go) != 0 {
+		t.Fatalf("dependencies.go = %+v, want none: the shape imports neither pgx nor testify",
+			manifest.Dependencies.Go)
+	}
+	if slices.Contains(requirementIDs(manifest), "ggg/system/identity") {
+		t.Fatalf("requires = %v, want no identity: the shape reads no identity", requirementIDs(manifest))
+	}
+	if len(manifest.Locales) != 0 || len(manifest.Runtime.Navigation) != 0 || len(manifest.Runtime.Visual) != 0 {
+		t.Fatal("--no-ui left a browser declaration behind")
+	}
+	transport := string(files[resourceFixtureRegistry+
+		"/registry/modules/workflow/example-feed/payload/workflow_example_feed.go.txt"])
+	for _, absent := range []string{"identity.", "pgx.", "logAudit", "validateExampleFeedName", "templates."} {
+		if strings.Contains(transport, absent) {
+			t.Fatalf("the narrowed transport still mentions %q:\n%s", absent, transport)
+		}
 	}
 }
 

@@ -116,7 +116,7 @@
         "source": "internal/gggcli/create_resource_test.go",
         "target": "internal/gggcli/create_resource_test.go",
         "class": "test",
-        "sha256": "02696037ea3765970f3531f108db33f2159a7ccb1e11ddfe8f178a4a7d0af792",
+        "sha256": "4bd1eed68c3a9d7cb449853eee2b73c4a0c36c6804934fd00755f0cf1e01a88e",
         "rewrite_module": true,
         "contract": true
       },
@@ -412,7 +412,7 @@
         "source": "internal/modkit/example_test.go",
         "target": "internal/modkit/example_test.go",
         "class": "test",
-        "sha256": "e229a0e23031af9536af435b305758968f69a4652121122e2966d5a5c4b75bae",
+        "sha256": "b89d1edba406b6a4322f9fb15e87748c524342cd60f2374d430d2e87a30c64a2",
         "rewrite_module": true,
         "contract": false
       },

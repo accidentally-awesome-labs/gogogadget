@@ -1,0 +1,54 @@
+package web
+
+import (
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/api"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+)
+
+// exampleFeedResponse is the public shape of one row.
+// An explicit DTO, not the query row: pinning the fields here means adding a
+// column can never silently change the API.
+type exampleFeedResponse struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+func newExampleFeedResponse(id int64, name string, createdAt, updatedAt time.Time) exampleFeedResponse {
+	return exampleFeedResponse{
+		ID: id, Name: name,
+		CreatedAt: createdAt.UTC().Format(time.RFC3339),
+		UpdatedAt: updatedAt.UTC().Format(time.RFC3339),
+	}
+}
+
+// GET /api/v1/example-feeds (scope read).
+func (s *Server) handleAPIListExampleFeeds(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	if offset < 0 {
+		offset = 0
+	}
+	// The JSON transport does not expose the UI's free-text filter, so the
+	// shared query runs with an empty one, which matches every row.
+	query := ""
+	rows, err := s.q.ListExampleFeeds(ctx, sqlc.ListExampleFeedsParams{Query: query, Lim: int32(limit), Off: int32(offset)})
+	if err != nil {
+		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not list example feeds.")
+		return
+	}
+	out := make([]exampleFeedResponse, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, newExampleFeedResponse(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
+	}
+	api.WriteJSON(w, http.StatusOK, map[string]any{"items": out, "limit": limit, "offset": offset})
+}

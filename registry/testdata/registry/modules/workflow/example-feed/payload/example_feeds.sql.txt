@@ -1,0 +1,31 @@
+-- name: ListExampleFeeds :many
+-- The example-feed resource owns this file: one query file per table, and every
+-- UPDATE below sets updated_at = now().
+--
+-- Newest first, with an optional case-insensitive name filter. An empty filter
+-- matches every row, so one query serves the plain list and the search box
+-- instead of two that can drift apart. The id tiebreak makes the order total.
+SELECT * FROM example_feeds
+WHERE (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%')
+ORDER BY created_at DESC, id DESC
+LIMIT sqlc.arg(lim) OFFSET sqlc.arg(off);
+
+-- name: CountExampleFeeds :one
+SELECT count(*) FROM example_feeds
+WHERE (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%');
+
+-- name: GetExampleFeedByID :one
+SELECT * FROM example_feeds WHERE id = sqlc.arg(id);
+
+-- name: CreateExampleFeed :one
+INSERT INTO example_feeds (name)
+VALUES (sqlc.arg(name))
+RETURNING *;
+
+-- name: UpdateExampleFeed :one
+UPDATE example_feeds SET name = sqlc.arg(name), updated_at = now()
+WHERE id = sqlc.arg(id)
+RETURNING *;
+
+-- name: DeleteExampleFeed :execrows
+DELETE FROM example_feeds WHERE id = sqlc.arg(id);

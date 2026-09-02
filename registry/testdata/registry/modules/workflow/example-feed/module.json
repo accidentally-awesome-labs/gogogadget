@@ -1,0 +1,272 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/workflow/example-feed",
+    "kind": "workflow",
+    "name": "example-feed",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example feeds",
+    "description": "The project-local example feed slice: the example_feeds table with its queries, migration, transport, templates and declarations.",
+    "requires": [
+      {
+        "id": "ggg/system/api",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/openapi-contract",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "registry/modules/workflow/example-feed/payload/example_feeds.sql.txt",
+        "target": "internal/db/queries/example_feeds.sql",
+        "class": "query",
+        "sha256": "fd5451e503db34ce679f9ea995fa11cfbb9ab9040f06840c2deaffe1984f15e1",
+        "rewrite_module": false,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-feed/payload/workflow_example_feed.go.txt",
+        "target": "internal/web/workflow_example_feed.go",
+        "class": "go",
+        "sha256": "efeb93e3f6c1aac63877e580630a96e592fa8f85a64445844136559d368d3312",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "routes": [
+        "api.example-feed.list"
+      ],
+      "queries": [
+        "CountExampleFeeds",
+        "CreateExampleFeed",
+        "DeleteExampleFeed",
+        "GetExampleFeedByID",
+        "ListExampleFeeds",
+        "UpdateExampleFeed"
+      ],
+      "data": [
+        "example_feeds"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.example-feed.list",
+          "method": "GET",
+          "pattern": "/api/v1/example-feeds",
+          "scope": "api-read",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIListExampleFeeds"
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountExampleFeeds",
+          "table": "example_feeds"
+        },
+        {
+          "name": "CreateExampleFeed",
+          "table": "example_feeds"
+        },
+        {
+          "name": "DeleteExampleFeed",
+          "table": "example_feeds"
+        },
+        {
+          "name": "GetExampleFeedByID",
+          "table": "example_feeds"
+        },
+        {
+          "name": "ListExampleFeeds",
+          "table": "example_feeds"
+        },
+        {
+          "name": "UpdateExampleFeed",
+          "table": "example_feeds"
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "ggg.example_feed",
+        "kind": "immutable",
+        "source": "registry/modules/workflow/example-feed/payload/example_feed.sql",
+        "sha256": "0424370d930fdd14c4969453e32a6954f7b4dde076852f0447972d695685e9c5"
+      }
+    ],
+    "environment": [],
+    "openapi": {
+      "tags": [
+        {
+          "name": "example-feeds",
+          "description": "The project-local example feeds collection."
+        }
+      ],
+      "components": {
+        "schemas": {
+          "ExampleFeed": {
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "created_at",
+              "updated_at"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "operations": [
+        {
+          "route_id": "api.example-feed.list",
+          "operation_id": "listExampleFeeds",
+          "summary": "List example feeds.",
+          "tags": [
+            "example-feeds"
+          ],
+          "parameters": [
+            {
+              "description": "Page size. Values outside 1-100 fall back to the default.",
+              "in": "query",
+              "name": "limit",
+              "required": false,
+              "schema": {
+                "default": 50,
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "description": "Rows to skip; negative values are treated as 0.",
+              "in": "query",
+              "name": "offset",
+              "required": false,
+              "schema": {
+                "default": 0,
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "items": {
+                        "items": {
+                          "$ref": "#/components/schemas/ExampleFeed"
+                        },
+                        "type": "array"
+                      },
+                      "limit": {
+                        "type": "integer"
+                      },
+                      "offset": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "items",
+                      "limit",
+                      "offset"
+                    ],
+                    "type": "object"
+                  }
+                }
+              },
+              "description": "A page of example feeds."
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        }
+      ]
+    },
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "example_feeds",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "free"
+  }
+}

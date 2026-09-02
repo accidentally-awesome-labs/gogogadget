@@ -513,3 +513,131 @@ $ go run ./cmd/ggg registry validate
 4. Unchanged from round 1: a generated resource declares a `runtime.visual` baseline nobody has
    captured; no `content/docs/` page describes `ggg create` yet; `materializeManifest` returning
    the completed manifest changes what every `ggg create` kind reports in its plan.
+
+
+---
+
+# Fix round 3 — standing compiler coverage for the narrowed shape
+
+Scoped to the concern I named at the end of round 2: the undefined-symbol class had bitten twice
+in this task, and standing compiler coverage was one shape (org) plus by-hand probes. It is now
+automatic for two shapes.
+
+## What was added
+
+`registry/testdata/registry/modules/workflow/example-feed/` — a second installable closure,
+byte-for-byte what the generator emits for `--scope platform --no-ui --api`. Four files: the
+manifest, the query payload, the migration payload, the transport payload. It has its own table
+(`example_feeds`) and its own migration, which was the work identified as blocking this.
+
+That shape was chosen because it is the one that actually broke (N1) and because it exercises the
+disjoint half of the generator:
+
+| | `example-resource` (`--scope org --api --admin --search`) | `example-feed` (`--scope platform --no-ui --api`) |
+| --- | --- | --- |
+| templates | app page, staff page, table, form | none |
+| app routes | GET + POST/POST/DELETE at app scope | none |
+| staff routes | GET | none |
+| JSON transport | list/create/update/delete | list only |
+| validator + unit test | emitted | not emitted |
+| audit organization | `org.OrgID` | n/a (no writes) |
+| locales / navigation / visual | full en+es, app+admin nav, baseline | none |
+| declared dependencies | pgx | none |
+| declared requirements | database, i18n, identity, organizations, security, server, api, openapi-contract, search | database, security, server, api, openapi-contract |
+| declared tests | `internal/web` | none |
+
+The narrowed closure's compile proof is exactly the class N1 was: its transport calls
+`s.q.ListExampleFeeds` and constructs `sqlc.ListExampleFeedsParams`, neither of which exists as Go
+until sqlc has read the installed query file. `go build ./...` in the derivative now fails if that
+chain breaks, instead of an AST cross-check being the only thing that notices.
+
+## Collision check — no collision
+
+The parent asked for a concrete collision if one existed. There is none. Every global name the
+registry checks is disjoint between the two closures, and that is now asserted rather than
+assumed: `TestExampleResourceFixturesDoNotCollide` builds both fixtures and refuses a duplicate
+module id, table, sqlc method, route id, method+pattern, handler, navigation id, visual id, i18n
+key, migration id, OpenAPI tag, OpenAPI schema or operationId. Concretely for `example-feed`:
+table `example_feeds`, migration `ggg.example_feed` (installed as
+`internal/db/migrations/0027_ggg_example_feed.sql`), route `api.example-feed.list` on
+`GET /api/v1/example-feeds`, handler `handleAPIListExampleFeeds`, OpenAPI tag `example-feeds`,
+schema `ExampleFeed`, operation `listExampleFeeds`, and no i18n keys at all.
+
+## The org closure is unchanged
+
+`git diff HEAD -- registry/testdata/registry/modules/workflow/example-resource` is empty after the
+fixture regeneration: the update pass rewrote it byte-identically. Only `example-feed/` is new and
+`registry/testdata/registry/workflows.json` gained one sorted item.
+
+## Declared tests for the narrowed closure
+
+`example-feed` declares no test packages, so `registry validate` runs none for it. That is correct
+rather than a gap: the shape emits no validator — it has no write path and therefore no name rule
+— and there is no pure logic left to unit-test. Pinned in both directions:
+`TestCreateResourceResolvesEverySymbolItEmits` asserts the `_test.go` payload and
+`tests.go_packages` are present together or absent together, and
+`TestExampleFeedFixtureIsTheNarrowedShape` asserts this fixture has neither. Its value in the
+validator is the install → sqlc → compile → remove → byte-for-byte-restore round trip.
+
+## Tests added
+
+- `TestCreateResourceMatchesExampleFixtures` — replaces the single-fixture test with a subtest per
+  fixture over `exampleResourceFixtures`, so adding a shape is a table entry. Same update mode
+  (`GGG_UPDATE_RESOURCE_FIXTURE=1`), same byte-equality in both directions, same
+  `modkit.ValidateManifest` check per fixture.
+- `TestExampleResourceFixturesDoNotCollide` — the collision matrix above.
+- `TestExampleFeedFixtureIsTheNarrowedShape` — targets, empty `tests.go_packages`, the single read
+  route, no Go dependencies, no identity requirement, no locales/navigation/visual, and that the
+  emitted transport mentions none of `identity.`, `pgx.`, `logAudit`, `validateExampleFeedName`
+  or `templates.`.
+- `internal/modkit/example_test.go` — the expected closure-kind sequence gains the third
+  `workflow` with a comment naming what the three are.
+
+## Commands run
+
+```
+$ GGG_UPDATE_RESOURCE_FIXTURE=1 go test ./internal/gggcli -run TestCreateResourceMatchesExampleFixtures -v
+    rewrote 6 fixture file(s) under registry/testdata/registry/modules/workflow/example-resource
+    rewrote 4 fixture file(s) under registry/testdata/registry/modules/workflow/example-feed
+--- PASS: TestCreateResourceMatchesExampleFixtures/example-resource
+--- PASS: TestCreateResourceMatchesExampleFixtures/example-feed
+$ git diff --stat HEAD -- registry/testdata/registry/modules/workflow/example-resource
+(empty — the org closure is byte-unchanged)
+
+$ go test ./internal/gggcli ./internal/modkit -count=1
+ok  github.com/gogogadget/gogogadget/internal/gggcli   0.419s
+ok  github.com/gogogadget/gogogadget/internal/modkit   7.079s
+$ go vet ./internal/gggcli ./internal/modkit; gofmt -l internal/gggcli internal/modkit   → clean
+
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline
+registry d47fe3e011f4d42c04b9c0f09424a66969a1e22a033e14ba9bbcbf5b0f35b2f7   # no drift
+
+$ go run ./cmd/ggg registry validate
+  info  example_closure_verified workflow closure ggg/workflow/example-feed: installed 3 file(s),
+        regenerated 28, compiled, 1848 tree entries restored byte for byte,
+        retained migration(s) internal/db/migrations/0027_ggg_example_feed.sql
+  info  example_closure_verified workflow closure ggg/workflow/example-resource: installed 5 file(s),
+        regenerated 30, compiled, 1848 tree entries restored byte for byte,
+        retained migration(s) internal/db/migrations/0027_ggg_example_resource.sql
+  ... all 9 closures verified, exit 0
+```
+
+## Remaining concerns after round 3
+
+1. **Standing compiler coverage is two shapes of twenty.** The two are the extremes — the full
+   slice and the narrowed one — and between them they cover every conditional branch in the
+   import list, the audit organization, the sqlc call-arity split (struct vs bare argument, since
+   platform's `Count`/`Get`/`Create`/`Delete` take bare values) and every optional declaration
+   block. The eighteen in between are permutations of those branches, covered by the AST symbol
+   and handler resolution gate plus the declaration assertions. A third closure would cost a third
+   table and buy less than these two did.
+2. **`example-feed` declares six sqlc methods and its transport calls one.** The query file is
+   per-table and complete by design — an operator adding a write path should not have to author
+   SQL — so the other five are generated by sqlc and unused. Consistent with shipped
+   `projects.sql`, where `ListAllProjectsByOrg` exists only for the CSV export. Worth naming
+   because `registry validate` compiles the package: unused *methods* are fine in Go, unused
+   *imports* are not, which is why the import list is derived and the query set is not.
+3. Unchanged from round 2: `--scope platform` implies `--admin`; `assertSQLCOutputDir` is
+   substring-based and fails closed; a generated resource declares a `runtime.visual` baseline
+   nobody has captured; no `content/docs/` page describes `ggg create` yet; `materializeManifest`
+   returning the completed manifest changes what every `ggg create` kind reports in its plan.
