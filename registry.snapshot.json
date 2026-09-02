@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "be6e39018d7b1a61387324d98e7a8f35f1b2e71d9b2c96bea000123829022fef"
+      "sha256": "7ab7b473861746603208ff7aacb3dd4e42e69ab0feae67cfc22e4477d110f1b0"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",

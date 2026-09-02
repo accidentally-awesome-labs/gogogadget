@@ -24,20 +24,20 @@
     },
     "files": [
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "d0c9b938e550fc301fdfdc9bcbcd85a1608fddda45db43b24c18d51e9c83a39e",
         "source": ".github/dependabot.yml",
-        "target": ".github/dependabot.yml"
+        "target": ".github/dependabot.yml",
+        "class": "asset",
+        "sha256": "d0c9b938e550fc301fdfdc9bcbcd85a1608fddda45db43b24c18d51e9c83a39e",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "6735de8f058f9be8287fea33c81b486ca8a6ff78d33565688105642d82433fbd",
         "source": ".github/workflows/ci.yml",
-        "target": ".github/workflows/ci.yml"
+        "target": ".github/workflows/ci.yml",
+        "class": "asset",
+        "sha256": "83a56d01ddb65d29179b9dc3153bfbd4d7631835af2643bd118dc7d59c438994",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {},
