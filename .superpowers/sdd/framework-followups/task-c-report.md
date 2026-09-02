@@ -284,7 +284,16 @@ production, removal of a selected adapter) before restoring everything.
 
 ## Commits
 
-- `c9e0a1a` — feat(registry): ship the maintained external-registry template
+- `fbfbfaa` — feat(registry): ship the maintained external-registry template
+
+### One extra fix the task required
+
+The root `.gitignore` ignored `registry.snapshot.sig` unanchored, so it
+silently refused to commit the template's signature — and the core manifest
+pins that file's digest, so a fresh clone would have failed `sync` with a
+missing payload. The rule is now `/registry.snapshot.sig` with a comment
+explaining that a distributed registry's signature is a published artifact,
+not a local build product.
 
 ## Concerns
 
