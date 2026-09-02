@@ -468,6 +468,11 @@ $ cd e2e && npx playwright test --project=chromium --reporter=line     auth.spec
 Each of the three new gates was proven to bite by mutation and then reverted (C2,
 I2, I3 above); `go test` is green again after every revert.
 
+## Commit
+
+`7a9ded0` — `fix(registry): split the e2e harness from the sweeps, and make in-place ownership transfer work`
+(68 paths, on top of `7b922a3`).
+
 ## Remaining note
 
 `ggg registry validate` is still not run here — it compiles derivative trees for
