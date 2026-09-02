@@ -223,3 +223,56 @@ jobs:
 
       - name: Build image
         run: docker build -t gogogadget:ci .
+
+  # `ggg registry validate` is the only gate that proves a module can be
+  # installed, compiled, tested, removed, and restored byte for byte. Every
+  # other registry check is a statement about data. It runs as two jobs, one
+  # per closure family, because they are two different claims: registry-core
+  # is this repository's own fixture registry, registry-external is a signed
+  # third-party registry resolved through the real path. Split this way a
+  # signing or provenance regression cannot be reported as a core fixture
+  # failure, and neither family's runtime hides behind the other's.
+  #
+  # The two jobs never share a work directory. They are separate runners, so
+  # separate checkouts — and the harness also suffixes its stable scratch path
+  # with the family (modkit.exampleWorkDir), so the same isolation holds when
+  # both commands run against one checkout locally.
+  #
+  # No Postgres service: the closures install, generate, compile, and run their
+  # own declared tests inside a throwaway derivative, and none of them touches
+  # a database. Adding one would only slow the job down.
+  registry-core:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      # Run directly, never through a pipe: the step must fail on the
+      # validator's exit code, and its diagnostics are the log.
+      - name: Validate core closures
+        run: bin/ggg registry validate --closures core
+
+  registry-external:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      - name: Validate external registry template closures
+        run: bin/ggg registry validate --closures external

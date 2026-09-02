@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -465,4 +466,62 @@ func TestValidateLockTreatsOurOwnPidAsStale(t *testing.T) {
 	lockPath := filepath.Join(t.TempDir(), "validate.lock")
 	require.NoError(t, os.WriteFile(lockPath, []byte(strconv.Itoa(os.Getpid())+"\n"), 0o644))
 	assert.NoError(t, acquireValidateLock(lockPath))
+}
+
+// The flag vocabulary, and the one place it is allowed to be lenient. A bare
+// `ggg registry validate` still means every family, because that is the
+// question an operator asks; anything else must be a family this build knows,
+// or the run would silently narrow to nothing.
+func TestClosureFamilyParsing(t *testing.T) {
+	for value, want := range map[string]ClosureFamily{
+		"":         ClosureFamilyAll,
+		"all":      ClosureFamilyAll,
+		"core":     ClosureFamilyCore,
+		"external": ClosureFamilyExternal,
+	} {
+		family, err := ParseClosureFamily(value)
+		require.NoErrorf(t, err, "closure family %q", value)
+		assert.Equal(t, want, family)
+	}
+	for _, value := range []string{"CORE", "example", "core,external", "none"} {
+		_, err := ParseClosureFamily(value)
+		assert.Errorf(t, err, "closure family %q must be refused, not narrowed to nothing", value)
+	}
+}
+
+// A named family that covers nothing is a refusal, and that is what keeps a
+// CI job pinned to one family from passing green after its fixtures are gone.
+// The all family keeps the accommodating answer, because a derivative that
+// vendored the fixtures away still has to be able to run the command.
+func TestNamedClosureFamilyRefusesWhenItCoversNothing(t *testing.T) {
+	empty := t.TempDir()
+
+	for _, family := range selectableClosureFamilies {
+		_, err := closuresForFamily(empty, family, io.Discard)
+		require.Errorf(t, err, "family %s exercised nothing and reported success", family)
+		assert.Contains(t, err.Error(), string(family))
+	}
+
+	closures, err := closuresForFamily(empty, ClosureFamilyAll, io.Discard)
+	require.NoError(t, err, "a project with no fixtures must still be able to run the command")
+	assert.Empty(t, closures)
+}
+
+// Two families never share a work directory. They are two CI jobs and two
+// operator invocations, and a shared derivative would mean one run's cleanup
+// deleting the other's tree mid-build — or, with the pid lock, the second run
+// refused outright.
+func TestClosureFamiliesGetSeparateWorkDirectories(t *testing.T) {
+	seen := map[string]ClosureFamily{}
+	for _, family := range append(slices.Clone(selectableClosureFamilies), ClosureFamilyAll) {
+		dir := exampleWorkDir("/projects/app", family)
+		if other, clash := seen[dir]; clash {
+			t.Fatalf("families %s and %s share the work directory %s", other, family, dir)
+		}
+		seen[dir] = family
+	}
+	assert.NotEqual(t,
+		exampleWorkDir("/projects/app", ClosureFamilyCore),
+		exampleWorkDir("/projects/other", ClosureFamilyCore),
+		"two checkouts must not share one derivative")
 }

@@ -62,7 +62,7 @@ transaction journal that restores the exact pre-run bytes on any failure.
 | `ggg diff` | no | Lists owned files that differ from their installed base |
 | `ggg doctor` | no | Reports lock, conflict, and candidate health |
 | `ggg sync --check` | no | Fails when the tree drifts from the lock |
-| `ggg registry validate` | no | Loads the catalog, then installs, compiles and removes every example closure in a throwaway derivative |
+| `ggg registry validate [--closures core\|external\|all]` | no | Loads the catalog, then installs, compiles and removes every closure of that family in a throwaway derivative (default `all`) |
 | `ggg init` | **yes** | Writes `gogogadget.json`; `--adopt` also writes the lock |
 | `ggg add KIND/NAME...` | **yes** | Selects modules, then reconciles |
 | `ggg remove KIND/NAME...` | **yes** | Deselects modules, then reconciles |

@@ -339,9 +339,10 @@ func (c *Controller) executeDoctor(ctx context.Context, _ DoctorRequest) (Result
 }
 
 // executeRegistryValidate loads the shipped catalog and exercises the example
-// closures. Progress goes to the sink the caller injected into the context —
-// the human stream for flag runs, io.Discard under --json (the envelope is
-// the machine output), a TUI buffer for the console — never os.Stdout.
+// closures in the requested family. Progress goes to the sink the caller
+// injected into the context — the human stream for flag runs, io.Discard
+// under --json (the envelope is the machine output), a TUI buffer for the
+// console — never os.Stdout.
 func (c *Controller) executeRegistryValidate(ctx context.Context, request RegistryReadRequest) (Result, error) {
 	catalog, err := modkit.LoadCatalog(os.DirFS(c.rootDir()))
 	if err != nil {
@@ -360,7 +361,7 @@ func (c *Controller) executeRegistryValidate(ctx context.Context, request Regist
 	if !ok {
 		progress = io.Discard
 	}
-	examples, err := modkit.ValidateExamples(ctx, c.rootDir(), progress)
+	examples, err := modkit.ValidateExamples(ctx, c.rootDir(), request.Closures, progress)
 	if err != nil {
 		return failureEnvelope("registry validate", refusalError(err))
 	}

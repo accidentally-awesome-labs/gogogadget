@@ -462,6 +462,17 @@ The examples are never installable here. They live in their own registry root
 that no shipped index references, so this project's catalog cannot resolve one,
 no profile can list one, and nothing generated from the lock can reach them.
 
+The closures come in two families, and `--closures core|external|all` picks
+one. `core` is everything `registry/testdata` publishes; `external` is the
+signed third-party tree under `templates/external-registry`, resolved through
+the real directory-registry path with its signature verified first. Naming a
+family that publishes nothing is refused rather than reported as a clean run,
+which is what lets CI pin a job to one family: `registry-core` and
+`registry-external` are separate jobs with separate work directories, because
+a scratch path derived from the project root *and* the family keeps the two
+runs from sharing a derivative. Bare `ggg registry validate` still means every
+family.
+
 The loop for a new module is:
 
 1. Write the source files where they belong in the tree.

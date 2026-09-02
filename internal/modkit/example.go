@@ -177,59 +177,88 @@ func (c exampleClosure) ids() []string {
 	return out
 }
 
-// ValidateExamples exercises every example closure end to end and returns one
-// result per closure. It writes progress to log so a long run is legible.
+// ClosureFamily names which publisher's closures one validation run
+// exercises. The families are separable because they are separate claims:
+// core is this repository's own fixture registry, external is a third
+// party's signed registry consumed through the real resolution path. CI runs
+// them as two jobs so an external-signing regression cannot be reported as a
+// core fixture failure, and each family gets its own stable work directory so
+// the two runs never share a derivative, a build cache, or a pid lock.
+type ClosureFamily string
+
+const (
+	// ClosureFamilyAll exercises every closure the project can reach. It is
+	// what a bare `ggg registry validate` means, so the default answer to
+	// "is my registry sound" stays the whole registry.
+	ClosureFamilyAll ClosureFamily = "all"
+	// ClosureFamilyCore exercises only what ExampleRegistryDir publishes.
+	ClosureFamilyCore ClosureFamily = "core"
+	// ClosureFamilyExternal exercises only what ExternalTemplateDir publishes.
+	ClosureFamilyExternal ClosureFamily = "external"
+)
+
+// selectableClosureFamilies are the families a run can narrow to. All is not
+// one of them: it is the union of these, not a selection. The CI guard
+// iterates this list, so a new family that no job covers fails the build
+// instead of silently going unexercised.
+var selectableClosureFamilies = []ClosureFamily{ClosureFamilyCore, ClosureFamilyExternal}
+
+// ParseClosureFamily maps a flag value to a family. An empty value is all, so
+// the flag is genuinely optional rather than a new required argument.
+func ParseClosureFamily(value string) (ClosureFamily, error) {
+	family := ClosureFamily(value)
+	if family == "" || family == ClosureFamilyAll {
+		return ClosureFamilyAll, nil
+	}
+	if slices.Contains(selectableClosureFamilies, family) {
+		return family, nil
+	}
+	names := make([]string, 0, len(selectableClosureFamilies)+1)
+	for _, known := range selectableClosureFamilies {
+		names = append(names, string(known))
+	}
+	names = append(names, string(ClosureFamilyAll))
+	return "", fmt.Errorf("unknown closure family %q; want %s", value, strings.Join(names, ", "))
+}
+
+// ValidateExamples exercises every closure in the requested family end to end
+// and returns one result per closure. It writes progress to log so a long run
+// is legible.
 //
-// A project without an example registry gets no results and no error. The
-// examples ship with the upstream catalog, and a derivative that vendored only
-// the modules it selected has nothing to exercise — refusing there would make
-// the command unusable in exactly the projects the registry exists to serve.
-// That this repository still has one is asserted by
+// A project without an example registry gets no results and no error when the
+// family is all. The examples ship with the upstream catalog, and a derivative
+// that vendored only the modules it selected has nothing to exercise —
+// refusing there would make the command unusable in exactly the projects the
+// registry exists to serve. That this repository still has one is asserted by
 // TestExampleRegistryDigestsMatchPayloads, so the skip cannot quietly become
 // the answer here.
 //
-// The derivative lives at a path derived from the project root rather than a
-// fresh mkdtemp: Go's build cache keys on the compiling directory, so a stable
-// path turns the second and every later closure into a warm build. Two
-// concurrent runs against one repository would fight over it, which is why this
-// is a command an operator invokes and not something a Make target runs.
-func ValidateExamples(ctx context.Context, root string, log io.Writer) ([]ExampleResult, error) {
+// Naming a family is the opposite request: it says which closures this run is
+// for, so finding none of them is a failure of that request rather than a
+// project shape to accommodate. That is what keeps a CI job pinned to one
+// family from going green after its fixtures disappear.
+//
+// The derivative lives at a path derived from the project root and the family
+// rather than a fresh mkdtemp: Go's build cache keys on the compiling
+// directory, so a stable path turns the second and every later closure into a
+// warm build. Two concurrent runs of the SAME family would fight over it,
+// which is why the pid lock refuses the second one.
+func ValidateExamples(
+	ctx context.Context, root string, family ClosureFamily, log io.Writer,
+) ([]ExampleResult, error) {
 	canonicalRoot, err := canonicalProjectRoot(root)
 	if err != nil {
 		return nil, err
 	}
-	examples := filepath.Join(canonicalRoot, ExampleRegistryDir)
-	if _, statErr := os.Stat(filepath.Join(examples, "registry.json")); errors.Is(statErr, fs.ErrNotExist) {
-		fmt.Fprintf(log, "no example registry at %s; nothing to exercise\n", ExampleRegistryDir)
-		return nil, nil
-	} else if statErr != nil {
-		return nil, statErr
-	}
-	catalog, err := LoadCatalog(os.DirFS(examples))
-	if err != nil {
-		return nil, fmt.Errorf("load example registry %s: %w", ExampleRegistryDir, err)
-	}
-	closures, err := exampleClosures(catalog)
+	closures, err := closuresForFamily(canonicalRoot, family, log)
 	if err != nil {
 		return nil, err
 	}
 	if len(closures) == 0 {
-		return nil, fmt.Errorf("%s publishes no example modules", ExampleRegistryDir)
+		return nil, nil
 	}
-	if err := assertExamplesUnreachable(canonicalRoot, catalog); err != nil {
-		return nil, err
-	}
-	// The external-registry template is exercised alongside the examples
-	// rather than in a command of its own: it is the same lifecycle claim
-	// about a different publisher, and a separate command would be a
-	// separate thing to forget to run.
-	external, err := externalTemplateClosures(canonicalRoot)
-	if err != nil {
-		return nil, err
-	}
-	closures = append(closures, external...)
 
-	work := exampleWorkDir(canonicalRoot)
+	work := exampleWorkDir(canonicalRoot, family)
 	template := filepath.Join(work, "template")
 	derivative := filepath.Join(work, "derivative")
 	// The work path is stable per project so Go's directory-keyed build cache
@@ -367,11 +396,87 @@ func validateLockOwner(lockPath string) (int, bool) {
 	return pid, process.Signal(syscall.Signal(0)) == nil
 }
 
-// exampleWorkDir is the stable per-repository scratch path. The digest keeps two
-// checkouts of this repository from sharing one derivative.
-func exampleWorkDir(root string) string {
+// exampleWorkDir is the stable per-repository, per-family scratch path. The
+// digest keeps two checkouts of this repository from sharing one derivative,
+// and the family suffix keeps a core run and an external run from sharing one
+// — they are two CI jobs and two operator invocations, and the plan requires
+// separate stable work directories rather than a serialized queue of one.
+func exampleWorkDir(root string, family ClosureFamily) string {
 	sum := sha256.Sum256([]byte(root))
-	return filepath.Join(os.TempDir(), "ggg-registry-validate-"+hex.EncodeToString(sum[:8]))
+	return filepath.Join(os.TempDir(), "ggg-registry-validate-"+hex.EncodeToString(sum[:8])+"-"+string(family))
+}
+
+// closuresForFamily collects the closures one family names, in the order they
+// are exercised. It is the single answer to "what does this family cover", so
+// the CI guard can ask the same question the command answers rather than
+// re-deriving it from a second description of the fixtures.
+//
+// An explicitly named family that covers nothing is an error: the caller said
+// which closures the run is for, and a run that quietly exercises none of them
+// is the always-green job this split exists to prevent. The all family keeps
+// the accommodating behavior, because a derivative that vendored the fixtures
+// away still has to be able to run the command.
+func closuresForFamily(canonicalRoot string, family ClosureFamily, log io.Writer) ([]exampleClosure, error) {
+	var closures []exampleClosure
+	if family != ClosureFamilyExternal {
+		core, err := coreExampleClosures(canonicalRoot, log)
+		if err != nil {
+			return nil, err
+		}
+		closures = append(closures, core...)
+	}
+	if family != ClosureFamilyCore {
+		// The external-registry template is exercised through the same
+		// lifecycle as the examples: it is the same claim about a different
+		// publisher, so it reuses this harness rather than a command of its
+		// own that would be a separate thing to forget to run.
+		external, err := externalTemplateClosures(canonicalRoot)
+		if err != nil {
+			return nil, err
+		}
+		closures = append(closures, external...)
+	}
+	if len(closures) != 0 {
+		return closures, nil
+	}
+	switch family {
+	case ClosureFamilyCore:
+		return nil, fmt.Errorf(
+			"closure family core was requested but %s publishes nothing to exercise", ExampleRegistryDir)
+	case ClosureFamilyExternal:
+		return nil, fmt.Errorf(
+			"closure family external was requested but %s publishes nothing to exercise", ExternalTemplateDir)
+	}
+	return nil, nil
+}
+
+// coreExampleClosures loads the example registry this repository publishes and
+// groups it into closures. A project that has no example registry gets none,
+// with a note: the skip is legitimate in a derivative and the caller decides
+// whether an empty family is an error.
+func coreExampleClosures(canonicalRoot string, log io.Writer) ([]exampleClosure, error) {
+	examples := filepath.Join(canonicalRoot, ExampleRegistryDir)
+	if _, err := os.Stat(filepath.Join(examples, "registry.json")); errors.Is(err, fs.ErrNotExist) {
+		fmt.Fprintf(log, "no example registry at %s; nothing to exercise\n", ExampleRegistryDir)
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	catalog, err := LoadCatalog(os.DirFS(examples))
+	if err != nil {
+		return nil, fmt.Errorf("load example registry %s: %w", ExampleRegistryDir, err)
+	}
+	closures, err := exampleClosures(catalog)
+	if err != nil {
+		return nil, err
+	}
+	if len(closures) == 0 {
+		return nil, fmt.Errorf("%s publishes no example modules", ExampleRegistryDir)
+	}
+	if err := assertExamplesUnreachable(canonicalRoot, catalog); err != nil {
+		return nil, err
+	}
+	return closures, nil
 }
 
 // exampleClosures groups the published examples into installable closures, one

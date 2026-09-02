@@ -129,6 +129,7 @@ func builtInCommands() []CommandSpec {
 		}},
 		{Name: "registry", Summary: "Author, verify, and manage registry sources", Usage: "ggg registry build|validate|init|keygen|sign|verify|rotate|add|remove|update", Flags: []FlagSpec{
 			{Name: "json", Help: "emit the machine envelope"},
+			{Name: "closures", Help: "closure family to exercise: core, external, or all (validate)", Value: true},
 			{Name: "namespace", Help: "registry namespace (init, add, remove)", Value: true},
 			{Name: "canonical-module", Help: "canonical Go module path of the registry (init)", Value: true},
 			{Name: "dir", Help: "registry tree directory", Value: true},

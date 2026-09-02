@@ -566,7 +566,14 @@ func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result,
 		return cc.Controller.applyRegistryBuild(dir)
 	case "validate":
 		if len(parsed.positional) != 0 {
-			return Result{}, usageError("ggg registry validate")
+			return Result{}, usageError("ggg registry validate [--closures core|external|all]")
+		}
+		// The family is parsed here rather than inside the engine so an
+		// unknown value is a usage error with the command's own vocabulary,
+		// not a refusal reported after the catalog has been loaded.
+		family, familyErr := modkit.ParseClosureFamily(parsed.value("closures", ""))
+		if familyErr != nil {
+			return Result{}, usageError(familyErr.Error())
 		}
 		// Validation is a read: it exercises the example closures but
 		// mutates nothing in the project. Progress goes to the human stream
@@ -577,7 +584,7 @@ func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result,
 		} else {
 			ctx = WithProgressSink(ctx, cc.Out)
 		}
-		return cc.Controller.Execute(ctx, RegistryReadRequest{Validate: true})
+		return cc.Controller.Execute(ctx, RegistryReadRequest{Validate: true, Closures: family})
 	case "init":
 		return runRegistryInit(cc, parsed)
 	case "keygen":

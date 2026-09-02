@@ -223,20 +223,37 @@ visual and e2e harnesses both set.
 
 ## CI
 
-Five jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
+Seven jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
 `make generate` → `git diff --exit-code` (generated code is committed and
 fresh, which is also what proves no registry drift) → `go vet` →
 `govulncheck` → `go test -race -cover ./...` → `make fuzz` → `go build`.
-`e2e`, `visual`, `smoke` and `docker` all depend on `test`: `e2e` installs
-Chromium and runs `make e2e`; `visual` runs `make visual`, which owns its own
-seeding and host server — do not add seed or start-server steps beside it,
-because a second process cannot bind `:18080` and the baselines only
-reproduce against the harness that wrote them; `smoke` boots the built binary
-against the CI Postgres and drives `scripts/smoke.sh`; `docker` builds the
-image to catch Dockerfile drift. Both `e2e` and `visual` upload their
-Playwright report on failure — a red visual job without the expected/actual/
-diff images is unactionable. There is deliberately no numeric coverage gate:
-a hard threshold punishes you for deleting sample code.
+`e2e`, `visual`, `smoke`, `docker`, `registry-core` and `registry-external`
+all depend on `test`: `e2e` installs Chromium and runs `make e2e`; `visual`
+runs `make visual`, which owns its own seeding and host server — do not add
+seed or start-server steps beside it, because a second process cannot bind
+`:18080` and the baselines only reproduce against the harness that wrote them;
+`smoke` boots the built binary against the CI Postgres and drives
+`scripts/smoke.sh`; `docker` builds the image to catch Dockerfile drift. Both
+`e2e` and `visual` upload their Playwright report on failure — a red visual
+job without the expected/actual/diff images is unactionable. There is
+deliberately no numeric coverage gate: a hard threshold punishes you for
+deleting sample code.
+
+`registry-core` runs `bin/ggg registry validate --closures core` and
+`registry-external` runs `bin/ggg registry validate --closures external`.
+That command is the only gate that proves a module can be installed,
+generated, compiled, tested, removed, and the tree restored byte for byte;
+everything else in the registry engine checks data. The families are two jobs
+rather than one because they are two claims — the fixture registry under
+`registry/testdata` (10 closures) versus the signed third-party tree under
+`templates/external-registry` (1 closure) — so a signing or provenance
+regression cannot be reported as a core fixture failure. Neither needs
+Postgres: each closure lives in a throwaway derivative and touches no
+database. The derivative path is stable per repository *and per family*, so
+the two runs never share a work directory, a warm build cache, or the pid lock
+that refuses a second concurrent run. `TestCIExercisesEveryClosureFamilyForReal`
+asserts both jobs exist, are not gated or continue-on-error, and still have
+closures to exercise.
 
 See [Database](/docs/database) for `TEST_DATABASE_URL` mechanics and
 [Frontend](/docs/frontend) for the `data-testid` contract.

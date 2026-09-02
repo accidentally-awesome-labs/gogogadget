@@ -171,7 +171,7 @@
         "source": "content/docs/cli.md",
         "target": "content/docs/cli.md",
         "class": "content",
-        "sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
+        "sha256": "fe7bedba4311edb2216794483ccd2ec9ccd68ed29f21ee03607cf91fb15d26ec",
         "rewrite_module": false,
         "contract": false
       },
@@ -291,7 +291,7 @@
         "source": "content/docs/modules.md",
         "target": "content/docs/modules.md",
         "class": "content",
-        "sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
+        "sha256": "6bfe4250bb5b14fdf7f345d6d5b1b77c46e6b9d103f9230866cf2b9fc13505a9",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "05e4484b50939fe0e8bc973ea2b911c75b405ebd5dc6998bf60f184dc0e385e5",
+        "sha256": "4d3463dc373f7b772a94381712b23f95e30e029361d41ff7b19564dc7ec07693",
         "rewrite_module": false,
         "contract": false
       },

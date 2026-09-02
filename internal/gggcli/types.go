@@ -90,6 +90,9 @@ type (
 	RegistryReadRequest struct {
 		// Validate exercises the example closures after loading the catalog.
 		Validate bool
+		// Closures narrows validation to one closure family. Empty is every
+		// family, which is what a bare `ggg registry validate` asks for.
+		Closures modkit.ClosureFamily
 	}
 )
 
