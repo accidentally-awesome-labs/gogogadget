@@ -244,7 +244,7 @@
         "source": "internal/web/realtime_test.go",
         "target": "internal/web/realtime_test.go",
         "class": "test",
-        "sha256": "6f926cd06998cb5fb72ab9f55b8ee80b19618a2352992f36531c88f3aa8a3573",
+        "sha256": "c36ef2089ad89e6c7c35781c111c234ea79c7dfd923e1f0f5cc95cca2cc87fee",
         "rewrite_module": true,
         "contract": false
       },

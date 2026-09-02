@@ -1088,7 +1088,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "9914152c18269929f009e65c9bebcb439f462b863d042d85c8eae2de32b1898d"
+      "sha256": "2e9a1d95c89e6710ca100f4f97019f8e75492a86dd7b78107b149e863c77d8c2"
     },
     {
       "path": "registry/modules/system/static/module.json",
