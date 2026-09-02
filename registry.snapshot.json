@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e/module.json",
-      "sha256": "95c2a6b480270f870c7a893b02ac2cee06c18181cc7d95c446c8f8bc3630a189"
+      "sha256": "d9516df823e1578a3c324aafdfa72868bcef4a2dd33f73e43444e46c7c1c261f"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "2d9ee1eebac95d978bc545deb4335f3f1e9d752fd20d773b488f8ba320b35c0c"
+      "sha256": "736c3a15ee27054ac6c5f3dd4e84f599e2d07e653485e4e99d1d916e077549ee"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

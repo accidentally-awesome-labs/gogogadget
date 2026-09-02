@@ -244,7 +244,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "bcb94edb520971d78ff1fe784ae7535c5bd24d67d8b164da62f28d8ad3eadd83",
+        "sha256": "04e1b0207eab3dbed43c006a5c8a656defd754bba512d81ab2ca6ccaf3328231",
         "rewrite_module": true,
         "contract": false
       },
@@ -252,7 +252,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "4ca538dd490e743f5cb5a3c86a404214249929ac2402758030af95cab1fa606b",
+        "sha256": "0118ea69cc6acf6e5aef598b8f174f4e6f6a37018c7237ad08c8baba7c25ab65",
         "rewrite_module": true,
         "contract": true
       },

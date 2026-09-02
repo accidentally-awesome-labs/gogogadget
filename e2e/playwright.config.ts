@@ -8,7 +8,13 @@ const databaseURL =
   process.env.E2E_DATABASE_URL ??
   'postgres://postgres:postgres@localhost:5432/gogogadget_e2e?sslmode=disable';
 
-export { databaseURL };
+// The server builds absolute redirect and link targets from APP_URL, so the
+// app has to agree with the origin Playwright drives. Left at its default
+// (:8080) the local billing checkout redirects the browser off the suite's
+// server entirely, and the confirmation step 400s against a foreign session.
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:18080';
+
+export { databaseURL, baseURL };
 
 export default defineConfig({
   testDir: '.',
@@ -16,7 +22,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:18080',
+    baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -48,6 +54,7 @@ export default defineConfig({
     env: {
       APP_ENV: 'test',
       PORT: '18080',
+      APP_URL: baseURL,
       DATABASE_URL: databaseURL,
       DEV_AUTH_BYPASS: 'true',
       CLERK_PORTAL_URL: 'https://accounts.example.test',

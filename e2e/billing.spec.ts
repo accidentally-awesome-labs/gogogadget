@@ -30,14 +30,20 @@ test.describe('billing', () => {
     await context.close();
   });
 
-  test('free org: checkout POST renders not-configured (keys empty in e2e)', async ({ browser }) => {
+  // development/test select the billing-local adapter, so checkout is real: it
+  // hands the org a local confirmation step instead of a provider redirect.
+  // Confirming would flip org_free to pro and break the sibling free-limit
+  // tests, so this asserts the screen and stops there.
+  test('free org: checkout POST lands on the local confirmation step', async ({ browser }) => {
     const context = await loginAs(browser, 'free');
     const page = await context.newPage();
     await page.goto('/app/settings/billing');
 
     await page.getByRole('button', { name: 'Upgrade to Pro' }).click();
-    await expect(page.getByText('Billing not configured')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Setup guide →' })).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/billing\/confirm\?.*product=/);
+    await expect(page).toHaveURL(/customer=org_free/);
+    await expect(page.getByRole('heading', { name: 'Confirm billing' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Confirm' })).toBeVisible();
     await context.close();
   });
 

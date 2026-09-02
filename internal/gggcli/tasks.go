@@ -273,7 +273,11 @@ func runTestTask(run func(string, ...string) error, root, mode string) error {
 		}
 		return run(filepath.Join(root, "e2e"), "npx", "playwright", "test")
 	case "visual":
-		return run(filepath.Join(root, "e2e"), "npx", "playwright", "test", "visual.spec.ts")
+		// Baselines only reproduce inside the pinned Playwright container, and
+		// the suite needs a seeded database plus a host server. scripts/visual.sh
+		// owns all three; a bare `npx playwright test` here runs on the host with
+		// no server and no e2e/node_modules.
+		return run(root, filepath.Join("scripts", "visual.sh"))
 	case "smoke":
 		return run(root, filepath.Join("scripts", "smoke.sh"))
 	case "all":

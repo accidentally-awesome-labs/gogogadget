@@ -116,6 +116,25 @@ func TestTrustedTaskUsesFixedArgv(t *testing.T) {
 	}
 }
 
+// The visual gate is only meaningful through scripts/visual.sh: it seeds the
+// e2e database, starts the host server and runs the specs in the pinned
+// container. A bare `npx playwright test` passes locally (node_modules present,
+// server already up) and fails in CI, so the argv is pinned by a test.
+func TestVisualTaskRunsContainerHarness(t *testing.T) {
+	runner := &recordingTaskRunner{}
+	controller := NewController(ControllerOptions{Root: t.TempDir(), TaskRunner: runner})
+	plan, err := controller.Preview(context.Background(), TaskMutation{Task: "test", Action: "visual"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := controller.Apply(context.Background(), plan); err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(runner.argv, " "); got != filepath.Join("scripts", "visual.sh") {
+		t.Fatalf("argv = %q", got)
+	}
+}
+
 type recordingTaskRunner struct{ argv []string }
 
 func (r *recordingTaskRunner) Run(_ context.Context, _ string, argv []string) error {
