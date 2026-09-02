@@ -24,28 +24,28 @@
     },
     "files": [
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "fb45a2fc71e68a1bc931aa0f7d21d0e2354978b75d994907897204c92706b536",
         "source": "Dockerfile",
-        "target": "Dockerfile"
+        "target": "Dockerfile",
+        "class": "asset",
+        "sha256": "d073eafe59ea56091b1a186e7e58d67f6188942b64f9f700874850c05c989e1c",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "generated",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "",
         "source": "compose.test.yaml",
-        "target": "compose.test.yaml"
+        "target": "compose.test.yaml",
+        "class": "generated",
+        "sha256": "",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "generated",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "",
         "source": "compose.yaml",
-        "target": "compose.yaml"
+        "target": "compose.yaml",
+        "class": "generated",
+        "sha256": "",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {},

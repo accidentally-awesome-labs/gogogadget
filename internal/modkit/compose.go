@@ -142,7 +142,7 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 	for _, item := range selected {
 		node := &yaml.Node{Kind: yaml.MappingNode}
 		appendYAMLMap(node, "image", yamlScalar(item.service.Container))
-		if len(item.service.Ports) > 0 {
+		if len(item.service.Ports) > 0 && environment != "test" {
 			ports := &yaml.Node{Kind: yaml.SequenceNode}
 			for _, port := range item.service.Ports {
 				ports.Content = append(ports.Content, yamlScalar(strconv.Itoa(port.DefaultHost)+":"+strconv.Itoa(port.Container)))

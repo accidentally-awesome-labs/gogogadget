@@ -916,7 +916,7 @@
     },
     {
       "path": "registry/modules/system/docker/module.json",
-      "sha256": "8a1aa5d5c357201309e58bb3c79a083e83d505ef305a576b59c0e65b65b7ac79"
+      "sha256": "e31604911c1a794128789ad6e184dc00bd115e37187f04cd6f4ad2ff2ac180ec"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "9209a1c0da6687975d88c0e1b4d316044fc4bbf651b19658182fd7467fd5e6d1"
+      "sha256": "8e8bc5457d43a19a1bddb3af0e9bdbd78f1b0d926e106f68730c36be373cf5f0"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

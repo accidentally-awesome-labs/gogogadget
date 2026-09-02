@@ -15,8 +15,6 @@ services:
                 condition: service_healthy
     ggg-system-database-postgres-docker-postgres:
         image: postgres@sha256:16bc17c64a573ef34162af9298258d1aec548232985b33ed7b1eac33ba35c229
-        ports:
-            - 5432:5432
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres

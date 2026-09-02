@@ -332,7 +332,7 @@
         "source": "internal/modkit/compose.go",
         "target": "internal/modkit/compose.go",
         "class": "go",
-        "sha256": "0f0262a6d937e5337a6d3cf6fbd20fd0782658cab91f0104e99615d44aae0a2d",
+        "sha256": "2bd8b701b008c34c5a825cf1407a02d8549065e1bccc8d83a610340938ce09f2",
         "rewrite_module": true,
         "contract": true
       },
