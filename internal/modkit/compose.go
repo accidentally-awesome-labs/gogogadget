@@ -240,6 +240,14 @@ func providerSelectionForEnvironment(selections ProviderSelections, environment 
 	}
 }
 
+// ComposeServiceName renders the compose service name for one adapter
+// target — the same derivation the generator writes into compose.yaml, so
+// commands that address a local service (database backup, restore, logs)
+// name it identically.
+func ComposeServiceName(adapter, target string) string {
+	return composeScopedName(adapter, target)
+}
+
 func composeScopedName(parts ...string) string {
 	joined := strings.Join(parts, "-")
 	var b strings.Builder

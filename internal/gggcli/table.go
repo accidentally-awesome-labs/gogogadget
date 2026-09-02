@@ -72,15 +72,40 @@ func builtInCommands() []CommandSpec {
 			{Name: "constructor", Help: "provider constructor", Value: true}, {Name: "definition", Help: "provider definition JSON", Value: true},
 			{Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "db", Summary: "Run database lifecycle tasks", Usage: "ggg db migrate|status|seed|reset [--environment development|test] [--yes] [--json]", Flags: []FlagSpec{
+		{Name: "db", Summary: "Run database lifecycle tasks", Usage: "ggg db migrate|status|seed|reset|backup|restore|restore-drill [--environment development|test] [--destination PATH] [--backup ID] [--to-env KEY] [--yes] [--json]", Flags: []FlagSpec{
 			{Name: "environment", Help: "select the local environment", Value: true, Default: "development"},
-			{Name: "yes", Help: "confirm a destructive reset"}, {Name: "json", Help: "emit the machine envelope"},
+			{Name: "destination", Help: "backup destination path", Value: true},
+			{Name: "backup", Help: "recorded backup id", Value: true},
+			{Name: "to-env", Help: "environment key addressing the restored database", Value: true},
+			{Name: "yes", Help: "confirm a destructive reset or a restore"}, {Name: "json", Help: "emit the machine envelope"},
+		}},
+		{Name: "deploy", Summary: "Deploy the project to its selected target", Usage: "ggg deploy plan|apply|status|logs|rollback|secrets --environment development|test|production [--key KEY]... [--yes] [--resume RUN_ID] [--json]", Flags: []FlagSpec{
+			{Name: "environment", Help: "deployment environment", Value: true, Default: "production"},
+			{Name: "key", Help: "secret key for deploy secrets (repeatable)", Value: true, Repeatable: true},
+			{Name: "yes", Help: "confirm the remote mutation"}, {Name: "resume", Help: "resume a persisted run", Value: true},
+			{Name: "follow", Help: "stream logs until cancelled"}, {Name: "json", Help: "emit the machine envelope"},
+		}},
+		{Name: "deployment", Summary: "Set the project's deployment module", Usage: "ggg deployment set MODULE [--json]", Flags: []FlagSpec{
+			{Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "dev", Summary: "Run the supervised development loop", Usage: "ggg dev [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
 		{Name: "diff", Summary: "Compare installed module files with the lock", Usage: "ggg diff [MODULE]... [--upstream] [--json]", Flags: []FlagSpec{
 			{Name: "upstream", Help: "show the staged upstream candidate diff"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "doctor", Summary: "Report project health and drifted state", Usage: "ggg doctor [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
+		{Name: "doctor", Summary: "Report project health and drifted state", Usage: "ggg doctor [--runtime] [--fix --finding CODE --yes] [--json]", Flags: []FlagSpec{
+			{Name: "runtime", Help: "add live checks: provider keys, provider health, deployment linkage, backup policy"},
+			{Name: "fix", Help: "perform the remediation attached to one typed finding"},
+			{Name: "finding", Help: "the finding code to fix", Value: true},
+			{Name: "yes", Help: "confirm the remediation"}, {Name: "json", Help: "emit the machine envelope"},
+		}},
+		{Name: "provider", Summary: "Manage provider slot selections and provisioning", Usage: "ggg provider list|set|configure|provision|test [--json]", Flags: []FlagSpec{
+			{Name: "slot", Help: "provider slot", Value: true}, {Name: "environment", Help: "target environment", Value: true},
+			{Name: "provider", Help: "selection SLOT:ENV=ADAPTER@TARGET (repeatable)", Value: true, Repeatable: true},
+			{Name: "set", Help: "declared input value KEY=VALUE (repeatable)", Value: true, Repeatable: true},
+			{Name: "adapter", Help: "adapter to verify", Value: true}, {Name: "target", Help: "target to verify", Value: true},
+			{Name: "yes", Help: "confirm the remote mutation"}, {Name: "resume", Help: "resume a persisted run", Value: true},
+			{Name: "json", Help: "emit the machine envelope"},
+		}},
 		{Name: "generate", Summary: "Refresh mutable registries and generate the project", Usage: "ggg generate [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
 		{Name: "help", Summary: "Show help for ggg or one command", Usage: "ggg help [COMMAND]"},
 		{Name: "identity", Summary: "Identity provider operations", Usage: "ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)"},

@@ -27,7 +27,7 @@
         "source": "internal/deploy/docker/target.go",
         "target": "internal/deploy/docker/target.go",
         "class": "go",
-        "sha256": "c4e300a3b0a1815898e91e78343c92ac02a3f9cce81fee0a8104dae54eee9e92",
+        "sha256": "ce042ec0ea2be92cca7539f12c8dd9f554ebf69d70e18d2dd6f8c95e6599ae65",
         "rewrite_module": true,
         "contract": true
       }
@@ -53,7 +53,7 @@
         {
           "id": "docker",
           "package": "internal/deploy/docker",
-          "constructor": "NewModule"
+          "constructor": "NewDeployTarget"
         }
       ]
     },

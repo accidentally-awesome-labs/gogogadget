@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go/format"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -113,6 +114,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"surfaces", one(emitVisualSurfaces)},
 		{"smoke-cases", one(emitSmokeCases)},
 		{"commands", one(emitCommandsRegistry)},
+		{"remote", one(emitRemoteRegistry)},
 	}
 	files := make([]GeneratedFile, 0, len(emitters))
 	for _, emitter := range emitters {
@@ -3455,4 +3457,139 @@ func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, gra
 		b.WriteString("\t}\n}\n")
 	}
 	return &GeneratedFile{Path: "internal/gggcli/commands/commands_registry_gen.go", Content: b.String()}, nil
+}
+
+// emitRemoteRegistry renders internal/gggcli/commands/remote_registry_gen.go:
+// the typed provisioner, deployer, and database-operator registries the CLI's
+// provider and deployment commands execute through. Provider/deploy modules
+// are reachable only through these constructors — never through generic CLI
+// handler packages, which the planner refuses when they import a seam.
+//
+// Selection is target-driven: a provisioner or database operator enters the
+// registry when some selected (adapter, target) pair in any environment
+// names it, and the deployer comes from the graph's one deployment module.
+func emitRemoteRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	remotePkg := modulePath + "/internal/remote"
+	used := map[string]string{"gggcli": modulePath + "/internal/gggcli", "remote": remotePkg}
+	imports := []string{fmt.Sprintf("\tgggcli %s", goString(modulePath+"/internal/gggcli")), fmt.Sprintf("\tremote %s", goString(remotePkg))}
+
+	modules := make(map[string]Manifest, len(graph))
+	for _, module := range graph {
+		modules[module.ID] = module
+	}
+
+	entry := func(pkg, constructor string) string {
+		goPkg := resolveTypeImport(modulePath, pkg)
+		name := uniqueImportName(goPkg, used)
+		imports = append(imports, fmt.Sprintf("\t%s %s", name, goString(goPkg)))
+		return name + "." + constructor + "()"
+	}
+
+	provisioners := make([]string, 0)
+	operators := make([]string, 0)
+	slots := make([]string, 0, len(lock.Providers))
+	for slot := range lock.Providers {
+		slots = append(slots, slot)
+	}
+	sort.Strings(slots)
+	for _, slot := range slots {
+		selections := lock.Providers[slot]
+		for _, environment := range []string{"development", "test", "production"} {
+			choice := providerSelectionForEnvironment(selections, environment)
+			if choice.Adapter == "" {
+				continue
+			}
+			module, ok := modules[choice.Adapter]
+			if !ok || module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
+				continue
+			}
+			for _, target := range module.Runtime.System.Adapter.Targets {
+				if target.ID != choice.Target {
+					continue
+				}
+				if (target.Automation == "provision" || target.Automation == "configure") && target.Provisioner != "" {
+					var declared *ProvisionerContribution
+					for i := range module.Runtime.Provisioners {
+						if module.Runtime.Provisioners[i].ID == target.Provisioner {
+							declared = &module.Runtime.Provisioners[i]
+							break
+						}
+					}
+					if declared == nil {
+						return nil, fmt.Errorf("adapter %s target %s names unclaimed provisioner %q", module.ID, target.ID, target.Provisioner)
+					}
+					line := fmt.Sprintf("\t\tprovisioners[%s] = %s", goString(declared.ID), entry(declared.Package, declared.Constructor))
+					if !slices.Contains(provisioners, line) {
+						provisioners = append(provisioners, line)
+					}
+				}
+				if target.DatabaseOperator != "" {
+					var declared *DatabaseOpsContribution
+					for i := range module.Runtime.DatabaseOps {
+						if module.Runtime.DatabaseOps[i].ID == target.DatabaseOperator {
+							declared = &module.Runtime.DatabaseOps[i]
+							break
+						}
+					}
+					if declared == nil {
+						return nil, fmt.Errorf("adapter %s target %s names unclaimed database operator %q", module.ID, target.ID, target.DatabaseOperator)
+					}
+					line := fmt.Sprintf("\t\toperators[%s] = %s", goString(declared.ID), entry(declared.Package, declared.Constructor))
+					if !slices.Contains(operators, line) {
+						operators = append(operators, line)
+					}
+				}
+			}
+		}
+	}
+
+	deployers := make([]string, 0)
+	for _, module := range orderedModules(lock, graph) {
+		for _, deployer := range module.Runtime.Deploy {
+			line := fmt.Sprintf("\t\tdeployers[%s] = %s", goString(deployer.ID), entry(deployer.Package, deployer.Constructor))
+			deployers = append(deployers, line)
+		}
+	}
+
+	sort.Strings(imports)
+	sort.Strings(provisioners)
+	sort.Strings(operators)
+	sort.Strings(deployers)
+
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package commands\n\n")
+	b.WriteString("import (\n")
+	for _, line := range imports {
+		b.WriteString(line + "\n")
+	}
+	b.WriteString(")\n\n")
+	b.WriteString("// RemoteRegistries returns the typed provisioner, deployer, and database\n")
+	b.WriteString("// operator registries the ggg provider/deploy/db commands execute through,\n")
+	b.WriteString("// built from the target-selected contributions of the installed graph.\n")
+	b.WriteString("func RemoteRegistries() gggcli.RemoteRegistries {\n")
+	b.WriteString("\tprovisioners := map[string]remote.ProviderProvisioner{}\n")
+	b.WriteString("\tdeployers := map[string]remote.DeployTarget{}\n")
+	b.WriteString("\toperators := map[string]remote.DatabaseOperator{}\n")
+	for _, line := range provisioners {
+		b.WriteString(line + "\n")
+	}
+	for _, line := range deployers {
+		b.WriteString(line + "\n")
+	}
+	for _, line := range operators {
+		b.WriteString(line + "\n")
+	}
+	b.WriteString("\treturn gggcli.RemoteRegistries{\n")
+	b.WriteString("\t\tProvisioner: func(id string) (remote.ProviderProvisioner, bool) {\n")
+	b.WriteString("\t\t\tprovisioner, ok := provisioners[id]\n\t\t\treturn provisioner, ok\n\t\t},\n")
+	b.WriteString("\t\tDeployTarget: func(id string) (remote.DeployTarget, bool) {\n")
+	b.WriteString("\t\t\ttarget, ok := deployers[id]\n\t\t\treturn target, ok\n\t\t},\n")
+	b.WriteString("\t\tDatabaseOperator: func(id string) (remote.DatabaseOperator, bool) {\n")
+	b.WriteString("\t\t\toperator, ok := operators[id]\n\t\t\treturn operator, ok\n\t\t},\n")
+	b.WriteString("\t}\n}\n")
+	return &GeneratedFile{Path: "internal/gggcli/commands/remote_registry_gen.go", Content: b.String()}, nil
 }

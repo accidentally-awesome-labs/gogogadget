@@ -35,7 +35,7 @@
         "source": "internal/deploy/fly/target.go",
         "target": "internal/deploy/fly/target.go",
         "class": "go",
-        "sha256": "0fe70475d50e72f394ff39bdbac2f41b60582376adcb2c42e99a8875c4bc3884",
+        "sha256": "447fad13472f02472b77f76fe00d4d59eec87c43bae9a9e45e123efa2f12162a",
         "rewrite_module": true,
         "contract": true
       }
@@ -61,7 +61,7 @@
         {
           "id": "fly",
           "package": "internal/deploy/fly",
-          "constructor": "NewModule"
+          "constructor": "NewDeployTarget"
         }
       ]
     },

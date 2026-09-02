@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/gogogadget/gogogadget/internal/modkit"
+	"github.com/gogogadget/gogogadget/internal/remote"
 )
 
 // Request is the sealed interface for read-only operations. The concrete set
@@ -45,8 +46,11 @@ type (
 		Upstream bool
 	}
 
-	// DoctorRequest runs the health check.
-	DoctorRequest struct{}
+	// DoctorRequest runs the health check. Runtime adds the live checks:
+	// provider keys, provider health, deployment linkage, and backup policy.
+	DoctorRequest struct {
+		Runtime bool
+	}
 
 	// ProviderTestRequest validates one selected provider adapter/target with
 	// the project's configured inputs. Shipping with the provisioning slice.
@@ -140,13 +144,20 @@ type (
 		Mode     modkit.ResolutionMode
 	}
 
-	// ProviderSetMutation records one provider slot choice in the intent.
-	// Shipping with the provisioning slice.
-	ProviderSetMutation struct {
+	// ProviderChoice is one SLOT:ENV=ADAPTER@TARGET selection.
+	ProviderChoice struct {
 		Slot        string
 		Environment string
 		Adapter     string
 		Target      string
+	}
+
+	// ProviderSetMutation records one or more provider slot choices in the
+	// intent. Flag, guided, and TUI paths converge on these concrete
+	// choices; a set that leaves any slot/environment unresolved is
+	// completed by the planner's own validation.
+	ProviderSetMutation struct {
+		Choices []ProviderChoice
 	}
 
 	// DeploymentSetMutation records the selected deployment module. Shipping
@@ -177,29 +188,49 @@ type (
 		Definition  string
 	}
 
-	// ProviderRemoteMutation plans/applies provider provisioning. Shipping
-	// with the provisioning slice.
+	// ProviderRemoteMutation plans/applies provider operations. Action is
+	// provision or configure: provision runs the selected target's typed
+	// provisioner; configure validates declared input values and merges
+	// them into the CLI-managed env file. Resume replays a persisted run's
+	// confirmed plan.
 	ProviderRemoteMutation struct {
 		Action      string
 		Slot        string
 		Environment string
+		Values      map[string]string
 		Yes         bool
 		Resume      string
 	}
 
-	// DeployRemoteMutation plans/applies deployments. Shipping with the
-	// deployment slice.
+	// DeployRemoteMutation plans/applies deployments. Action is one of
+	// apply, rollback, or secrets; secrets reads only the keys named in
+	// Keys from SecretValues.
 	DeployRemoteMutation struct {
 		Action      string
 		Environment string
+		Keys        []string
 		Yes         bool
 		Resume      string
 	}
 
 	// DoctorFixMutation performs the remediation attached to one typed doctor
-	// finding. Shipping with the doctor --fix slice.
+	// finding. It may run only the remediation that finding declares; a code
+	// without an attached remediation is a refusal, never a guess.
 	DoctorFixMutation struct {
 		FindingCode string
+		Yes         bool
+	}
+
+	// DatabaseOpsMutation is one database lifecycle operation against the
+	// selected database target's operator: backup, restore, or
+	// restore-drill. Restore always creates a new database and verifies it;
+	// it never overwrites the active one.
+	DatabaseOpsMutation struct {
+		Action      string
+		Environment string
+		Destination string
+		BackupID    string
+		DestURLKey  string
 		Yes         bool
 	}
 
@@ -249,6 +280,7 @@ func (DeployRemoteMutation) sealedMutation()   {}
 func (DoctorFixMutation) sealedMutation()      {}
 func (RegistryMutation) sealedMutation()       {}
 func (TaskMutation) sealedMutation()           {}
+func (DatabaseOpsMutation) sealedMutation()    {}
 
 // Plan is the preview boundary: what a mutation would do, before anything
 // writes. Local carries the modkit file plan; Remote carries provider and
@@ -270,14 +302,25 @@ type Plan struct {
 	create     *createPlan
 }
 
-// RemotePlan is one provider or deployment change set. The detail it can carry
-// grows with the provisioning and deployment slices; it never carries secret
-// values.
+// RemotePlan is one provider or deployment change set. Changes name
+// canonical resource identities and hashes; a remote plan never carries
+// secret values.
 type RemotePlan struct {
 	// Kind is "provider" or "deploy".
 	Kind string
 	// Summary names the adapter/target or deployment the plan touches.
 	Summary string
+	// Slot is the provider slot, empty for deployments.
+	Slot string
+	// Environment is the environment the plan applies to.
+	Environment string
+	// PlanHash binds the confirmed plan to the apply that runs it.
+	PlanHash string
+	// ObservedStateHash is the authoritative observation the plan was
+	// confirmed against; a fresh observation that differs refuses as stale.
+	ObservedStateHash string
+	// Changes are the ordered remote changes.
+	Changes []remote.RemoteChange
 }
 
 // Result is the renderer boundary: the fixed envelope plus command-specific

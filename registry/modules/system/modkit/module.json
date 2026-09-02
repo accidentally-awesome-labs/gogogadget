@@ -36,7 +36,7 @@
         "source": "cmd/ggg/main.go",
         "target": "cmd/ggg/main.go",
         "class": "go",
-        "sha256": "653c3647e0370f1355fe4d44bfe8898318039909b69a60c3bb91f0cd759b4ba0",
+        "sha256": "6bf93f122f22880227ea46108355b7de30de99a06961c0b8bd5bd5d41d1d1d75",
         "rewrite_module": true,
         "contract": true
       },
@@ -52,7 +52,7 @@
         "source": "internal/gggcli/app.go",
         "target": "internal/gggcli/app.go",
         "class": "go",
-        "sha256": "08dbabc5654b5413bfcba42966eae3f4f7ed303a346d82ae04d067a4d4ebc7de",
+        "sha256": "dd81f70b54ba222767b8402f5c80f98c58e01981827e5d634f83e29c6f731dad",
         "rewrite_module": true,
         "contract": false
       },
@@ -84,7 +84,7 @@
         "source": "internal/gggcli/controller.go",
         "target": "internal/gggcli/controller.go",
         "class": "go",
-        "sha256": "e7761658f3baf8043d1d435ab4da57310ce358f2fd8fdfdff1d215bec33e7157",
+        "sha256": "70a25b67300ffd0e717c87dbcba0977982d790951c3cdb8544f909ec91c6ceb3",
         "rewrite_module": true,
         "contract": false
       },
@@ -116,7 +116,7 @@
         "source": "internal/gggcli/handlers.go",
         "target": "internal/gggcli/handlers.go",
         "class": "go",
-        "sha256": "24265cd16b9ec420988295a43b2b5b73509859b016e601dc87ee584cf0a7b6a4",
+        "sha256": "77f902e800a0044c8beb2bb1de9937ac297ff2fecde6b6ef0563ebbb1237fe0d",
         "rewrite_module": true,
         "contract": false
       },
@@ -177,6 +177,38 @@
         "contract": false
       },
       {
+        "source": "internal/gggcli/remote.go",
+        "target": "internal/gggcli/remote.go",
+        "class": "go",
+        "sha256": "95684730c3e8867cbb6e800dffc2f818827aa789acb82477a095a80c1f592c07",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/remote_exec.go",
+        "target": "internal/gggcli/remote_exec.go",
+        "class": "go",
+        "sha256": "a612358027dc465e40a4d1c6e813635256995acbf928086bb10b8a2a371afad1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/remote_exec2.go",
+        "target": "internal/gggcli/remote_exec2.go",
+        "class": "go",
+        "sha256": "eba8213a9ca09a6e93b89d03e1b482e1c87c37cda5119125055bf07916f5aa73",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/remote_handlers.go",
+        "target": "internal/gggcli/remote_handlers.go",
+        "class": "go",
+        "sha256": "3bf9c0f7adf065372667ce175c1ec100d2d4147bcccc2ef0d4471b22a82b83bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/gggcli/spec.go",
         "target": "internal/gggcli/spec.go",
         "class": "go",
@@ -188,7 +220,7 @@
         "source": "internal/gggcli/table.go",
         "target": "internal/gggcli/table.go",
         "class": "go",
-        "sha256": "ef78d43f625a6deee793b623630b3b42ab098e302fb930581b5167557b5eb120",
+        "sha256": "a74d695cf3e8ebca0d34bb911500c665b1f4e25cdf8017570bfd1ed73fadbed7",
         "rewrite_module": true,
         "contract": false
       },
@@ -196,7 +228,7 @@
         "source": "internal/gggcli/task8_handlers.go",
         "target": "internal/gggcli/task8_handlers.go",
         "class": "go",
-        "sha256": "419a3cbd1b8fbabffb0434b55eaee0bbe2c4397a2ba609c8b631b446a64a61b4",
+        "sha256": "eb71df4b1ec97ba8b6f7dded3ebb156b928baba94f36f6be3066632841ffa668",
         "rewrite_module": true,
         "contract": true
       },
@@ -228,7 +260,7 @@
         "source": "internal/gggcli/types.go",
         "target": "internal/gggcli/types.go",
         "class": "go",
-        "sha256": "586177b629bd5261c657b8f73fc36178c716cc2639a47d65a68b2eb0c85cbe91",
+        "sha256": "a1772849a0d18ad39f5868c84318b18d9309e2ea261db289fb0e17c99c7e1773",
         "rewrite_module": true,
         "contract": false
       },
@@ -273,6 +305,14 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/cli_scan.go",
+        "target": "internal/modkit/cli_scan.go",
+        "class": "go",
+        "sha256": "4adaeb884e9ccef76538bde81f8e67ddbae440cf34e9406e656ac41fbc1c6b45",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/modkit/codec.go",
         "target": "internal/modkit/codec.go",
         "class": "go",
@@ -284,7 +324,7 @@
         "source": "internal/modkit/compose.go",
         "target": "internal/modkit/compose.go",
         "class": "go",
-        "sha256": "83115a7c63272285be0a15eeef9227a0ff799215ceb3eb7b8d19ce0a8b6922c5",
+        "sha256": "0f0262a6d937e5337a6d3cf6fbd20fd0782658cab91f0104e99615d44aae0a2d",
         "rewrite_module": true,
         "contract": true
       },
@@ -356,7 +396,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "0f23e869860c55156ef511bbaec4c437682e271b565efa24d348936b9948de7d",
+        "sha256": "dbec592a9f425809e2a78ed8949f6c9593080b5a08e5b3580550ca2047b2c242",
         "rewrite_module": true,
         "contract": false
       },
@@ -476,7 +516,7 @@
         "source": "internal/modkit/operation.go",
         "target": "internal/modkit/operation.go",
         "class": "go",
-        "sha256": "eec01224b400f3b4ea761e962a18f62a6566c6769a6cdaeb6170f26285dfd5a6",
+        "sha256": "c132dd5c136b863c36600b7d7fad6390162e6cfc8a2db90b18a70e2bde4ed8ff",
         "rewrite_module": true,
         "contract": false
       },
@@ -492,7 +532,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "e4a4d527de6552a5f4b45576d48a4f252b183ab9243c2e2c27eb72f7bea066f1",
+        "sha256": "d0348cdc286a464228bd775f0cd71a4d1edd522f0386124922dddc390e2da10e",
         "rewrite_module": true,
         "contract": true
       },
@@ -524,7 +564,7 @@
         "source": "internal/modkit/reconcile.go",
         "target": "internal/modkit/reconcile.go",
         "class": "go",
-        "sha256": "67232ef2d97216f845b17ec8d71602a759c90f967d6ac3ac7e5dd6f974951ce5",
+        "sha256": "56dbdb74aebd14c88f52d01cda151e815482ad3a80f3fad49226a080b799d76d",
         "rewrite_module": true,
         "contract": false
       },
@@ -735,13 +775,38 @@
         "sha256": "d58a04b7976d4af75f0b26ca7a4103d73271cd04e90baf69b754430e950fd7b3",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/remote/env.go",
+        "target": "internal/remote/env.go",
+        "class": "go",
+        "sha256": "5ec4732c8bf8dc76399f66481dfbcce6030dd16cc12a256fd084e3b2d8095956",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/remote/remote.go",
+        "target": "internal/remote/remote.go",
+        "class": "go",
+        "sha256": "468ec17b9419f9053d3b0b534feb2ed305d79b815c3e5faab5113660115ec823",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/remote/state.go",
+        "target": "internal/remote/state.go",
+        "class": "go",
+        "sha256": "3ced42ec04cafa388e505d60968ea543e33ffc797f266de1356e8ee6725a733d",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
     "claims": {
       "packages": [
         "cmd/ggg",
         "internal/gggcli",
-        "internal/modkit"
+        "internal/modkit",
+        "internal/remote"
       ]
     },
     "runtime": {},

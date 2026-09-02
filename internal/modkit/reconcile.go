@@ -7,6 +7,7 @@ import (
 	"os"
 	pathpkg "path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -168,6 +169,7 @@ func reconcilePlannedState(
 	existing Lock,
 	hasLock bool,
 	claims map[string]struct{},
+	retire map[string]struct{},
 ) (Lock, []Change, []Conflict, []StagedFile, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
 	// claim them, so a manifest that points at a registry-owned artifact is a
@@ -260,11 +262,22 @@ func reconcilePlannedState(
 	for _, module := range graph.modules {
 		newModules[module.ID] = module
 	}
+	retiredTombstones := make([]LockedModule, 0, len(retire))
+	retiredChanges := make([]Change, 0)
 	for id, module := range oldModules {
 		if module.Reason == TombstoneReason {
 			continue
 		}
 		if _, selected := newModules[id]; !selected {
+			if _, retiring := retire[id]; retiring {
+				tombstone, deletions, err := planRetirement(ctx, root, id, module)
+				if err != nil {
+					return Lock{}, nil, nil, nil, nil, err
+				}
+				retiredTombstones = append(retiredTombstones, *tombstone)
+				retiredChanges = append(retiredChanges, deletions...)
+				continue
+			}
 			return Lock{}, nil, nil, nil, nil, fmt.Errorf(
 				"module %s is installed but no longer selected; removal planning is required", id,
 			)
@@ -483,6 +496,7 @@ func reconcilePlannedState(
 		return Lock{}, nil, nil, nil, nil, err
 	}
 	changes = append(changes, migrationChanges...)
+	changes = append(changes, retiredChanges...)
 
 	finalGraph := selectedGraph{modules: effectiveList, order: order, reasons: graph.reasons}
 	finalLock := buildReconciledLock(snapshot.Commit, finalGraph, states, migrationFiles)
@@ -498,6 +512,10 @@ func reconcilePlannedState(
 		}
 		finalLock.Modules = append(finalLock.Modules, module)
 		finalLock.Order = append(finalLock.Order, module.ID)
+	}
+	for _, tombstone := range retiredTombstones {
+		finalLock.Modules = append(finalLock.Modules, tombstone)
+		finalLock.Order = append(finalLock.Order, tombstone.ID)
 	}
 	sort.Slice(finalLock.Modules, func(i, j int) bool { return finalLock.Modules[i].ID < finalLock.Modules[j].ID })
 	return finalLock, changes, conflicts, staged, diagnostics, nil
@@ -739,4 +757,69 @@ func sortPlanOutputs(changes []Change, conflicts []Conflict, staged []StagedFile
 		return conflicts[i].Path < conflicts[j].Path
 	})
 	sort.Slice(staged, func(i, j int) bool { return staged[i].Path < staged[j].Path })
+}
+
+// planRetirement is the in-transaction removal of a module this plan itself
+// deselected — the deployment module a `deployment set` replacement leaves
+// behind. It deletes the module's authored files (whose bytes must match the
+// lock: a modified file is a human decision, not a side effect) and hands
+// back the tombstone that preserves identity and any migration ledger.
+func planRetirement(ctx context.Context, root, id string, module LockedModule) (*LockedModule, []Change, error) {
+	changes := make([]Change, 0)
+	for _, file := range module.Files {
+		if err := ctx.Err(); err != nil {
+			return nil, nil, err
+		}
+		_, digest, missing, err := CurrentTargetState(root, file.Path)
+		if err != nil {
+			return nil, nil, err
+		}
+		if missing {
+			return nil, nil, fmt.Errorf("owned file %s of module %s is missing; restore it before replacing the deployment", file.Path, id)
+		}
+		if digest != file.BaseSHA256 {
+			return nil, nil, fmt.Errorf("module %s owns locally modified file %s; resolve it before replacing the deployment", id, file.Path)
+		}
+		changes = append(changes, Change{
+			Path: file.Path, Module: id, Source: file.Source,
+			Kind: ChangeDelete, Class: DestinationAuthored, SHA256: file.BaseSHA256,
+		})
+	}
+	declared := make([]string, 0, len(changes))
+	for _, change := range changes {
+		declared = append(declared, change.Path)
+	}
+	owned := make([]string, 0, len(module.Files))
+	for _, file := range module.Files {
+		owned = append(owned, file.Path)
+	}
+	for _, path := range generatedSiblings(owned) {
+		if slices.Contains(declared, path) {
+			continue
+		}
+		_, digest, missing, err := CurrentTargetState(root, path)
+		if err != nil {
+			return nil, nil, err
+		}
+		if missing {
+			continue
+		}
+		changes = append(changes, Change{
+			Path: path, Module: id, Kind: ChangeDelete, Class: DestinationGenerated, SHA256: digest,
+		})
+		declared = append(declared, path)
+	}
+	tombstone := module
+	tombstone.Manifest.Files = []ManifestFile{}
+	tombstone.Manifest.Requires = []Requirement{}
+	tombstone.Manifest.Runtime = RuntimeContributions{}
+	tombstone.Manifest.Claims = NamespaceClaims{}
+	tombstone.Manifest.Environment = []EnvironmentVariable{}
+	tombstone.Manifest.Docs = []DocumentationRef{}
+	tombstone.Manifest.Tests = TestMetadata{}
+	tombstone.Files = []LockedFile{}
+	tombstone.Pending = nil
+	tombstone.Reason = TombstoneReason
+	tombstone.RequiredBy = []string{}
+	return &tombstone, changes, nil
 }

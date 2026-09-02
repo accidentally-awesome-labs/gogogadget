@@ -33,6 +33,9 @@ type App struct {
 	// name is skipped and reported on stderr; the built-in keeps its
 	// place and every other contributed command still serves.
 	Contributed []ContributedCommand
+	// Remote resolves the typed provisioner, deployer, and database
+	// operator registries the generated project-local registry supplies.
+	Remote RemoteRegistries
 }
 
 // Run executes the command described by args and returns the error whose exit
@@ -61,7 +64,7 @@ func (a App) Run(ctx context.Context, args []string) error {
 	for _, name := range nameConflicts {
 		fmt.Fprintf(errOut, "warning: contributed command %q collides with a reserved built-in name and was skipped\n", name)
 	}
-	controller := NewController(ControllerOptions{Root: a.Root, Version: a.Version, Engine: a.Engine, WriteFile: a.WriteFile, Table: table})
+	controller := NewController(ControllerOptions{Root: a.Root, Version: a.Version, Engine: a.Engine, WriteFile: a.WriteFile, Table: table, Remote: a.Remote})
 	interactive := IsTerminal(out) && IsTerminalReader(in)
 
 	if len(argv) == 0 {
@@ -110,6 +113,7 @@ func (a App) Run(ctx context.Context, args []string) error {
 	}
 
 	handler := a.handlerFor(name)
+	ctx = withCommandContext(ctx, cc)
 	result, err := handler(ctx, cc, rest)
 	if err != nil {
 		// A failed command that produced an envelope emits it exactly once,

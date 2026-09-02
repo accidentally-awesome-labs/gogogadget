@@ -24,4 +24,14 @@ type Operation struct {
 	// blocks adoption; claiming it adopts the local bytes as a recorded
 	// modification instead of overwriting them or calling them pristine.
 	Claims []string
+	// SetDeployment replaces the project's deployment selection as part of one
+	// planned transaction: the newly selected deploy module enters the graph
+	// with reason "deployment" and the previously selected one is retired in
+	// the same plan — its authored files deleted, its migration ledger
+	// tombstoned — because a tree cannot carry two selected deploy modules.
+	SetDeployment string
+	// SetProviders replaces the project's provider selections in the same
+	// planned transaction. Adapters the new selections stop selecting are
+	// retired exactly like a replaced deployment module.
+	SetProviders map[string]ProviderSelections
 }

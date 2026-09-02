@@ -24,6 +24,7 @@ func run(args []string) error {
 		Err:         os.Stderr,
 		Version:     version,
 		Contributed: commands.CLICommands(),
+		Remote:      commands.RemoteRegistries(),
 	}
 	return app.Run(context.Background(), args)
 }

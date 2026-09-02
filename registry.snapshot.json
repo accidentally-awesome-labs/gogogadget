@@ -896,7 +896,7 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "f7df7be96058eedd93d719e6f78eefa36d1f3c46ef869e6f70d802d08c3f37cb"
+      "sha256": "347d185309f29258abfb24a7b7e3acad67f5bc887f70d8fd6a449c71276e25d3"
     },
     {
       "path": "registry/modules/system/database/module.json",
@@ -904,11 +904,11 @@
     },
     {
       "path": "registry/modules/system/deploy-docker/module.json",
-      "sha256": "64db61867d1c35e7d3f92d824d29d66449bbcd03d4ad6a2efeb025d7dca2c4d3"
+      "sha256": "252a9ee6675cd773db72bd61c00ce60325703d09c4daf8a16c13196cd53b5e61"
     },
     {
       "path": "registry/modules/system/deploy-fly/module.json",
-      "sha256": "ce7abdae767a72fe7b4b8ef7ae659c09f0f2635a94f54b5cfda15dd1f463a831"
+      "sha256": "a7a8288f9f253f9649acccc03fb6ad5f204c80bc953f5063fa6240b3eb2ab822"
     },
     {
       "path": "registry/modules/system/dev-tools/module.json",
@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "97413c99e45de55df8677f56ad0d784a6745214323e75181532848b2f8ceab3a"
+      "sha256": "60534f1bdc875648d3d36cc1695a6bfa5da6544767eaf70eedf02adc0375395d"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

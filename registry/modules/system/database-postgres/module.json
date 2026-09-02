@@ -48,6 +48,22 @@
     },
     "files": [
       {
+        "source": "internal/database/ops/docker/docker.go",
+        "target": "internal/database/ops/docker/docker.go",
+        "class": "go",
+        "sha256": "83fcf4f98dd93b2f0b590a0fd459df446c509153f1ffc053b3288b6df5fd2c92",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/database/ops/docker/exec.go",
+        "target": "internal/database/ops/docker/exec.go",
+        "class": "go",
+        "sha256": "0dfd9b7b9d167609c21aa7b4270d41a11025021c1a2457990133b734b1b239a5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/database/postgres/postgres.go",
         "target": "internal/database/postgres/postgres.go",
         "class": "go",
@@ -62,11 +78,27 @@
         "sha256": "17ed9ea8c20b801c6dfeb43ef3d353cb4526d0f61c3d345dbd649fc98fb73cc2",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/provision/neon/neon.go",
+        "target": "internal/provision/neon/neon.go",
+        "class": "go",
+        "sha256": "823309119ebc69b57dd8808a696a8a4c1f98ec3c9a88df1114b9f332085b3900",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
     "claims": {
       "packages": [
-        "internal/database/postgres"
+        "internal/database/ops/docker",
+        "internal/database/postgres",
+        "internal/provision/neon"
+      ],
+      "provisioners": [
+        "neon_provisioner"
+      ],
+      "database_ops": [
+        "docker_operator"
       ]
     },
     "runtime": {
@@ -156,7 +188,8 @@
                   "port": 5432,
                   "command": "pg_isready -U postgres"
                 }
-              }
+              },
+              "database_operator": "docker_operator"
             },
             {
               "id": "neon",
@@ -165,17 +198,72 @@
               "environments": [
                 "production"
               ],
-              "automation": "manual",
+              "automation": "provision",
               "docs_url": "https://gogogadget.dev/docs/providers/neon",
               "console_url": "https://console.neon.tech",
-              "inputs": []
+              "inputs": [
+                {
+                  "key": "project_id",
+                  "env_key": "NEON_PROJECT_ID",
+                  "label": "Existing Neon project id (leave unset to provision one)",
+                  "type": "string",
+                  "required": false,
+                  "secret": false
+                },
+                {
+                  "key": "api_key",
+                  "env_key": "NEON_API_KEY",
+                  "label": "Neon API key",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                }
+              ],
+              "provisioner": "neon_provisioner"
             }
           ]
         }
-      }
+      },
+      "provisioners": [
+        {
+          "id": "neon_provisioner",
+          "package": "internal/provision/neon",
+          "constructor": "NewProvisioner"
+        }
+      ],
+      "database_ops": [
+        {
+          "id": "docker_operator",
+          "package": "internal/database/ops/docker",
+          "constructor": "NewOperator"
+        }
+      ]
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "NEON_API_KEY",
+        "field": "NeonAPIKey",
+        "type": "string",
+        "description": "Neon API key for provisioning",
+        "required": true,
+        "secret": true,
+        "targets": [
+          "ggg/system/database-postgres@neon"
+        ]
+      },
+      {
+        "key": "NEON_PROJECT_ID",
+        "field": "NeonProjectID",
+        "type": "string",
+        "description": "Existing Neon project id; leave unset to provision one",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/database-postgres@neon"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

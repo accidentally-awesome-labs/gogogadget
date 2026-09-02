@@ -26,6 +26,8 @@ degradation behave.
 | `POSTHOG_API_KEY` | `ggg/system/analytics-posthog` |  |  | Posthog Api Key. Secret: ships blank in `.env.example` |
 | `POSTHOG_HOST` | `ggg/system/analytics-posthog` |  |  | Posthog Host |
 | `DATABASE_URL` | `ggg/system/database` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
+| `NEON_API_KEY` | `ggg/system/database-postgres` | **always** |  | Neon API key for provisioning. Secret: ships blank in `.env.example` |
+| `NEON_PROJECT_ID` | `ggg/system/database-postgres` |  |  | Existing Neon project id; leave unset to provision one |
 | `LLM_API_KEY` | `ggg/system/llm-openai-compatible` |  |  | Llm Api Key. Secret: ships blank in `.env.example` |
 | `LLM_BASE_URL` | `ggg/system/llm-openai-compatible` |  |  | Llm Base Url |
 | `LLM_MODEL` | `ggg/system/llm-openai-compatible` |  |  | Llm Model |

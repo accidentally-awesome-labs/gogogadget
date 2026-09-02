@@ -29,6 +29,11 @@ type Controller struct {
 	// sealed HelpRequest/CompletionRequest and the `help`/`completion`
 	// handlers can never diverge. Nil means the built-ins only.
 	table []CommandSpec
+	// remoteReg resolves the typed provisioner/deployer/database-operator
+	// registries the generated project-local registry supplies. Provider
+	// and deploy modules execute only through these — never through command
+	// handlers.
+	remoteReg RemoteRegistries
 }
 
 // ControllerOptions configures a Controller.
@@ -47,6 +52,10 @@ type ControllerOptions struct {
 	// Table is the assembled command table — built-ins plus contributed
 	// commands. Help and completion requests render from it.
 	Table []CommandSpec
+	// Remote resolves the typed provisioner, deployer, and database
+	// operator registries. Nil lookups report every module as not
+	// installed, which remote commands surface as refusals.
+	Remote RemoteRegistries
 }
 
 // NewController constructs the command platform's single controller.
@@ -58,6 +67,7 @@ func NewController(opts ControllerOptions) *Controller {
 		writeFile:  opts.WriteFile,
 		taskRunner: opts.TaskRunner,
 		table:      opts.Table,
+		remoteReg:  opts.Remote,
 	}
 }
 
@@ -190,14 +200,17 @@ func (c *Controller) Execute(ctx context.Context, req Request) (Result, error) {
 	case RegistryReadRequest:
 		return c.executeRegistryValidate(ctx, request)
 
+	case ProviderListRequest:
+		return c.executeProviderList(request)
+
 	case ProviderTestRequest:
-		return Result{}, errNotAvailable("provider test", "it ships with the provider provisioning slice")
+		return c.executeProviderTest(ctx, request)
 
 	case DeployStatusRequest:
-		return Result{}, errNotAvailable("deploy status", "it ships with the deployment slice")
+		return c.executeDeployStatus(ctx, request)
 
 	case DeployLogsRequest:
-		return Result{}, errNotAvailable("deploy logs", "it ships with the deployment slice")
+		return c.executeDeployLogs(ctx, ccForLogs(ctx), request)
 
 	default:
 		return Result{}, usageError("unsupported request")
@@ -250,22 +263,32 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		return c.previewNew(ctx, mutation)
 
 	case ProviderSetMutation:
-		return Plan{}, errNotAvailable("provider selection", "it ships with the provider provisioning slice")
+		return c.previewProviderSet(ctx, mutation)
 
 	case DeploymentSetMutation:
-		return Plan{}, errNotAvailable("deployment selection", "it ships with the deployment slice")
+		return c.previewDeploymentSet(ctx, mutation)
 
 	case CreateMutation:
 		return c.previewCreate(ctx, mutation)
 
 	case ProviderRemoteMutation:
-		return Plan{}, errNotAvailable("provider provisioning", "it ships with the provider provisioning slice")
+		switch mutation.Action {
+		case "provision":
+			return c.previewProviderProvision(ctx, mutation)
+		case "configure":
+			return c.previewProviderConfigure(ctx, mutation)
+		default:
+			return Plan{}, usageError("provider action must be provision or configure")
+		}
 
 	case DeployRemoteMutation:
-		return Plan{}, errNotAvailable("deployment", "it ships with the deployment slice")
+		return c.previewDeploy(ctx, mutation)
+
+	case DatabaseOpsMutation:
+		return c.previewDatabaseOps(ctx, mutation)
 
 	case DoctorFixMutation:
-		return Plan{}, errNotAvailable("doctor fix", "it ships with the doctor --fix slice")
+		return Plan{Command: "doctor fix", mutation: mutation}, nil
 
 	default:
 		return Plan{}, usageError("unsupported mutation")
@@ -284,6 +307,23 @@ func (c *Controller) Apply(ctx context.Context, plan Plan) (Result, error) {
 	}
 	if plan.create != nil {
 		return c.applyCreate(ctx, plan)
+	}
+	if mutation, ok := plan.mutation.(ProviderRemoteMutation); ok {
+		switch mutation.Action {
+		case "provision":
+			return c.applyProviderProvision(ctx, ccForApply(ctx), plan, mutation)
+		case "configure":
+			return c.applyProviderConfigure(ctx, ccForApply(ctx), plan, mutation)
+		}
+	}
+	if mutation, ok := plan.mutation.(DeployRemoteMutation); ok {
+		return c.applyDeploy(ctx, ccForApply(ctx), plan, mutation)
+	}
+	if mutation, ok := plan.mutation.(DatabaseOpsMutation); ok {
+		return c.applyDatabaseOps(ctx, ccForApply(ctx), plan, mutation)
+	}
+	if mutation, ok := plan.mutation.(DoctorFixMutation); ok {
+		return c.applyDoctorFix(ctx, plan, mutation)
 	}
 	if mutation, ok := plan.mutation.(TaskMutation); ok {
 		switch mutation.Task {

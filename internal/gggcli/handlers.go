@@ -130,6 +130,9 @@ func builtInHandlers() map[string]CommandHandler {
 		"migrate":    runMigrate,
 		"cache":      runCache,
 		"registry":   runRegistry,
+		"provider":   runProvider,
+		"deployment": runDeployment,
+		"deploy":     runDeploy,
 		"help":       runHelp,
 		"completion": runCompletion,
 	}
@@ -212,7 +215,31 @@ func runDoctor(ctx context.Context, cc CommandContext, args []string) (Result, e
 	if len(parsed.positional) != 0 {
 		return Result{}, usageError(spec.Usage)
 	}
-	return cc.Controller.Execute(ctx, DoctorRequest{})
+	if parsed.Bool("fix") {
+		mutation := DoctorFixMutation{
+			FindingCode: parsed.value("finding", ""),
+			Yes:         parsed.Bool("yes"),
+		}
+		if mutation.FindingCode == "" {
+			return Result{}, usageError("doctor --fix requires --finding CODE naming the finding to remediate")
+		}
+		if !mutation.Yes {
+			return Result{}, refusalError(errors.New("doctor fix: noninteractive runs require --yes"))
+		}
+		plan, err := cc.Controller.Preview(ctx, mutation)
+		if err != nil {
+			return Result{}, err
+		}
+		result, err := cc.Controller.Apply(ctx, plan)
+		if err != nil {
+			if result.Envelope.Command == "" {
+				result.Envelope.Command = "doctor fix"
+			}
+			return Result{Envelope: normalizeEnvelope(result.Envelope), Payload: result.Payload}, err
+		}
+		return Result{Envelope: normalizeEnvelope(result.Envelope), Payload: result.Payload}, nil
+	}
+	return cc.Controller.Execute(ctx, DoctorRequest{Runtime: parsed.Bool("runtime")})
 }
 
 // runGraphMutation drives add/remove/update. All three edit intent and

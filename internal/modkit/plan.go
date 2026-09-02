@@ -54,12 +54,35 @@ const (
 type DestinationClass string
 
 const (
-	DestinationAuthored  DestinationClass = "authored"
-	DestinationMigration DestinationClass = "migration"
-	DestinationGenerated DestinationClass = "generated"
-	DestinationIntent    DestinationClass = "intent"
-	DestinationLock      DestinationClass = "lock"
+	DestinationAuthored   DestinationClass = "authored"
+	DestinationMigration  DestinationClass = "migration"
+	DestinationGenerated  DestinationClass = "generated"
+	DestinationIntent     DestinationClass = "intent"
+	DestinationLock       DestinationClass = "lock"
+	DestinationDependency DestinationClass = "dependency"
+	DestinationTool       DestinationClass = "tool"
+	DestinationContainer  DestinationClass = "container"
+	// DestinationRemote marks a provider-side or deployment-side change
+	// reported in the envelope: the change's path is a remote resource
+	// identity, not a file in the project tree.
+	DestinationRemote DestinationClass = "remote"
 )
+
+// RemoteChange is one provider-side or deployment-side change in the fixed
+// vocabulary shared with internal/remote. Paths follow the remote path
+// grammar (provider://<adapter>@<target>/<resource-id> or
+// deploy://<deploy-id>/<resource-id>); values are never included.
+type RemoteChange struct {
+	ChangeID        string           `json:"change_id"`
+	Path            string           `json:"path"`
+	Kind            string           `json:"kind"`
+	IdempotencyKey  string           `json:"idempotency_key"`
+	DesiredHash     string           `json:"desired_hash"`
+	ObservedVersion string           `json:"observed_version"`
+	DependsOn       []string         `json:"depends_on"`
+	SecretKeys      []string         `json:"secret_keys"`
+	Class           DestinationClass `json:"class"`
+}
 
 // Change is one deterministic destination classification.
 type Change struct {
@@ -181,6 +204,16 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	} else if op.RegistryRef != "" {
 		return Plan{}, fmt.Errorf("operation %q does not accept a registry ref", op.Kind)
 	}
+	previousDeployment := currentProject.Deployment
+	if op.SetProviders != nil {
+		desiredProject.Providers = maps.Clone(op.SetProviders)
+	}
+	if op.SetDeployment != "" {
+		if err := ValidateScopedProjectModuleID(op.SetDeployment); err != nil {
+			return Plan{}, fmt.Errorf("deployment module %q is not a valid scoped module id", op.SetDeployment)
+		}
+		desiredProject.Deployment = op.SetDeployment
+	}
 
 	if err := ctx.Err(); err != nil {
 		return Plan{}, err
@@ -225,6 +258,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
+	if err := ValidateCLIHandlerPackages(graph.modules, payloadsAsFiles(payloads)); err != nil {
+		return Plan{}, err
+	}
 	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
 	if op.Kind == OpInit || (op.Kind == OpSync && hasLock) {
 		if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {
@@ -255,8 +291,26 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
+	if op.SetDeployment != "" {
+		module, ok := moduleByID[op.SetDeployment]
+		if !ok {
+			return Plan{}, fmt.Errorf("deployment module %q is not present in the resolved registries", op.SetDeployment)
+		}
+		if module.Kind != ModuleSystem || module.Runtime.System == nil || len(module.Runtime.Deploy) != 1 {
+			return Plan{}, fmt.Errorf("deployment module %q must provide exactly one deploy target", op.SetDeployment)
+		}
+	}
+	retiring := map[string]struct{}{}
+	if op.SetDeployment != "" && previousDeployment != "" && previousDeployment != op.SetDeployment {
+		if _, installed := oldModuleByID(existingLock, previousDeployment); installed {
+			retiring[previousDeployment] = struct{}{}
+		}
+	}
+	for id := range retiredAdapters(existingLock, desiredProject) {
+		retiring[id] = struct{}{}
+	}
 	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims,
+		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims, retiring,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -454,4 +508,56 @@ func normalizedClaims(claims []string) (map[string]struct{}, error) {
 		normalized[trimmed] = struct{}{}
 	}
 	return normalized, nil
+}
+
+// retiredAdapters lists the adapters an explicit provider replacement stops
+// selecting: modules referenced by the committed lock's provider selections
+// that the desired selections no longer name. Retiring them keeps one
+// transaction honest — a replaced adapter's files leave with the selection,
+// never after it.
+func retiredAdapters(existing Lock, desired Project) map[string]struct{} {
+	retired := map[string]struct{}{}
+	if len(existing.Providers) == 0 {
+		return retired
+	}
+	oldSelected := map[string]struct{}{}
+	for _, selections := range existing.Providers {
+		for _, choice := range []ProviderSelection{selections.Development, selections.Test, selections.Production} {
+			if choice.Adapter != "" {
+				oldSelected[choice.Adapter] = struct{}{}
+			}
+		}
+	}
+	for _, selections := range desired.Providers {
+		for _, choice := range []ProviderSelection{selections.Development, selections.Test, selections.Production} {
+			delete(oldSelected, choice.Adapter)
+		}
+	}
+	for id := range oldSelected {
+		if _, installed := oldModuleByID(existing, id); installed {
+			retired[id] = struct{}{}
+		}
+	}
+	return retired
+}
+
+// oldModuleByID reports whether one module is installed (non-tombstone) in
+// the current lock.
+func oldModuleByID(lock Lock, id string) (LockedModule, bool) {
+	for _, module := range lock.Modules {
+		if module.ID == id && module.Reason != TombstoneReason {
+			return module, true
+		}
+	}
+	return LockedModule{}, false
+}
+
+// payloadsAsFiles projects planned payloads onto the (target, content) pairs
+// the CLI-handler scanner reads.
+func payloadsAsFiles(payloads []plannedAuthoredPayload) map[string][]byte {
+	files := make(map[string][]byte, len(payloads))
+	for _, payload := range payloads {
+		files[payload.file.Target] = payload.content
+	}
+	return files
 }

@@ -201,6 +201,19 @@ func runServices(ctx context.Context, cc CommandContext, args []string) (Result,
 
 func runDB(ctx context.Context, cc CommandContext, args []string) (Result, error) {
 	spec, _ := lookupSpec(builtInCommands(), "db")
+	if len(args) == 0 {
+		return Result{}, usageError(spec.Usage)
+	}
+	switch args[0] {
+	case "backup", "restore", "restore-drill":
+		return runDBOps(ctx, cc, spec, args)
+	default:
+		return runDBTask(ctx, cc, spec, args)
+	}
+}
+
+// runDBTask is the trusted-task path: migrate, status, seed, reset.
+func runDBTask(ctx context.Context, cc CommandContext, spec CommandSpec, args []string) (Result, error) {
 	parsed, err := parseArgv(spec, args)
 	if err != nil {
 		return Result{}, err
@@ -208,15 +221,51 @@ func runDB(ctx context.Context, cc CommandContext, args []string) (Result, error
 	if len(parsed.positional) != 1 {
 		return Result{}, usageError(spec.Usage)
 	}
-	mutation := TaskMutation{Task: "db", Action: parsed.positional[0], Environment: parsed.value("environment", "development"), Yes: parsed.Bool("yes")}
-	if mutation.Action == "reset" && !mutation.Yes && cc.Interactive && !cc.AsJSON {
-		answer, promptErr := readLine(cc, "Delete the database volume? Type reset: ")
-		if promptErr != nil || answer != "reset" {
-			return Result{}, ErrCancelled
-		}
-		mutation.Yes = true
+	action := parsed.positional[0]
+	if action != "migrate" && action != "status" && action != "seed" && action != "reset" {
+		return Result{}, usageError(spec.Usage)
+	}
+	mutation := TaskMutation{
+		Task: "db", Action: action,
+		Environment: parsed.value("environment", "development"),
+		Yes:         parsed.Bool("yes"),
 	}
 	return drivePlanMutation(ctx, cc, "db", mutation, false)
+}
+
+// runDBOps is the database-operator path: backup, restore, restore-drill.
+// Restore and drill are container mutations, so they follow the remote
+// plan/confirm contract; restore never overwrites the active database.
+func runDBOps(ctx context.Context, cc CommandContext, spec CommandSpec, args []string) (Result, error) {
+	parsed, err := parseArgv(spec, args)
+	if err != nil {
+		return Result{}, err
+	}
+	cc.AsJSON = cc.AsJSON || parsed.Bool("json")
+	yes := parsed.Bool("yes")
+	mutation := DatabaseOpsMutation{
+		Action:      parsed.positional[0],
+		Environment: parsed.value("environment", "development"),
+		Destination: parsed.value("destination", ""),
+		BackupID:    parsed.value("backup", ""),
+		DestURLKey:  parsed.value("to-env", ""),
+		Yes:         yes,
+	}
+	if mutation.Action == "backup" && mutation.Destination == "" {
+		return Result{}, usageError("db backup requires --destination PATH")
+	}
+	if mutation.Action == "restore" {
+		if err := requireRemoteConfirm(cc, yes, "db restore"); err != nil {
+			return Result{}, err
+		}
+	}
+	if mutation.Action == "restore-drill" {
+		if err := requireRemoteConfirm(cc, yes, "db restore-drill"); err != nil {
+			return Result{}, err
+		}
+	}
+	confirm := mutation.Action != "backup"
+	return driveRemoteMutation(ctx, cc, "db "+mutation.Action, mutation, "db "+mutation.Action, confirm && !yes)
 }
 
 func runTest(ctx context.Context, cc CommandContext, args []string) (Result, error) {
