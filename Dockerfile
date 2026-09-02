@@ -27,12 +27,13 @@ COPY --from=tools /usr/local/bin/tailwindcss /usr/local/bin/tailwindcss
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-# One definition of the pipeline: the same target CI and developers run, so the
-# CSS/sqlc/registry output baked into the image cannot drift from the Makefile.
-# TAILWIND override: the binary is on PATH here, and the build context may carry
-# a host bin/tailwindcss built for another OS. golang:1.26-bookworm ships GNU
-# Make 4.3, and --offline keeps ggg sync from needing the network.
-RUN make generate TAILWIND=tailwindcss
+# Generated outputs are baked in with direct tool calls: the ggg CLI depends on
+# bin/tailwindcss at the project-relative path, which is unavailable inside the
+# container (the tools stage puts it on PATH instead). templ and sqlc are go
+# tool directives resolved from go.mod, so they work with go build alone.
+RUN go tool templ generate ./... \
+ && go tool sqlc generate \
+ && tailwindcss -i input.css -o static/app.css --minify
 ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=${VERSION}" -o /out/server ./cmd/server
 
