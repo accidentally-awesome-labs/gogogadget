@@ -892,7 +892,7 @@
     },
     {
       "path": "registry/modules/system/content/module.json",
-      "sha256": "87242a6b87c5dbfcb184f8c5bcf23f97dd8be4662e11cf46cd555124c6292ea0"
+      "sha256": "83e03e76dba9ad9cca9d5f63832452ff963e3d1c8740b40f80ba093444bb435a"
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "b871565697c51225842eef4154d54c3b4182abf8dfc77c5b7d8cd664228b8850"
+      "sha256": "3ed7715ecf3d44ee5531fbc2ee923ec399bf6ecd14a36263785b406fe7b184e0"
     },
     {
       "path": "registry/modules/system/e2e/module.json",

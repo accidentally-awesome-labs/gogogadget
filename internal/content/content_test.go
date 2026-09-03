@@ -108,6 +108,33 @@ func TestLoadDocsGroupingAndOrder(t *testing.T) {
 	assert.Equal(t, "index", docs.Sections[0].Pages[0].Slug)
 }
 
+// A <pre> that overflows horizontally is a scrollable region, and axe fails an
+// unfocusable one (scrollable-region-focusable, WCAG 2.1.1) — which is how the
+// docs accessibility sweep caught this. Every code block the renderer emits
+// carries tabindex="0", so no page's line lengths can reintroduce it.
+func TestRenderMakesCodeBlocksKeyboardFocusable(t *testing.T) {
+	for name, src := range map[string]string{
+		"fenced":   "```sh\nggg provider set --slot ggg/mail\n```\n",
+		"unfenced": "    ggg provider set --slot ggg/mail\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			out, err := Render([]byte(src))
+			require.NoError(t, err)
+			assert.Contains(t, out, `<pre tabindex="0">`)
+			assert.NotContains(t, out, "<pre>", "an unfocusable code block cannot be scrolled by keyboard")
+			assert.Contains(t, out, "ggg provider set --slot ggg/mail")
+		})
+	}
+}
+
+func TestRenderKeepsCodeBlockBodiesEscaped(t *testing.T) {
+	out, err := Render([]byte("```html\n<script>alert(1)</script>\n```\n"))
+	require.NoError(t, err)
+	assert.Contains(t, out, `<pre tabindex="0"><code class="language-html">`)
+	assert.Contains(t, out, "&lt;script&gt;", "a code body is text, never markup")
+	assert.NotContains(t, out, "<script>")
+}
+
 func TestRSS(t *testing.T) {
 	posts, err := ParsePosts(testFS)
 	require.NoError(t, err)

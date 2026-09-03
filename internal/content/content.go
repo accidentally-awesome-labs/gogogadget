@@ -13,11 +13,72 @@ import (
 	"time"
 
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/util"
 	"gopkg.in/yaml.v3"
 )
 
-var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
+var md = goldmark.New(
+	goldmark.WithExtensions(extension.GFM),
+	goldmark.WithRendererOptions(renderer.WithNodeRenderers(
+		// Priority beats the default HTML renderer's 1000.
+		util.Prioritized(focusableCodeBlocks{}, 100),
+	)),
+)
+
+// focusableCodeBlocks renders code blocks as goldmark's default renderer does,
+// plus tabindex="0" on the <pre>.
+//
+// A <pre> that overflows horizontally is a scrollable region, and a scrollable
+// region that cannot be focused cannot be scrolled by keyboard at all — axe
+// reports it as scrollable-region-focusable (WCAG 2.1.1), which the docs
+// accessibility sweep fails on. Line length is not the fix: the next long
+// command re-breaks it. tabindex="0" needs no CSS, because input.css already
+// gives `[tabindex]:focus-visible` the global focus ring.
+type focusableCodeBlocks struct{}
+
+func (focusableCodeBlocks) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindCodeBlock, renderFocusableCodeBlock)
+	reg.Register(ast.KindFencedCodeBlock, renderFocusableFencedCodeBlock)
+}
+
+func renderFocusableCodeBlock(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		_, _ = w.WriteString("</code></pre>\n")
+		return ast.WalkContinue, nil
+	}
+	_, _ = w.WriteString(`<pre tabindex="0"><code>`)
+	writeCodeLines(w, source, n)
+	return ast.WalkContinue, nil
+}
+
+func renderFocusableFencedCodeBlock(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		_, _ = w.WriteString("</code></pre>\n")
+		return ast.WalkContinue, nil
+	}
+	_, _ = w.WriteString(`<pre tabindex="0"><code`)
+	if language := node.(*ast.FencedCodeBlock).Language(source); language != nil {
+		_, _ = w.WriteString(` class="language-`)
+		html.DefaultWriter.Write(w, language)
+		_, _ = w.WriteString(`"`)
+	}
+	_ = w.WriteByte('>')
+	writeCodeLines(w, source, node)
+	return ast.WalkContinue, nil
+}
+
+// writeCodeLines mirrors the default renderer's writeLines: the body is raw
+// text, escaped, never parsed as HTML.
+func writeCodeLines(w util.BufWriter, source []byte, n ast.Node) {
+	for i := range n.Lines().Len() {
+		line := n.Lines().At(i)
+		html.DefaultWriter.RawWrite(w, line.Value(source))
+	}
+}
 
 // Post is the blog view model: one live entry of the "post" content type,
 // projected from Entry.AsPost. The markdown seed corpus parses into the same

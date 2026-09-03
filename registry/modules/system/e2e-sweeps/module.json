@@ -663,7 +663,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-dark-desktop-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-dark-desktop-chromium-linux.png",
         "class": "test",
-        "sha256": "f950eae2a0d1c87c6411f76ec6256119559846b4a7975a10e5ddb92382cfc255",
+        "sha256": "4641f7510602e8a752f0331e592292c5604444a25816d15a94ea99656e89472b",
         "rewrite_module": false,
         "contract": false
       },
@@ -671,7 +671,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-dark-mobile-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-dark-mobile-chromium-linux.png",
         "class": "test",
-        "sha256": "f85a471f4590431feeb2d635e57ce79063cb0dc205f717ede1399e5ecf58a5e8",
+        "sha256": "8fcb8ac76581c745c971340d86c9d1a8ac6ab6e571f5ee6fb4e0d79621a89dd1",
         "rewrite_module": false,
         "contract": false
       },
@@ -679,7 +679,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-dark-tablet-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-dark-tablet-chromium-linux.png",
         "class": "test",
-        "sha256": "31de7442a3c6e06a3f217a63224872b1976d8967a22dd163fa43f3692c993668",
+        "sha256": "dd48cd346aa97154eaf6d7676aa4f4496ae206962569307918977ee90103c392",
         "rewrite_module": false,
         "contract": false
       },
@@ -687,7 +687,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-light-desktop-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-light-desktop-chromium-linux.png",
         "class": "test",
-        "sha256": "23fcfd00a0d76b01eb98d29363f42733c49813eef1de47565cb9c037a21f42f6",
+        "sha256": "7323811ca6802f133452e448cfe933268e87bfdca453fc6b8cd4c408f8880407",
         "rewrite_module": false,
         "contract": false
       },
@@ -695,7 +695,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-light-mobile-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-light-mobile-chromium-linux.png",
         "class": "test",
-        "sha256": "476f3a6496dd5825ef036a453b3a6716ee9e6ede5945b75245276f225a56c740",
+        "sha256": "5f45082986c527ab658f7206e0b795ac000d91be7a6f18eda052c0ce2e11d314",
         "rewrite_module": false,
         "contract": false
       },
@@ -703,7 +703,7 @@
         "source": "e2e/visual.spec.ts-snapshots/docs-light-tablet-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/docs-light-tablet-chromium-linux.png",
         "class": "test",
-        "sha256": "24591e949fb8e9c10ebde524d82db6e6d94cf41d66d66102969830f1229a2a7a",
+        "sha256": "af732ab99dbac4587dd58b47833f56f63cc11cbd3ebd94b9e82905b19f53ad8f",
         "rewrite_module": false,
         "contract": false
       },

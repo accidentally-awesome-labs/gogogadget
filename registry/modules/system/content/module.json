@@ -83,7 +83,7 @@
         "source": "internal/content/content.go",
         "target": "internal/content/content.go",
         "class": "go",
-        "sha256": "a7687b821f1537f9f340f6fc24213758fb9bf4a4d4505032c66cad5aa3148fe5",
+        "sha256": "4a43ee36df5971a2e3e89af3399c3ff75e5f2cd908b207674f9c8b2a98c09a3b",
         "rewrite_module": true,
         "contract": true
       },
@@ -91,7 +91,7 @@
         "source": "internal/content/content_test.go",
         "target": "internal/content/content_test.go",
         "class": "go",
-        "sha256": "d3746e1dd8afee7b0f969e92738539f34846277c68562882262d26b69346ea22",
+        "sha256": "e7d3052b582766f2787e06c2d0d2050a75caf0bd004d6cca967d2d10ff41305c",
         "rewrite_module": true,
         "contract": false
       },
