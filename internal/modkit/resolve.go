@@ -503,6 +503,11 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 				continue
 			}
 			for _, need := range module.Runtime.System.Needs {
+				if _, fromRuntime := runtimeProvidedCapabilities[need.Capability]; fromRuntime {
+					// The Runtime supplies these from itself, so they create no
+					// edge and never need a providing module.
+					continue
+				}
 				provider, ok := providers[need.Capability]
 				if !ok {
 					if need.Optional {

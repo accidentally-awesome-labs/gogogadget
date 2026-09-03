@@ -4,7 +4,7 @@
     "id": "ggg/system/apphost",
     "kind": "system",
     "name": "apphost",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Application host seam",
     "description": "Leaf ambient-environment seam (configuration lookup, logging, clock, version) that every runtime module is constructed against.",
@@ -19,7 +19,7 @@
         "source": "internal/apphost/apphost.go",
         "target": "internal/apphost/apphost.go",
         "class": "go",
-        "sha256": "c6b70582e517e069b37473cda5cc703719a015b4efe1fc862f046f4589bc2317",
+        "sha256": "fdb4a46001ab11979000d4c007e08adb3b40b1897cb138d150933305a8e856d2",
         "rewrite_module": true,
         "contract": true
       },

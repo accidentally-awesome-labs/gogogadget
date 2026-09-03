@@ -299,10 +299,19 @@ func orderedModules(lock Lock, graph []Manifest) []Manifest {
 	return ordered
 }
 
+// runtimeProvidedCapabilities are the capabilities the generated Runtime
+// supplies from itself rather than from a module constructor. They are not
+// ambient Options values — nothing outside Boot can produce them — so the
+// emitter seeds the provider map with the receiver expression instead.
+var runtimeProvidedCapabilities = map[string]string{"runtime.health": "apphost.HealthFunc(r.Health)"}
+
 // collectRootNeeds returns needs whose capability is not provided by any
 // module in the graph; these are ambient values supplied by Options.
 func collectRootNeeds(lock Lock, graph []Manifest) []RuntimeNeed {
-	provided := make(map[string]bool)
+	provided := make(map[string]bool, len(runtimeProvidedCapabilities))
+	for capability := range runtimeProvidedCapabilities {
+		provided[capability] = true
+	}
 	for _, m := range orderedModules(lock, graph) {
 		if m.Runtime.System != nil {
 			for _, p := range m.Runtime.System.Provides {
@@ -527,6 +536,9 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			b.WriteString("\tvar err error\n")
 		}
 		provider := map[string]string{}
+		for capability, expr := range runtimeProvidedCapabilities {
+			provider[capability] = expr
+		}
 		if configID != "" {
 			configModule := byID[configID]
 			for _, provide := range configModule.Runtime.System.Provides {

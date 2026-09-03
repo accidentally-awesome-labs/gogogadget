@@ -43,6 +43,9 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
 		Analytics: analytics.NoopCapturer{}, LLM: llmfake.Completer{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
 		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}},
+		Health: func(context.Context) apphost.HealthReport {
+			return apphost.HealthReport{Ready: true}
+		},
 	})
 	if err != nil {
 		t.Fatalf("NewModule: %v", err)
@@ -103,6 +106,13 @@ func TestNewModuleRejectsMissingCapabilityWithoutDatabase(t *testing.T) {
 			d.Flags = flags.NewDBEvaluator(base.Queries, time.Second)
 			return d
 		}, "server: observability reporter capability is required"},
+		{"health", func() Deps {
+			d := base
+			d.Storage = storagefs.NewDevStore(t.TempDir())
+			d.Flags = flags.NewDBEvaluator(base.Queries, time.Second)
+			d.Reporter = observability.NoopReporter{}
+			return d
+		}, "server: runtime health capability is required"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := NewModule(context.Background(), host, tc.deps())

@@ -310,12 +310,20 @@ the managed one" a tested statement rather than a configuration convention.
 
 ## Fuzz
 
-`make fuzz` runs `FuzzFakeVerifier` for 15s (session-token parsing — never
-panics, claims round-trip). It is CI-only; the `check` gate stays fast by
-decision. A second trust-boundary target,
-`FuzzSanitizeFilename` in `internal/mail/dev` (dev email filenames — output
-can never contain `/`, `\`, `..`, or NUL), exists and runs under
-`go test -fuzz`, but the `fuzz` target does not currently invoke it.
+`make fuzz` runs every trust-boundary fuzz target, `FUZZTIME` (default `8s`)
+each:
+
+| Target | Package | Invariant |
+|---|---|---|
+| `FuzzFakeVerifier` | `internal/identity` | session-token parsing never panics; claims round-trip |
+| `FuzzSanitizeFilename` | `internal/mail/dev` | a dev email filename can never contain `/`, `\`, `..` or NUL |
+
+The gate is CI-only; the `check` gate stays fast by decision. A fuzz target no
+gate invokes is an unfuzzed parser, so
+`TestFuzzGateInvokesEveryFuzzTarget` in `internal/modkit` scans every
+`_test.go` in the tree for `func FuzzXxx` and fails when the `fuzz` recipe does
+not name it. Adding a target to the tree is therefore all it takes to add it to
+the gate — the check is against the declared targets, never a count.
 
 ## Deliberately absent
 

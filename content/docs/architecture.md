@@ -108,7 +108,11 @@ satisfy `apphost.HealthChecker`, and the generator emits a compile-time
 assignment proving it. `Runtime.Health(ctx)` aggregates every registered check
 concurrently with a 2-second deadline, recovers a panicking check as
 unhealthy, caches the report for 10 seconds, and reports `Ready` false only
-when a **critical** slot's check fails.
+when a **critical** slot's check fails. The report is handed to the HTTP
+surface as the `runtime.health` capability — the one capability the Runtime
+supplies from itself rather than from a module — and `GET /readyz` is its
+consumer: an unhealthy critical slot is a 503 naming the slot, an unhealthy
+non-critical slot is a 200 reporting it degraded.
 
 ### 5. Provider slots select adapters per environment
 
@@ -174,17 +178,26 @@ request
 └─ MaxBytesReader (10 MB cap, every route)
    └─ provider environment (APP_ENV into the template context)
       └─ telemetry.HTTP   span + duration attributes
-         └─ routeBodyLimit   narrows to RoutePolicy.MaxBodyBytes where a route declares a tighter cap
-            └─ requestID   16-byte hex id, exposed as X-Request-Id
-               └─ accessLog   one slog line per request (5xx at ERROR)
-                  └─ i18n.Detect   ?lang= → ggg_lang cookie → Accept-Language → en
-                     └─ maintenanceMode   MAINTENANCE_MODE=true → 503 (JSON under /api/); probes + /static/ exempt
-                        └─ rateLimit   per-IP token bucket
-                           └─ secureHeaders   strict CSP, nosniff, frame/permission policies, HSTS in prod
-                              └─ sessionLoad   verify the session cookie (optional; absent → unauthenticated)
-                                 └─ csrf (nosurf)   exempt: /webhooks/* /api/* /ingest/* /healthz /readyz /static/*
-                                    └─ routes
+         └─ recover   panic → the 500 page + one observability.Reporter capture
+            └─ routeBodyLimit   narrows to RoutePolicy.MaxBodyBytes where a route declares a tighter cap
+               └─ requestID   16-byte hex id, exposed as X-Request-Id
+                  └─ accessLog   one slog line per request (5xx at ERROR)
+                     └─ i18n.Detect   ?lang= → ggg_lang cookie → Accept-Language → en
+                        └─ maintenanceMode   MAINTENANCE_MODE=true → 503 (JSON under /api/); probes + /static/ exempt
+                           └─ rateLimit   per-IP token bucket
+                              └─ secureHeaders   strict CSP, nosniff, frame/permission policies, HSTS in prod
+                                 └─ sessionLoad   verify the session cookie (optional; absent → unauthenticated)
+                                    └─ csrf (nosurf)   exempt: /webhooks/* /api/* /ingest/* /healthz /readyz /static/*
+                                       └─ routes
 ```
+
+`recover` sits outside every named middleware and inside the global body cap,
+so a panic in a handler, in csrf, or in the session loader is a rendered 500
+rather than a dropped connection. It is inside the telemetry span and the
+provider-environment wrapper on purpose: the error page renders with the same
+chrome context every other page gets, and the span closes on the recovered 500
+instead of unwinding through a panic. Outside production the page carries the
+panic and its stack.
 
 Inside routing, three guarded groups wrap their own chains:
 

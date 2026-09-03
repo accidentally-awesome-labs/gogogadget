@@ -230,6 +230,8 @@ func (a App) render(cc CommandContext, command string, result Result) error {
 		return renderRegistry(cc.Out, result)
 	case "diff":
 		return renderDiff(cc.Out, result.Payload)
+	case "provider", "deploy":
+		return renderRemote(cc.Out, result)
 	default:
 		return renderHuman(cc.Out, result.Envelope)
 	}

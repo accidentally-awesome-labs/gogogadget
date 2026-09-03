@@ -2,6 +2,10 @@
 
 GGG := bin/ggg
 
+# FUZZTIME is per fuzz target, so `make fuzz` stays bounded at the number of
+# targets times this. CI overrides it for a longer soak.
+FUZZTIME ?= 8s
+
 $(GGG):
 	go build -o $(GGG) ./cmd/ggg
 
@@ -46,8 +50,12 @@ services-down: $(GGG)
 
 # Compatibility gates retained as single fixed operations until their dedicated
 # typed modes are promoted; orchestration lives in ggg, never in Make.
+#
+# Every trust-boundary fuzz target runs in this one gate: a target no gate
+# invokes is an unfuzzed parser.
 fuzz:
-	go test -run=^$$ -fuzz=FuzzFakeVerifier -fuzztime=15s ./internal/identity/
+	go test -run=^$$ -fuzz=FuzzFakeVerifier -fuzztime=$(FUZZTIME) ./internal/identity/
+	go test -run=^$$ -fuzz=FuzzSanitizeFilename -fuzztime=$(FUZZTIME) ./internal/mail/dev/
 
 e2e-ui:
 	cd e2e && npx playwright test --ui

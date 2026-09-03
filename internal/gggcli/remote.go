@@ -288,6 +288,174 @@ func remoteChangeKind(kind string) modkit.ChangeKind {
 	}
 }
 
+// renderRemote is the human rendering for the read-only provider and deploy
+// commands. Their results are payload-shaped — the fixed envelope carries no
+// rows for them — so renderHuman alone would print nothing at all. The JSON
+// envelope is untouched: this reads exactly the same payload keys, so the two
+// renderings cannot disagree. Every mutating provider/deploy command still
+// falls through to the envelope rendering.
+func renderRemote(out io.Writer, result Result) error {
+	switch result.Envelope.Command {
+	case "provider list":
+		return renderProviderList(out, result)
+	case "provider test":
+		return renderProviderTest(out, result)
+	case "deploy plan":
+		return renderDeployPlan(out, result)
+	case "deploy status":
+		return renderDeployStatus(out, result)
+	default:
+		return renderHuman(out, result.Envelope)
+	}
+}
+
+// renderProviderList prints one line per slot and environment: the selected
+// adapter@target, the target's mode and automation, and the declared input
+// key names — never values.
+func renderProviderList(out io.Writer, result Result) error {
+	rows, _ := result.Payload["providers"].([]map[string]any)
+	for _, row := range rows {
+		slot, _ := row["slot"].(string)
+		environments, _ := row["environments"].(map[string]any)
+		for _, environment := range []string{"development", "test", "production"} {
+			selection, _ := environments[environment].(map[string]any)
+			if selection == nil {
+				continue
+			}
+			if failure, bad := selection["error"].(string); bad {
+				if _, err := fmt.Fprintf(out, "%-22s %-12s unresolved  %s\n", slot, environment, failure); err != nil {
+					return err
+				}
+				continue
+			}
+			adapter, _ := selection["adapter"].(string)
+			target, _ := selection["target"].(string)
+			mode, _ := selection["mode"].(string)
+			automation, _ := selection["automation"].(string)
+			inputs, _ := selection["inputs"].([]string)
+			line := fmt.Sprintf("%-22s %-12s %s@%s  %s/%s", slot, environment, adapter, target, mode, automation)
+			if len(inputs) > 0 {
+				line += "  inputs: " + strings.Join(inputs, ", ")
+			}
+			if _, err := fmt.Fprintln(out, line); err != nil {
+				return err
+			}
+		}
+	}
+	return renderHuman(out, result.Envelope)
+}
+
+// renderProviderTest prints the probed selection and its verdict: the
+// observed state for a provisioner-backed target, or the configured and
+// missing key names for a declarative one.
+func renderProviderTest(out io.Writer, result Result) error {
+	payload := result.Payload
+	slot, _ := payload["slot"].(string)
+	environment, _ := payload["environment"].(string)
+	adapter, _ := payload["adapter"].(string)
+	target, _ := payload["target"].(string)
+	if _, err := fmt.Fprintf(out, "%s %s  %s@%s\n", slot, environment, adapter, target); err != nil {
+		return err
+	}
+	if state, ok := payload["state"].(string); ok {
+		healthy, _ := payload["healthy"].(bool)
+		message, _ := payload["message"].(string)
+		verdict := "unhealthy"
+		if healthy {
+			verdict = "healthy"
+		}
+		if _, err := fmt.Fprintf(out, "  %-10s %s %s\n", verdict, state, message); err != nil {
+			return err
+		}
+		return renderHuman(out, result.Envelope)
+	}
+	if automation, ok := payload["automation"].(string); ok {
+		if _, err := fmt.Fprintf(out, "  automation %s\n", automation); err != nil {
+			return err
+		}
+	}
+	for _, key := range []string{"configured", "missing"} {
+		names, _ := payload[key].([]string)
+		if len(names) == 0 {
+			continue
+		}
+		if _, err := fmt.Fprintf(out, "  %-10s %s\n", key, strings.Join(names, ", ")); err != nil {
+			return err
+		}
+	}
+	return renderHuman(out, result.Envelope)
+}
+
+// renderDeployPlan prints the ordered change set: the plan and observed
+// hashes the later apply is confirmed against, then one line per change with
+// its canonical remote path. Secret keys appear by name only.
+func renderDeployPlan(out io.Writer, result Result) error {
+	plan, _ := result.Payload["deploy_plan"].(map[string]any)
+	if plan == nil {
+		return renderHuman(out, result.Envelope)
+	}
+	module, _ := plan["module"].(string)
+	target, _ := plan["target"].(string)
+	environment, _ := plan["environment"].(string)
+	planHash, _ := plan["plan_hash"].(string)
+	observed, _ := plan["observed_state_hash"].(string)
+	if _, err := fmt.Fprintf(out, "%s (%s) %s\n", module, target, environment); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(out, "  plan     %s\n  observed %s\n", planHash, observed); err != nil {
+		return err
+	}
+	changes, _ := plan["changes"].([]map[string]any)
+	for _, change := range changes {
+		kind, _ := change["kind"].(string)
+		path, _ := change["path"].(string)
+		line := fmt.Sprintf("  %-12s %s", kind, path)
+		if keys, _ := change["secret_keys"].([]string); len(keys) > 0 {
+			line += "  secrets: " + strings.Join(keys, ", ")
+		}
+		if _, err := fmt.Fprintln(out, line); err != nil {
+			return err
+		}
+	}
+	if len(changes) == 0 {
+		if _, err := fmt.Fprintln(out, "  no changes"); err != nil {
+			return err
+		}
+	}
+	return renderHuman(out, result.Envelope)
+}
+
+// renderDeployStatus prints the authoritative observation of one deployment
+// environment.
+func renderDeployStatus(out io.Writer, result Result) error {
+	status, _ := result.Payload["deployment"].(map[string]any)
+	if status == nil {
+		return renderHuman(out, result.Envelope)
+	}
+	module, _ := status["module"].(string)
+	target, _ := status["target"].(string)
+	environment, _ := status["environment"].(string)
+	state, _ := status["state"].(string)
+	ready, _ := status["ready"].(bool)
+	readiness := "not ready"
+	if ready {
+		readiness = "ready"
+	}
+	if _, err := fmt.Fprintf(out, "%s (%s) %s\n  %-10s %s\n", module, target, environment, readiness, state); err != nil {
+		return err
+	}
+	for _, key := range []string{"release_id", "url", "observed_version"} {
+		value, _ := status[key].(string)
+		if value == "" {
+			continue
+		}
+		if _, err := fmt.Fprintf(out, "  %-16s %s\n", key, value); err != nil {
+			return err
+		}
+	}
+	return renderHuman(out, result.Envelope)
+}
+
 // sortedTargetInputs orders a target's declared inputs by key for stable
 // rendering.
 func sortedTargetInputs(inputs []modkit.TargetInput) []modkit.TargetInput {

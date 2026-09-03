@@ -570,6 +570,47 @@ func deployPayload(environment string, state remote.DeployState) map[string]any 
 	}
 }
 
+// executeDeployPlan previews one deployment environment's change set through
+// the deploy target's own Plan. It is the read-only half of the remote plan
+// contract: the same ordered changes, plan hash, and observed state hash an
+// apply is confirmed against, rendered as canonical paths and hashes with no
+// values — so an operator can see what a deploy would do without starting
+// one, and `--resume RUN_ID` has an object to reload.
+func (c *Controller) executeDeployPlan(ctx context.Context, request DeployPlanRequest) (Result, error) {
+	if request.Environment == "" {
+		request.Environment = "production"
+	}
+	manifest, contribution, err := c.resolveDeployment()
+	if err != nil {
+		return Result{}, err
+	}
+	plan, err := c.previewDeploy(ctx, DeployRemoteMutation{Action: "apply", Environment: request.Environment})
+	if err != nil {
+		return Result{}, err
+	}
+	remotePlan := plan.Remote[0]
+	changes := make([]map[string]any, 0, len(remotePlan.Changes))
+	for _, change := range remotePlan.Changes {
+		changes = append(changes, map[string]any{
+			"change_id": change.ChangeID, "path": change.Path, "kind": change.Kind,
+			"idempotency_key": change.IdempotencyKey, "desired_hash": change.DesiredHash,
+			"observed_version": change.ObservedVersion,
+			"depends_on":       change.DependsOn, "secret_keys": change.SecretKeys,
+		})
+	}
+	payload := map[string]any{"deploy_plan": map[string]any{
+		"module": manifest.ID, "target": contribution.ID,
+		"environment": request.Environment,
+		"plan_hash":   remotePlan.PlanHash, "observed_state_hash": remotePlan.ObservedStateHash,
+		"changes": changes,
+	}}
+	env := normalizeEnvelope(modkit.Envelope{
+		Command: "deploy plan", OK: true, Exit: exitOK, RunID: plan.RunID,
+	})
+	env = remoteChangeEnvelope(env, plan.Remote)
+	return Result{Envelope: env, Payload: payload}, nil
+}
+
 // executeDeployStatus observes one deployment environment.
 func (c *Controller) executeDeployStatus(ctx context.Context, request DeployStatusRequest) (Result, error) {
 	if request.Environment == "" {

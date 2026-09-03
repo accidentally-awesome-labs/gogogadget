@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 8,
+    "revision": 9,
     "contract": 2,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -52,7 +52,7 @@
         "source": "internal/gggcli/app.go",
         "target": "internal/gggcli/app.go",
         "class": "go",
-        "sha256": "a5cb61f4a84a290a724addf0be636f131be367a0ac09362c58ce71744d3e7c24",
+        "sha256": "fd09ed6c6eb647466fe6f93eae6fbaca274c326348dba97022287413d38de124",
         "rewrite_module": true,
         "contract": false
       },
@@ -84,7 +84,7 @@
         "source": "internal/gggcli/controller.go",
         "target": "internal/gggcli/controller.go",
         "class": "go",
-        "sha256": "925233c0e5bf8561a4edf089d1b209f351f1fc560a6031f6a094ae6188e2cf2a",
+        "sha256": "f3686ae92a2847ea786cd44f31a447c65c4ad878497475d70cfae2d9a34a25bb",
         "rewrite_module": true,
         "contract": false
       },
@@ -220,7 +220,15 @@
         "source": "internal/gggcli/remote.go",
         "target": "internal/gggcli/remote.go",
         "class": "go",
-        "sha256": "95684730c3e8867cbb6e800dffc2f818827aa789acb82477a095a80c1f592c07",
+        "sha256": "85814ad2a9c2b298cefac2276cee5de5fca5055f4a002a7b8cc65989a0d7ecb9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/remote_contract_test.go",
+        "target": "internal/gggcli/remote_contract_test.go",
+        "class": "test",
+        "sha256": "332402428160a6ac2752b48e3f88cf57de3e1e1b80f48af1406c14600824fef6",
         "rewrite_module": true,
         "contract": true
       },
@@ -228,7 +236,7 @@
         "source": "internal/gggcli/remote_exec.go",
         "target": "internal/gggcli/remote_exec.go",
         "class": "go",
-        "sha256": "a612358027dc465e40a4d1c6e813635256995acbf928086bb10b8a2a371afad1",
+        "sha256": "2bd3ffcd8949508bc6e7e778d5fe14098652048af42a8d7cd2c35fb59c7a406e",
         "rewrite_module": true,
         "contract": true
       },
@@ -244,7 +252,7 @@
         "source": "internal/gggcli/remote_handlers.go",
         "target": "internal/gggcli/remote_handlers.go",
         "class": "go",
-        "sha256": "3bf9c0f7adf065372667ce175c1ec100d2d4147bcccc2ef0d4471b22a82b83bb",
+        "sha256": "a9aa4d2252567c1dc0a31373a36e271b9286e6878828357d895940e91fc6a737",
         "rewrite_module": true,
         "contract": true
       },
@@ -300,7 +308,7 @@
         "source": "internal/gggcli/types.go",
         "target": "internal/gggcli/types.go",
         "class": "go",
-        "sha256": "d1ebb67a90caa58885ecf315b0fa9ebd3a8a78ecbfba104d9a8b838ff992c1d1",
+        "sha256": "2a7024123bf8e1f7668e9abe95b789e780762e6bea1aa49a0f20c37da51c0d5d",
         "rewrite_module": true,
         "contract": false
       },
@@ -457,10 +465,18 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/fuzz_gate_test.go",
+        "target": "internal/modkit/fuzz_gate_test.go",
+        "class": "test",
+        "sha256": "11ee8c61f187fc7408dd2fc7704f8ea408d70b654a25516187df52b914a1ca34",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "ce39cb3d25c26056362c1b62b41dcf597d45896349e5432592cb616ec48051e3",
+        "sha256": "5b0ff1fbba4d4844379e03f1dcff5045e673642398dd0a9fb9ae3861d576a9a6",
         "rewrite_module": true,
         "contract": false
       },
@@ -708,7 +724,7 @@
         "source": "internal/modkit/resolve.go",
         "target": "internal/modkit/resolve.go",
         "class": "go",
-        "sha256": "c02e6e30a86878fc7a75e1d9f12e24aa9ea1edb26c6ffd57f7a1ea4a1310c755",
+        "sha256": "18f24c93430bb134d3eec696192417560f9b8f5a42fc77251171b0045f3308b7",
         "rewrite_module": true,
         "contract": false
       },

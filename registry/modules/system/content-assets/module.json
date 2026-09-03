@@ -139,7 +139,7 @@
         "source": "content/docs/architecture.md",
         "target": "content/docs/architecture.md",
         "class": "content",
-        "sha256": "165065c39a6c5824354783d460f01c87d6f5825441523d2d52f9f31d43a0e493",
+        "sha256": "70d1c99c4a8b962383cd27ad753fb8fefff8047a2e78980f53e942814a398fe8",
         "rewrite_module": false,
         "contract": false
       },
@@ -211,7 +211,7 @@
         "source": "content/docs/deployment.md",
         "target": "content/docs/deployment.md",
         "class": "content",
-        "sha256": "4de643eac7d09daf1efe5fa8d1688b86e5be2ffdd73bb6e7cc961a1dab1b05a9",
+        "sha256": "1d50b14d4adb6af37f1f59ec1039073eff56f0ba7c9e894d10dffa37cfd6ea22",
         "rewrite_module": false,
         "contract": false
       },
@@ -323,7 +323,7 @@
         "source": "content/docs/roadmap.md",
         "target": "content/docs/roadmap.md",
         "class": "content",
-        "sha256": "e7c1bb43244db520122a0b9f3e309237f0e72c6cc23cec5e2f0946bb506777e8",
+        "sha256": "81f6057f329a3199fe3c3b0837a6ff3d92b66d619a46715d66c97018611b9640",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "2abe6ae6c7706382abc68cfc66f964877d94665205b6dea8fb629c0310df5694",
+        "sha256": "e6a283fed2d3d18c54ee33c5ef783594605d01d8787751f0d5adab9dba26c069",
         "rewrite_module": false,
         "contract": false
       },

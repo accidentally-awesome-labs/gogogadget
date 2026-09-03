@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "bc5f9b30dd8ed6f389b46240c892f373a60388e8b15a87e4edabf09219eca86f"
+      "sha256": "1501fef54ba4c0ce727f22db7eef32259c8ee3c6e80ea11a8578307428a60beb"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "452e13cef1f2fdeec1c971369c2d2be90e272674b16a5fedc8f1a762eb1281e1"
+      "sha256": "4c4f2c7244ec8db6906a48165e7ea1a64b1f116b14502bfd85c4972f545c311b"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "c6187cf95c073889eb67fcb89c7852bea4de5ddfbc2e0b89e95acd69b76abfb3"
+      "sha256": "f7f64105ce3125966489fd29f1fe3d23c8d56cfb42c4c2d4ed35ac53fa325401"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1032,7 +1032,7 @@
     },
     {
       "path": "registry/modules/system/project-base/module.json",
-      "sha256": "0c7d9c614196331215abdcefc501224ad15ba00c2a1e5fc669be1fdab4c0ab38"
+      "sha256": "ce3276ad1f632675982aae2cf9a5fe5b3bd97fae8f9330c1c02a37aea6652ffe"
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "2e9a1d95c89e6710ca100f4f97019f8e75492a86dd7b78107b149e863c77d8c2"
+      "sha256": "38b81895ac51e47cd298af027e3a3ebfeaf4828af58cfbdcae410cb5ae0fa8fd"
     },
     {
       "path": "registry/modules/system/static/module.json",

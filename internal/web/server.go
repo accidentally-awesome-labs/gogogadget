@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
+	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/cache"
@@ -41,6 +43,11 @@ type Server struct {
 	cfg config.Config
 	log *slog.Logger
 	db  *pgxpool.Pool
+	// health is the runtime.health capability: the generated Runtime's own
+	// aggregated report. /readyz consults it so an unhealthy critical provider
+	// slot sheds traffic. nil (a Server built directly by a test) falls back to
+	// the database ping alone.
+	health apphost.HealthFunc
 	// Active-announcement cache: one banner at a time, 30s TTL, refreshed
 	// eagerly by invalidateAnnouncementCache() on every admin mutation.
 	annMu           sync.Mutex
@@ -108,6 +115,10 @@ type Deps struct {
 	// registry/testdata. web.NewModule — the constructor the generated bootstrap
 	// calls — never sets it, so a booted production runtime cannot reach them.
 	TestOnlyModules bool
+	// Health is the runtime.health capability — the generated Runtime's own
+	// aggregated provider report, which /readyz consults. The runtime supplies
+	// it from itself, so no module provides it and Options never carries it.
+	Health apphost.HealthFunc
 
 	Verifier          identity.Verifier
 	SessionLoader     identitysession.Loader
@@ -156,6 +167,7 @@ func NewServer(d Deps) (*Server, error) {
 	}
 	s := &Server{
 		cfg: *d.Config, log: d.Log, db: d.DB, q: d.Queries, version: d.Version,
+		health:          d.Health,
 		testOnlyModules: d.TestOnlyModules, docs: d.Docs, verifier: d.Verifier,
 		sessionLoader: d.SessionLoader, identityWebhook: d.IdentityWebhook,
 		billingWebhook: d.BillingWebhook, fetcher: d.Fetcher,
@@ -226,6 +238,14 @@ func (s *Server) invalidateAnnouncementCache() {
 // see docs/architecture: maxBytes → recover → routeBodyLimit → requestID →
 // accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders →
 // sessionLoad (identity step) → csrf → routes.
+//
+// recover sits immediately inside the global body cap and outside every other
+// middleware, so a panic anywhere below it — a handler, csrf, the session
+// loader — becomes the 500 page and one observability.Reporter capture instead
+// of a dropped connection. The two unnamed wrappers (request-scoped provider
+// environment and the telemetry span) are outside it on purpose: the 500 page
+// renders with the same chrome context every other page gets, and the span
+// closes on the recovered 500 rather than unwinding through a panic.
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
@@ -237,6 +257,7 @@ func (s *Server) Handler() http.Handler {
 	h = s.accessLog(h)
 	h = s.requestID(h)
 	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
+	h = s.recover(h)        // panic → 500 page + reporter capture
 	nextHandler := telemetry.HTTP(h, s.telemetry, "web")
 	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next := r.WithContext(templates.WithProviderEnvironment(r.Context(), s.cfg.Env))
@@ -279,19 +300,64 @@ func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok", "version": s.version})
 }
 
-// GET /readyz — readiness. 200 only when a DB ping succeeds.
+// readyzResponse is the readiness body: the aggregate verdict plus the slots
+// that reported a failure, split by whether they block readiness. Names only —
+// a probe body is public, so no check message is ever echoed here.
+type readyzResponse struct {
+	Status   string   `json:"status"`
+	Critical []string `json:"critical,omitempty"`
+	Degraded []string `json:"degraded,omitempty"`
+}
+
+// GET /readyz — readiness. The database ping comes first because a pool that
+// cannot answer makes every other check meaningless, then the runtime health
+// report decides: an unhealthy critical slot sheds traffic (503, naming the
+// slot), an unhealthy non-critical slot is reported as degraded and still
+// serves (200). The whole probe is bounded at 2 seconds and the report itself
+// is cached for 10, so a probe loop never fans out to every provider.
 func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 	if s.db == nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "db not configured"})
+		writeJSON(w, http.StatusServiceUnavailable, readyzResponse{Status: "db not configured"})
 		return
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
 	if err := s.db.Ping(ctx); err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "db unreachable"})
+		writeJSON(w, http.StatusServiceUnavailable, readyzResponse{Status: "db unreachable"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	if s.health == nil {
+		writeJSON(w, http.StatusOK, readyzResponse{Status: "ok"})
+		return
+	}
+	report := s.health(ctx)
+	var critical, degraded []string
+	for _, check := range report.Checks {
+		if check.Healthy {
+			continue
+		}
+		name := check.Slot
+		if name == "" {
+			name = check.Module
+		}
+		if check.Critical {
+			critical = append(critical, name)
+		} else {
+			degraded = append(degraded, name)
+		}
+	}
+	sort.Strings(critical)
+	sort.Strings(degraded)
+	switch {
+	case !report.Ready:
+		writeJSON(w, http.StatusServiceUnavailable, readyzResponse{
+			Status: "critical slot unhealthy", Critical: critical, Degraded: degraded,
+		})
+	case len(degraded) > 0:
+		writeJSON(w, http.StatusOK, readyzResponse{Status: "degraded", Degraded: degraded})
+	default:
+		writeJSON(w, http.StatusOK, readyzResponse{Status: "ok"})
+	}
 }
 
 func (s *Server) serveRealtime(w http.ResponseWriter, r *http.Request) {

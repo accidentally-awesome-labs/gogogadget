@@ -4,7 +4,7 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
@@ -212,7 +212,7 @@
         "source": "internal/web/module.go",
         "target": "internal/web/module.go",
         "class": "go",
-        "sha256": "472641ed2569b33763dc8302a379a85c65df1427fe8f7f9b3a305914ac7c70cf",
+        "sha256": "a35c69db962d3b483f2ea6164f2a6bb1a7b82d025a9549d2f181859a5df9b304",
         "rewrite_module": true,
         "contract": true
       },
@@ -220,7 +220,7 @@
         "source": "internal/web/module_test.go",
         "target": "internal/web/module_test.go",
         "class": "test",
-        "sha256": "69a9b50d92500ab998649913649d1585327297a28cf96593aaaeff7b83be845d",
+        "sha256": "387d206904ab3bfea9f0e5b8bea5970ad41f1e07df3d067270a0f6d622e89cee",
         "rewrite_module": true,
         "contract": false
       },
@@ -247,6 +247,14 @@
         "sha256": "c36ef2089ad89e6c7c35781c111c234ea79c7dfd923e1f0f5cc95cca2cc87fee",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/recover_readyz_test.go",
+        "target": "internal/web/recover_readyz_test.go",
+        "class": "test",
+        "sha256": "4f7ba6c7b61e0b468f62049988753bb728b76476a86fb89d170be86930258220",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/web/route.go",
@@ -284,7 +292,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "503f1865b64340d538e57eee9685a73f164754b1c117f3deac6c51c385646add",
+        "sha256": "ee1600cf352c1ed23d3a2f972870fbcf468e201f58ab24af5f9bba00d769cde2",
         "rewrite_module": true,
         "contract": true
       },
@@ -496,6 +504,12 @@
             "field": "Flags",
             "capability": "flags.service",
             "type": "flags.Service",
+            "optional": false
+          },
+          {
+            "field": "Health",
+            "capability": "runtime.health",
+            "type": "apphost.HealthFunc",
             "optional": false
           },
           {

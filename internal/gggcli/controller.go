@@ -206,6 +206,9 @@ func (c *Controller) Execute(ctx context.Context, req Request) (Result, error) {
 	case ProviderTestRequest:
 		return c.executeProviderTest(ctx, request)
 
+	case DeployPlanRequest:
+		return c.executeDeployPlan(ctx, request)
+
 	case DeployStatusRequest:
 		return c.executeDeployStatus(ctx, request)
 

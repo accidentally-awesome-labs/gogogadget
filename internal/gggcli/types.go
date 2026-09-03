@@ -61,6 +61,14 @@ type (
 		Target      string
 	}
 
+	// DeployPlanRequest previews one deployment environment's change set
+	// through the deploy target's own Plan: the ordered changes, the plan
+	// hash, and the observed state hash the later apply is confirmed
+	// against. It reads only — DeployStatusRequest is the observation.
+	DeployPlanRequest struct {
+		Environment string
+	}
+
 	// DeployStatusRequest observes one deployment target. Shipping with the
 	// deployment slice.
 	DeployStatusRequest struct {
@@ -268,6 +276,7 @@ func (InfoRequest) sealedRequest()             {}
 func (DiffRequest) sealedRequest()             {}
 func (DoctorRequest) sealedRequest()           {}
 func (ProviderTestRequest) sealedRequest()     {}
+func (DeployPlanRequest) sealedRequest()       {}
 func (DeployStatusRequest) sealedRequest()     {}
 func (DeployLogsRequest) sealedRequest()       {}
 func (HelpRequest) sealedRequest()             {}

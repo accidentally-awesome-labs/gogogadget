@@ -45,15 +45,21 @@ ggg deploy secrets  --environment production --key DATABASE_URL --key CLERK_SECR
 `--environment` defaults to `production`. Every mutating form accepts
 `--resume RUN_ID`; `--key` is repeatable and is the only way to name a secret.
 
-- **`plan` and `status`** both take the target's authoritative reading —
-  release id, URL, observed version, readiness — and report it under the
-  `deployment` payload key. They write nothing. A target that is not ready
-  exits 3 naming the state.
+- **`plan`** calls the deploy target's own `Plan` and reports the ordered
+  change set under the `deploy_plan` payload key: the plan hash, the observed
+  state hash the later apply is confirmed against, and one row per change in
+  the `deploy://<deploy-id>/<resource-id>` path grammar. Secret keys appear by
+  name; no value ever does. It writes nothing, and its run id is the one
+  `--resume RUN_ID` reloads.
+- **`status`** takes the target's authoritative reading — release id, URL,
+  observed version, readiness — and reports it under the `deployment` payload
+  key. It writes nothing. A target that is not ready exits 3 naming the state.
 - **`apply`** computes the change set from the target (`Plan`), previews it,
-  confirms, re-observes, and only then ships. Its confirmation is
-  interactive: `deploy apply` asks on a terminal and refuses a noninteractive
-  run. `rollback` and `secrets` take `--yes` for a noninteractive run and
-  refuse without it.
+  confirms, re-observes, and only then ships.
+- **Confirmation is uniform across `apply`, `rollback` and `secrets`.** On a
+  terminal the command asks. Off a terminal — or under `--json` — `--yes` is
+  the confirmation and `--resume RUN_ID` replays a run whose plan was already
+  confirmed; neither present is a refusal with exit 3, before anything runs.
 - **`logs`** streams through the target; `--follow` keeps streaming until the
   command is cancelled.
 - **`rollback`** refuses when no release has been recorded for that
@@ -201,18 +207,34 @@ key rather than argv or output. `ggg doctor --runtime` reports
 | Endpoint | Semantics | DB | Use for |
 |---|---|---|---|
 | `GET /healthz` | Liveness: the process is up; returns the build version | never touched | Probes that must not flap on a DB blip |
-| `GET /readyz` | Readiness: 200 only when a database ping succeeds, else 503 | ping | Platform health checks |
+| `GET /readyz` | Readiness: the database ping, then the runtime health report | ping | Platform health checks |
 
 A database hiccup must never restart the container (liveness), but it must
 stop traffic (readiness). Point the platform's health check at `/readyz`.
 
-Beyond the probe, `Runtime.Health(ctx)` aggregates every registered adapter
-check — concurrently, with a 2-second deadline each and a 10-second cache —
-and only a **critical** slot (`ggg/database`, `ggg/identity`, `ggg/billing`)
-can make the report unready. `ggg doctor --runtime` is the operator-facing
-view of the same territory: CLI/schema compatibility, drift, selected provider
-keys, live provider checks, deployment linkage, backup policy and the
-CLI-managed env files.
+`/readyz` is the HTTP consumer of the generated `Runtime.Health(ctx)` report,
+handed to the HTTP surface as the `runtime.health` capability. The database
+ping runs first — a pool that cannot answer makes every other check
+meaningless — and then the report decides:
+
+| Report | Status | Body |
+|---|---|---|
+| Every check healthy | 200 | `{"status":"ok"}` |
+| An unhealthy **non-critical** slot | 200 | `{"status":"degraded","degraded":["ggg/mail"]}` |
+| An unhealthy **critical** slot (`ggg/database`, `ggg/identity`, `ggg/billing`) | 503 | `{"status":"critical slot unhealthy","critical":["ggg/database"]}` |
+
+So a provider outage blocks readiness only for a slot whose seam declaration
+is `critical: true`; everything else is reported degraded and keeps serving.
+The body names slots, never check messages — a probe body is public. The whole
+probe is bounded at 2 seconds and the aggregate report is cached for 10, so a
+probe loop never fans out to every provider.
+
+`Runtime.Health(ctx)` itself aggregates every registered adapter check
+concurrently, with a 2-second deadline each, recovering a panicking check as
+unhealthy. `ggg doctor --runtime` is the operator-facing view of the wider
+territory: CLI/schema compatibility, drift, selected provider keys, live
+provider checks, deployment linkage, backup policy and the CLI-managed env
+files.
 
 ## Scaling
 

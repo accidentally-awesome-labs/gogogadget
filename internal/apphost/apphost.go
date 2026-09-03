@@ -132,6 +132,12 @@ type HealthReport struct {
 	Checks    []HealthCheck `json:"checks"`
 	Ready     bool          `json:"ready"`
 }
+
+// HealthFunc is the runtime.health capability: the generated Runtime's own
+// Health method, handed to the modules that report readiness. It is the one
+// capability the runtime itself provides rather than a module, which is why
+// no manifest declares a provider for it.
+type HealthFunc func(context.Context) HealthReport
 type HealthRegistration struct {
 	Module   string
 	Slot     string

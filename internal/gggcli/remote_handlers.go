@@ -252,7 +252,7 @@ func runDeploy(ctx context.Context, cc CommandContext, args []string) (Result, e
 
 	switch action {
 	case "plan":
-		return cc.Controller.Execute(ctx, DeployStatusRequest{Environment: environment})
+		return cc.Controller.Execute(ctx, DeployPlanRequest{Environment: environment})
 	case "status":
 		return cc.Controller.Execute(ctx, DeployStatusRequest{Environment: environment})
 	case "logs":
@@ -262,19 +262,18 @@ func runDeploy(ctx context.Context, cc CommandContext, args []string) (Result, e
 			Action: action, Environment: environment, Keys: keys,
 			Yes: yes, Resume: parsed.value("resume", ""),
 		}
-		if action == "apply" {
-			// plan is a preview-shaped alias: run the plan/observe path.
-			return driveRemoteMutation(ctx, cc, "deploy apply", mutation,
-				"deploy "+action+" ("+environment+")", true)
-		}
 		if action == "secrets" && len(keys) == 0 {
 			return Result{}, usageError("deploy secrets requires at least one --key KEY")
 		}
-		if err := requireRemoteConfirm(cc, yes, "deploy "+action); err != nil {
+		// --yes is the noninteractive confirmation, and --resume replays a run
+		// whose plan was already confirmed. Either satisfies the gate; neither
+		// present off a TTY (or under --json) is the declared refusal.
+		confirmed := yes || mutation.Resume != ""
+		if err := requireRemoteConfirm(cc, confirmed, "deploy "+action); err != nil {
 			return Result{}, err
 		}
 		return driveRemoteMutation(ctx, cc, "deploy "+action, mutation,
-			"deploy "+action+" ("+environment+")", !yes)
+			"deploy "+action+" ("+environment+")", !confirmed)
 	default:
 		return Result{}, usageError(spec.Usage)
 	}
