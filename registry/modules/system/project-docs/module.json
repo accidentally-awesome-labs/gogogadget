@@ -24,36 +24,36 @@
     },
     "files": [
       {
-        "class": "docs",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "1a30a761c15b6ae924c3bbf5b8ae0b3b19212609379d3127642de42e77c2570e",
         "source": "AGENTS.md",
-        "target": "AGENTS.md"
+        "target": "AGENTS.md",
+        "class": "docs",
+        "sha256": "1a30a761c15b6ae924c3bbf5b8ae0b3b19212609379d3127642de42e77c2570e",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "docs",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
         "source": "CLAUDE.md",
-        "target": "CLAUDE.md"
-      },
-      {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "3623d35e0c9fce179b448ccffc6505b0300f7e8daf0a1bc3f62afd782feeab1d",
-        "source": "LICENSE",
-        "target": "LICENSE"
-      },
-      {
+        "target": "CLAUDE.md",
         "class": "docs",
-        "contract": false,
+        "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
         "rewrite_module": false,
-        "sha256": "cc0546ae66cfa565f924905dee9b0b174089d44e2f99920191963dc5196a3c0a",
+        "contract": false
+      },
+      {
+        "source": "LICENSE",
+        "target": "LICENSE",
+        "class": "asset",
+        "sha256": "3623d35e0c9fce179b448ccffc6505b0300f7e8daf0a1bc3f62afd782feeab1d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "README.md",
-        "target": "README.md"
+        "target": "README.md",
+        "class": "docs",
+        "sha256": "dbc0982401833c3ca7a32b34aa6a48cbddc1d557240b04b2dad0a7e6137abb5f",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {},

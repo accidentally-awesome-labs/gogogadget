@@ -99,7 +99,7 @@
         "source": "internal/content/docs_check_test.go",
         "target": "internal/content/docs_check_test.go",
         "class": "go",
-        "sha256": "7dcb6fe880315151c9ecb154fd66bca61b1c93537390430a9a6e8cc2b89bcd54",
+        "sha256": "e292d68c1cbdefb3eb027fd025cbf665adf787363726d3e2560998c3140d3f9c",
         "rewrite_module": true,
         "contract": false
       },

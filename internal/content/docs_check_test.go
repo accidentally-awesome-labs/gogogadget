@@ -2,6 +2,8 @@ package content
 
 import (
 	"io/fs"
+	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
@@ -10,7 +12,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var docsLinkRe = regexp.MustCompile(`\]\(/docs/([a-z0-9-]+)\)`)
+// docsLinkRe matches an in-app docs link. The optional trailing group covers
+// `/docs/security#csrf` and `/docs/security/`, which resolve to the same page
+// and were previously invisible to this check — a broken anchor link is still
+// a broken link.
+var docsLinkRe = regexp.MustCompile(`\]\(/docs/([a-z0-9-]+)[/#)]`)
+
+// readmeDocsLinkRe matches the repository README's relative links into the
+// docs corpus. The README is not embedded, so it is read from disk; it is the
+// entry point every reader hits first, and a dead link there is the one that
+// costs the most.
+var readmeDocsLinkRe = regexp.MustCompile(`\]\(content/docs/([a-z0-9-]+)\.md\)`)
 
 // TestDocsInternalLinksResolve asserts every internal /docs/<slug> link in
 // every shipped markdown file points at a page that exists.
@@ -37,6 +49,23 @@ func TestDocsInternalLinksResolve(t *testing.T) {
 		return nil
 	})
 	require.NoError(t, err)
+}
+
+// TestReadmeDocsLinksResolve asserts every content/docs/<slug>.md link in the
+// repository README points at a page that actually ships. The README is the
+// first thing a reader opens and the one file the docs pipeline does not
+// embed, so nothing else would catch a rename here.
+func TestReadmeDocsLinksResolve(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "README.md"))
+	require.NoError(t, err)
+
+	matches := readmeDocsLinkRe.FindAllSubmatch(raw, -1)
+	require.NotEmpty(t, matches, "the README must link into the docs corpus")
+	for _, m := range matches {
+		slug := string(m[1])
+		_, statErr := os.Stat(filepath.Join("..", "..", "content", "docs", slug+".md"))
+		assert.NoError(t, statErr, "README links to content/docs/%s.md which does not exist", slug)
+	}
 }
 
 // TestDocsInventory guards the docs inventory count and sidebar ordering.

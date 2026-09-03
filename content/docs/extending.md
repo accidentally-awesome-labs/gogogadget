@@ -1,26 +1,28 @@
 ---
 title: Extending GoGoGadget
-description: The recipe hub — install, modify, author and update modules with ggg, then the per-feature recipes.
+description: The authoring hub — create, modify, update and publish modules with ggg, then the per-feature recipes.
 section: Guides
 weight: 27
 ---
 
 Every change follows the same shape: find the **module that owns the file**,
 edit that module's source, regenerate, and let `sync` prove nothing drifted.
+New capability follows the same shape with one extra step at the front:
+`ggg create` writes the module first.
 
-That last part is the difference from a plain boilerplate. The cross-cutting
-files — the route table, the config struct, the i18n catalogs, the OpenAPI
-description, `.env.example`, the seed data, the Playwright surface list — are
-no longer places you edit. They are rendered from the module manifests by
+That is the difference from a template you copy. The cross-cutting files — the
+route table, the config struct, the i18n catalogs, the OpenAPI description,
+`.env.example`, the compose stacks, the seed order, the Playwright surface
+list — are not places you edit. They are rendered from the module manifests by
 `ggg sync`, so a hand edit there survives exactly until the next
-`make generate` and then vanishes without a word. Change the declaration
+`ggg generate` and then vanishes without a word. Change the declaration
 instead and the generated file follows.
 
 ```sh
-go run ./cmd/ggg info workflow/projects   # who owns what, and what to run
+ggg info ggg/workflow/projects   # who owns what, and what to run
 # …edit the module's own source…
-make generate                             # ggg sync → templ → sqlc → tailwind
-make check                                # the gate: generate + no-drift + vet + test + build
+ggg generate                     # refresh mutable registries → sync → templ → sqlc → tailwind
+ggg check                        # the gate: generate + no-drift + vet + test + build
 ```
 
 This page is the task-shaped view. For the command surface in full see
@@ -34,7 +36,7 @@ see [Modules](/docs/modules); for what happens when one is uninstalled see
 |---|---|---|
 | **Module source** | `internal/web/page_projects.go`, `internal/web/templates/ui/badge.templ`, `internal/db/queries/projects.sql`, `internal/billing/plans.go`, `input.css` | Yours. Edit freely; `ggg diff` reports it as `modified` and `update` never overwrites it. |
 | **Declarations** | `registry/modules/<kind>/<name>/module.json` | The source of truth for routes, jobs, env keys, i18n, nav, data policy. |
-| **Generated output** | `*_templ.go`, every `*_registry_gen.*`, `internal/db/sqlc/`, `static/app.css`, `static/ui-components.js`, `static/ui-engines.js`, `.env.example`, `content/docs/configuration-reference.md`, `content/docs/module-reference.md`, `content/docs/component-reference.md`, `e2e/generated/personas.ts`, `e2e/generated/surfaces.ts`, `internal/web/templates/scenarios_gen.go`, `internal/web/templates/ui/reference_gen.go` | Tool-owned. Never edit; `ggg sync --check` fails on drift. |
+| **Generated output** | `*_templ.go`, every `*_registry_gen.*`, `internal/db/sqlc/`, `static/app.css`, `static/ui-components.js`, `static/ui-engines.js`, `.env.example`, `compose.yaml`, `compose.test.yaml`, `content/docs/configuration-reference.md`, `content/docs/module-reference.md`, `content/docs/component-reference.md`, `e2e/generated/{inventory,personas,surfaces}.ts`, `internal/web/templates/scenarios_gen.go`, `internal/web/templates/ui/reference_gen.go` | Tool-owned. Never edit; `ggg sync --check` fails on drift. |
 
 That list is not a convention — it is `IsGeneratedOutputPath` in
 `internal/modkit`, and the planner refuses to let a module claim any path it
@@ -42,17 +44,18 @@ matches.
 
 ## Install what already exists
 
-This project selects 240 modules: 21 elements, 122 components, 36 pages,
-28 workflows and 33 systems. `ggg catalog` lists 242 entries, because the two
-this project excludes — `component/table-empty` and `element/divider` — stay
-in the lock as `removed` tombstones so a later `ggg add` knows what they were.
-Before writing anything, check whether what you need is already there.
+The catalog publishes 297 modules; this project installs 288 of them — 257
+pulled by `ggg/profile/full`, 30 by provider selection, and one deployment
+module. `ggg catalog` lists 297 rows, because the modules this project
+excludes stay in the lock as `removed` tombstones so a later `ggg add` knows
+what they were. Before writing anything, check whether what you need is
+already there.
 
 ```sh
-go run ./cmd/ggg catalog                       # every module and its state
-go run ./cmd/ggg catalog --kind component      # one kind
-go run ./cmd/ggg catalog --installed           # only what this project has
-go run ./cmd/ggg info component/data-table     # files, deps, links, verify commands
+ggg catalog                          # every module and its state
+ggg catalog --kind component         # one kind
+ggg catalog --installed              # only what this project has
+ggg info ggg/component/data-table    # files, deps, links, verify commands
 ```
 
 `ggg info` answers the two questions you have next — where can I look at this,
@@ -62,30 +65,46 @@ and what do I run — as `gallery` / `scenario` / `route` links and literal
 conflicts, diagnostics, exit}`).
 
 ```sh
-go run ./cmd/ggg add component/kanban          # installs it and its dependency closure
-go run ./cmd/ggg remove component/carousel     # after the removal checks below
+ggg add ggg/component/kanban         # installs it and its dependency closure
+ggg remove ggg/component/carousel    # after the removal checks below
 ```
 
 `add` and `remove` edit **only** `gogogadget.json` and then run the same
 reconciler `sync` runs; they are not a second code path. This project selects
-`profile/full` and subtracts, so `add` deletes an id from `exclude` and
+`ggg/profile/full` and subtracts, so `add` deletes an id from `exclude` and
 `remove` appends one:
 
 ```json
 {
-  "schema": 1,
-  "registry": { "repository": "gogogadget/gogogadget", "ref": "main" },
-  "modules": ["profile/full"],
-  "exclude": ["component/table-empty", "element/divider"]
+  "schema": 2,
+  "registries": [{ "namespace": "ggg", "source": "directory", "path": "registry" }],
+  "modules": ["ggg/profile/full"],
+  "exclude": ["ggg/component/table-empty", "ggg/element/divider", "ggg/system/deploy-docker"],
+  "providers": {
+    "ggg/mail": {
+      "development": { "adapter": "ggg/system/mail-dev", "target": "filesystem" },
+      "test":        { "adapter": "ggg/system/mail-dev", "target": "filesystem" },
+      "production":  { "adapter": "ggg/system/mail-resend", "target": "resend" }
+    }
+  },
+  "deployment": "ggg/system/deploy-fly"
 }
 ```
 
-`gogogadget.lock.json` is the generated, committed counterpart: the resolved
-registry commit, the deterministic dependency `order`, and per file a
-`base_sha256` (what upstream shipped), a `local_sha256` (what is on disk) and
-a `state` — `clean`, `modified`, `missing`, `conflicted` or `generated`. That
-pair is what makes "did I change
-this?" a question with an answer.
+Ids are globally scoped `<namespace>/<kind>/<name>`, so a third-party module
+never shadows a core one. `providers` must name **exactly** the slots the
+selected closure declares — no missing slot, no extra one — with a choice for
+`development`, `test` and `production`. Adding a slot means installing the
+seam that declares it; making one optional means removing that seam, not
+leaving the selection blank.
+
+`gogogadget.lock.json` is the generated, committed counterpart: the registry
+provenance ledger, the referenced snapshots, the deterministic dependency
+`order`, one runtime order per environment, the resolved provider selections,
+the managed Go dependency ledger, and per file a `base_sha256` (what upstream
+shipped), a `local_sha256` (what is on disk) and a `state` — `clean`,
+`modified`, `missing`, `conflicted` or `generated`. That pair is what makes
+"did I change this?" a question with an answer.
 
 Every command exits with a declared code, so automation can branch on it:
 `0` ok, `1` fetch/runtime error, `2` usage or schema error, `3` a preflight
@@ -98,14 +117,14 @@ Installed source is ordinary source. Open the file, change it, regenerate.
 Nothing has to be told, and there is no fork:
 
 ```console
-$ go run ./cmd/ggg diff
-modified   page/home                internal/web/templates/home.templ
-modified   system/static            static/app.css
+$ ggg diff
+modified   ggg/page/home                internal/web/templates/home.templ
+modified   ggg/system/static            static/app.css
 ```
 
 `diff` lists every file whose bytes differ from the locked base, per module.
-`ggg diff KIND/NAME` narrows to one module; `--upstream` also lists clean
-files and, when a conflict is staged, the path of its unified diff.
+`ggg diff MODULE` narrows to one module; `--upstream` also lists clean files
+and, when a conflict is staged, the path of its unified diff.
 
 The one thing to keep straight: a local edit is invisible to the compiler but
 loud to the updater. It never blocks you and it never gets clobbered — it
@@ -115,8 +134,16 @@ deliberately, which is the next section.
 ## Resolve an update conflict
 
 ```sh
-go run ./cmd/ggg update            # advance the whole installed graph to one commit
+ggg update                                   # every installed module, from its registry's declared ref
+ggg update ggg/component/badge ggg/page/home # only these, plus the closure they require
+ggg update --registry acme --ref v1.2.0      # move exactly one registry's ref
 ```
+
+`ggg update` with module operands advances only those modules and whatever
+they require, leaving everything else at its recorded per-module snapshot.
+`--registry NAMESPACE --ref REF` is the other form: it moves exactly one
+registry and takes no module operands. Either way, incompatibility is
+reported by naming the modules that must move together.
 
 Pristine files are replaced silently. A file you edited that upstream also
 changed is **never** overwritten. Your bytes stay exactly as they are, the
@@ -129,9 +156,9 @@ whose `contract` also changed stay pinned at their old commit.
 Read the diff, then pick one:
 
 ```sh
-go run ./cmd/ggg resolve component/badge --path internal/web/templates/ui/badge.templ --accept-upstream
-go run ./cmd/ggg resolve component/badge --path internal/web/templates/ui/badge.templ --keep-local
-go run ./cmd/ggg resolve component/badge --path internal/web/templates/ui/badge.templ --merged
+ggg resolve ggg/component/badge --path internal/web/templates/ui/badge.templ --accept-upstream
+ggg resolve ggg/component/badge --path internal/web/templates/ui/badge.templ --keep-local
+ggg resolve ggg/component/badge --path internal/web/templates/ui/badge.templ --merged
 ```
 
 - `--accept-upstream` writes the candidate and records the file clean. Your
@@ -143,7 +170,7 @@ go run ./cmd/ggg resolve component/badge --path internal/web/templates/ui/badge.
   same conflict therefore clears for good, and the *next* upstream change to
   that file conflicts correctly instead of re-reporting this one.
 
-Then `go run ./cmd/ggg sync` and the tree is green again. A conflict is
+Then `ggg sync` and the tree is green again. A conflict is
 deliberately not portable: the candidate bytes live in ignored `tmp/`, so
 `sync --check` keeps failing until someone resolves it and nobody can commit
 a half-updated tree as a good state. If you clone a repo whose lock carries
@@ -151,6 +178,68 @@ conflict metadata but whose `tmp/` is empty, `ggg doctor` reports
 `candidate_missing` and naming the modules; rerunning `ggg update` at the
 lock's target commit re-materializes the candidates without touching your
 source.
+
+## Create source with `ggg create`
+
+`ggg create` writes a complete, valid module into the project's own **mutable
+directory registry**, then previews and applies it through the same planned
+transaction every other mutation uses. A project created by `ggg new` gets
+that registry automatically, with a namespace derived from the project slug;
+core and third-party registries stay immutable.
+
+```sh
+ggg create resource invoice --scope org --api --admin --search
+ggg create page pricing --scope public
+ggg create job export-ledger --schedulable --max-attempts 5
+ggg create component stat-tile --family data
+ggg create migration backfill-invoices --owner acme/workflow/invoice --kind immutable
+ggg create module system/ledger
+ggg create provider ledger --slot ggg/audit-export \
+  --package internal/ledger --constructor NewModule --definition ledger.json
+```
+
+| Form | What it emits |
+|---|---|
+| `resource NAME --scope user\|org\|platform` | The full vertical slice — see below |
+| `page NAME --scope public\|app\|admin\|dev` | A templ page in `internal/web/templates/pages/` and its package claim |
+| `component NAME --family FAMILY` | A `package ui` renderer in `internal/web/templates/ui/` |
+| `job KIND [--schedulable] [--max-attempts N]` | A handler in `internal/jobs/` plus the `runtime.jobs` declaration and job-kind claim (attempts default to 10) |
+| `migration NAME --owner MODULE --kind immutable\|neutralize\|purge` | A reviewed forward migration payload recorded in the owning module's ledger |
+| `module KIND/NAME` | A bare module of that kind with one package and its claim |
+| `provider NAME --slot SLOT --package PKG --constructor SYM --definition FILE` | An adapter manifest: slot, capabilities derived from the slot, targets, inputs, env, dependencies, lifecycle and health from the definition file |
+
+`--definition` is required for `create provider` off a terminal, and the
+resulting adapter must validate as a manifest before anything is written.
+
+### What `create resource` actually emits
+
+One invocation writes the sqlc query file, an immutable migration, the
+transport, the templates, a validator test, and every declaration that binds
+them together: routes, queries, navigation, locales, the visual surface, the
+OpenAPI slice (with `--api`), the data-lifecycle record, the test inventory,
+and the namespace claims. Names are derived once — table defaults to
+`snake(NAME)+"s"`, route to `/app/<kebab-name>s`, both overridable with
+`--table` and `--route` — so a route id, a query name and an i18n key cannot
+disagree.
+
+The flags narrow it, and three combinations are refused before a single file
+is built:
+
+| Refusal | Why |
+|---|---|
+| `--no-ui` with `--admin` | An admin surface *is* a UI surface; accepting both would either emit templates `--no-ui` promised to omit or declare admin routes with no renderer |
+| `--api` with `--scope user` | `RequireAPIToken` puts an organization in the context and nothing else, so a user-scoped table has no tenant on the JSON transport — the read would list every user's rows to any token holder |
+| `--search` with `--scope platform` | `search_documents.tenant_id` is a foreign key to `orgs`; a platform row belongs to no organization, and filing it under whichever staff member wrote it would both misattribute it and hide it |
+
+Two narrowings are applied rather than refused, and both are visible on the
+plan: a **platform**-scoped resource implies `--admin`, because its mutations
+belong at admin scope rather than to every authenticated member of every
+organization; and `--api` on a platform resource emits the **read** route
+only, reported as the `resource_api_read_only` diagnostic naming
+`/admin/<plural>` as where the mutations live.
+
+After `create`, the normal loop applies: edit the emitted source, run
+`ggg generate`, run `ggg check`.
 
 ## Author a module
 
@@ -160,13 +249,17 @@ postinstall, no command array. It is data the generators read.
 
 ```jsonc
 {
-  "schema": 1,
+  "schema": 2,
   "module": {
-    "id": "workflow/widgets", "kind": "workflow", "name": "widgets",
+    "id": "ggg/workflow/widgets", "kind": "workflow", "name": "widgets",
     "revision": 1, "contract": 1,
     "title": "Widget create, update and delete",
     "description": "…",
-    "requires": ["system/database", "system/security", "system/server"],
+    "requires": [
+      { "id": "ggg/system/database", "contract": { "min": 1, "max": 1 } },
+      { "id": "ggg/system/server",   "contract": { "min": 1, "max": 1 } }
+    ],
+    "dependencies": { "go": [], "tools": [], "containers": [] },
     "files": [
       { "source": "internal/web/workflow_widgets.go",
         "target": "internal/web/workflow_widgets.go",
@@ -186,20 +279,40 @@ The fields that carry weight:
   identical bytes never imply shared ownership. `contract: true` marks a file
   that defines the module's public interface, so changing it bumps the
   contract and pins dependents through an update. `rewrite_module: true` lets
-  the installer rewrite the canonical Go import prefix into a derivative's
-  own module path.
-- **`requires`** — a hard dependency edge. It is what makes `add` install a
-  closure and `remove` refuse while a dependent is present.
-- **`runtime`** — the typed contributions: `routes`, `jobs`, `navigation`,
-  `slots`, `ui`, `scenarios`, `queries`, `content_types`, `assets`,
-  `janitors`, `visual`, `system`. Each generates real Go, so a wrong package
-  or handler name is a compile error on a named generated line, not a
-  mystery at boot.
+  the installer rewrite a canonical Go import prefix — any configured
+  registry's — into the derivative project's own module path.
+- **`requires`** — a hard dependency edge with an inclusive contract range,
+  `{id, contract: {min, max}}`. It is what makes `add` install a closure and
+  `remove` refuse while a dependent is present, and an out-of-range contract
+  refuses before a payload byte is read. `revision` moves on any
+  implementation change; `contract` moves only when a consumer must change
+  code.
+- **`dependencies`** — `go` (exact `{module, version}`), `tools` (per-os/arch
+  artifact with URL, SHA-256, format and project-relative `install_path` under
+  `bin/`) and `containers` (image with an immutable digest). The lists are
+  always present, even empty. Before the lock or `go.mod` moves, the planner
+  scans authored and generated imports and refuses an undeclared direct
+  dependency.
+- **`runtime`** — the typed contributions: `routes`, `jobs`, `janitors`,
+  `navigation`, `slots`, `ui`, `scenarios`, `queries`, `content_types`,
+  `assets`, `visual`, `personas`, `system`, `provider_slots`, `provisioners`,
+  `database_ops`, `deploy`, `cli`. Each generates real Go, so a wrong package
+  or handler name is a compile error on a named generated line, not a mystery
+  at boot.
+- **`runtime.system`** — the constructor a system module contributes:
+  `package`, `constructor`, its `needs` and `provides` capabilities, and
+  `start` / `stop` / `health` flags. Add an `adapter` block (`slot` plus
+  `targets`) and it becomes a selectable implementation of a provider slot;
+  add `provider_slots` instead and it becomes the constructor-free seam that
+  declares one.
 - **`environment`** — one record per env key (`key`, `field`, `type`,
-  `description`, plus `secret`, `default`, `required`, `production_required`).
-  This is the only place an env key is declared: the config struct, its
-  validation, `.env.example` and the
+  `description`, plus `secret`, `default`, `required`, `production_required`
+  and `targets`). This is the only place an env key is declared: the config
+  struct, its validation, `.env.example` and the
   [configuration reference](/docs/configuration-reference) all come from here.
+  `targets` narrows a key to specific service targets of the owning adapter —
+  the parser is generated for the installed union, but `required` is enforced
+  only for the adapter and target actually selected.
 - **`locales`** — `{"en": {...}, "es": {...}}`, inline in the manifest. Every
   key must exist in every declared locale with matching format placeholders,
   and two modules may not own the same key. Generation refuses otherwise.
@@ -207,6 +320,10 @@ The fields that carry weight:
   `organization_delete`, `persisted_jobs`, …). The account and organization
   export collectors and the deletion order are generated from these, so a new
   stateful module cannot be silently left out of a GDPR export.
+- **`claims`** — the collision-checked names this module owns: packages,
+  routes, jobs, and for the framework surfaces `provider_slots`,
+  `provisioners`, `database_ops`, `cli` and `deploy`. Every declaration needs
+  a matching claim.
 - **`removal_policy`** — `free`, `retain-data`, `drain-required`,
   `replacement-required` or `major-version-only`. See
   [module removal](/docs/module-removal).
@@ -214,9 +331,9 @@ The fields that carry weight:
 Then build and validate:
 
 ```sh
-go run ./cmd/ggg registry build       # rescan registry/, refresh payload digests, verify vendored bytes
-go run ./cmd/ggg registry validate    # check the catalog, then prove the example lifecycle in a derivative
-go run ./cmd/ggg sync --offline       # install into this tree and regenerate
+ggg registry build       # rescan the registry tree, refresh payload digests, verify vendored bytes
+ggg registry validate    # check the catalog, then prove the closure lifecycle in a derivative
+ggg sync --offline       # install into this tree and regenerate
 ```
 
 `registry build` is the authoring step you will forget once: in a self-hosting
@@ -333,17 +450,17 @@ refuse, stage, and exit 4.
 **Some modules cannot be removed by the CLI at all**, because removing them is
 a migration rather than an uninstall:
 
-| Policy | Modules | Behaviour |
+| Policy | Modules (of the 288 installed here) | Behaviour |
 |---|---|---|
-| `replacement-required` | `element/ui-core`, `system/apphost`, `system/config`, `system/database`, `system/i18n`, `system/modkit`, `system/organizations`, `system/security`, `system/server`, `system/static`, `workflow/appearance`, `workflow/auth-session` | Refused (exit 3). There is nothing left to run without them; swapping one is a manual migration. |
-| `major-version-only` | `system/api`, `system/billing`, `system/identity`, `system/rate-limit`, `workflow/billing-webhook` | Refused (exit 3). `/api/v1` is a published contract and identity is every existing session; dropping either breaks live clients, so it belongs in a major version. |
-| `drain-required` | `system/jobs` | Allowed only if the manifest supplies a reviewed forward **neutralization** migration that disables schedules and terminally marks persisted work before the new binary starts. `--purge-data` additionally requires a reviewed teardown migration. |
-| `retain-data` | audit, content, notifications, schedules, storage, usage, webhooks, flags, announcements, impersonation, API tokens, blog, changelog | Removed, but their tables and rows stay. |
-| `free` | everything else (209 modules) | Removed cleanly. |
+| `replacement-required` (17) | `ggg/element/ui-core`, `ggg/system/{apphost,audit-export,cache,config,database,i18n,modkit,organizations,realtime,search,security,server,static,telemetry}`, `ggg/workflow/{appearance,auth-session}` | Refused (exit 3). There is nothing left to run without them; a provider seam has no nil form, so replacing one is a manual migration. |
+| `major-version-only` (5) | `ggg/system/{api,billing,identity,rate-limit}`, `ggg/workflow/billing-webhook` | Refused (exit 3). `/api/v1` is a published contract and identity is every existing session; dropping either breaks live clients, so it belongs in a major version. |
+| `drain-required` (1) | `ggg/system/jobs` | Allowed only if the manifest supplies a reviewed forward **neutralization** migration that disables schedules and terminally marks persisted work before the new binary starts. `--purge-data` additionally requires a reviewed teardown migration. |
+| `retain-data` (16) | audit, content, notifications, schedules, storage (seam and S3 adapter), usage, webhooks, flags, announcements, impersonation, API tokens, notification preferences, outbound webhooks, blog, changelog | Removed, but their tables and rows stay. |
+| `free` (249) | everything else | Removed cleanly. |
 
 Removal also refuses (exit 3, before touching anything) when a module is
 required by an installed dependent, when one of its owned files is missing,
-or when one is locally modified — the diagnostic names `ggg diff KIND/NAME`
+or when one is locally modified — the diagnostic names `ggg diff MODULE`
 and asks you to back the customization up or revert it deliberately. There is
 no force flag.
 
@@ -353,9 +470,9 @@ URL, version, exact byte count, SHA-256 and licence:
 
 | Module | Artifact | Version | Bytes | Licence |
 |---|---|---|---|---|
-| `component/chart` | `static/vendor/chartjs-4.5.1.umd.min.js` | 4.5.1 | 208522 | MIT |
-| `component/calendar` | `static/vendor/cally-0.9.2.js` | 0.9.2 | 38355 | MIT |
-| `component/kanban` | `static/vendor/sortablejs-1.15.7.min.js` | 1.15.7 | 45478 | MIT |
+| `ggg/component/chart` | `static/vendor/chartjs-4.5.1.umd.min.js` | 4.5.1 | 208522 | MIT |
+| `ggg/component/calendar` | `static/vendor/cally-0.9.2.js` | 0.9.2 | 38355 | MIT |
+| `ggg/component/kanban` | `static/vendor/sortablejs-1.15.7.min.js` | 1.15.7 | 45478 | MIT |
 
 Nothing loads from a CDN — the CSP is `script-src 'self'` and a browser test
 asserts no cross-origin request. Each engine loads lazily, only when its
@@ -369,19 +486,24 @@ registries; the core component set pulls in no browser engine at all.
 
 ## Add a CRUD resource
 
-`workflow/projects` plus `page/projects`, `page/project-new` and
-`page/project-edit` are the worked example; read them with `ggg info` before
-copying. A resource is normally **two modules**: a page module owning the
-read surface and a workflow module owning the mutations.
+`ggg create resource NAME --scope org` writes all of this for you — the
+section above lists exactly what it emits and what it refuses. Read this one
+when you are hand-building a resource, extending a generated one, or want to
+know why the generator made a particular choice.
+
+`ggg/workflow/projects` plus `ggg/page/projects`, `ggg/page/project-new` and
+`ggg/page/project-edit` are the worked example; read them with `ggg info`
+before copying. A hand-built resource is normally **two modules**: a page
+module owning the read surface and a workflow module owning the mutations.
 
 1. **Migration** — `internal/db/migrations/00NN_widgets.sql` with
    `-- +goose Up` / `-- +goose Down`. Org-scope it
-   (`clerk_org_id TEXT NOT NULL REFERENCES orgs(clerk_org_id) ON DELETE CASCADE`)
+   (`org_id TEXT NOT NULL REFERENCES orgs(org_id) ON DELETE CASCADE`)
    plus `created_at` / `updated_at`. Declare it in the manifest's
    `migrations`; the number is allocated once and pinned in the lock. See
    [Database](/docs/database).
 2. **Queries** — `internal/db/queries/widgets.sql`, one file per table. Every
-   UPDATE sets `updated_at = now()`; every WHERE carries `clerk_org_id = $1`
+   UPDATE sets `updated_at = now()`; every WHERE carries `org_id = $1`
    so a cross-org id is a 404, never a leak.
 3. **Templates** — `internal/web/templates/widgets.templ`, composed from
    `ui.DataTable`, `ui.PageHeader`, `ui.Field` and friends rather than raw
@@ -410,15 +532,15 @@ read surface and a workflow module owning the mutations.
 9. **Tests** — `internal/web/widgets_test.go`: cross-org access → 404;
    plan-limited branch → 422. Name the package in the manifest's `tests` so
    `ggg info` prints the command. See [Testing](/docs/testing).
-10. `make generate && make check`.
+10. `ggg generate && ggg check`.
 
 ## Add a plan
 
 1. **Plan truth** — append to the `Plans` slice in
-   `internal/billing/plans.go` (owned by `system/billing`). Order is render
+   `internal/billing/plans.go` (owned by `ggg/system/billing`). Order is render
    order; keep `free` first (`PlanByKey` falls back to index 0).
 2. **Polar product** — create it in the Polar dashboard; copy the id.
-3. **Env** — add an `environment` record to `system/billing`'s manifest
+3. **Env** — add an `environment` record to `ggg/system/billing`'s manifest
    (`"key": "POLAR_PRODUCT_BUSINESS", "field": "PolarProductBusiness",
    "type": "string"`). Do **not** touch `.env.example` or the config struct;
    both are generated from that record. Copy the new line into your own `.env`.
@@ -449,7 +571,7 @@ See [Billing](/docs/billing).
    constructor in `internal/mail/mail.go`, next to `WelcomeMessage`. Bodies
    render to strings at enqueue time; workers never touch templates.
 3. **Job kind** — a `Kind…` const plus a `jobs.Define` registration, and a
-   `runtime.jobs` record on `system/mail`'s manifest:
+   `runtime.jobs` record on `ggg/system/mail`'s manifest:
    `{"kind": "email.x", "package": "internal/jobs", "handler": "defineEmailX",
    "schedulable": false, "max_attempts": 0}`. The generated dispatcher and
    typed enqueue helper come from that record — there is no `dispatch` switch
@@ -483,7 +605,7 @@ See [Billing](/docs/billing).
 2. Rewrite the list query with the FTS + ILIKE-fallback predicate and the
    `ts_rank` ordering — copy `ListProjectsByOrg` in
    `internal/db/queries/projects.sql` (see [Database](/docs/database)).
-3. `make generate`, then a db round-trip test: exact word, websearch
+3. `ggg generate`, then a db round-trip test: exact word, websearch
    multi-word, partial token, ranking.
 
 ## Schedule recurring work
@@ -504,7 +626,7 @@ Unknown events are already ACKed (200 + log), so this is purely additive.
 - **Clerk** — a parser for the payload shape in `internal/identity/sync.go`,
   then a `case` in `processClerkEvent`
   (`internal/web/handlers_webhooks.go`, owned by
-  `workflow/identity-webhook-sync`). Test with the `signSvix` fixture, which
+  `ggg/workflow/identity-webhook-sync`). Test with the `signSvix` fixture, which
   emits real `svix-*` headers.
 - **Polar** — a `case` in `Processor.ProcessSubscription`
   (`internal/billing/webhook.go`), reached from
@@ -517,66 +639,70 @@ are explained in [Security](/docs/security).
 
 ## Add an OAuth provider
 
-Clerk dashboard → SSO connections → enable Google/GitHub/…. **Zero code**: the
-hosted Account Portal renders the buttons and the mirror sync does not care
-how a user authenticated. 2FA is the same story. See
-[Authentication](/docs/authentication).
+A hosted identity provider's own dashboard → SSO connections → enable
+Google/GitHub/…. **Zero code**: the hosted portal renders the buttons and the
+mirror sync does not care how a user authenticated. 2FA is the same story.
+See [Authentication](/docs/authentication).
 
-## Swap the billing provider
+## Swap a provider
 
-`system/billing` is `major-version-only`, so this is a source edit inside the
-installed module, not a `ggg remove`.
+For any of the 18 provider slots, "swapping the provider" is a selection, not
+a source edit:
 
-1. New file `internal/billing/<provider>.go` implementing `billing.Client`
-   (`CreateCheckout`, `CreatePortalSession`, `RevokeSubscription`,
-   `IngestUsage`) — `internal/billing/polar.go` is the template (raw
-   `net/http`, no provider SDK). This is the only provider-touching file.
-2. Replace verification and payload parsing in
-   `internal/web/workflow_billing_webhook.go` and the `SubscriptionPayload`
-   mapping in `internal/billing/webhook.go`. Keep the event → action table
-   semantics: that state machine is the product, not the provider.
-3. Swap the env declarations on the manifest, and construct the new client in
-   `internal/billing/module.go`.
-4. Handler tests survive untouched — they run against `billing.MockClient`,
-   and the seam's `contract_test.go` suite runs the real client and the mock
-   through the same table.
+```sh
+ggg provider set --provider ggg/mail:production=ggg/system/mail-smtp@smtp
+ggg provider list --json
+```
 
-`plans.go`, entitlements and the pricing page are provider-agnostic and stay.
-Your edits show up in `ggg diff` as `modified` and are never overwritten by
-`update`.
+The command journals the change, re-resolves the graph, installs the new
+adapter, drops the old one if nothing else selects it, and regenerates the
+boot function for that environment. Nothing in your handlers changes: they
+hold the seam's capability, not the adapter.
 
-## Swap the auth provider
+**Writing a new adapter** for an existing slot is the interesting case, and it
+is a module like any other:
 
-1. Implement `identity.Verifier` — `Verify(ctx, token) (*Claims, error)` — in
-   one file next to `internal/identity/verifier.go`.
-2. Implement `identity.UserFetcher` for the lazy mirror upsert.
-3. Construct both in `system/identity`'s module constructor.
-4. Replace the mirror-sync webhook: Clerk-shaped parsing in
-   `internal/identity/sync.go` and `handlers_webhooks.go` becomes your
-   provider's delivery format. Keep the mirror schema (`users`, `orgs`,
-   `org_members`) — everything downstream reads it.
-5. Point the `/login`, `/signup`, `/logout` redirects in
-   `internal/web/workflow_auth_session.go` at the new hosted UI.
+1. `ggg create provider NAME --slot SLOT --package internal/<seam>/<name>
+   --constructor NewModule --definition NAME.json`. The definition supplies
+   targets, inputs, environment keys, dependencies, lifecycle and health; the
+   capabilities come from the slot itself, so an adapter cannot advertise a
+   capability set the seam did not declare.
+2. Implement the seam interface in that package. The vendor SDK is imported
+   **there** and nowhere else, and every vendor env key is declared on that
+   module.
+3. Run the seam's contract suite against it — `internal/mail/contract.Run`,
+   `runClientContract`, and so on. An adapter that passes a narrower table
+   than the managed one is an adapter that will fail in one environment only.
+4. `ggg provider set` it for the environment you want, then
+   `ggg provider test --slot SLOT --environment ENV`.
 
-Every guard (`RequireAuth`, `RequireOrg`, …) and the e2e `FakeVerifier`
-continue to work unchanged. That is what the seam is for.
+Publishing that adapter to other projects, rather than keeping it local, is
+the next section.
+
+Two slots are worth knowing about before you start: `internal/identity` and
+`internal/billing` still hold their webhook parsers (and therefore the Clerk
+SDK, `svix` and `standard-webhooks`) in the **seam** package rather than in
+the adapters. A new identity or billing adapter has to leave those files
+alone and add its own; see [Roadmap](/docs/roadmap).
 
 ## B2C mode (no organizations)
 
-`system/organizations` is `replacement-required`, so this is a fork of the
+`ggg/system/organizations` is `replacement-required`, so this is a fork of the
 installed source rather than a removal.
 
-1. `internal/web/auth.go`: drop `requireOrg` from `appChain` (and the
+1. `internal/web/auth.go`: drop `requireOrg` from the app chain (and the
    SelectOrg branch); make `loadPlan` resolve by user instead of org.
 2. Migration: rekey `subscriptions`, `projects`, `api_tokens` and `audit_log`
-   from `clerk_org_id` to `clerk_user_id`; update the queries to match.
-3. Delete the org machinery: the `organizationMembership.*` webhook cases,
-   `memberships.sql`, the SelectOrg page, Settings → Organization, and the
-   `OrganizationSwitcher` in the sidebar — each is a manifest file entry as
-   well as a source file.
-4. Checkout metadata carries the user id as the external id.
+   from `org_id` to `user_id`; update the queries to match. Both columns are
+   already provider-neutral internal ids, so nothing about the identity
+   adapter is involved.
+3. Delete the org machinery: the membership webhook cases, `memberships.sql`,
+   the SelectOrg page, Settings → Organization, and the organization switcher
+   in the sidebar — each is a manifest file entry as well as a source file.
+4. Checkout metadata carries the user id as the external id, and
+   `billing_accounts` keys on that instead.
 
-The Clerk webhook then only needs `user.*` events.
+The identity webhook then only needs user events.
 
 ## Add an API endpoint
 
@@ -593,7 +719,7 @@ The Clerk webhook then only needs `user.*` events.
    plan limit is 402 with code `plan_limit`.
 4. Mutations audit with `metadata {"via":"api"}`.
 5. Versioning: `/api/v1` is **additive-only**; a breaking change means a new
-   `/api/v2` mount. `system/api` is `major-version-only` for the same reason.
+   `/api/v2` mount. `ggg/system/api` is `major-version-only` for the same reason.
    See [API](/docs/api).
 6. Test at the integration layer (`internal/web/api_test.go` covers token,
    scope, 402 and 404).
@@ -617,7 +743,7 @@ revisions, publishing, the cache, the public index and detail routes, and
 sitemap and RSS inclusion all follow from the declaration.
 
 1. **Declare the type** — append a `content.Type` to `content.DefaultTypes()`
-   in `internal/content/types.go` (owned by `system/content`):
+   in `internal/content/types.go` (owned by `ggg/system/content`):
 
    ```go
    {
@@ -638,7 +764,7 @@ sitemap and RSS inclusion all follow from the declaration.
    `locales` for **both** `en` and `es`. Registry keys are read from Go
    values, so the template scanner cannot see them; a test over
    `content.DefaultTypes()` fails the build when a locale is missing one.
-4. `make generate`, restart. `/admin/content` grows a Guides filter and a New
+4. `ggg generate`, restart. `/admin/content` grows a Guides filter and a New
    button, `/admin/content/new?kind=guide` renders and validates the `level`
    select, and publishing puts an entry on `/guides` and `/guides/{slug}`
    through the generic templates — canonical and `hreflang` tags included,
@@ -664,8 +790,8 @@ See [Content](/docs/content).
    `section`, `weight` (int) — plus `draft: true` to keep it out of
    production. The renderer supplies the `h1` from `title`, so the body starts
    at `##`.
-2. Add the file to `system/content-assets`'s manifest `files` with
-   `"class": "content"`, then `go run ./cmd/ggg registry build`. Every shipped
+2. Add the file to `ggg/system/content-assets`'s manifest `files` with
+   `"class": "content"`, then `ggg registry build`. Every shipped
    docs page is module-owned; a page no manifest lists still renders in this
    repository but is not distributed, so `ggg sync` will never install it into
    a derivative.
@@ -690,7 +816,7 @@ module graph, and [component reference](/docs/component-reference) from the
 The CSV export dogfoods three batteries: a **job** (`export.projects_csv` —
 enqueued from the handler, not scheduled), the **storage** seam (DevStore
 works zero-account) and a **notification** carrying the download link. The
-shape, from `workflow/project-export`:
+shape, from `ggg/workflow/project-export`:
 
 1. Add the job kind, payload (`{OrgID, UserID}`) and `runtime.jobs`
    declaration.
@@ -708,19 +834,19 @@ Locales are declared, not hand-merged. `internal/i18n/catalog_en_registry_gen.go
 from the `locales` blocks of every installed manifest.
 
 1. Add the tag and its native label to `Locales` in `internal/i18n/i18n.go`
-   (owned by `system/i18n`), and to the matcher list.
+   (owned by `ggg/system/i18n`), and to the matcher list.
 2. Add the new locale code to the `locales` block of **every** module that
    owns a key. Generation refuses a key that is missing from a declared locale
    and refuses two locales whose format placeholders disagree, so there is no
    way to ship a half-translated catalog.
-3. `make generate`. See [Internationalization](/docs/i18n).
+3. `ggg generate`. See [Internationalization](/docs/i18n).
 
 ## Add a component
 
 A component is a module: one public renderer, one options struct, one
 directory in the registry.
 
-1. **Check first.** `go run ./cmd/ggg catalog --kind component` and
+1. **Check first.** `ggg catalog --kind component` and
    `--kind element` list 143 live modules, which between them export the 172
    renderers in `ui.ComponentRegistry`. `/dev/gallery` and the
    [component reference](/docs/component-reference) show them rendered.
@@ -741,14 +867,14 @@ directory in the registry.
    See [UI foundations](/docs/ui-foundations).
 5. **An icon?** One const in `icons.templ` plus one switch arm emitting the
    complete `<svg>`. `TestIconRegistryIsComplete` fails a const with no arm.
-6. **Declare it.** A `component/<kebab-name>` manifest requiring
-   `element/ui-core`, with a `runtime.ui` record carrying `name`, `family`,
+6. **Declare it.** A `ggg/component/<kebab-name>` manifest requiring
+   `ggg/element/ui-core`, with a `runtime.ui` record carrying `name`, `family`,
    `signature`, `summary` and `states`. That record is what puts the component
    on `/dev/gallery/{family}/{name}`, in the generated reference, and in the
    visual and axe sweeps. `TestGalleryCoversEveryInstalledComponent` compares
    installed metadata against rendered `data-ui` values, so an undeclared or
    ungalleried component fails the gate.
-7. `go run ./cmd/ggg registry build && make generate && make check`, then
+7. `ggg registry build && ggg generate && ggg check`, then
    `make visual-update` if the family baseline legitimately moved.
 
 ## Add a theme (rebrand)
@@ -835,7 +961,7 @@ rebrand:
    `locales` blocks, not in a template variable: word order around a brand
    differs per language.
 
-Then `make generate`, open `/dev/gallery` in both themes, and
+Then `ggg generate`, open `/dev/gallery` in both themes, and
 `make visual-update` / `make visual` to prove the new baselines compare cleanly.
 
 ### Editing input.css instead (the fork path)

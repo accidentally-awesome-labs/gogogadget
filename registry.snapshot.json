@@ -888,11 +888,11 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "9dd85d0ebe71274f5956b18a50be3c19daf6c0224cee83333f09c87b496853ed"
+      "sha256": "452e13cef1f2fdeec1c971369c2d2be90e272674b16a5fedc8f1a762eb1281e1"
     },
     {
       "path": "registry/modules/system/content/module.json",
-      "sha256": "1283abd4b054cda477ef6d7666f3c8a1e0ac2f46e214fe6fbb4577d7ad103d91"
+      "sha256": "87242a6b87c5dbfcb184f8c5bcf23f97dd8be4662e11cf46cd555124c6292ea0"
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "16d6863735f56391809822132321690d00305d47d70db6b6b1dc79a76c611118"
+      "sha256": "cd31c14a88eb058c58947c2c2ddfd80371d7d45c9891df672311fd8163e5e321"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",

@@ -24,25 +24,28 @@ generated from the manifests themselves.
 
 One file per module: `registry/modules/<kind>/<name>/module.json`, validated
 against `registry/schema/module.schema.json`. The document is
-`{ "schema": 1, "module": { … } }` and it is **data only**. There is no `run`,
+`{ "schema": 2, "module": { … } }` and it is **data only**. There is no `run`,
 `hook`, `postinstall`, command array, plugin path, or inline code field
 anywhere in the schema — installing a module cannot execute anything.
 
-Here is the whole of `component/badge`, which is about as small as a real module
+Here is the whole of `ggg/component/badge`, which is about as small as a real module
 gets:
 
 ```json
 {
-  "schema": 1,
+  "schema": 2,
   "module": {
-    "id": "component/badge",
+    "id": "ggg/component/badge",
     "kind": "component",
     "name": "badge",
     "revision": 1,
     "contract": 1,
     "title": "Badge",
     "description": "The Badge renderer and its options.",
-    "requires": ["element/ui-core"],
+    "requires": [
+      { "id": "ggg/element/ui-core", "contract": { "min": 1, "max": 1 } }
+    ],
+    "dependencies": { "go": [], "tools": [], "containers": [] },
     "files": [
       {
         "source": "internal/web/templates/ui/badge.templ",
@@ -75,7 +78,7 @@ gets:
 }
 ```
 
-Seventeen fields are **required** by the schema, and the empty ones above are
+Eighteen fields are **required** by the schema, and the empty ones above are
 not noise. `"data": []` is a claim that this module persists nothing; `"claims":
 {}` is a claim that it reserves no global name. An omitted field would be an
 unknown; an empty one is a stated absence, and the removal planner and the

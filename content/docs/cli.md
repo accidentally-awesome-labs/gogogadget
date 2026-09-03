@@ -11,37 +11,40 @@ files you own and can edit. It is not a package manager: nothing is fetched at
 runtime, nothing is vendored into a black box, and there is no `node_modules`
 equivalent. What arrives is source.
 
-The command lives at `cmd/ggg`; all behavior is in `internal/modkit`. Run it
-from the project root:
+The command lives at `cmd/ggg`; presentation and dispatch are in
+`internal/gggcli`, and resolution, planning and apply stay in
+`internal/modkit`. `ggg setup` builds `bin/ggg` from the project's own source,
+and every later command rides that binary:
 
 ```sh
-go run ./cmd/ggg catalog
-go run ./cmd/ggg info component/badge
+bin/ggg catalog
+bin/ggg info ggg/component/badge
 ```
 
-Repository automation always uses `go run ./cmd/ggg`, so a fresh clone never
-depends on `PATH` or a prebuilt binary. `make generate` is
-`go run ./cmd/ggg sync --offline` followed by templ, sqlc, and Tailwind;
-`make check` runs `generate`, then `go run ./cmd/ggg sync --check --offline`,
-vet, tests, and builds — so the local gate itself proves there is no generated
-drift.
+`ggg generate` refreshes mutable directory registries, runs
+`ggg sync --offline`, then templ, sqlc and Tailwind; `ggg check` runs
+`generate`, then `ggg sync --check --offline`, vet, tests and build — so the
+local gate itself proves there is no generated drift. The `make` targets are
+thin aliases over `bin/ggg`.
 
 ## The two files
 
 | File | Owner | Purpose |
 |---|---|---|
-| `gogogadget.json` | you | Declared intent: which registry, which ref, which modules, which exclusions |
-| `gogogadget.lock.json` | `ggg` | Resolved truth: one registry commit, dependency order, and a per-file digest ledger |
+| `gogogadget.json` | you | Declared intent: registries, modules, exclusions, provider selections, deployment module |
+| `gogogadget.lock.json` | `ggg` | Resolved truth: provenance ledgers, dependency order, per-environment runtime orders, and a per-file digest ledger |
 
-Both are committed. This repository's own intent file is the whole catalog with
-two deliberate omissions:
+Both are committed. This repository's own intent file is the whole catalog
+with a few deliberate omissions:
 
 ```json
 {
-  "schema": 1,
-  "registry": { "repository": "gogogadget/gogogadget", "ref": "main" },
-  "modules": ["profile/full"],
-  "exclude": ["component/table-empty", "element/divider"]
+  "schema": 2,
+  "registries": [{ "namespace": "ggg", "source": "directory", "path": "registry" }],
+  "modules": ["ggg/profile/full"],
+  "exclude": ["ggg/component/table-empty", "ggg/element/divider", "ggg/system/deploy-docker"],
+  "providers": { "…": {} },
+  "deployment": "ggg/system/deploy-fly"
 }
 ```
 
@@ -56,20 +59,28 @@ transaction journal that restores the exact pre-run bytes on any failure.
 
 | Command | Mutates | What it does |
 |---|---|---|
-| `ggg version` | no | Prints `ggg <version>` |
+| `ggg version`, `ggg help [COMMAND]`, `ggg completion bash\|zsh\|fish` | no | Version, derived help, derived completions |
 | `ggg catalog` | no | Lists catalog modules with installed state |
-| `ggg info KIND/NAME` | no | Prints one module's full contract |
+| `ggg info MODULE` | no | Prints one module's full contract |
 | `ggg diff` | no | Lists owned files that differ from their installed base |
-| `ggg doctor` | no | Reports lock, conflict, and candidate health |
+| `ggg doctor [--runtime]` | no | Lock, conflict and candidate health; `--runtime` adds provider keys, provider health, deployment linkage and backup policy |
 | `ggg sync --check` | no | Fails when the tree drifts from the lock |
-| `ggg registry validate [--closures core\|external\|all]` | no | Loads the catalog, then installs, compiles and removes every closure of that family in a throwaway derivative (default `all`) |
-| `ggg init` | **yes** | Writes `gogogadget.json`; `--adopt` also writes the lock |
-| `ggg add KIND/NAME...` | **yes** | Selects modules, then reconciles |
-| `ggg remove KIND/NAME...` | **yes** | Deselects modules, then reconciles |
-| `ggg update` | **yes** | Advances the installed graph toward one commit |
+| `ggg provider list\|test`, `ggg deploy plan\|status\|logs` | no | Observation only |
+| `ggg registry validate [--closures core\|external\|all]` | no | Loads the catalog, then installs, compiles, tests and removes every closure of that family in a throwaway derivative (default `all`) |
+| `ggg new DIR` | **yes** | Creates a project: profile, provider selections, deployment, registry |
+| `ggg init` | **yes** | Initializes or adopts the current directory |
+| `ggg add MODULE...` / `ggg remove MODULE...` | **yes** | Selects or deselects modules, then reconciles |
+| `ggg update [MODULES...]` | **yes** | Advances named modules, or one registry's ref |
 | `ggg sync` | **yes** | Reconciles the tree to the declared intent |
-| `ggg resolve KIND/NAME` | **yes** | Records a decision for one conflicted file |
-| `ggg registry build` | **yes** | Refreshes manifest digests and rebuilds the kind indexes |
+| `ggg resolve MODULE` | **yes** | Records a decision for one conflicted file |
+| `ggg create KIND NAME` | **yes** | Writes a module into the project's mutable registry |
+| `ggg provider set\|configure\|provision` | **yes** | Changes a slot's selection, its declared inputs, or provisions its target |
+| `ggg deployment set MODULE`, `ggg deploy apply\|rollback\|secrets` | **yes** | Deployment selection and remote operations |
+| `ggg db migrate\|status\|seed\|reset\|backup\|restore\|restore-drill` | **yes** | Database lifecycle |
+| `ggg setup`, `generate`, `services`, `dev`, `check`, `test`, `build` | **yes** | Trusted tasks with fixed argv |
+| `ggg registry build\|init\|keygen\|sign\|verify\|rotate\|add\|remove\|update` | **yes** | Registry authoring and source management |
+| `ggg migrate schema-1`, `ggg cache prune`, `ggg identity link` | **yes** | One-way schema upgrade, cache pruning, audited identity mapping |
+| `ggg ui` | **yes** | The interactive console (contributed by `ggg/system/cli-ui`) |
 
 `ggg registry build` mutates the **registry**, not the project: it rewrites
 manifest digests and `registry/*.json` indexes. In a self-hosting registry the
@@ -80,37 +91,28 @@ touches manifests, never payloads.
 
 ### Flags
 
-There is deliberately no `--help` text: the flag sets discard their own usage
-output so a usage failure is one line naming the correct form, not a wall. The
-authoritative list is here and in `internal/modkit/cli.go`.
-
-```text
-ggg init [--ref REF] [--repository REPO] [--adopt] [--claim PATH]... [--offline] [--json]
-ggg catalog [--installed] [--kind KIND] [--latest] [--json]
-ggg info KIND/NAME [--json]
-ggg add KIND/NAME... [--dry-run] [--json]
-ggg remove KIND/NAME... [--dry-run] [--purge-data] [--json]
-ggg update [--ref REF] [--dry-run] [--json]
-ggg diff [KIND/NAME...] [--upstream] [--json]
-ggg resolve KIND/NAME --path PATH (--accept-upstream|--keep-local|--merged) [--json]
-ggg doctor [--json]
-ggg sync [--check] [--offline] [--claim PATH]... [--json]
-ggg registry build|validate [--json]
-ggg version
-```
+`ggg help`, `ggg help COMMAND` and the shell completions are all **derived
+from the same command table the dispatcher reads** (`CommandTable()` in
+`internal/gggcli/table.go`), so a command or flag cannot exist in one place
+and be invisible in another. That table is the authoritative list; run
+`ggg help COMMAND` rather than trusting a copy.
 
 Notable behavior, all enforced rather than advisory:
 
 - Flags may appear before, after, or between positional arguments.
-  Go's `flag` package stops at the first non-flag token, which would silently
-  drop the `--json` in `ggg info component/card --json`; `ggg` re-parses instead.
-- `--purge-data` is rejected on anything but `remove`, and `--ref` on anything
-  but `update`. A flag that is accepted and ignored is worse than one refused.
+- `--json` implies noninteractive: it never prompts, and a command that would
+  need a confirmation refuses instead.
+- `ggg` with no arguments opens the console on a terminal; off a terminal it
+  is the declared `interactive_terminal_required` usage failure (exit 2).
+- `--accessible`, or `GGG_ACCESSIBLE=1`, switches guided forms to linear
+  prompts. It is global and may appear before the command.
 - `--claim` is repeatable and only meaningful where the lock is being written.
   `--claim` with `--check` is a usage error, because `--check` must not mutate.
 - `--kind` accepts only `element`, `component`, `page`, `workflow`, `system`.
-- `--offline` resolves from the local or cached registry and never reaches the
-  network.
+- `--offline` resolves only from the local or cached registry and never
+  reaches the network.
+- Every declared secret is redacted from prompts, plans, diagnostics, JSON and
+  logs before anything leaves the process.
 
 ### Module states
 
@@ -127,7 +129,7 @@ Notable behavior, all enforced rather than advisory:
 the lock as a `removed` tombstone, and `installedStates` maps every lock entry —
 so a tombstone is reported by `ggg catalog` *and* by `ggg catalog --installed`,
 because the flag filters on "present in the lock", which a tombstone satisfies.
-In this repository that makes both commands print 242 rows while 240 modules are
+In this repository that makes both commands report tombstones alongside the 288 modules that are
 live.
 
 The row set and the module set are different questions, so **always filter on
@@ -142,7 +144,7 @@ go run ./cmd/ggg catalog --json |
 ```
 
 The [Module reference](/docs/module-reference) page is generated from the
-resolved graph rather than from the lock, so its 240 rows are the live count by
+resolved graph rather than from the lock, so its rows are the live count by
 construction — a module absent from it is not installed.
 
 `ggg diff` reports per-file states instead — `clean`, `modified`, `missing`, or
@@ -174,7 +176,7 @@ index every field without probing.
 `run_id` is derived from the envelope's own content, so the same plan reports the
 same id and a changed plan cannot reuse one.
 
-Three commands carry command-specific data **in addition** to those eleven keys,
+Three commands carry command-specific data **in addition** to those ten keys,
 never instead of them:
 
 | Command | Extra keys |

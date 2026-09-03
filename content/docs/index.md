@@ -1,23 +1,34 @@
 ---
 title: GoGoGadget
-description: A production-grade Go + HTMX SaaS boilerplate that delegates the commodity half to managed services.
+description: An opinionated Go + templ + htmx + Postgres application framework, shipped as a source-module registry driven by the ggg CLI.
 section: Start
 weight: 1
 ---
 
-GoGoGadget is a full-featured SaaS boilerplate: marketing site, auth, teams,
-subscription billing, transactional email, background jobs, admin dashboard,
-blog, docs, and a public API — shipped as **one self-contained Go binary** you
-can read end to end.
+GoGoGadget is an opinionated **Go + templ + htmx 4 + Alpine + Postgres**
+application framework. It is not a template you copy: the catalog publishes
+297 installable modules, and `ggg` resolves the ones you select into one
+graph, writes them into your tree as ordinary source you own, and keeps them
+updatable without ever overwriting an edit you made.
 
-It is for Go developers and small teams who want to spend their first month on
-the product surface, not on plumbing. Clone it, run `make setup && make dev`,
-and you have a working SaaS — with zero SaaS accounts required for local
-development.
+The promise, in order:
+
+1. **Choose a profile** — `minimal`, `web`, `api`, `saas` or `full`.
+2. **Choose one adapter and service target per required provider slot, per
+   environment** — 18 slots, each with a zero-account local option and a
+   maintained managed reference.
+3. **Preview** — every command plans first and writes nothing while planning.
+4. **Apply** — one journalled transaction that rolls back on failure.
+5. **Own the source** — what lands is your code.
+6. **Keep updating without losing local edits** — an upstream change to a file
+   you edited is staged as a conflict, never applied over you.
+
+Start at [Getting started](/docs/getting-started); the reasoning behind the
+layering is in [Architecture](/docs/architecture).
 
 ## The stack
 
-Every dependency is load-bearing; there are no duplicates and no ornamentation.
+Every dependency is load-bearing, and every one is declared in a manifest.
 
 | Layer | Choice | What you never build |
 |---|---|---|
@@ -25,52 +36,42 @@ Every dependency is load-bearing; there are no duplicates and no ornamentation.
 | Templates | templ (type-safe, compiled) | String-concatenated HTML |
 | Interactivity | htmx 4 + Alpine.js (CSP build) | A virtual DOM, a bundler, hydration |
 | Styling | Tailwind CSS v4 (standalone binary, no node) | A JS toolchain |
-| Database | Postgres 16 + sqlc + goose | An ORM, runtime query magic |
-| Auth, users, orgs, 2FA | Clerk (hosted Account Portal) | Password storage, OAuth flows, TOTP, invitations UI |
-| Billing | Polar.sh (merchant of record) | Sales tax/VAT compliance, checkout plumbing |
-| Transactional email | Resend | SMTP, TLS, deliverability |
-| Product analytics | PostHog (optional, env-gated) | Analytics infrastructure |
-| Error tracking | Sentry (optional, env-gated) | An error pipeline |
+| Database | Postgres + sqlc + goose | An ORM, runtime query magic |
+| Everything else | A provider slot | A vendor lock-in you cannot change per environment |
 
-The pinned tool chain (templ, goose, sqlc, air, govulncheck) lives in `go.mod`
-`tool` directives; Tailwind and the vendored frontend assets (htmx, Alpine,
-clerk-js, Inter) are fetched by sha256-pinned scripts. No node/npm anywhere in
-the shipped artifact.
+Postgres is the substrate, not a slot you swap: sqlc, migrations,
+transactional jobs, the audit ledger, notifications, schedules, usage,
+webhooks, flags, content and default search are built on it. The
+`ggg/database` slot chooses where Postgres runs, not whether it is Postgres.
 
-## Feature map
+## Where things are documented
 
-| Feature | Where it lives | Docs |
-|---|---|---|
-| Auth with social login + 2FA | Clerk hosted portal + session middleware | [Authentication](/docs/authentication) |
-| Teams/orgs with roles + invitations | Clerk orgs mirrored to Postgres | [Organizations](/docs/organizations) |
-| Subscriptions, checkout, portal, entitlements | Polar.sh + `internal/billing` | [Billing](/docs/billing) |
-| Transactional email | Resend behind `mail.Sender`, sent via jobs | [Email](/docs/email) |
-| Background jobs | Postgres queue, `FOR UPDATE SKIP LOCKED` | [Background jobs](/docs/background-jobs) |
-| Dashboard + CRUD example | Projects resource, HTMX fragments | [Frontend](/docs/frontend) |
-| Public JSON API | Org-scoped Bearer tokens, `/api/v1` | [API](/docs/api) |
-| Blog + RSS + SEO | Markdown in `content/blog` | [Content](/docs/content) |
-| Docs (this site) | Markdown in `content/docs`, rendered at `/docs` | [Content](/docs/content) |
-| Admin dashboard | Users, orgs, MRR, disable flow | [Admin](/docs/admin) |
-| Audit log | Org-scoped activity feed | [Architecture](/docs/architecture) |
-| Rate limiting, CSRF, strict CSP | `internal/web/middleware.go` | [Security](/docs/security) |
+| Section | Pages |
+|---|---|
+| **Start** | [Getting started](/docs/getting-started) |
+| **Core** | [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Database](/docs/database) · [Frontend](/docs/frontend) |
+| **Features** | [Authentication](/docs/authentication) · [Organizations](/docs/organizations) · [Billing](/docs/billing) · [Email](/docs/email) · [Background jobs](/docs/background-jobs) · [Storage](/docs/storage) · [Notifications](/docs/notifications) · [Outbound webhooks](/docs/webhooks) · [Feature flags](/docs/feature-flags) · [AI](/docs/ai) · [API](/docs/api) · [Admin](/docs/admin) · [Content](/docs/content) · [Internationalization](/docs/i18n) · [SEO](/docs/seo) · [Observability](/docs/observability) |
+| **Guides** | [Testing](/docs/testing) · [Deployment](/docs/deployment) · [Security](/docs/security) · [UI foundations](/docs/ui-foundations) · [Extending](/docs/extending) · [Roadmap](/docs/roadmap) · [Troubleshooting](/docs/troubleshooting) |
+| **Modules** | [CLI and registry](/docs/cli) · [Module anatomy](/docs/modules) · [Module removal](/docs/module-removal) · [Components](/docs/components) · [Gallery and scenarios](/docs/gallery) · [Module reference](/docs/module-reference) · [Component reference](/docs/component-reference) · [Configuration reference](/docs/configuration-reference) |
 
-## Philosophy: buy the undifferentiated, own the product surface
+The three reference pages are generated from the module manifests, so the
+inventory cannot drift from what is installed.
 
-Password hashing, email verification, OAuth handshakes, TOTP enrollment, sales
-tax, SMTP — every SaaS rebuilds them, none of them differentiate one. GoGoGadget
-delegates that half to managed services and keeps everything your users
-actually see — pages, flows, data model, API — in plain Go code you own.
+## Philosophy
 
-Two rules make that work in practice:
+**Own the product surface; select the plumbing.** Password hashing, OAuth
+handshakes, TOTP enrolment, sales tax, SMTP, object storage, a search index —
+every application needs them and none of them differentiate one. GoGoGadget
+puts each behind a seam with a typed capability, and makes the implementation
+a per-environment choice rather than a rewrite.
 
-1. **Every external service hides behind one narrow interface** —
-   `identity.Verifier`, `billing.Client`, `mail.Sender`, `analytics.Capturer`.
-   Handlers never import an SDK, so swapping a provider means replacing one
-   file. See [Architecture](/docs/architecture).
-2. **Everything degrades cleanly.** An unconfigured service renders a 503
-   "not configured" fragment or a log no-op — never a crash. A fresh clone
-   runs the full app with zero accounts. See
-   [Getting started](/docs/getting-started).
+Two rules make that work:
 
-The result is a boilerplate small enough to hold in your head and complete
-enough to charge money on day one.
+1. **Handlers never import a vendor SDK.** They hold the seam's capability;
+   the adapter holds the SDK, its keys, its lifecycle and its health check.
+   See [Architecture](/docs/architecture).
+2. **Nothing degrades silently.** A managed adapter selected without its keys
+   is one joined boot error naming every missing key — never a quiet fallback
+   to the local implementation. The local implementations are the *default*
+   for development and test, so a new project runs end to end with zero
+   accounts. See [Getting started](/docs/getting-started).

@@ -1,28 +1,35 @@
 ---
 title: Testing
-description: Four test layers, the decision rule, and the fixtures that make them deterministic.
+description: The layer decision rule, the contract suites every adapter runs, the gates, and the fixtures that make them deterministic.
 section: Guides
 weight: 23
 ---
 
-Four layers, one decision rule:
+Five layers, one decision rule:
 
 | Layer       | Runs on                                   | Write it for                                                        |
 |-------------|-------------------------------------------|---------------------------------------------------------------------|
 | Unit        | nothing (no DB)                           | pure logic — entitlements, config, plans, token hashing             |
+| Contract    | an `httptest` fake of the provider's wire | one seam's behaviour, run by **every** adapter of that slot         |
 | Integration | real Postgres (`TEST_DATABASE_URL`)       | handler/route behavior — webhooks, guards, limits, API auth         |
 | End-to-end  | Playwright (real server + DB + browser)   | user flows — HTMX CRUD, redirects, toasts                           |
 | Visual      | Playwright screenshots (dockerized)       | pixel-level layout, in both themes                                  |
 
-**Pure logic → unit. Handler behavior → integration. User flow → e2e. Pixels
-→ visual.** Never reach for a heavier layer than the behavior needs.
+**Pure logic → unit. A seam's behaviour → contract. Handler behavior →
+integration. User flow → e2e. Pixels → visual.** Never reach for a heavier
+layer than the behavior needs.
 
-Which of those a given change needs is answerable without guessing. Every
-module declares its test inventory, and `ggg info` prints it as commands you
-can run verbatim:
+`ggg test` runs a layer at a time — `unit`, `integration`, `e2e`, `visual`,
+`smoke`, or `all` — and `ggg check` is the commit gate: generate → drift check
+(`sync --check --offline`) → `go vet` → `go test` → `go build`. The `make`
+targets are thin aliases over `bin/ggg`.
+
+Which layer a given change needs is answerable without guessing. Every module
+declares its test inventory, and `ggg info` prints it as commands you can run
+verbatim:
 
 ```console
-$ go run ./cmd/ggg info workflow/projects
+$ ggg info ggg/workflow/projects
 …
   verify   go test -count=1 ./internal/web
 ```
@@ -38,13 +45,40 @@ Plain `go test`, no database. Examples: the `Entitled` status matrix, plan
 limits and MRR math, config validation, the `e2e:` token parser, the JSON
 error shape.
 
+## Contract
+
+Every provider seam owns one behaviour suite that **every** adapter of that
+slot runs. A local adapter that drifts from the managed one fails the same
+table the managed one passes, which is what makes selecting a different
+adapter per environment safe rather than hopeful.
+
+Two shapes are in use, both owned by the seam:
+
+- An exported runner, for a seam whose adapters live in their own packages —
+  `internal/mail/contract.Run(t, factory)` called by
+  `internal/mail/{dev,resend,smtp}/contract_test.go`, and
+  `internal/storage/contract.Run`/`RunWithOptions` called by
+  `internal/storage/{filesystem,s3}/contract_test.go`.
+- An unexported table beside the seam — `runVerifierContract` (identity),
+  `runClientContract` (billing), `runStoreContract` (storage),
+  `runReporterContract` (observability) — each run once per implementation,
+  the real client and the local one.
+
+The real client is exercised against an `httptest` fake of the provider's own
+wire format, so a mock cannot drift from the contract it stands in for.
+Adapter lifecycle is part of it: a buffering adapter must flush inside the
+caller's deadline and its `Stop` must be idempotent, and every adapter that
+declares `health` satisfies `apphost.HealthChecker` — the generated bootstrap
+emits a compile-time assertion, so a declaration without an implementation is
+a build failure, not a runtime nil.
+
 ## Integration
 
 `internal/db/testdb` gives **every package its own database**
 (`gogogadget_test_<name>`), dropped, recreated, and migrated at `Open` —
 `go test ./...` runs packages in parallel, and a shared database would let
 one package's teardown nuke another's fixtures. Tests self-skip when the
-server is unreachable (`docker compose up -d db` locally; CI provides it).
+server is unreachable (`ggg services up` locally; CI provides it).
 
 **`TEST_DB_SUFFIX` is appended to that name.** The name is otherwise fixed per
 package and `Open` drops before it creates, so two runs of the same package
@@ -224,9 +258,10 @@ visual and e2e harnesses both set.
 ## CI
 
 Seven jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
-`make generate` → `git diff --exit-code` (generated code is committed and
-fresh, which is also what proves no registry drift) → `go vet` →
-`govulncheck` → `go test -race -cover ./...` → `make fuzz` → `go build`.
+`make generate` → `git diff --exit-code -- ':!gogogadget.lock.json'`
+(generated code is committed and fresh, which is also what proves no registry
+drift) → `go vet` → `govulncheck` → `go test -race -cover ./...` →
+`make fuzz` → `go build`.
 `e2e`, `visual`, `smoke`, `docker`, `registry-core` and `registry-external`
 all depend on `test`: `e2e` installs Chromium and runs `make e2e`; `visual`
 runs `make visual`, which owns its own seeding and host server — do not add
@@ -258,25 +293,29 @@ closures to exercise.
 See [Database](/docs/database) for `TEST_DATABASE_URL` mechanics and
 [Frontend](/docs/frontend) for the `data-testid` contract.
 
-## Seam contract suites
+## The provider permutation gate
 
-Every provider seam has an in-package `contract_test.go`: an unexported
-`run<Seam>Contract(t, factory)` table suite that every implementation runs —
-the real client (against an `httptest` fake of the provider's wire format)
-and the mocks/no-ops. A mock that drifts from the real contract fails the
-same suite the real client runs. Faked today: Polar (billing), Resend (mail,
-via the SDK's exported `BaseURL`), Clerk JWKS (identity, custom JWKS URL +
-locally generated RSA key), Sentry (global hub + httptest DSN), PostHog
-(analytics, `NewWithConfig` endpoint), R2 (storage, stateful fake endpoint),
-and the OpenAI-compatible LLM client. No unfakeable impl remains; the
-compile-time-assertion fallback the pattern allows was needed nowhere.
+A seam with two adapters is two claims, and `ggg registry validate` is what
+proves both. Beside the eight single-module example closures,
+`registry/testdata` publishes two **provider fixtures** —
+`fixture/system/mail-providers` and `fixture/system/storage-providers` —
+each installing a seam plus two candidate adapters. The harness installs the
+closure, switches the environment selection between the candidates,
+recompiles, removes it, and compares the derivative tree byte for byte. The
+external family adds the same shape for a third-party slot adapter
+(`gadgetworks/system/audit-export-ledger` against `ggg/audit-export`).
+
+That is what makes "development chooses the local adapter, production chooses
+the managed one" a tested statement rather than a configuration convention.
 
 ## Fuzz
 
-Two trust-boundary parsers fuzz for 15s each via `make fuzz` (CI-only; the
-`check` gate stays fast by decision): `FuzzFakeVerifier` (session-token
-parsing — never panics, claims round-trip) and `FuzzSanitizeFilename` (dev
-email filenames — output can never contain `/`, `\`, `..`, or NUL).
+`make fuzz` runs `FuzzFakeVerifier` for 15s (session-token parsing — never
+panics, claims round-trip). It is CI-only; the `check` gate stays fast by
+decision. A second trust-boundary target,
+`FuzzSanitizeFilename` in `internal/mail/dev` (dev email filenames — output
+can never contain `/`, `\`, `..`, or NUL), exists and runs under
+`go test -fuzz`, but the `fuzz` target does not currently invoke it.
 
 ## Deliberately absent
 

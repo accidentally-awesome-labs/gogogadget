@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: From clone to running SaaS in ten minutes — with zero SaaS accounts.
+description: From ggg new to a running application in ten minutes — with zero SaaS accounts.
 section: Start
 weight: 2
 ---
@@ -8,79 +8,162 @@ weight: 2
 Prerequisites: **Go 1.26+** and **Docker** (for the local Postgres). Nothing
 else — no node, no npm.
 
+A GoGoGadget project is created, not cloned. You choose a profile, choose one
+adapter and service target for each required provider slot in each
+environment, preview the plan, apply it, and own the source that lands.
+
+## Create a project
+
 ```sh
-make setup
-docker compose up -d db
-make seed
-make dev
+git clone https://github.com/gogogadget/gogogadget && cd gogogadget
+go build -o /tmp/ggg ./cmd/ggg
+/tmp/ggg new ../my-app \
+  --module example.com/my-app \
+  --profile saas \
+  --registry directory:. \
+  --deployment ggg/system/deploy-docker
+```
+
+`--registry` takes `github:OWNER/REPO` or `directory:PATH`. A GitHub source is
+pinned by `--ref` and verified against the core registry's Ed25519 public key;
+a released `ggg` defaults the ref to its own version tag, and a development
+build refuses to guess — pass `--ref` explicitly. `directory:.` is the
+self-hosting form used above, which vendors the resolved catalog into the new
+project so it needs no network at all.
+
+Every answer has a flag, and `--answers FILE` supplies the same
+`{Name, Module, Profile, Providers, Deployment, Registry, Ref}` object as JSON
+(mutually exclusive with the individual answer flags, and incapable of
+carrying a secret). On a terminal, missing answers are prompted for;
+`--non-interactive` refuses instead of prompting, and `--json` implies
+noninteractive.
+
+To adopt a directory you already have, use `ggg init` instead: `--module` for
+a directory with no `go.mod`, `--adopt` to produce the initial lock from what
+is already installed, and `--claim PATH` for a pre-existing file that already
+differs from what the module ships.
+
+### The profiles
+
+| Profile | Members | Required provider slots | What it adds |
+|---|---|---|---|
+| `minimal` | 34 | 18 | The smallest compilable application plus every provider seam it needs |
+| `web` | 167 | 9 | Public content, internationalization, discovery surfaces |
+| `api` | 170 | 10 | Identity and the JSON API transport |
+| `saas` | 296 | 18 | Organizations, billing, jobs, notifications, admin, product workflows |
+| `full` | 286 | 18 | Every module the catalog publishes |
+
+A profile also carries **provider defaults** — the local adapter for
+development and test, the managed one for production — and a
+`default_deployment`. Those seed the wizard; the created project writes
+explicit values, so no selection is ever implicit in your `gogogadget.json`.
+
+## Run it
+
+```sh
+cd ../my-app
+/tmp/ggg setup       # tools, modules, generation, and bin/ggg
+bin/ggg services up
+bin/ggg db migrate
+bin/ggg db seed
+bin/ggg dev
 ```
 
 Open http://localhost:8080.
 
-## What each command does
+- **`ggg setup`** runs `go mod download all`, installs every tool artifact the
+  installed manifests declare (each digest-verified before a byte is written,
+  into project-relative `bin/`), completes the module graph with
+  `go mod tidy`, generates, and builds `bin/ggg` from the project's own
+  `cmd/ggg`. It is the only step that needs an external `ggg`; every later
+  command rides `bin/ggg`.
+- **`ggg services up`** starts the local services your selections actually
+  need, from the generated `compose.yaml`. Nothing is hand-written: service
+  names, images (digest-pinned), ports, volumes and health checks come from
+  the `local_service` block of the selected target. `--environment test`
+  selects `compose.test.yaml` instead.
+- **`ggg db migrate`** runs the embedded goose migrations; **`ggg db seed`**
+  loads the module-owned development fixtures through `cmd/seed`.
+- **`ggg dev`** regenerates, brings the development services up healthy, then
+  supervises templ watch, Tailwind watch and air as one process group. Each
+  log line is prefixed by its process, Ctrl+C cancels the group, and the first
+  non-cancellation child failure is what the command returns. Browser refresh
+  stays manual — the strict CSP forbids air's injected reload snippet.
 
-- `make setup` checks your Go and Docker versions, runs `go mod download`,
-  downloads the pinned Tailwind standalone binary to `bin/tailwindcss`
-  (`scripts/setup-tools.sh`, sha256-verified), vendors the frontend assets
-  (htmx 4, Alpine.js CSP build, clerk-js, Inter — `scripts/vendor-frontend.sh`,
-  sha256-verified), and copies `.env.example` to `.env`.
-- `docker compose up -d db` starts Postgres 16 (with a healthcheck) on port
-  5432. Port already taken? Set `DB_PORT` in `.env` — see
-  [Configuration](/docs/configuration).
-- `make seed` loads `internal/db/testdata/seed_dev.sql`: a demo user
-  (`demo@gogogadget.dev`), a demo org (`Demo Org`), and four projects.
-- `make dev` is the one-terminal loop: templ watch + Tailwind watch + air,
-  which rebuilds and restarts the server on every save. Browser refresh stays
-  manual — the strict CSP forbids air's injected reload snippet.
+`make` targets are thin aliases: `make dev` is `bin/ggg dev`, `make check` is
+`bin/ggg check`, `make seed` is `bin/ggg db seed`, `make db-reset` is
+`bin/ggg db reset --yes`.
 
 ## Zero-account mode
 
-The fresh clone runs the **full app with zero SaaS accounts**. `.env.example`
-ships `DEV_AUTH_BYPASS=true`, which swaps Clerk's verifier for a local one that
-accepts synthetic session cookies of the shape `e2e:<userID>:<orgID>:<role>`.
+A new project runs the **full application with zero SaaS accounts**, because
+the development and test selections are local adapters: `identity-dev`,
+`billing-local`, `mail-dev` (writes to `tmp/emails/`), `storage-filesystem`
+(writes to `tmp/uploads/`), Postgres flags/search/realtime/notifications,
+`observability-log`, `analytics-noop`, `llm-fake`, and memory cache and rate
+limiting.
 
-Go straight to http://localhost:8080/dev/login — it sets the demo session
-cookie and lands you in `/app` as `demo@gogogadget.dev`, admin of Demo Org,
-with the four seeded projects on the dashboard. (Hitting `/login` or `/signup`
-in this mode redirects to `/dev/login` too.)
+`.env.example` ships `DEV_AUTH_BYPASS=true`, which swaps the identity verifier
+for one that accepts synthetic session cookies of the shape
+`e2e:<userID>:<orgID>:<role>`.
 
-`DEV_AUTH_BYPASS` is honored only outside production — booting with
+Go to http://localhost:8080/dev/login — it sets the demo session cookie and
+lands you in `/app` as the seeded demo user, admin of the demo org. (Hitting
+`/login` or `/signup` in this mode redirects to `/dev/login` too.)
+
+`DEV_AUTH_BYPASS` is honored only outside production: booting with
 `APP_ENV=production` and the bypass on is a hard startup error. Every guard
 and middleware still executes in bypass mode, so tests and e2e exercise the
 real request path.
 
-## Connecting real services
+## Connect a managed service
 
-When you are ready for real auth, billing, and email, create the accounts
-listed in the README and fill in `.env`:
+Nothing degrades silently. Selecting a managed adapter for an environment and
+leaving its keys unset is one joined boot error naming every missing key — it
+never falls back to the local adapter.
 
-- **Clerk** — the four `CLERK_*` keys. See [Authentication](/docs/authentication).
-- **Polar.sh** — `POLAR_ACCESS_TOKEN`, webhook secret, product IDs. See
-  [Billing](/docs/billing).
-- **Resend** — `RESEND_API_KEY` + `EMAIL_FROM`. Without it, the dev sender
-  logs mail and writes rendered HTML to `tmp/emails/`. See [Email](/docs/email).
+```sh
+bin/ggg provider list --json                       # committed selections and the key names each needs
+bin/ggg provider set --provider ggg/mail:production=ggg/system/mail-resend@resend
+bin/ggg provider configure --slot ggg/identity --environment production
+bin/ggg provider test --slot ggg/database --environment production
+```
 
-Every unconfigured service degrades to a 503 "not configured" fragment or a
-log no-op — never a crash. All keys and defaults: [Configuration](/docs/configuration).
+`provider configure` renders the fields the selected target declares, refuses
+a key that target never declared, validates each value against its declared
+type (`string`, `url`, `integer`, `boolean`, `enum`), and reports configured
+and missing **key names** — never values. Values it writes go to gitignored,
+mode-`0600` `.ggg/env/<environment>.env`; only `development` and `test` are
+CLI-managed, and a `--set` against production is refused outright. Production
+values reach the platform through `ggg deploy secrets`, never a local file.
+See [Deployment](/docs/deployment).
+
+All keys and defaults: [Configuration](/docs/configuration) and the generated
+[configuration reference](/docs/configuration-reference).
 
 ## The day-to-day loop
 
 ```sh
-make check   # generate + vet + test + build — THE one-command gate
+bin/ggg check   # generate → drift check → vet → test → build
 ```
 
-`make check` regenerates templ/sqlc/Tailwind output first, then vets, tests,
-and builds. Run it before every commit. Other targets you will use daily:
+`check` regenerates first (`ggg generate`: refresh mutable registries, sync,
+templ, sqlc, Tailwind), then proves the tree matches the lock with
+`ggg sync --check --offline`, then vets, tests and builds. Run it before every
+commit. Other commands you will use daily:
 
 ```sh
-make test       # unit + integration (integration self-skips without a test DB)
-make e2e        # Playwright end-to-end suite
-make db-reset   # destroy and recreate the local database, reseed demo data
+bin/ggg test unit          # go test ./...
+bin/ggg test e2e           # test compose stack + Playwright
+bin/ggg db reset --yes     # destroy and recreate the local database, reseed
+bin/ggg diff               # every file whose bytes differ from the lock
+bin/ggg doctor --runtime   # lock, drift, provider keys, provider health, backups
 ```
 
-`make db-reset` is the fix for a wedged local database: `docker compose down -v`,
-fresh `up -d db`, then `cmd/seed -reset` — drop/create the database named in
-`DATABASE_URL`, apply migrations, load the demo fixture.
+`db reset` is the only ordinary command that deletes a database volume, which
+is why it requires `--yes` in a noninteractive run. `services down` keeps
+named volumes unless you pass `--volumes`.
 
-Next: [Architecture](/docs/architecture) for the package map and request
-lifecycle, or [Extending](/docs/extending) for the recipe hub.
+Next: [Architecture](/docs/architecture) for how manifests, the resolver and
+the generated bootstrap fit together, or [Extending](/docs/extending) for the
+authoring path.
