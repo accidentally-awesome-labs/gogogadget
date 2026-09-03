@@ -3,8 +3,12 @@ package gggcli
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -500,4 +504,144 @@ func TestSyncPlanningRefusalEmitsJSONEnvelope(t *testing.T) {
 	if first["code"] != "command_failed" || first["severity"] != "error" {
 		t.Fatalf("diagnostic = %#v", first)
 	}
+}
+
+// The stale-engine guard has to be reachable from the real command surface,
+// because that is where it failed: a `bin/ggg` built before the runtime.health
+// capability existed read the new manifests and reported a missing provider on
+// a healthy tree. Every lock-reading command must instead refuse with exit 3
+// and name the rebuild, and the refusal must land before any write.
+func TestCLIRefusesALockWrittenByANewerEngine(t *testing.T) {
+	root, engine := cliProject(t)
+	if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, _, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+		t.Fatalf("sync: %v", err)
+	}
+	lockPath := filepath.Join(root, modkit.LockFileName)
+	current := readFile(t, lockPath)
+	stamped := fmt.Sprintf("%q: %d,", "engine_contract", modkit.EngineContract)
+	if !strings.Contains(current, stamped) {
+		t.Fatalf("sync did not record %s in the lock:\n%s", stamped, current)
+	}
+	newer := strings.Replace(current, stamped,
+		fmt.Sprintf("%q: %d,", "engine_contract", modkit.EngineContract+1), 1)
+	writeTestFile(t, root, modkit.LockFileName, []byte(newer))
+	before := treeDigest(t, root)
+
+	for _, args := range [][]string{
+		{"sync", "--offline"},
+		{"sync", "--check", "--offline"},
+		{"diff"},
+		{"catalog"},
+		{"doctor"},
+		// A remote command reaches the lock through its own reader, whose
+		// caller labels planning failures runtime errors.
+		{"provider", "list"},
+	} {
+		out, errOut, err := runApp(t, root, engine, args...)
+		if err == nil {
+			t.Fatalf("%v = nil error, want a stale-engine refusal", args)
+		}
+		if got := ExitCode(err); got != exitRefusal {
+			t.Fatalf("%v exit = %d, want %d (%v)", args, got, exitRefusal, err)
+		}
+		// What the operator actually sees: the error main prints plus whatever
+		// the command rendered. doctor reports through its findings, so both
+		// channels count as reachable.
+		surface := err.Error() + out + errOut
+		for _, want := range []string{modkit.LockFileName, "go build -o bin/ggg ./cmd/ggg"} {
+			if !strings.Contains(surface, want) {
+				t.Fatalf("%v surface %q is missing %q", args, surface, want)
+			}
+		}
+	}
+
+	// The trusted tasks behind `make setup` and `make check` refuse at preview,
+	// so a stale engine writes nothing at all — not even the per-environment
+	// env files apply creates before its first lock read. This is the exact
+	// path that misreported the tree when `bin/ggg` was stale.
+	tasks := NewController(ControllerOptions{Root: root, Engine: engine, TaskRunner: &recordingTaskRunner{}})
+	for _, task := range []TaskMutation{{Task: "setup"}, {Task: "check"}, {Task: "generate"}} {
+		_, err := tasks.Preview(context.Background(), task)
+		if err == nil {
+			t.Fatalf("preview %q on a newer lock = nil error, want a stale-engine refusal", task.Task)
+		}
+		if got := ExitCode(err); got != exitRefusal {
+			t.Fatalf("preview %q exit = %d, want %d (%v)", task.Task, got, exitRefusal, err)
+		}
+		if !strings.Contains(err.Error(), "go build -o bin/ggg ./cmd/ggg") {
+			t.Fatalf("preview %q error %q is missing the remedy", task.Task, err)
+		}
+	}
+	if after := treeDigest(t, root); after != before {
+		t.Fatal("a refused command wrote to the tree")
+	}
+
+	// Rebuilding is the remedy, and the reverse direction is the normal upgrade
+	// order: this binary reads an older lock silently and re-stamps it.
+	older := strings.Replace(current, stamped, fmt.Sprintf("%q: %d,", "engine_contract", 1), 1)
+	writeTestFile(t, root, modkit.LockFileName, []byte(older))
+	_, errOut, err := runApp(t, root, engine, "diff")
+	if err != nil {
+		t.Fatalf("diff against an older lock: %v", err)
+	}
+	if strings.Contains(errOut, "engine contract") {
+		t.Fatalf("an older lock warned: %q", errOut)
+	}
+	if _, _, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+		t.Fatalf("sync against an older lock: %v", err)
+	}
+	if got := readFile(t, lockPath); !strings.Contains(got, stamped) {
+		t.Fatalf("sync did not re-stamp %s:\n%s", stamped, got)
+	}
+}
+
+// The refusal stays exit 3 whichever layer reports it. Lock readers sit under
+// layers that relabel failures — usage for malformed input, runtime for a
+// failed task step — and a `sync` that exits 1 sends the operator looking for
+// a runtime fault instead of rebuilding the binary.
+func TestStaleEngineRefusalOutranksItsReporter(t *testing.T) {
+	stale := modkit.EngineContractError{Lock: modkit.EngineContract + 1, Binary: modkit.EngineContract}
+	reported := map[string]error{
+		"bare":                    stale,
+		"runtime-wrapped step":    runtimeError(fmt.Errorf("install declared tools: %w", stale)),
+		"planner failure":         plannerFailure{runtimeError(stale)},
+		"refusal (already right)": refusalError(stale),
+	}
+	for name, err := range reported {
+		if got := ExitCode(err); got != exitRefusal {
+			t.Fatalf("%s exit = %d, want %d", name, got, exitRefusal)
+		}
+	}
+}
+
+// treeDigest hashes every tracked path under root so a "nothing was written"
+// assertion covers content, not just the files a test remembered to name.
+func treeDigest(t *testing.T, root string) string {
+	t.Helper()
+	sum := sha256.New()
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(sum, "%s\x00%x\x00", filepath.ToSlash(rel), sha256.Sum256(data))
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk %s: %v", root, err)
+	}
+	return hex.EncodeToString(sum.Sum(nil))
 }

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -332,7 +333,12 @@ func (c *Controller) previewRegistryAdd(ctx context.Context, current []modkit.Pr
 	}
 	lock := modkit.Lock{}
 	if data, readErr := os.ReadFile(c.rootDir() + string(os.PathSeparator) + modkit.LockFileName); readErr == nil {
-		if parsed, parseErr := modkit.ParseLock(data); parseErr == nil {
+		parsed, parseErr := modkit.ParseLock(data)
+		var stale modkit.EngineContractError
+		if errors.As(parseErr, &stale) {
+			return nil, refusalError(parseErr)
+		}
+		if parseErr == nil {
 			lock = parsed
 		}
 	}

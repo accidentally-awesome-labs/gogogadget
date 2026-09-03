@@ -250,6 +250,12 @@ func (c *Controller) collectDiff(modules []string, upstream bool) ([]DiffEntry, 
 	}
 	lock, err := modkit.ParseLock(data)
 	if err != nil {
+		// usageError keeps only the message, so a stale-engine refusal has to
+		// keep its own error value to stay a refusal rather than bad input.
+		var stale modkit.EngineContractError
+		if errors.As(err, &stale) {
+			return nil, "", refusalError(err)
+		}
 		return nil, "", usageError(err.Error())
 	}
 
@@ -453,7 +459,16 @@ func (c *Controller) readCatalog(ctx context.Context, latest bool) (modkit.Catal
 
 	lock, hasLock := modkit.Lock{}, false
 	if data, readErr := os.ReadFile(filepath.Join(c.rootDir(), modkit.LockFileName)); readErr == nil {
-		if parsed, parseErr := modkit.ParseLock(data); parseErr == nil {
+		parsed, parseErr := modkit.ParseLock(data)
+		// An unreadable lock is tolerated here — the catalog is browsable
+		// before install and the planner validates the lock for real — but a
+		// stale-engine refusal is not: resolving a catalog against snapshots
+		// this binary cannot model is how the misreport starts.
+		var stale modkit.EngineContractError
+		if errors.As(parseErr, &stale) {
+			return modkit.Catalog{}, "", modkit.Lock{}, refusalError(parseErr)
+		}
+		if parseErr == nil {
 			lock, hasLock = parsed, true
 		}
 	}

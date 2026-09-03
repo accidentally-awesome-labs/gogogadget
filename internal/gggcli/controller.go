@@ -389,11 +389,7 @@ func operationOffline(plan Plan) bool {
 // cause so its exit code survives. Handlers return both; the App renders the
 // envelope exactly once.
 func failureEnvelope(command string, cause error) (Result, error) {
-	var coder interface{ ExitCode() int }
-	exit := exitRuntime
-	if errors.As(cause, &coder) {
-		exit = coder.ExitCode()
-	}
+	exit := ExitCode(cause)
 	env := normalizeEnvelope(modkit.Envelope{
 		Command: command,
 		OK:      false,

@@ -93,6 +93,16 @@ func (e *Engine) Health(ctx context.Context, root string) (HealthReport, error) 
 	}
 	lock, err := ParseLock(lockData)
 	if err != nil {
+		// A lock from a newer engine is not a malformed lock: reporting it as
+		// "not canonical" would send the operator looking for corruption
+		// instead of rebuilding. Doctor's job is to name the real remedy, so it
+		// reports the refusal verbatim under its own code.
+		var staleEngine EngineContractError
+		if errors.As(err, &staleEngine) {
+			return fail(HealthFinding{
+				Code: "engine_stale", Path: "gogogadget.lock.json", Message: err.Error(),
+			}), nil
+		}
 		return fail(HealthFinding{
 			Code: "lock_invalid", Path: "gogogadget.lock.json",
 			Message: fmt.Sprintf("gogogadget.lock.json is not canonical: %v", err),

@@ -1,6 +1,8 @@
 package modkit
 
 import (
+	"errors"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -265,5 +267,94 @@ func TestMarshalLockCanonical(t *testing.T) {
 	}
 	if _, err := ParseLock(got); err != nil {
 		t.Fatalf("MarshalLock output is not parseable: %v", err)
+	}
+}
+
+// The engine contract is asymmetric on purpose. A lock written by a newer
+// engine assumes capabilities, generators, or invariants this binary does not
+// implement, so reading it produces a confident wrong answer — the stale
+// `bin/ggg` that reported a missing runtime.health provider on a healthy tree.
+// A lock written by an older engine is the normal upgrade order (rebuild, then
+// sync) and must pass silently, including a lock predating the field.
+func TestParseLockRefusesOnlyANewerEngineContract(t *testing.T) {
+	withContract := func(value string) []byte {
+		return []byte(strings.Replace(canonicalLockJSON,
+			`"schema": 2,`, `"schema": 2,`+"\n  "+`"engine_contract": `+value+`,`, 1))
+	}
+
+	t.Run("absent proceeds", func(t *testing.T) {
+		lock, err := ParseLock([]byte(canonicalLockJSON))
+		if err != nil {
+			t.Fatalf("ParseLock(no engine_contract): %v", err)
+		}
+		if lock.EngineContract != 0 {
+			t.Fatalf("EngineContract = %d, want 0 for a lock predating the field", lock.EngineContract)
+		}
+	})
+
+	t.Run("older proceeds", func(t *testing.T) {
+		if _, err := ParseLock(withContract("1")); err != nil {
+			t.Fatalf("ParseLock(engine_contract 1): %v", err)
+		}
+	})
+
+	t.Run("equal proceeds", func(t *testing.T) {
+		lock, err := ParseLock(withContract(strconv.Itoa(EngineContract)))
+		if err != nil {
+			t.Fatalf("ParseLock(engine_contract %d): %v", EngineContract, err)
+		}
+		if lock.EngineContract != EngineContract {
+			t.Fatalf("EngineContract = %d, want %d", lock.EngineContract, EngineContract)
+		}
+	})
+
+	t.Run("newer refuses with the remedy", func(t *testing.T) {
+		_, err := ParseLock(withContract(strconv.Itoa(EngineContract + 1)))
+		var stale EngineContractError
+		if !errors.As(err, &stale) {
+			t.Fatalf("ParseLock error = %v, want EngineContractError", err)
+		}
+		if stale.Lock != EngineContract+1 || stale.Binary != EngineContract {
+			t.Fatalf("EngineContractError = %+v, want lock %d binary %d", stale, EngineContract+1, EngineContract)
+		}
+		if stale.ExitCode() != ExitRefusal {
+			t.Fatalf("ExitCode = %d, want %d", stale.ExitCode(), ExitRefusal)
+		}
+		for _, want := range []string{
+			LockFileName,
+			"engine contract " + strconv.Itoa(EngineContract+1),
+			"contract " + strconv.Itoa(EngineContract),
+			"go build -o bin/ggg ./cmd/ggg",
+			"make setup",
+		} {
+			if !strings.Contains(err.Error(), want) {
+				t.Fatalf("error %q is missing %q", err, want)
+			}
+		}
+	})
+}
+
+// A written lock always records this binary's contract: the value is stamped by
+// MarshalLock, so no construction site can claim a contract it does not
+// implement, and the recorded value never lags the engine that produced it.
+func TestMarshalLockStampsThisEnginesContract(t *testing.T) {
+	lock, err := ParseLock([]byte(canonicalLockJSON))
+	if err != nil {
+		t.Fatalf("ParseLock(canonical): %v", err)
+	}
+	lock.EngineContract = 1
+	data, err := MarshalLock(lock)
+	if err != nil {
+		t.Fatalf("MarshalLock: %v", err)
+	}
+	if !strings.Contains(string(data), `"engine_contract": `+strconv.Itoa(EngineContract)+`,`) {
+		t.Fatalf("marshalled lock does not record engine_contract %d:\n%s", EngineContract, data)
+	}
+	reparsed, err := ParseLock(data)
+	if err != nil {
+		t.Fatalf("ParseLock(marshalled): %v", err)
+	}
+	if reparsed.EngineContract != EngineContract {
+		t.Fatalf("round-tripped EngineContract = %d, want %d", reparsed.EngineContract, EngineContract)
 	}
 }

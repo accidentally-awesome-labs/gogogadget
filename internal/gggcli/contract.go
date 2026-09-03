@@ -18,6 +18,14 @@ import (
 // ExitCode reports the process exit code an error carries. Errors without a
 // declared code are runtime failures.
 func ExitCode(err error) int {
+	// A stale-engine refusal outranks the code of whichever layer reported it.
+	// Every lock read can raise it, and those layers otherwise relabel it — a
+	// usage error for malformed input, a runtime error for a failed task step —
+	// which is exactly the misreport this guard exists to stop.
+	var stale modkit.EngineContractError
+	if errors.As(err, &stale) {
+		return exitRefusal
+	}
 	var coded interface{ ExitCode() int }
 	if errors.As(err, &coded) {
 		return coded.ExitCode()

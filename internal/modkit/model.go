@@ -834,7 +834,18 @@ type DataDeclaration struct {
 
 // Lock is the generated, committed resolved registry state.
 type Lock struct {
-	Schema         int              `json:"schema"`
+	Schema int `json:"schema"`
+	// EngineContract records the engine contract of the binary that wrote this
+	// lock. Schema versions the file format; this versions the behavior the
+	// resolved state assumes of its reader. A reader refuses a lock whose
+	// contract is newer than its own compiled-in EngineContract.
+	//
+	// Every lock MarshalLock writes records it, so the key set of a written
+	// lock is still fixed. It is omitempty only so a lock written before the
+	// guard existed reads as contract 0 — the oldest there is, which a newer
+	// binary must accept silently. Refusing it for a missing key would be the
+	// same unactionable engine error the guard exists to replace.
+	EngineContract int              `json:"engine_contract,omitempty"`
 	RegistryCommit string           `json:"registry_commit"`
 	Registries     []LockedRegistry `json:"registries"`
 	Snapshots      []LockedSnapshot `json:"snapshots"`

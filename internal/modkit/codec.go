@@ -47,7 +47,11 @@ func MarshalProject(project Project) ([]byte, error) {
 	return marshalIndented(clone)
 }
 
-// ParseLock decodes and validates canonical generated lock JSON.
+// ParseLock decodes and validates canonical generated lock JSON. It is the one
+// gate every lock reader passes, so the engine-contract refusal lives here: a
+// lock written by a newer engine is rejected before any caller can plan,
+// generate, or write from it. A lock written by an older engine is normal —
+// rebuild then sync is the upgrade order — and passes silently.
 func ParseLock(data []byte) (Lock, error) {
 	var lock Lock
 	if err := rejectDuplicateJSONFields(data); err != nil {
@@ -58,6 +62,9 @@ func ParseLock(data []byte) (Lock, error) {
 	}
 	if err := requireJSONValue(data, reflect.TypeOf(lock), "lock"); err != nil {
 		return Lock{}, fmt.Errorf("parse lock: %w", err)
+	}
+	if err := EngineContractRefusal(lock.EngineContract); err != nil {
+		return Lock{}, err
 	}
 	if err := validateLock(lock, true); err != nil {
 		return Lock{}, err
@@ -109,6 +116,10 @@ func MarshalLock(lock Lock) ([]byte, error) {
 			}
 		}
 	}
+	// The lock records the engine that wrote it, so the value is stamped here
+	// rather than carried in from a caller: no construction site can claim a
+	// contract this binary does not implement.
+	clone.EngineContract = EngineContract
 	canonicalizeLock(&clone)
 	if err := validateLock(clone, true); err != nil {
 		return nil, err

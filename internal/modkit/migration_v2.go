@@ -152,6 +152,8 @@ func MigrateSchema1Lock(data []byte) ([]byte, error) {
 	}
 	order, _ := root["order"].([]any)
 	root["schema"] = 2
+	// The migrating binary is the writer, so it records its own contract.
+	root["engine_contract"] = EngineContract
 	root["runtime_orders"] = map[string]any{"development": order, "test": order, "production": order}
 	root["dependencies"] = []any{}
 	root["providers"] = map[string]any{}

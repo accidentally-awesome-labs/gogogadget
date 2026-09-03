@@ -1207,6 +1207,13 @@ func validateLock(lock Lock, canonical bool) error {
 	if lock.Schema != 2 {
 		return fmt.Errorf("lock schema must be 2; migrate schema 1 explicitly")
 	}
+	// Zero means "written before the guard existed"; anything above this
+	// binary's own contract is ParseLock's refusal, not a validation error — a
+	// newer contract is a legible state with a named remedy and must not be
+	// reported as a malformed lock.
+	if lock.EngineContract < 0 {
+		return fmt.Errorf("lock engine_contract must not be negative")
+	}
 	if strings.TrimSpace(lock.RegistryCommit) == "" {
 		return fmt.Errorf("lock registry_commit must be non-empty")
 	}

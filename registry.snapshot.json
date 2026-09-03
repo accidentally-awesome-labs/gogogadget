@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "24c3d2b465e2373dc18e7a518dc7f37677c45e5e0ed651b4031975e9b0ad16f5"
+      "sha256": "2641d9eac6520decbdc99aae7d3d4f397fff86d2f8362a7768a6705478fb7cdc"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "f7f64105ce3125966489fd29f1fe3d23c8d56cfb42c4c2d4ed35ac53fa325401"
+      "sha256": "96a6a71ac86664d4379f0ab1a6d488ea13d9d714881c5c2f651e97af4acc0621"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1032,7 +1032,7 @@
     },
     {
       "path": "registry/modules/system/project-base/module.json",
-      "sha256": "ce3276ad1f632675982aae2cf9a5fe5b3bd97fae8f9330c1c02a37aea6652ffe"
+      "sha256": "e353f7410de38ccb524fdd0b7812c7b759da72df9e707692a8b4a35574549ee4"
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
@@ -1296,7 +1296,7 @@
     },
     {
       "path": "registry/schema/lock.schema.json",
-      "sha256": "7a4bee62a9be0df03a7ff56b7f9d493f74b9c9cb807681b6cfc474422b5a38ec"
+      "sha256": "4ec25d950c48bc1ef6e4b3e4ee7952c482a42f8ad83f2bf2a6c7e8fb6f72347b"
     },
     {
       "path": "registry/schema/module.schema.json",

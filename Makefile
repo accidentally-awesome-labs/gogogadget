@@ -6,7 +6,26 @@ GGG := bin/ggg
 # targets times this. CI overrides it for a longer soak.
 FUZZTIME ?= 8s
 
-$(GGG):
+# bin/ggg is a real file target, so it needs real prerequisites. Without them
+# make never rebuilds it once it exists, and every target below runs a stale
+# engine against fresh manifests.
+#
+# `go list -deps` is the only accurate source for that list: the CLI compiles
+# in far more than cmd/ggg, internal/gggcli and internal/modkit — internal/
+# remote, internal/provision/*, internal/deploy/*, internal/database/ops/* and
+# the generated command registry are all in the binary — and the set changes
+# as modules are installed. Test files are excluded: .GoFiles omits them.
+#
+# Paths are made project-relative because make splits prerequisites on
+# whitespace, so an absolute path under a directory whose name contains a
+# space would break the list. A tree too incomplete to list (a fresh genesis,
+# before generation has produced the sqlc and registry packages) yields no
+# prerequisites, which is the right answer there: build the binary if it is
+# absent, then let it generate. `ggg setup` builds bin/ggg itself and does not
+# depend on this.
+GGG_SOURCE := $(shell go list -deps -f '{{if and .Module (eq .Module.Path "github.com/gogogadget/gogogadget")}}{{$$dir := .Dir}}{{range .GoFiles}}{{$$dir}}/{{.}}{{"\n"}}{{end}}{{range .EmbedFiles}}{{$$dir}}/{{.}}{{"\n"}}{{end}}{{end}}' ./cmd/ggg 2>/dev/null | sed -e 's|^$(CURDIR)/||')
+
+$(GGG): go.mod go.sum $(GGG_SOURCE)
 	go build -o $(GGG) ./cmd/ggg
 
 setup: $(GGG)

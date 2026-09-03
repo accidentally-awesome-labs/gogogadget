@@ -75,6 +75,25 @@ func (c *Controller) previewTrustedTask(mutation TaskMutation) error {
 	if mutation.Task == "db" && mutation.Action == "reset" && !mutation.Yes {
 		return refusalError(fmt.Errorf("db reset requires destructive confirmation (--yes in noninteractive mode)"))
 	}
+	// Every trusted task either re-runs sync or operates on state sync
+	// produced, and apply creates the per-environment env files before it
+	// reaches the first lock read. Refusing here keeps the preview contract
+	// intact: a stale engine writes nothing at all.
+	return c.refuseStaleEngine()
+}
+
+// refuseStaleEngine reports the lock's engine-contract refusal for commands
+// that would otherwise write before reading the lock. A project with no lock
+// has nothing to be stale against — that is a fresh genesis, where `ggg setup`
+// is exactly the right command.
+func (c *Controller) refuseStaleEngine() error {
+	data, err := os.ReadFile(filepath.Join(c.rootDir(), modkit.LockFileName))
+	if err != nil {
+		return nil
+	}
+	if err := modkit.EngineContractRefusal(modkit.LockEngineContract(data)); err != nil {
+		return refusalError(err)
+	}
 	return nil
 }
 

@@ -171,7 +171,7 @@
         "source": "content/docs/cli.md",
         "target": "content/docs/cli.md",
         "class": "content",
-        "sha256": "26019bdabfc8082beea45affb19a2fa1455142767b273b30c2818c6d1be8b337",
+        "sha256": "174ae105a79d592b8b3d578cf091e43ae94663f6322efaefe7c6c8df9d54b9ce",
         "rewrite_module": false,
         "contract": false
       },

@@ -52,6 +52,57 @@ with a few deliberate omissions:
 `gogogadget.json` and then call the same reconciler `sync` calls, which is why
 there is exactly one code path from intent to bytes on disk.
 
+## The engine contract
+
+`bin/ggg` is built from the project's own source, so it can fall behind the
+manifests and lock it reads — pull a registry update, skip the rebuild, and a
+binary that predates a capability is now the authority on a tree that uses it.
+That does not fail loudly on its own: the stale engine reports a confident
+wrong answer about a perfectly healthy tree.
+
+So the lock records the engine that wrote it:
+
+```json
+{ "schema": 2, "engine_contract": 2, "…": "…" }
+```
+
+`schema` versions the **file format**. `engine_contract` versions the
+**behavior the resolved state assumes of its reader**, and the two move
+independently. Every command that reads the lock compares the recorded value
+against the one compiled into the binary:
+
+| Lock vs binary | Result |
+|---|---|
+| newer than the binary | **exit 3**, before anything is read further or written, naming the rebuild |
+| equal | proceeds |
+| older, or absent (a lock written before the field existed) | proceeds silently; the next write re-stamps it |
+
+The asymmetry is the upgrade order: rebuild, then sync. A newer binary reading
+an older lock is normal and never warns. The refusal reads:
+
+```
+error: gogogadget.lock.json records engine contract 3; this ggg binary is
+contract 2. Rebuild the CLI from this tree — `go build -o bin/ggg ./cmd/ggg`,
+or `make setup` — then re-run
+```
+
+`ggg doctor` reports the same thing as an `engine_stale` finding rather than
+as a corrupt lock, because the lock is fine — the binary is not.
+
+`make` targets rebuild `bin/ggg` before they use it: the target's
+prerequisites are the first-party Go files the CLI compiles in, so an engine
+change is picked up on the next `make check` without anyone remembering to.
+The guard is what protects a direct `bin/ggg` invocation, a stale binary in
+CI, and a consumer who updated their registry without rebuilding.
+
+**Bumping it** (framework contributors): `modkit.EngineContract` goes up by
+one, in the same change, whenever an older binary would be *wrong* about a
+lock this engine writes — a new generated capability provider or consumer, a
+new generator output, a new resolver invariant. It stays put for changes an
+older binary still reads correctly: wording, performance, new commands. There
+is no automatic detection; the bump is a judgement recorded next to the
+constant, with one line per contract explaining what changed.
+
 ## Commands
 
 Read-only commands never write to the tree. Mutating commands write through a
@@ -214,7 +265,8 @@ Automation branches on these, so they are a public contract.
 Exit 3 is the one worth internalizing: a refusal means nothing was written. The
 planner is pure, so every namespace collision, missing dependency, cycle, digest
 mismatch, locally modified file blocking a removal, and stricter removal policy
-is caught before the first byte moves.
+is caught before the first byte moves. A lock written by a newer engine than the
+running binary refuses here too — see [the engine contract](#the-engine-contract).
 
 Exit 4 has two distinct sources and both are honest reports rather than errors:
 
