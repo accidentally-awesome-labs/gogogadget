@@ -116,6 +116,68 @@ func runGenesis(t *testing.T, runner TaskRunner) (string, error) {
 	return target, nil
 }
 
+// runGenesisInPlace initializes an existing, non-empty directory the way
+// `ggg init` does, so the rollback branch that removes files from a directory
+// the command did not create is actually exercised.
+func runGenesisInPlace(t *testing.T, target string, runner TaskRunner) error {
+	t.Helper()
+	source := genesisTree(t)
+	controller := NewController(ControllerOptions{Root: source, Version: "v1.2.3", TaskRunner: runner})
+	ctx := context.Background()
+	plan, err := controller.Preview(ctx, NewMutation{
+		Dir: target, Name: "genesis", ModulePath: "example.com/genesis",
+		Profile: "ggg/profile/full", Registry: "directory:.", InPlace: true,
+	})
+	if err != nil {
+		return err
+	}
+	_, err = controller.Apply(ctx, plan)
+	return err
+}
+
+// The in-place rollback is the only branch that deletes from a directory the
+// command did not create, so it is the one that has to be shown deleting
+// exactly its own writes. An operator's pre-existing file is not ours and
+// must come back byte-identical.
+func TestInPlaceGenesisRollbackRemovesOnlyWhatItWrote(t *testing.T) {
+	target := t.TempDir()
+	operator := []byte("notes the installer has no claim on\n")
+	writeTestFile(t, target, "NOTES.md", operator)
+	runner := &recordingRunner{fail: map[string]error{"go build ./...": os.ErrInvalid}}
+
+	err := runGenesisInPlace(t, target, runner)
+	if err == nil {
+		t.Fatal("in-place genesis reported success over a tree that does not compile")
+	}
+	if exitOf(t, err) != exitRollback {
+		t.Fatalf("exit = %d, want %d (rolled back)", exitOf(t, err), exitRollback)
+	}
+	if !strings.Contains(err.Error(), "go.sum") {
+		t.Fatalf("the in-place remedy must name go.sum, which the rollback cannot remove: %v", err)
+	}
+	// The directory itself survives — it was not ours to delete.
+	if _, statErr := os.Stat(target); statErr != nil {
+		t.Fatalf("in-place rollback removed a directory it did not create: %v", statErr)
+	}
+	for _, name := range []string{
+		"go.mod", modkit.ProjectFileName, modkit.LockFileName,
+		filepath.Join("internal", "widget", "widget.go"),
+		filepath.Join("internal", "config", "config.go"),
+		filepath.Join("internal", "modules", "bootstrap_registry_gen.go"),
+	} {
+		if _, statErr := os.Stat(filepath.Join(target, filepath.FromSlash(name))); !os.IsNotExist(statErr) {
+			t.Fatalf("in-place rollback kept %s (%v)", name, statErr)
+		}
+	}
+	kept, readErr := os.ReadFile(filepath.Join(target, "NOTES.md"))
+	if readErr != nil {
+		t.Fatalf("in-place rollback removed the operator's own file: %v", readErr)
+	}
+	if string(kept) != string(operator) {
+		t.Fatalf("operator file = %q, want %q", kept, operator)
+	}
+}
+
 // The build-out is what makes the created tree compile, and the compile check
 // is what makes the success envelope mean something. Both run in the created
 // project, never in the directory `ggg new` was invoked from.

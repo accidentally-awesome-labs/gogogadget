@@ -628,6 +628,18 @@ func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 		cleanup()
 		return Result{}, err
 	}
+	// The generated aggregates are not part of plan.Changes, so result.Written
+	// never names them and an in-place rollback would leave them behind. Note
+	// the ones that are absent now, before the apply creates them: a path an
+	// operator already had at a generator-owned name is theirs, and the
+	// engine's own journal is what restores it.
+	newlyGenerated := make([]string, 0)
+	for _, name := range (modkit.RegistryGenerator{}).GeneratedPaths(*plan.Local) {
+		full := filepath.Join(state.target, filepath.FromSlash(name))
+		if _, statErr := os.Lstat(full); errors.Is(statErr, fs.ErrNotExist) {
+			newlyGenerated = append(newlyGenerated, full)
+		}
+	}
 	result, err := engine.Apply(ctx, *plan.Local)
 	if err != nil {
 		cleanup()
@@ -647,20 +659,24 @@ func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 	if buildErr != nil {
 		// A root this command created is removed outright, which is the whole
 		// rollback. An in-place genesis cannot remove a directory it did not
-		// create, so it removes what it wrote — the base files plus every
-		// journalled path, the lock included — and the remedy names the rest.
+		// create, so it removes what it wrote — the base files, every
+		// journalled path, the lock, and the aggregates this run generated.
+		// go.sum is none of those: the dependency reconciliation writes it
+		// through the go tool, so the remedy names it along with the tool
+		// outputs and bin/.
 		if !createdRoot {
 			created = append(created, filepath.Join(state.target, modkit.LockFileName))
 			for _, name := range result.Written {
 				created = append(created, filepath.Join(state.target, filepath.FromSlash(name)))
 			}
+			created = append(created, newlyGenerated...)
 		}
 		cleanup()
 		env := planEnvelope(*plan.Local, "new", exitRollback)
 		env.OK = false
 		remedy := fmt.Errorf("%w; nothing was kept, fix the cause and re-run `ggg new`", buildErr)
 		if !createdRoot {
-			remedy = fmt.Errorf("%w; installed source and the lock were removed, but generated tool outputs and bin/ remain: delete them and re-run", buildErr)
+			remedy = fmt.Errorf("%w; installed source and the lock were removed, but go.sum, the generated tool outputs and bin/ remain: delete them and re-run", buildErr)
 		}
 		return Result{Envelope: env}, rollbackError(remedy)
 	}

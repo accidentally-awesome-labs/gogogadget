@@ -70,6 +70,25 @@ func (usageError) ExitCode() int {
 	return exitUsage
 }
 
+// hasDeclaredExit reports whether an error already carries one of this layer's
+// declared exit codes.
+//
+// It matches the concrete carriers and never the structural
+// interface{ ExitCode() int }: *exec.ExitError satisfies that interface
+// through *os.ProcessState, so a structural test lets a child process's raw
+// status become a declared code — 7 from a bare curl under `set -e`, 125 from
+// a docker daemon error, or, worst, 5 claiming a rolled-back tree the command
+// never touched. Declared codes have exactly one producer, this package, and a
+// subprocess status is not one of them.
+func hasDeclaredExit(err error) bool {
+	var coded exitError
+	var usage usageError
+	var cancelled UserCancelledError
+	var stale modkit.EngineContractError
+	return errors.As(err, &coded) || errors.As(err, &usage) ||
+		errors.As(err, &cancelled) || errors.As(err, &stale)
+}
+
 // ErrCancelled reports that the operator cancelled before any plan existed.
 // Nothing was previewed and nothing was written, so the process exits 0.
 var ErrCancelled = exitError{code: exitOK, err: errors.New("cancelled")}

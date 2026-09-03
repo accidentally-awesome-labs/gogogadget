@@ -212,14 +212,16 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		// A failed trusted task reports the same fixed envelope as any other
 		// failure. Returning a zero-value envelope here made the renderer
 		// print "failed (exit 0)" while the process exited nonzero — the same
-		// success-over-failure mismatch the success path below guards
-		// against. A step that already declared its code keeps it (a
-		// stale-engine refusal stays a refusal); a bare subprocess failure
-		// becomes a runtime error, and the envelope's exit is read off the
-		// same error the process status comes from, so the two cannot
-		// disagree.
-		var coded interface{ ExitCode() int }
-		if !errors.As(err, &coded) {
+		// success-over-failure mismatch the success path below guards against.
+		//
+		// hasDeclaredExit deliberately does not test the structural
+		// interface{ ExitCode() int }, because a subprocess status would
+		// satisfy it and become a declared code. Everything reachable here is
+		// a step failure — a wrapped *exec.ExitError, or the argv-prefixed
+		// error the run closure builds — so it all becomes a runtime failure,
+		// and the envelope's exit is read off the same error the process
+		// status comes from, so the two cannot disagree.
+		if !hasDeclaredExit(err) {
 			err = runtimeError(err)
 		}
 		return failureEnvelope(mutation.Task+taskActionSuffix(mutation.Action), err)
@@ -346,9 +348,15 @@ func readProjectLock(root string) (modkit.Lock, bool, error) {
 //
 // Values come from the manifests' own declarations, never from this file:
 // non-secret keys whose module states an example that differs from its
-// default. Mode stays 0600 because configured credentials land here later,
-// and only development and test are ever written.
+// default. Mode stays 0600 because configured credentials land here later.
+//
+// The rule that production is never written to disk is enforced here, at the
+// only place that writes: a value provider that merely declines to produce
+// lines would still have created the file.
 func ensureEnvironmentFile(root, environment string) error {
+	if environment != "development" && environment != "test" {
+		return fmt.Errorf("environment %q is never written to disk", environment)
+	}
 	path := filepath.Join(root, ".ggg", "env", environment+".env")
 	if info, err := os.Stat(path); err == nil {
 		if info.Size() > 0 {

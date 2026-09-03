@@ -3012,13 +3012,15 @@ func emitEnvExample(ctx context.Context, modulePath string, lock Lock, graph []M
 // never written under any circumstance, and an adapter's keys apply only to
 // the environment that selected it.
 //
-// Only development and test are askable. Production configuration is never
-// written to disk, and this writes declared defaults rather than resurrecting
-// any credential-presence fallback: a managed adapter selected for production
-// without its keys still refuses to boot.
+// Only development and test are askable, because an adapter's keys are scoped
+// to the environment that selected it and there is nothing to ask about an
+// environment nothing writes. Whether a file may be created at all is
+// enforced by the caller that writes it, not here. This returns declared
+// defaults and resurrects no credential-presence fallback: a managed adapter
+// selected for production without its keys still refuses to boot.
 func DeclaredEnvironmentPosture(lock Lock, graph []Manifest, environment string) ([]string, error) {
 	if environment != "development" && environment != "test" {
-		return nil, fmt.Errorf("environment %q is never written to disk", environment)
+		return nil, fmt.Errorf("environment %q has no written posture", environment)
 	}
 	declarations, err := declaredEnvironment(lock, graph)
 	if err != nil {

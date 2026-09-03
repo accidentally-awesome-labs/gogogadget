@@ -3,6 +3,7 @@ package gggcli
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -139,27 +140,57 @@ func TestVisualTaskRunsContainerHarness(t *testing.T) {
 // failure. It returned a zero-value envelope, so the renderer printed
 // "failed (exit 0)" while the process exited 1 — an envelope that contradicts
 // the process status, which is what automation branches on.
+//
+// The second case is the regression the first fix nearly introduced: a child
+// process's status must never become a declared exit code. *exec.ExitError
+// satisfies interface{ ExitCode() int } through *os.ProcessState, and the
+// statuses are real — smoke.sh under `set -euo pipefail` exits 7 on a bare
+// curl, docker compose reports daemon errors as 125, and a child exiting 5
+// would make ggg claim the rolled-back-tree code over a tree it never
+// touched.
 func TestFailedTrustedTaskReportsTheFailureEnvelope(t *testing.T) {
-	runner := &recordingRunner{fail: map[string]error{"go build ./cmd/server": os.ErrInvalid}}
-	controller := NewController(ControllerOptions{Root: t.TempDir(), TaskRunner: runner})
-	plan, err := controller.Preview(context.Background(), TaskMutation{Task: "build"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	result, err := controller.Apply(context.Background(), plan)
-	if err == nil {
-		t.Fatal("a failed task reported success")
-	}
-	if result.Envelope.Exit != exitRuntime || result.Envelope.OK {
-		t.Fatalf("envelope = {ok:%v exit:%d}, want {ok:false exit:%d}", result.Envelope.OK, result.Envelope.Exit, exitRuntime)
-	}
-	if result.Envelope.Exit != exitOf(t, err) {
-		t.Fatalf("envelope exit %d contradicts the process exit %d", result.Envelope.Exit, exitOf(t, err))
-	}
-	if result.Envelope.Command != "build" {
-		t.Fatalf("envelope command = %q, want %q", result.Envelope.Command, "build")
+	for _, testCase := range []struct {
+		name  string
+		cause error
+	}{
+		{"uncoded failure", os.ErrInvalid},
+		{"child process status", childStatusError(7)},
+		{"child process status claiming the rollback code", childStatusError(exitRollback)},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			runner := &recordingRunner{fail: map[string]error{"go build ./cmd/server": testCase.cause}}
+			controller := NewController(ControllerOptions{Root: t.TempDir(), TaskRunner: runner})
+			plan, err := controller.Preview(context.Background(), TaskMutation{Task: "build"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := controller.Apply(context.Background(), plan)
+			if err == nil {
+				t.Fatal("a failed task reported success")
+			}
+			if result.Envelope.Exit != exitRuntime || result.Envelope.OK {
+				t.Fatalf("envelope = {ok:%v exit:%d}, want {ok:false exit:%d}", result.Envelope.OK, result.Envelope.Exit, exitRuntime)
+			}
+			if got := exitOf(t, err); got != exitRuntime {
+				t.Fatalf("process exit = %d, want %d: a subprocess status reached the public contract", got, exitRuntime)
+			}
+			if result.Envelope.Exit != exitOf(t, err) {
+				t.Fatalf("envelope exit %d contradicts the process exit %d", result.Envelope.Exit, exitOf(t, err))
+			}
+			if result.Envelope.Command != "build" {
+				t.Fatalf("envelope command = %q, want %q", result.Envelope.Command, "build")
+			}
+		})
 	}
 }
+
+// childStatusError mimics what osTaskRunner returns for a child that exited
+// nonzero: an error carrying ExitCode() structurally, wrapped in the argv
+// prefix the task runner adds.
+type childStatusError int
+
+func (e childStatusError) Error() string { return fmt.Sprintf("exit status %d", int(e)) }
+func (e childStatusError) ExitCode() int { return int(e) }
 
 type recordingTaskRunner struct{ argv []string }
 
