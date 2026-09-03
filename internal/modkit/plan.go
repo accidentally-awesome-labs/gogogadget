@@ -93,6 +93,13 @@ type Change struct {
 	Class   DestinationClass `json:"class"`
 	SHA256  string           `json:"sha256"`
 	Content []byte           `json:"-"`
+	// Executable installs the target with the executable bit. It is derived
+	// from the payload's declared FileClassScript, never from the source
+	// file's mode on the publisher's disk: a manifest declares intent and the
+	// installer reproduces it. Without it every `class:"script"` payload
+	// landed 0644, so a created project could not run the shell scripts its
+	// own `ggg test smoke` and `ggg test visual` invoke.
+	Executable bool `json:"executable,omitempty"`
 }
 
 // Diagnostic is a stable machine-readable planner message.

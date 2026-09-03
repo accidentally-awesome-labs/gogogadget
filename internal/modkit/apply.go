@@ -221,7 +221,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 			full := filepath.Join(plan.Root, filepath.FromSlash(change.Path))
 			switch change.Kind {
 			case ChangeCreate, ChangeUpdate:
-				if err := atomicWrite(full, change.Content); err != nil {
+				if err := atomicWrite(full, change.Content, change.Executable); err != nil {
 					return fmt.Errorf("write %s: %w", change.Path, err)
 				}
 				written = append(written, change.Path)
@@ -249,7 +249,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 	if err != nil {
 		return failed(fmt.Errorf("marshal lock: %w", err))
 	}
-	if err := atomicWrite(filepath.Join(plan.Root, "gogogadget.lock.json"), lockContent); err != nil {
+	if err := atomicWrite(filepath.Join(plan.Root, "gogogadget.lock.json"), lockContent, false); err != nil {
 		return failed(fmt.Errorf("write lock: %w", err))
 	}
 
@@ -263,6 +263,11 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 // what makes an installed module readable to a group checkout and to a container
 // that builds as one uid and runs as another.
 const defaultFileMode fs.FileMode = 0o644
+
+// executableFileMode is the mode a newly created payload declared
+// FileClassScript gets. `ggg test smoke` and `ggg test visual` exec their
+// scripts directly, so the declared class has to reach the filesystem.
+const executableFileMode fs.FileMode = 0o755
 
 // slashParent returns the parent of a slash-separated relative path, or "" at
 // the top. It is deliberately not filepath.Dir: journal keys are slash paths,
@@ -278,15 +283,27 @@ func slashParent(path string) string {
 // atomicWrite writes content to a sibling temp file and renames it into place
 // so a crash cannot leave a half-written target. os.CreateTemp opens at 0600,
 // so the mode is set explicitly before the rename: an update keeps the target's
-// existing mode and a create gets defaultFileMode. Without this every file
+// existing mode and a create gets defaultFileMode, or executableFileMode when
+// the change declares an executable payload. Without this every file
 // `ggg add` installs would be owner-only.
-func atomicWrite(full string, content []byte) error {
+func atomicWrite(full string, content []byte, executable bool) error {
 	if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
 		return err
 	}
 	mode := defaultFileMode
+	if executable {
+		mode = executableFileMode
+	}
 	if info, err := os.Stat(full); err == nil {
 		mode = info.Mode().Perm()
+		if executable {
+			// An existing script keeps whatever the operator set, but a
+			// target that lost its bit — installed before mode was declared,
+			// or checked out by a tool that drops it — regains it. The class
+			// is the contract; a 0644 script the CLI has to exec is a broken
+			// install, not an operator preference.
+			mode |= 0o111
+		}
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(full), ".ggg-*")
 	if err != nil {

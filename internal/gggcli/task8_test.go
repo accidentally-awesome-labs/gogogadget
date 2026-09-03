@@ -135,6 +135,32 @@ func TestVisualTaskRunsContainerHarness(t *testing.T) {
 	}
 }
 
+// A failed trusted task must carry the same fixed envelope as any other
+// failure. It returned a zero-value envelope, so the renderer printed
+// "failed (exit 0)" while the process exited 1 — an envelope that contradicts
+// the process status, which is what automation branches on.
+func TestFailedTrustedTaskReportsTheFailureEnvelope(t *testing.T) {
+	runner := &recordingRunner{fail: map[string]error{"go build ./cmd/server": os.ErrInvalid}}
+	controller := NewController(ControllerOptions{Root: t.TempDir(), TaskRunner: runner})
+	plan, err := controller.Preview(context.Background(), TaskMutation{Task: "build"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := controller.Apply(context.Background(), plan)
+	if err == nil {
+		t.Fatal("a failed task reported success")
+	}
+	if result.Envelope.Exit != exitRuntime || result.Envelope.OK {
+		t.Fatalf("envelope = {ok:%v exit:%d}, want {ok:false exit:%d}", result.Envelope.OK, result.Envelope.Exit, exitRuntime)
+	}
+	if result.Envelope.Exit != exitOf(t, err) {
+		t.Fatalf("envelope exit %d contradicts the process exit %d", result.Envelope.Exit, exitOf(t, err))
+	}
+	if result.Envelope.Command != "build" {
+		t.Fatalf("envelope command = %q, want %q", result.Envelope.Command, "build")
+	}
+}
+
 type recordingTaskRunner struct{ argv []string }
 
 func (r *recordingTaskRunner) Run(_ context.Context, _ string, argv []string) error {

@@ -103,7 +103,7 @@ func refreshManifestDocument(root, rel string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if err := atomicWrite(full, append(encoded, '\n')); err != nil {
+	if err := atomicWrite(full, append(encoded, '\n'), false); err != nil {
 		return false, err
 	}
 	return true, nil

@@ -237,6 +237,9 @@ func resolveModuleFiles(
 				Path: targetPath, Module: module.ID, Source: pendingConflict.CandidatePath,
 				Kind: kind, Class: DestinationAuthored, SHA256: candidateDigest,
 				Content: append([]byte(nil), candidate...),
+				// Mode is declared data: the resolved bytes install with the
+				// class the manifest declares, exactly like a plain sync.
+				Executable: freshPayload.file.Class == FileClassScript,
 			})
 		} else if localDigest == candidateDigest {
 			state = FileClean
@@ -295,7 +298,8 @@ func resolveModuleFiles(
 				changes = append(changes, Change{
 					Path: targetPath, Module: module.ID, Source: pendingConflict.CandidatePath,
 					Kind: kind, Class: DestinationAuthored, SHA256: candidateDigest,
-					Content: append([]byte(nil), candidate...),
+					Content:    append([]byte(nil), candidate...),
+					Executable: freshPayload.file.Class == FileClassScript,
 				})
 			} else if localDigest == candidateDigest {
 				state = FileClean

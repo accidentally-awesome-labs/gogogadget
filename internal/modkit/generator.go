@@ -53,7 +53,7 @@ func (g RegistryGenerator) Generate(ctx context.Context, plan Plan) error {
 		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 			return fmt.Errorf("create %s: %w", filepath.Dir(file.Path), err)
 		}
-		if err := atomicWrite(target, []byte(file.Content)); err != nil {
+		if err := atomicWrite(target, []byte(file.Content), false); err != nil {
 			return fmt.Errorf("write %s: %w", file.Path, err)
 		}
 	}

@@ -89,6 +89,7 @@ func classifyAuthoredTarget(root, module string, file ManifestFile, content []by
 	change := Change{
 		Path: file.Target, Module: module, Source: file.Source, Class: DestinationAuthored,
 		SHA256: digestBytes(content), Content: append([]byte(nil), content...),
+		Executable: file.Class == FileClassScript,
 	}
 	owner, owned := owners[file.Target]
 	if owned && owner.module != module {

@@ -474,6 +474,55 @@ func TestApplyWritesGroupReadableFiles(t *testing.T) {
 	}
 }
 
+// A payload declared FileClassScript must land executable. It did not, so
+// every created project installed scripts/smoke.sh and scripts/visual*.sh at
+// 0644 and `ggg test smoke` died with "fork/exec scripts/smoke.sh: permission
+// denied" — the class declared an intent the installer dropped.
+func TestApplyInstallsDeclaredScriptsExecutable(t *testing.T) {
+	files, _ := removalRegistries(t)
+	script := []byte("#!/usr/bin/env bash\nset -euo pipefail\necho smoke\n")
+	files["registry/modules/page/optional/run.sh"] = &fstest.MapFile{Data: script}
+	mutatePlannerModule(t, files, "ggg/page/optional", func(module *Manifest) {
+		module.Files = append(module.Files, ManifestFile{
+			Source: "registry/modules/page/optional/run.sh", Target: "scripts/run.sh",
+			Class: FileClassScript, SHA256: sha256Hex(script),
+		})
+	})
+	source := refSource{snapshots: map[string]Snapshot{
+		"main":      {Commit: testCommitA, FS: files},
+		testCommitA: {Commit: testCommitA, FS: files},
+	}}
+	root := writeTargetProject(t, "example.com/acme/app", Project{
+		Schema:     2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}},
+		Providers:  map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/page/optional"}, Exclude: []string{},
+	})
+	plan, err := New(Options{Source: source}).Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	if _, err := applyEngineWith(&scriptedGenerator{}).Apply(context.Background(), plan); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	info, err := os.Stat(filepath.Join(root, "scripts", "run.sh"))
+	if err != nil {
+		t.Fatalf("stat script: %v", err)
+	}
+	if got := info.Mode().Perm(); got != executableFileMode {
+		t.Fatalf("script mode = %04o, want %04o", got, executableFileMode)
+	}
+	// The bit is declared, not ambient: a Go payload in the same apply stays
+	// non-executable.
+	goInfo, err := os.Stat(filepath.Join(root, "internal", "modules", "optional.go"))
+	if err != nil {
+		t.Fatalf("stat go payload: %v", err)
+	}
+	if got := goInfo.Mode().Perm(); got != defaultFileMode {
+		t.Fatalf("go payload mode = %04o, want %04o", got, defaultFileMode)
+	}
+}
+
 // Rollback must restore the mode it found, not a hardcoded one. A file the
 // operator made executable and a file they made 0600 must both come back the
 // way they were.

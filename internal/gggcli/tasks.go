@@ -216,7 +216,20 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		err = run(root, "go", "build", "./cmd/server")
 	}
 	if err != nil {
-		return Result{}, runtimeError(err)
+		// A failed trusted task reports the same fixed envelope as any other
+		// failure. Returning a zero-value envelope here made the renderer
+		// print "failed (exit 0)" while the process exited nonzero — the same
+		// success-over-failure mismatch the success path below guards
+		// against. A step that already declared its code keeps it (a
+		// stale-engine refusal stays a refusal); a bare subprocess failure
+		// becomes a runtime error, and the envelope's exit is read off the
+		// same error the process status comes from, so the two cannot
+		// disagree.
+		var coded interface{ ExitCode() int }
+		if !errors.As(err, &coded) {
+			err = runtimeError(err)
+		}
+		return failureEnvelope(mutation.Task+taskActionSuffix(mutation.Action), err)
 	}
 	// Trusted tasks report the fixed envelope like every other command: a
 	// zero-value envelope must never reach the renderer, or a successful task
