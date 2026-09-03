@@ -87,7 +87,13 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		if registry.Namespace == currentLock.Modules[moduleIndex].RegistryNamespace && pending.SourceCommit != "" {
 			registry.Ref = pending.SourceCommit
 		}
-		snapshot, err := e.source.Resolve(ctx, registry)
+		// The conflicted module's registry is already pinned to the pending
+		// candidate's commit above. Every other registry still carries the
+		// operator's ref, which offline resolution cannot turn into a commit,
+		// so it resolves through the lock's recorded snapshot. Verification is
+		// off: the pending candidate comes from a newer snapshot than the
+		// record by construction.
+		snapshot, err := e.resolveConfiguredRegistry(ctx, registry, currentLock, true, false)
 		if err != nil {
 			return Plan{}, fmt.Errorf("resolve pending registry commit %s: %w", pending.RegistryCommit, err)
 		}

@@ -254,8 +254,13 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, err
 	}
 	registrySources := make([]resolvedRegistry, 0, len(desiredProject.Registries))
+	// Update in every form is the sanctioned way to move a pin, and a plan
+	// that replaces the registry set is changing intent outright, so both skip
+	// verification; every other operation must resolve to the commit the lock
+	// already recorded.
+	verifyPins := hasLock && op.Kind != OpUpdate && op.SetRegistries == nil
 	for _, configured := range desiredProject.Registries {
-		snapshot, resolveErr := e.source.Resolve(ctx, configured)
+		snapshot, resolveErr := e.resolveConfiguredRegistry(ctx, configured, existingLock, op.Offline, verifyPins)
 		if resolveErr != nil {
 			return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", configured.Namespace, configured.Ref, resolveErr)
 		}

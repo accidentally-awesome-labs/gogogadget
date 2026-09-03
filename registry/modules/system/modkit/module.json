@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 10,
+    "revision": 11,
     "contract": 2,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -52,7 +52,7 @@
         "source": "internal/gggcli/app.go",
         "target": "internal/gggcli/app.go",
         "class": "go",
-        "sha256": "fd09ed6c6eb647466fe6f93eae6fbaca274c326348dba97022287413d38de124",
+        "sha256": "a63189c8be581945e9d58d73ecc50f1f5f8a7bae4a505565545d35b64160df1f",
         "rewrite_module": true,
         "contract": false
       },
@@ -156,7 +156,7 @@
         "source": "internal/gggcli/genesis_test.go",
         "target": "internal/gggcli/genesis_test.go",
         "class": "test",
-        "sha256": "cadde987b61ec1d80d61094c3888d2ed9fa8cc64643b035d5306fb7ef8b7bfa3",
+        "sha256": "485a839483aafb2f64efa31379fc479107b9c71ec7e3c8b1eabbeaf5c722410c",
         "rewrite_module": true,
         "contract": true
       },
@@ -677,7 +677,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "949fab92eb1b8d1e98ea14afa4e4b5e55897e1ceed93e0ae513bcb04b40b341d",
+        "sha256": "db0196c1254917f8b8e06f1544ca6b957dc198a4e913f3eb4b320219f2619ab3",
         "rewrite_module": true,
         "contract": true
       },
@@ -763,6 +763,14 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/registry_pin_test.go",
+        "target": "internal/modkit/registry_pin_test.go",
+        "class": "test",
+        "sha256": "15d700c1e7c8ab2724af69259929e1b69cdaeebf002fc6e222f806bf4e612636",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/modkit/registry_published_selfhost_test.go",
         "target": "internal/modkit/registry_published_selfhost_test.go",
         "class": "test",
@@ -807,7 +815,7 @@
         "source": "internal/modkit/resolve_conflict.go",
         "target": "internal/modkit/resolve_conflict.go",
         "class": "go",
-        "sha256": "8f0df59e4c222ab45b3f4b82100a62642a91c6117ed63398d697c09a7d887d14",
+        "sha256": "f632e35db17c7c1738ce93f2bd16bfe73027ea9fd5ef452dade4adc67addffe8",
         "rewrite_module": true,
         "contract": false
       },
@@ -872,7 +880,7 @@
         "source": "internal/modkit/source_github.go",
         "target": "internal/modkit/source_github.go",
         "class": "go",
-        "sha256": "eda82a1e673810ad675dd55493ceb4a7be7810fe560e1f8c017860a3a250706a",
+        "sha256": "0e5f9407e7c269343cd0abbc855489410a222b630132471eca8bc3c7f3268cdd",
         "rewrite_module": true,
         "contract": false
       },
@@ -880,7 +888,7 @@
         "source": "internal/modkit/source_project.go",
         "target": "internal/modkit/source_project.go",
         "class": "go",
-        "sha256": "1c7c015db9191cc151072c609f6d02ede39d2965a2989590a3dde368d6b652f6",
+        "sha256": "a0969fe1d0f530737466cbe05565425c8d3599b8173d572407e951b5e95ecd66",
         "rewrite_module": true,
         "contract": true
       },

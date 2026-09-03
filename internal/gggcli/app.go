@@ -82,17 +82,22 @@ func (a App) Run(ctx context.Context, args []string) error {
 
 	// `--help` / `-h` / `help` are derived from the table. A --help request
 	// for an unknown command stays a usage failure.
+	//
+	// The write error is returned, not discarded: every other render path
+	// propagates it, and an exit status that says success over output the
+	// caller never received is the same envelope-versus-status disagreement
+	// the trusted tasks had.
 	name := argv[0]
 	if name == "--help" || name == "-h" {
-		fmt.Fprint(out, renderHelp(table, ""))
-		return nil
+		_, err := fmt.Fprint(out, renderHelp(table, ""))
+		return err
 	}
 	rest := argv[1:]
 	for _, arg := range rest {
 		if arg == "--help" || arg == "-h" {
 			if _, known := lookupSpec(table, name); known {
-				fmt.Fprint(out, renderHelp(table, name))
-				return nil
+				_, err := fmt.Fprint(out, renderHelp(table, name))
+				return err
 			}
 			return usageError(fmt.Sprintf("unknown command %q", name))
 		}

@@ -66,7 +66,20 @@ func (s GitHubSource) Resolve(ctx context.Context, registry ProjectRegistry) (Sn
 
 	if s.Offline {
 		if !validGitHubCommit(ref) {
-			return Snapshot{}, fmt.Errorf("resolve GitHub source %q offline: ref must be a full 40-character lowercase commit", repository)
+			// A release tag is what an operator maintains and what
+			// `ggg new --ref` records, so reaching here means the lock had no
+			// snapshot to resolve it through — a project that has never synced
+			// online. Offline resolution cannot turn a ref into a commit, so
+			// name the two commands that can.
+			target := registry.Namespace
+			if target == "" {
+				target = repository
+			}
+			return Snapshot{}, fmt.Errorf(
+				"resolve GitHub source %q offline: ref %q is not a full 40-character lowercase commit "+
+					"and the lock records no snapshot for registry %q; run `ggg sync` once with network access, "+
+					"or `ggg update --registry %s --ref %s`",
+				repository, ref, target, target, ref)
 		}
 		exists, err := validateExistingGitHubCacheDir(cacheDir)
 		if err != nil {

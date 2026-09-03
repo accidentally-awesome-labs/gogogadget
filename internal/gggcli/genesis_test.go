@@ -328,3 +328,28 @@ func TestGenerationStepsFollowTheInstalledDeclarations(t *testing.T) {
 		}
 	}
 }
+
+// failingWriter refuses every write the way a closed pipe does.
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) { return 0, os.ErrClosed }
+
+// A command whose output never reached the caller must not report success.
+// The help and --help paths discarded the write error and returned nil, so
+// `ggg --help` into a closed pipe printed nothing and exited 0 — the same
+// status-versus-reality disagreement the trusted-task envelope had.
+func TestHelpDoesNotReportSuccessWhenItsOutputCannotBeWritten(t *testing.T) {
+	for _, argv := range [][]string{{"--help"}, {"-h"}, {"sync", "--help"}} {
+		var errOut bytesBuffer
+		app := App{Out: failingWriter{}, Err: &errOut, Root: t.TempDir(), Version: "v1.2.3"}
+		err := app.Run(context.Background(), argv)
+		if err == nil {
+			t.Fatalf("%v reported success over output that was never written", argv)
+		}
+		// ExitCode is what cmd/ggg exits with; an uncoded write failure is a
+		// runtime failure, never success.
+		if got := ExitCode(err); got != exitRuntime {
+			t.Fatalf("%v exit = %d, want %d", argv, got, exitRuntime)
+		}
+	}
+}
