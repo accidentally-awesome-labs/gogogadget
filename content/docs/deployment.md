@@ -195,8 +195,8 @@ service name and container port, so it is unaffected by host publishing.
 ### Moving a published port
 
 A busy host — anything already on `5432` or `8080`, including a Postgres
-installed the normal way — moves a port with a committed project decision, not
-by editing a generated file:
+installed the normal way — moves a port with a committed project decision in
+`gogogadget.json`, not by editing a generated file:
 
 ```json
 "ports": {
@@ -210,6 +210,11 @@ A key is `<service>/<port>`: `app/http` for the generated app service, and
 `development`, `test`, or both; an unset environment keeps the derived port,
 and an `app/http` test entry is the one way to publish the test app. The values
 are host ports, they are not secret, and `APP_URL` follows them.
+
+The whole key is optional: a project that declares no override simply has no
+`ports` key, and writing intent never adds one. That is what every project
+created before this existed says, and it is why upgrading the CLI does not
+touch a project file at rest.
 
 Two refusals hold the promise, both before anything is written:
 

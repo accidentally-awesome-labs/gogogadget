@@ -87,7 +87,6 @@ reconciler `sync` runs; they are not a second code path. This project selects
       "production":  { "adapter": "ggg/system/mail-resend", "target": "resend" }
     }
   },
-  "ports": {},
   "deployment": "ggg/system/deploy-fly"
 }
 ```
@@ -101,8 +100,9 @@ leaving the selection blank.
 
 `ports` is the other committed decision about how the stack stands up: the
 host port one generated Compose port publishes on, keyed `<service>/<port>`,
-for the environments that have a Compose file. It is empty until a busy host
-needs a port moved — the derivation rule and both refusals are in
+for the environments that have a Compose file. Unlike the keys above it is
+**optional** — absent means no override, which is what every project written
+before it existed says — and the derivation rule and both refusals are in
 [Deployment](/docs/deployment).
 
 `gogogadget.lock.json` is the generated, committed counterpart: the registry

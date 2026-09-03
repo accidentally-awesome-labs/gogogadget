@@ -44,7 +44,6 @@ with a few deliberate omissions:
   "modules": ["ggg/profile/full"],
   "exclude": ["ggg/component/table-empty", "ggg/element/divider", "ggg/system/deploy-docker"],
   "providers": { "…": {} },
-  "ports": {},
   "deployment": "ggg/system/deploy-fly"
 }
 ```

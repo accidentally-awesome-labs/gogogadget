@@ -68,7 +68,7 @@
         "source": "internal/gggcli/ui/screens_integration_test.go",
         "target": "internal/gggcli/ui/screens_integration_test.go",
         "class": "test",
-        "sha256": "d673b6e8a095f765f1b85735805af22a3d261d60d989841de17d6553972f4c01",
+        "sha256": "3ad5fc04af1741824864b6bfcb920ed7838e49ce5cfc6bdfde09badff7488041",
         "rewrite_module": true,
         "contract": false
       },

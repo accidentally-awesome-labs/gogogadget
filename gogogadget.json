@@ -269,6 +269,5 @@
       }
     }
   },
-  "ports": {},
   "deployment": "ggg/system/deploy-fly"
 }

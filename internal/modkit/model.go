@@ -12,15 +12,22 @@ type Project struct {
 	// Ports overrides the host port one generated Compose port publishes on.
 	// A key is `<service>/<port>`: `app/http` for the generated app service,
 	// and `<adapter>@<target>/<declared port name>` for an adapter's local
-	// service. Absent keys keep the derived default, so this map is empty in
-	// a project that never had to move a port.
+	// service. Absent keys keep the derived default.
 	//
 	// Publishing lives here, beside the provider selections that decide which
 	// services exist at all, because it is a committed project decision: a
 	// generated Compose file is registry-owned and a hand edit vanishes at the
 	// next generate, and an environment variable would not be reviewable.
 	// Nothing here is a secret.
-	Ports      map[string]PortOverrides `json:"ports"`
+	//
+	// The whole key is optional, unlike the fixed keys above, and an absent
+	// map is identical to an empty one everywhere. Overrides are intent an
+	// older writer legitimately never wrote: a project file created before
+	// this existed must keep loading, because it is data at rest that
+	// upgrading a CLI cannot rewrite. Requiring the key would brick it, which
+	// is the failure the schema contract exists to prevent — and it would be
+	// a format change smuggled in under an unchanged schema version.
+	Ports      map[string]PortOverrides `json:"ports,omitempty"`
 	Deployment string                   `json:"deployment"`
 }
 

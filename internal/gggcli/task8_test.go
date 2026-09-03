@@ -138,6 +138,21 @@ func TestComposePublishesDerivedTestPortsAndLeavesTheTestAppUnpublished(t *testi
 	if !strings.Contains(test, "APP_URL: http://app:8080") {
 		t.Fatalf("unpublished test app does not report its in-network origin:\n%s", test)
 	}
+	// A project that declares no override has no `ports` key at all, so the
+	// generator sees a nil map. It must be the same input as an empty one: an
+	// absent override is no override, not a missing one.
+	withEmpty, err := modkit.GenerateComposeFiles(modkit.Lock{
+		Providers: map[string]modkit.ProviderSelections{"ggg/database": both},
+		Ports:     map[string]modkit.PortOverrides{},
+	}, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := range files {
+		if files[i].Path != withEmpty[i].Path || files[i].Content != withEmpty[i].Content {
+			t.Fatalf("absent ports generated %s differently from an empty map", files[i].Path)
+		}
+	}
 }
 
 // An operator on a busy host must be able to move a published port without
