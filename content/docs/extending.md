@@ -417,6 +417,17 @@ a namespace that does not match what you pinned, a colliding canonical module
 prefix, and a dependency outside its declared contract range each refuse
 before the first byte is written.
 
+A tag is the right pin for both core and third-party registries, and it stays
+a tag: `gogogadget.json` keeps `"ref": "v1.0.0"` because that is what a human
+maintains and what `ggg update --registry NAMESPACE --ref REF` moves. The
+commit it resolved to is recorded in the lock alongside the snapshot digest and
+the content-addressed cache key, and offline commands — `ggg setup`,
+`generate`, `check`, every `sync --offline` — resolve through that record
+rather than the ref, because nothing offline can turn a tag into a commit. A
+registry whose ref is a full commit must still resolve to the commit the lock
+records; a disagreement refuses and names `ggg update`, so a pinned project
+never moves as a side effect of `sync`.
+
 Rotate a signing key with `ggg registry rotate --old-key-file … --new-key-file
 … --not-before RFC3339`. That publishes `registry-key-rotation.json` plus
 detached signatures under both keys; a consumer honours the new key only once
