@@ -353,3 +353,150 @@ func TestHelpDoesNotReportSuccessWhenItsOutputCannotBeWritten(t *testing.T) {
 		}
 	}
 }
+
+// A created project must be idempotent-clean: `ggg check` is what the
+// generated README, Makefile and docs all point a new operator at, and it
+// begins with `sync --check --offline`.
+//
+// It was not. `ggg new` planned against the operator's core registry alone and
+// then wrote gogogadget.json with the core AND the project-local registry, so
+// the lock described a registry set the project did not have. The registry
+// commit is a digest over the resolved sources, and every generated header
+// carries it, so an untouched fresh destination reported a pending lock change
+// and a generated drift for every emitted file.
+func TestFreshGenesisIsIdempotentClean(t *testing.T) {
+	target, err := runGenesis(t, &recordingRunner{})
+	if err != nil {
+		t.Fatalf("new: %v", err)
+	}
+
+	// The project-local registry is in the intent file and in the lock, and
+	// the lock resolved it rather than merely listing it.
+	project, err := modkit.ParseProject(readFileForTest(t, filepath.Join(target, modkit.ProjectFileName)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	lock, err := modkit.ParseLock(readFileForTest(t, filepath.Join(target, modkit.LockFileName)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	local := ""
+	for _, registry := range project.Registries {
+		if registry.Path == "registry" {
+			local = registry.Namespace
+		}
+	}
+	if local == "" {
+		t.Fatalf("project declares no project-local registry: %+v", project.Registries)
+	}
+	if len(lock.Registries) != len(project.Registries) {
+		t.Fatalf("lock records %d registries, project declares %d", len(lock.Registries), len(project.Registries))
+	}
+	found := false
+	for _, recorded := range lock.Registries {
+		if recorded.Namespace == local {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("lock does not record the project-local registry %q: %+v", local, lock.Registries)
+	}
+	if _, ok := lockedSnapshotNamespaces(lock)[local]; !ok {
+		t.Fatalf("lock has no snapshot for the project-local registry %q", local)
+	}
+
+	// The destination's own check: no pending changes, no generated drift.
+	assertNoPendingChanges(t, target)
+}
+
+// The project-local registry must be a working source, not a declaration. An
+// operator's next step is `ggg create`, which authors into it, so a module
+// written there has to resolve and install.
+func TestGenesisProjectLocalRegistryResolvesAnAuthoredModule(t *testing.T) {
+	target, err := runGenesis(t, &recordingRunner{})
+	if err != nil {
+		t.Fatalf("new: %v", err)
+	}
+	project, err := modkit.ParseProject(readFileForTest(t, filepath.Join(target, modkit.ProjectFileName)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	namespace := ""
+	for _, registry := range project.Registries {
+		if registry.Path == "registry" {
+			namespace = registry.Namespace
+		}
+	}
+	if namespace == "" {
+		t.Fatal("project declares no project-local registry")
+	}
+
+	body := "package authored\n\nconst Version = 1\n"
+	writeTestFile(t, target, "registry/registry/modules/system/authored/authored.go", []byte(body))
+	writeTestFile(t, target, "registry/registry/modules/system/authored/module.json", []byte(`{"schema":2,"module":{
+		"id":"`+namespace+`/system/authored","kind":"system","name":"authored","revision":1,"contract":1,
+		"title":"Authored","description":"A module the operator authored.","requires":[],
+		"files":[{"source":"registry/modules/system/authored/authored.go",
+		          "target":"internal/authored/authored.go","class":"go",
+		          "sha256":"`+sha256Hex([]byte(body))+`","rewrite_module":true,"contract":false}],
+		"claims":{"packages":["internal/authored"]},
+		"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
+		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
+	if _, _, err := modkit.BuildRegistryIndexes(filepath.Join(target, "registry")); err != nil {
+		t.Fatalf("build local registry indexes: %v", err)
+	}
+
+	controller := NewController(ControllerOptions{Root: target, Version: "v1.2.3", TaskRunner: &recordingRunner{}})
+	plan, err := controller.Preview(context.Background(), GraphMutation{Kind: modkit.OpAdd, Modules: []string{namespace + "/system/authored"}})
+	if err != nil {
+		t.Fatalf("add the authored module: %v", err)
+	}
+	if _, err := controller.Apply(context.Background(), plan); err != nil {
+		t.Fatalf("apply the authored module: %v", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(target, "internal", "authored", "authored.go")); statErr != nil {
+		t.Fatalf("the authored module's payload was not installed: %v", statErr)
+	}
+	assertNoPendingChanges(t, target)
+}
+
+// assertNoPendingChanges runs the destination's own `sync --check --offline`,
+// which is the first step of `ggg check`.
+func assertNoPendingChanges(t *testing.T, target string) {
+	t.Helper()
+	controller := NewController(ControllerOptions{Root: target, Version: "v1.2.3", TaskRunner: &recordingRunner{}})
+	plan, previewErr := controller.Preview(context.Background(), SyncMutation{Check: true, Offline: true})
+	if previewErr != nil {
+		t.Fatalf("sync --check --offline on an untouched destination: %v", previewErr)
+	}
+	pending := 0
+	for _, change := range plan.Local.Changes {
+		if change.Kind != modkit.ChangeUnchanged {
+			pending++
+			t.Errorf("pending %s %s %s", change.Kind, change.Class, change.Path)
+		}
+	}
+	for _, diagnostic := range plan.Diagnostics {
+		t.Errorf("diagnostic %s %s", diagnostic.Code, diagnostic.Message)
+	}
+	if pending != 0 {
+		t.Fatalf("a fresh destination reported %d pending change(s); `ggg check` exits 4 there", pending)
+	}
+}
+
+func lockedSnapshotNamespaces(lock modkit.Lock) map[string]struct{} {
+	out := make(map[string]struct{}, len(lock.Snapshots))
+	for _, snapshot := range lock.Snapshots {
+		out[snapshot.Namespace] = struct{}{}
+	}
+	return out
+}
+
+func readFileForTest(t *testing.T, path string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
+}

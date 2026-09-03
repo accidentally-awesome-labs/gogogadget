@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -177,22 +178,30 @@ func (c *Controller) previewNew(ctx context.Context, mutation NewMutation) (Plan
 		return Plan{}, runtimeError(err)
 	}
 	defer os.RemoveAll(temporary)
-	if err := os.WriteFile(filepath.Join(temporary, "go.mod"), []byte("module "+mutation.ModulePath+"\n\ngo 1.26.6\n"), 0o644); err != nil {
+	goMod := []byte("module " + mutation.ModulePath + "\n\ngo 1.26.6\n")
+	if err := os.WriteFile(filepath.Join(temporary, "go.mod"), goMod, 0o644); err != nil {
 		return Plan{}, runtimeError(err)
 	}
-	projectData, err := modkit.MarshalProject(project)
-	if err != nil {
+	stage := func(intent modkit.Project) error {
+		data, marshalErr := modkit.MarshalProject(intent)
+		if marshalErr != nil {
+			return marshalErr
+		}
+		return os.WriteFile(filepath.Join(temporary, modkit.ProjectFileName), data, 0o644)
+	}
+	if err := stage(project); err != nil {
 		return Plan{}, runtimeError(err)
 	}
-	if err := os.WriteFile(filepath.Join(temporary, modkit.ProjectFileName), projectData, 0o644); err != nil {
-		return Plan{}, runtimeError(err)
-	}
-	engine := modkit.New(modkit.Options{Source: resolver, Generator: modkit.RegistryGenerator{}, ToolRunner: modkit.OSCommandRunner{}})
-	local, err := engine.Plan(ctx, temporary, modkit.Operation{Kind: modkit.OpSync, Offline: registry.Source == "directory"})
+	offline := registry.Source == "directory"
+	// Pass one resolves only the operator's core source, which is all that
+	// exists yet. Its closure is what decides which modules and payloads a
+	// directory genesis vendors, so the trees the destination will actually
+	// contain cannot be built before it.
+	closure, err := modkit.New(modkit.Options{Source: resolver, Generator: modkit.RegistryGenerator{}, ToolRunner: modkit.OSCommandRunner{}}).
+		Plan(ctx, temporary, modkit.Operation{Kind: modkit.OpSync, Offline: offline})
 	if err != nil {
 		return Plan{}, plannerFailure{refusalError(err)}
 	}
-	local.Root = target
 
 	localRegistry, err := modkit.ProjectLocalRegistry(target, projectSlug(mutation.Name))
 	if err != nil {
@@ -205,7 +214,7 @@ func (c *Controller) previewNew(ctx context.Context, mutation NewMutation) (Plan
 	finalCore := registry
 	if registry.Source == "directory" {
 		finalCore.Path = "_registry-core"
-		vendored, vendorErr := vendorResolvedRegistry(snapshot, catalog, profile, local.Lock, project)
+		vendored, vendorErr := vendorResolvedRegistry(snapshot, catalog, profile, closure.Lock, project)
 		if vendorErr != nil {
 			return Plan{}, runtimeError(vendorErr)
 		}
@@ -214,15 +223,85 @@ func (c *Controller) previewNew(ctx context.Context, mutation NewMutation) (Plan
 		}
 	}
 	project.Registries = []modkit.ProjectRegistry{finalCore, localRegistry}
-	projectData, err = modkit.MarshalProject(project)
+	projectData, err := modkit.MarshalProject(project)
 	if err != nil {
 		return Plan{}, runtimeError(err)
 	}
+
+	// Pass two is the plan that ships. A project's lock and every generated
+	// header are functions of the resolved registry SET — the registry commit
+	// is a digest over each module's snapshot, and the project-local registry
+	// is one of those sources — so a lock planned against one registry while
+	// the project declares two is stale the moment it is written. That is what
+	// it was: a fresh destination's own `sync --check --offline` reported one
+	// pending lock change and 25 generated drifts on an untouched tree, which
+	// is the first thing the generated README tells an operator to run.
+	//
+	// So stage the trees the destination will contain — the project-local
+	// registry, and for a directory genesis the vendored core under
+	// _registry-core — and plan against them. Resolution is per source kind:
+	// ProjectSource roots every directory registry at the staging tree and
+	// sends a GitHub core to the same cached, signature-verified snapshot pass
+	// one used.
+	//
+	// Genesis must not paper over this by running an extra applying sync: that
+	// hides the ordering and makes the lock a function of how many times the
+	// command ran.
+	for name, data := range baseFiles {
+		full := filepath.Join(temporary, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			return Plan{}, runtimeError(err)
+		}
+		if err := os.WriteFile(full, data, 0o644); err != nil {
+			return Plan{}, runtimeError(err)
+		}
+	}
+	if err := stage(project); err != nil {
+		return Plan{}, runtimeError(err)
+	}
+	staged, err := c.newProjectSource(temporary, registry)
+	if err != nil {
+		return Plan{}, err
+	}
+	local, err := modkit.New(modkit.Options{Source: staged, Generator: modkit.RegistryGenerator{}, ToolRunner: modkit.OSCommandRunner{}}).
+		Plan(ctx, temporary, modkit.Operation{Kind: modkit.OpSync, Offline: offline})
+	if err != nil {
+		return Plan{}, plannerFailure{refusalError(err)}
+	}
+	// Vendoring is derived from pass one's closure, so pass two must install
+	// the same modules. A divergence means the staged trees do not describe
+	// the closure they were built from, and shipping that would produce
+	// exactly the stale lock this ordering exists to prevent.
+	if !slices.Equal(closure.Lock.Order, local.Lock.Order) {
+		return Plan{}, runtimeError(fmt.Errorf(
+			"genesis closure changed once the project-local registry was staged: %d modules became %d",
+			len(closure.Lock.Order), len(local.Lock.Order)))
+	}
+	local.Root = target
+
 	state := &newProjectPlan{target: target, projectData: projectData, baseFiles: baseFiles, rootCreated: rootCreated}
-	plan := c.planFor("new", &local, registry.Source == "directory")
+	plan := c.planFor("new", &local, offline)
 	plan.mutation = mutation
 	plan.newProject = state
 	return plan, nil
+}
+
+// newProjectSource resolves the registries the created project will declare.
+// Directory registries — the project-local one, and the vendored core of a
+// directory genesis — are rooted at the staging tree; a GitHub core resolves
+// through the same cache pass one populated.
+func (c *Controller) newProjectSource(root string, core modkit.ProjectRegistry) (modkit.SourceResolver, error) {
+	source := modkit.ProjectSource{Root: root}
+	if core.Source != "directory" {
+		cache, err := os.UserCacheDir()
+		if err != nil {
+			return nil, runtimeError(err)
+		}
+		source.GitHub = modkit.GitHubSource{
+			CacheDir: filepath.Join(cache, "ggg", "registry"), Token: os.Getenv("GITHUB_TOKEN"),
+		}
+	}
+	return source, nil
 }
 
 func (c *Controller) resolveNewCatalog(ctx context.Context, registry modkit.ProjectRegistry) (modkit.SourceResolver, modkit.Snapshot, modkit.Catalog, error) {
