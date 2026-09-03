@@ -92,7 +92,7 @@
         "source": "internal/gggcli/core_registry_test.go",
         "target": "internal/gggcli/core_registry_test.go",
         "class": "test",
-        "sha256": "1cbf8bad7649e9ea902caf22e9d77f0654cacee62ee470e95ebf05038ac1f8ee",
+        "sha256": "c7e64b54b0636474546d2fc6c86e9e23b4ca966c364fe76fefef48a24e7fbe98",
         "rewrite_module": true,
         "contract": false
       },
@@ -153,6 +153,14 @@
         "contract": false
       },
       {
+        "source": "internal/gggcli/genesis_test.go",
+        "target": "internal/gggcli/genesis_test.go",
+        "class": "test",
+        "sha256": "c13df89cd5af9aaf407ee9ecf157a17435d2f5f627982ff287acc75eb2a3a68b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/gggcli/handlers.go",
         "target": "internal/gggcli/handlers.go",
         "class": "go",
@@ -172,7 +180,7 @@
         "source": "internal/gggcli/new_project.go",
         "target": "internal/gggcli/new_project.go",
         "class": "go",
-        "sha256": "e5001a67bee779e353ea01e51b57df3563bf75708f8d5bcf07ffd1769a2ccd96",
+        "sha256": "95221343f3119c538246b63e8adec47ff465f1a044c0038705998261f90e273e",
         "rewrite_module": true,
         "contract": true
       },
@@ -220,7 +228,7 @@
         "source": "internal/gggcli/registry_authors.go",
         "target": "internal/gggcli/registry_authors.go",
         "class": "go",
-        "sha256": "d4316fcb69d50bc3456266b9a0579957dbfe8a134cbdbba8437852efe0fa9cb5",
+        "sha256": "add82e4c0eab5f2f3de0eea497823c23599d0cdf77ac00ec16dcec410e61f7b5",
         "rewrite_module": true,
         "contract": false
       },
@@ -300,7 +308,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "546b1e0bb3829e8fa3dc023d72b95e4ce09a66db53f1f3a19ea2fa3a0bdf8a1d",
+        "sha256": "8cbb9d14cd67a368f9a923df3f180e450331e7c5fd6ac307119d92cdc1103e8a",
         "rewrite_module": true,
         "contract": true
       },

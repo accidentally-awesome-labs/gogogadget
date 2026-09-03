@@ -491,6 +491,72 @@ func vendorResolvedRegistry(snapshot modkit.Snapshot, catalog modkit.Catalog, pr
 	return files, nil
 }
 
+// genesisRunner executes the genesis build-out. Subprocess output goes to
+// stderr, never stdout: `ggg new --json` must emit one envelope on stdout and
+// nothing else, and generator chatter is progress.
+func (c *Controller) genesisRunner() TaskRunner {
+	if c.taskRunner != nil {
+		return c.taskRunner
+	}
+	return osTaskRunner{out: os.Stderr, err: os.Stderr}
+}
+
+// genesisBuildOut leaves a created project buildable. `ggg new` installs
+// authored source, writes the lock, and renders every registry aggregate, but
+// three inputs to compilation are tool outputs rather than authored files:
+// templ's *_templ.go, the sqlc package internal/db/module.go imports, and
+// static/app.css, which static/embed_registry_gen.go names in a compile-time
+// //go:embed pattern. Without them nothing in the project compiles, including
+// the bin/ggg that `ggg setup` has to build before it can run anything at all
+// — which is why genesis cannot defer this to setup.
+//
+// Tailwind is a pinned standalone binary rather than a Go tool, so producing
+// static/app.css means installing the declared tool artifacts through the same
+// digest-verified path setup uses. That is the honest option: the file is a
+// generated output whose only correct producer is the declared compiler, and a
+// placeholder would ship broken CSS behind a compiling package. Genesis
+// already fetches and signature-verifies a registry snapshot and runs
+// `go mod download all`, so one digest-pinned artifact adds no new trust or
+// connectivity assumption, and it leaves bin/tailwindcss exactly where
+// `ggg generate` and `ggg dev` look for it.
+//
+// The order is setup's, minus the step already done: `go mod download all` ran
+// inside dependency reconciliation, so install the tools, complete the require
+// graph tolerantly (`tidy -e`, because the generated packages do not exist
+// yet and a readonly `go tool` refuses an incomplete graph), generate, then
+// complete the require graph for real.
+func genesisBuildOut(ctx context.Context, root string, runner TaskRunner) error {
+	if err := installDeclaredTools(ctx, root); err != nil {
+		return err
+	}
+	lock, _, err := readProjectLock(root)
+	if err != nil {
+		return err
+	}
+	steps := append([][]string{{"go", "mod", "tidy", "-e"}}, generationSteps(lock)...)
+	steps = append(steps, []string{"go", "mod", "tidy"})
+	for _, argv := range steps {
+		if err := runner.Run(ctx, root, argv); err != nil {
+			return fmt.Errorf("%s: %w", strings.Join(argv, " "), err)
+		}
+	}
+	return nil
+}
+
+// verifyGenesisCompiles is the commit check of the genesis transaction. A
+// success envelope over a tree that cannot compile is the defect this guards:
+// `ggg setup` there cannot even build bin/ggg, so the operator is left with no
+// command to run and no diagnostic. The scope is the whole project because the
+// break is not local — a missing tool output surfaces wherever its importer
+// happens to be, and the one that shipped reached cmd/ggg through
+// internal/gggcli, internal/db, and internal/db/sqlc.
+func verifyGenesisCompiles(ctx context.Context, root string, runner TaskRunner) error {
+	if err := runner.Run(ctx, root, []string{"go", "build", "./..."}); err != nil {
+		return fmt.Errorf("the created project does not compile (go build ./...): %w", err)
+	}
+	return nil
+}
+
 func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 	state := plan.newProject
 	if state == nil || plan.Local == nil {
@@ -560,6 +626,35 @@ func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 		env := planEnvelope(*plan.Local, "new", exitRollback)
 		env.OK = false
 		return Result{Envelope: env}, rollbackError(err)
+	}
+	// The tree the apply installed is source only. Finish the transaction by
+	// producing the tool outputs compilation needs and proving the result
+	// builds; a failure here rolls the genesis back rather than reporting
+	// success over a project no command can run.
+	runner := c.genesisRunner()
+	buildErr := genesisBuildOut(ctx, state.target, runner)
+	if buildErr == nil {
+		buildErr = verifyGenesisCompiles(ctx, state.target, runner)
+	}
+	if buildErr != nil {
+		// A root this command created is removed outright, which is the whole
+		// rollback. An in-place genesis cannot remove a directory it did not
+		// create, so it removes what it wrote — the base files plus every
+		// journalled path, the lock included — and the remedy names the rest.
+		if !createdRoot {
+			created = append(created, filepath.Join(state.target, modkit.LockFileName))
+			for _, name := range result.Written {
+				created = append(created, filepath.Join(state.target, filepath.FromSlash(name)))
+			}
+		}
+		cleanup()
+		env := planEnvelope(*plan.Local, "new", exitRollback)
+		env.OK = false
+		remedy := fmt.Errorf("%w; nothing was kept, fix the cause and re-run `ggg new`", buildErr)
+		if !createdRoot {
+			remedy = fmt.Errorf("%w; installed source and the lock were removed, but generated tool outputs and bin/ remain: delete them and re-run", buildErr)
+		}
+		return Result{Envelope: env}, rollbackError(remedy)
 	}
 	env := planEnvelope(*plan.Local, "new", exitOK)
 	env.Generated = appendUnique(env.Generated, result.Written...)

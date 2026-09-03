@@ -391,6 +391,12 @@ in, `ggg provider set`, then `go build ./...` and the module's own
 neither are set; CI uses the environment form so the private key never touches
 a disk. Publish the **public** key — it is the string consumers pin.
 
+`--dir` is explicit above because a publisher's registry is usually its whole
+repository root. Omitted, it resolves to the directory that actually holds the
+selected registry's `registry.json` — the declared registry path when that
+directory is a self-contained registry root, otherwise the project root, which
+is the rule `ggg sync` resolves the same registry through.
+
 A consumer adds the source, then selects the adapter per environment:
 
 ```sh

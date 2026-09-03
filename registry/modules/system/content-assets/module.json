@@ -227,7 +227,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "53ef0e934f0b5d176e5e2bd150bc9344601d9fd5169897b70b9897c1720647ca",
+        "sha256": "13d2a97a50b9bbfd273ea93f98c9abaa330d0d88d43e6937797ba0b0f308d030",
         "rewrite_module": false,
         "contract": false
       },
@@ -259,7 +259,7 @@
         "source": "content/docs/getting-started.md",
         "target": "content/docs/getting-started.md",
         "class": "content",
-        "sha256": "acfb8babfac4efb735391f61ffdf07f4b4daa10e46cc72864557411d26c1b974",
+        "sha256": "f4f691eddaf7706fa2c501f4b7a29ab6e9737578663f4fc1a65ba224e69039cd",
         "rewrite_module": false,
         "contract": false
       },

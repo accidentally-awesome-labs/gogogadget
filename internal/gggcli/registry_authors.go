@@ -24,23 +24,37 @@ import (
 // mutation uses.
 
 // registryDirFlag resolves the registry tree a subcommand acts on: an
-// explicit --dir, else the project's directory registry, else the project
-// root itself (the self-hosting layout).
+// explicit --dir, else the directory that actually holds the selected
+// registry's registry.json.
+//
+// A declared project-relative registry path is a self-contained registry root
+// only when that directory carries its own registry.json; otherwise the
+// project root is the registry root. That second shape is this repository's
+// own layout — registry.json and registry.snapshot.json sit at the root while
+// registry/ holds only the indexes and module documents — so returning the
+// declared path unconditionally made `ggg registry sign` refuse with
+// `read registry.json: open registry.json: no such file or directory` on the
+// very tree that publishes the core catalog. The rule mirrors
+// DirectorySource.Resolve, which is what `ggg sync` resolves the same
+// registry through, and the returned path is root-anchored so it does not
+// depend on the process working directory.
 func (c *Controller) registryDirFlag(dir string) string {
 	if dir != "" {
 		return dir
 	}
+	root := c.rootDir()
 	if project, err := c.loadProject(); err == nil {
 		for _, registry := range project.Registries {
-			if registry.Source == "directory" && registry.Path != "" {
-				return registry.Path
+			if registry.Source != "directory" || registry.Path == "" || registry.Path == "." {
+				continue
+			}
+			candidate := filepath.Join(root, filepath.FromSlash(registry.Path))
+			if _, err := os.Stat(filepath.Join(candidate, "registry.json")); err == nil {
+				return candidate
 			}
 		}
 	}
-	if _, err := os.Stat("registry.json"); err == nil {
-		return "."
-	}
-	return "."
+	return root
 }
 
 // registryBuildDir resolves the registry tree `ggg registry build` rebuilds.

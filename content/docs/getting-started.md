@@ -43,6 +43,28 @@ a directory with no `go.mod`, `--adopt` to produce the initial lock from what
 is already installed, and `--claim PATH` for a pre-existing file that already
 differs from what the module ships.
 
+### What genesis leaves
+
+`ggg new` is one journalled transaction, and it either leaves a project that
+builds or it leaves nothing. Once the authored source, the lock and every
+registry aggregate are written, genesis finishes the tree the way `ggg setup`
+would: it installs the tool artifacts the installed manifests declare (each
+digest-verified before a byte is written, into project-relative `bin/`),
+completes the module graph with `go mod tidy`, and runs the generators the
+lock declares — `templ generate`, `sqlc generate`, and the Tailwind build that
+writes `static/app.css`.
+
+Those outputs are inputs to compilation, not conveniences:
+`internal/db/module.go` imports the package `sqlc generate` writes, and
+`static/embed_registry_gen.go` names `static/app.css` in a compile-time
+`//go:embed` pattern. A project without them cannot compile at all — including
+the `bin/ggg` that `ggg setup` has to build before it can run anything else.
+
+So the last thing genesis does is `go build ./...` in the created project. If
+that fails the genesis rolls back — a directory `ggg new` created is removed
+outright — and the diagnostic names the check instead of reporting success
+over a tree no command can run.
+
 ### The profiles
 
 | Profile | Members | Required provider slots | What it adds |
@@ -62,7 +84,7 @@ explicit values, so no selection is ever implicit in your `gogogadget.json`.
 
 ```sh
 cd ../my-app
-/tmp/ggg setup       # tools, modules, generation, and bin/ggg
+/tmp/ggg setup       # bin/ggg, plus every genesis step re-run idempotently
 bin/ggg services up
 bin/ggg db migrate
 bin/ggg db seed
@@ -75,8 +97,11 @@ Open http://localhost:8080.
   installed manifests declare (each digest-verified before a byte is written,
   into project-relative `bin/`), completes the module graph with
   `go mod tidy`, generates, and builds `bin/ggg` from the project's own
-  `cmd/ggg`. It is the only step that needs an external `ggg`; every later
-  command rides `bin/ggg`.
+  `cmd/ggg`. Genesis already ran everything but that last build, and each step
+  is idempotent — an already-verified tool install is left untouched — so on a
+  fresh project this is effectively just the `bin/ggg` build. It is also the
+  only step that needs an external `ggg`; every later command rides
+  `bin/ggg`.
 - **`ggg services up`** starts the local services your selections actually
   need, from the generated `compose.yaml`. Nothing is hand-written: service
   names, images (digest-pinned), ports, volumes and health checks come from

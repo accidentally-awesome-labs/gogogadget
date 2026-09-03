@@ -146,7 +146,7 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		// readonly build requires the indirect require graph), and only then
 		// the bin/ggg build.
 		if err = run(root, "go", "mod", "download", "all"); err == nil {
-			err = c.installDeclaredTools(ctx)
+			err = installDeclaredTools(ctx, root)
 		}
 		if err == nil {
 			// `tidy -e` completes the require graph even though generated
@@ -258,17 +258,73 @@ func (c *Controller) runGenerate(ctx context.Context, runner TaskRunner) error {
 			return err
 		}
 	}
-	for _, argv := range [][]string{
-		selfArgv("sync", "--offline"),
-		{"go", "tool", "templ", "generate"},
-		{"go", "tool", "sqlc", "generate"},
-		{filepath.Join("bin", "tailwindcss"), "-i", "input.css", "-o", "static/app.css", "--minify"},
-	} {
+	lock, _, err := readProjectLock(root)
+	if err != nil {
+		return err
+	}
+	for _, argv := range append([][]string{selfArgv("sync", "--offline")}, generationSteps(lock)...) {
 		if err := run(argv...); err != nil {
 			return fmt.Errorf("%s: %w", strings.Join(argv, " "), err)
 		}
 	}
 	return nil
+}
+
+// The three generators this framework runs. templ and sqlc are Go tool
+// directives; Tailwind is a pinned standalone binary installed under bin/.
+const (
+	templGoTool         = "github.com/a-h/templ/cmd/templ"
+	sqlcGoTool          = "github.com/sqlc-dev/sqlc/cmd/sqlc"
+	tailwindInstallPath = "bin/tailwindcss"
+)
+
+// generationSteps is the ordered generator argv the installed lock declares.
+// Each step is gated on the declaration that produces it, so the pipeline is
+// the project's own — a project that installs neither templ nor sqlc runs
+// neither instead of failing on a tool it never asked for. templ runs before
+// sqlc only because both write inputs to compilation and this is the order
+// `make generate` has always used; neither reads the other's output.
+func generationSteps(lock modkit.Lock) [][]string {
+	steps := make([][]string, 0, 3)
+	if slices.Contains(lock.GoTools, templGoTool) {
+		steps = append(steps, []string{"go", "tool", "templ", "generate"})
+	}
+	if slices.Contains(lock.GoTools, sqlcGoTool) {
+		steps = append(steps, []string{"go", "tool", "sqlc", "generate"})
+	}
+	if declaresToolInstallPath(lock, tailwindInstallPath) {
+		steps = append(steps, []string{filepath.FromSlash(tailwindInstallPath), "-i", "input.css", "-o", "static/app.css", "--minify"})
+	}
+	return steps
+}
+
+func declaresToolInstallPath(lock modkit.Lock, path string) bool {
+	for _, locked := range lock.Modules {
+		for _, tool := range locked.Manifest.Dependencies.Tools {
+			if tool.InstallPath == path {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// readProjectLock reads the installed lock. A missing lock is not an error:
+// a project with no lock has no installed modules, and so declares no tools
+// and no generators.
+func readProjectLock(root string) (modkit.Lock, bool, error) {
+	data, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+	if errors.Is(err, fs.ErrNotExist) {
+		return modkit.Lock{}, false, nil
+	}
+	if err != nil {
+		return modkit.Lock{}, false, err
+	}
+	lock, err := modkit.ParseLock(data)
+	if err != nil {
+		return modkit.Lock{}, false, err
+	}
+	return lock, true, nil
 }
 
 // selfArgv re-invokes the running ggg binary. `go run ./cmd/ggg` would force
@@ -322,26 +378,20 @@ func taskActionSuffix(action string) string {
 // declare for this platform into its project-relative install path. Artifact
 // bytes are digest-verified before anything is written; an existing verified
 // install is left untouched.
-func (c *Controller) installDeclaredTools(ctx context.Context) error {
-	root := c.rootDir()
-	data, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
-	if errors.Is(err, fs.ErrNotExist) {
-		return nil // no lock: no installed modules, no declared tools
+//
+// The declaration set comes from the lock's own embedded manifests, not from a
+// re-resolved catalog: the lock records exactly what is installed, and a
+// freshly created project must be able to install its tools before it can
+// resolve anything itself. root is explicit for the same reason — genesis
+// installs into the tree it just created, not into the caller's project.
+func installDeclaredTools(ctx context.Context, root string) error {
+	lock, ok, err := readProjectLock(root)
+	if err != nil || !ok {
+		return err // no lock: no installed modules, no declared tools
 	}
-	if err != nil {
-		return err
-	}
-	lock, err := modkit.ParseLock(data)
-	if err != nil {
-		return err
-	}
-	catalog, _, _, err := c.readCatalog(ctx, false)
-	if err != nil {
-		return err
-	}
-	byID := make(map[string]modkit.Manifest, len(catalog.Modules))
-	for _, module := range catalog.Modules {
-		byID[module.ID] = module
+	byID := make(map[string]modkit.Manifest, len(lock.Modules))
+	for _, locked := range lock.Modules {
+		byID[locked.Manifest.ID] = locked.Manifest
 	}
 	// One logical tool may declare one artifact per platform; artifacts that
 	// share an install path AND platform must agree byte for byte.
