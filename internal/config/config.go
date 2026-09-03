@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -71,10 +72,28 @@ func LoadFrom(lookup func(string) string) (Config, error) {
 	return cfg, errors.Join(errs...)
 }
 
-// Load reads the process environment, auto-loading `.env` in development.
+// Load reads the process environment, auto-loading the CLI-managed
+// .ggg/env/<environment>.env and, in development, the legacy .env.
+//
+// Precedence is the plan's: the process environment wins, then the
+// CLI-managed file, then the legacy .env in development only, and no file at
+// all in production. loadDotEnv never overwrites a key that is already set,
+// so loading in this order is what implements it.
+//
+// The CLI-managed layer is the one that was missing. It is where `ggg
+// provider configure` and genesis write development values, and where the
+// generated compose.yaml points the app service's env_file — so a program run
+// on the host rather than in the container saw none of it and fell back to
+// DATABASE_URL's declared default, localhost:5432. `ggg db seed` reached the
+// operator's own Postgres that way, migrated it, seeded it, and reported
+// success.
 func Load() (Config, error) {
-	if pick(os.Getenv, "APP_ENV", "development") == "development" {
-		loadDotEnv(".env") // missing file is fine; real env wins
+	environment := pick(os.Getenv, "APP_ENV", "development")
+	if environment != "production" {
+		loadDotEnv(filepath.Join(".ggg", "env", environment+".env"))
+		if environment == "development" {
+			loadDotEnv(".env") // missing file is fine; real env wins
+		}
 	}
 	return LoadFrom(os.Getenv)
 }
@@ -151,8 +170,16 @@ func parseBool(v string) bool {
 }
 
 // loadDotEnv fills os environ from a KEY=VALUE file without overriding keys
-// that are already set. Supports comments, blank lines, optional `export `,
-// and single/double quoted values. Intentionally minimal.
+// that already carry a value. Supports comments, blank lines, optional
+// `export `, and single/double quoted values. Intentionally minimal.
+//
+// A key that is SET BUT EMPTY counts as absent, so the file supplies it. That
+// matches remote.LookupEnv, which is the same precedence contract for the
+// CLI, and it matters here: everything downstream already treats an empty
+// declared value as unset — pick() falls back to the declared default — so
+// letting an empty process value shadow the file only means falling through
+// to a default connection string, which is how a command reaches the wrong
+// server.
 func loadDotEnv(path string) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -177,7 +204,7 @@ func loadDotEnv(path string) {
 			v = v[1 : len(v)-1]
 		}
 		if k != "" {
-			if _, exists := os.LookupEnv(k); !exists {
+			if existing, exists := os.LookupEnv(k); !exists || existing == "" {
 				os.Setenv(k, v)
 			}
 		}

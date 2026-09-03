@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 12,
+    "revision": 13,
     "contract": 2,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -129,6 +129,14 @@
         "contract": true
       },
       {
+        "source": "internal/gggcli/db_env_test.go",
+        "target": "internal/gggcli/db_env_test.go",
+        "class": "test",
+        "sha256": "6936dd517586b9201e2b50d2fa32fd8469f30a57d31bb3e1145aa84c26d1ca6a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/gggcli/executors.go",
         "target": "internal/gggcli/executors.go",
         "class": "go",
@@ -156,7 +164,7 @@
         "source": "internal/gggcli/genesis_test.go",
         "target": "internal/gggcli/genesis_test.go",
         "class": "test",
-        "sha256": "a6036b9deefcfdfe3a31fa9834927beef6651118d93e23b2c32882ef393f9b30",
+        "sha256": "11c0a8b37a7bf34d38529b0994390cdd7c8ad8d5dd4ad4475a990c6a129d650c",
         "rewrite_module": true,
         "contract": true
       },
@@ -180,7 +188,7 @@
         "source": "internal/gggcli/new_project.go",
         "target": "internal/gggcli/new_project.go",
         "class": "go",
-        "sha256": "5e448ef9d7528e515d186dbc9949e52f61f3e94d5343b65545c6c2df97430d5c",
+        "sha256": "e7fd989da374dcc0adf24f3fda6713b992afcdea6b03bf11a2a83e6884a8391d",
         "rewrite_module": true,
         "contract": true
       },
@@ -309,7 +317,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "18fe303c19ad791e6837ae8a4819b168eb40af0ac48b8c195c95a05483036396",
+        "sha256": "fbf14999ce195df9bc5dcf33dd89e02ffa1105b23ff22940892ff8278b3ec060",
         "rewrite_module": true,
         "contract": false
       },
@@ -317,7 +325,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "2d17ebfc887807c8c3c80ae0d9f7cc8d9d0b7b294162bdc15d6d44c7f760c5b7",
+        "sha256": "aa057f7e005d98f2b4fc3e31ced928f204e7ab7f4da77d365dbfc10a052e4267",
         "rewrite_module": true,
         "contract": true
       },
@@ -993,7 +1001,7 @@
         "source": "internal/remote/env.go",
         "target": "internal/remote/env.go",
         "class": "go",
-        "sha256": "5ec4732c8bf8dc76399f66481dfbcce6030dd16cc12a256fd084e3b2d8095956",
+        "sha256": "b4628fde6e440c146436948e29b2ef58f99c374e3befe28efee2c7b16411f1a8",
         "rewrite_module": true,
         "contract": true
       },

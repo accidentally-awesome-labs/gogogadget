@@ -23,13 +23,15 @@ import (
 type recordingRunner struct {
 	calls []string
 	roots []string
+	envs  []map[string]string
 	fail  map[string]error
 }
 
-func (r *recordingRunner) Run(_ context.Context, root string, argv []string) error {
+func (r *recordingRunner) Run(_ context.Context, root string, argv []string, env map[string]string) error {
 	line := strings.Join(argv, " ")
 	r.calls = append(r.calls, line)
 	r.roots = append(r.roots, root)
+	r.envs = append(r.envs, env)
 	return r.fail[line]
 }
 

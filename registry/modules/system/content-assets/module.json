@@ -187,7 +187,7 @@
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
-        "sha256": "546e3ed7e5a2f59c8a5fe3bf2602e66e5a0592fcec3c45c49123b5ea412c927c",
+        "sha256": "1e8438e3a7e287840a80f98f216ed929f4f3c068aeaba9e1afecd96b52777a70",
         "rewrite_module": false,
         "contract": false
       },
@@ -259,7 +259,7 @@
         "source": "content/docs/getting-started.md",
         "target": "content/docs/getting-started.md",
         "class": "content",
-        "sha256": "c0434df3f9ee3b15437da3fef5d0ce9709db95ab180cb2f201eb388194f97c86",
+        "sha256": "d23cfa9b457ceda6a64014ff4ae0a1c343a3d89eb68e139a5468f01307363509",
         "rewrite_module": false,
         "contract": false
       },

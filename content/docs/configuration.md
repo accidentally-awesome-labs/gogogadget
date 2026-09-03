@@ -18,10 +18,32 @@ few cross-field derivations described below.
 
 All validation problems are reported together at boot, never one at a time.
 
-`.env` is auto-loaded in **development only**, via a tiny inline parser that
-never overrides variables already set in the real environment. In test and
-production the process environment is the only source. `.env.example` is
-generated and ships a working zero-account development setup.
+Resolution order is fixed, and every layer below the first is a file:
+
+1. **The process environment** — always wins.
+2. **`.ggg/env/<environment>.env`** — the CLI-managed file, mode `0600` and
+   gitignored. Genesis seeds it with the declared development posture and
+   `ggg provider configure` writes into it; the generated `compose.yaml` names
+   it as the app service's `env_file`. This is where a value you configured
+   with the tool actually lives.
+3. **`.env`** — the legacy file, **development only**. `.env.example` is
+   generated and ships a working zero-account setup; copy it here if you
+   prefer a single file.
+
+A key that is present but empty counts as unset, so the next layer supplies
+it. **Production reads no file at all** — not `.env`, and not
+`.ggg/env/production.env` even if one exists; production configuration comes
+from the deployment environment.
+
+`ggg db migrate|status|seed|reset` resolve through exactly this order and
+**refuse** when the value is missing rather than passing an empty one to the
+tool. That refusal is deliberate: an empty connection string is not an error
+to libpq — it falls back to its own defaults and connects to a local socket —
+so a command that passed one on could migrate or seed a server the project has
+nothing to do with. `--environment test` reads `.ggg/env/test.env` and never
+`.env`. The resolved value reaches the tool through its environment
+(`GOOSE_DBSTRING`, `DATABASE_URL`), never on the command line, because the
+process list is public and a DSN carries a password.
 
 ## The full table
 

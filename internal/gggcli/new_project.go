@@ -623,7 +623,7 @@ func genesisBuildOut(ctx context.Context, root string, runner TaskRunner) error 
 	steps := append([][]string{{"go", "mod", "tidy", "-e"}}, generationSteps(lock)...)
 	steps = append(steps, []string{"go", "mod", "tidy"})
 	for _, argv := range steps {
-		if err := runner.Run(ctx, root, argv); err != nil {
+		if err := runner.Run(ctx, root, argv, nil); err != nil {
 			return fmt.Errorf("%s: %w", strings.Join(argv, " "), err)
 		}
 	}
@@ -638,7 +638,7 @@ func genesisBuildOut(ctx context.Context, root string, runner TaskRunner) error 
 // happens to be, and the one that shipped reached cmd/ggg through
 // internal/gggcli, internal/db, and internal/db/sqlc.
 func verifyGenesisCompiles(ctx context.Context, root string, runner TaskRunner) error {
-	if err := runner.Run(ctx, root, []string{"go", "build", "./..."}); err != nil {
+	if err := runner.Run(ctx, root, []string{"go", "build", "./..."}, nil); err != nil {
 		return fmt.Errorf("the created project does not compile (go build ./...): %w", err)
 	}
 	return nil

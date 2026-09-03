@@ -192,9 +192,13 @@ type childStatusError int
 func (e childStatusError) Error() string { return fmt.Sprintf("exit status %d", int(e)) }
 func (e childStatusError) ExitCode() int { return int(e) }
 
-type recordingTaskRunner struct{ argv []string }
+type recordingTaskRunner struct {
+	argv []string
+	env  map[string]string
+}
 
-func (r *recordingTaskRunner) Run(_ context.Context, _ string, argv []string) error {
+func (r *recordingTaskRunner) Run(_ context.Context, _ string, argv []string, env map[string]string) error {
 	r.argv = append([]string(nil), argv...)
+	r.env = env
 	return nil
 }

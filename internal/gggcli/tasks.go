@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"net/http"
 	"os"
 	"os/exec"
@@ -25,13 +26,20 @@ import (
 	"syscall"
 
 	"github.com/gogogadget/gogogadget/internal/modkit"
+	"github.com/gogogadget/gogogadget/internal/remote"
 )
 
-// TaskRunner is the narrow execution seam for trusted commands. Handlers choose
-// every argv element; manifests can declare artifacts and containers but never
-// executable shell text.
+// TaskRunner is the narrow execution seam for trusted commands. Handlers
+// choose every argv element and every injected environment value; manifests
+// can declare artifacts and containers but never executable shell text.
+//
+// env carries values a child reads from its environment rather than from
+// argv. A connection string is the case that forced it: the plan forbids
+// putting one on a command line, where the process list would publish it, and
+// `go run ./cmd/seed` reads its configuration from the environment by design.
+// Nil means the child inherits the CLI's environment unchanged.
 type TaskRunner interface {
-	Run(context.Context, string, []string) error
+	Run(ctx context.Context, root string, argv []string, env map[string]string) error
 }
 
 type osTaskRunner struct {
@@ -39,7 +47,7 @@ type osTaskRunner struct {
 	err io.Writer
 }
 
-func (r osTaskRunner) Run(ctx context.Context, root string, argv []string) error {
+func (r osTaskRunner) Run(ctx context.Context, root string, argv []string, env map[string]string) error {
 	if len(argv) == 0 {
 		return fmt.Errorf("empty task argv")
 	}
@@ -48,6 +56,16 @@ func (r osTaskRunner) Run(ctx context.Context, root string, argv []string) error
 	command.Stdout = r.out
 	command.Stderr = r.err
 	command.Stdin = os.Stdin
+	if len(env) > 0 {
+		// Injected values are appended after the inherited environment, and
+		// os/exec keeps the last occurrence of a duplicate key, so the
+		// resolved value is what the child sees. Sorted so an argv/env pair
+		// is reproducible in a test and in a log.
+		command.Env = os.Environ()
+		for _, key := range slices.Sorted(maps.Keys(env)) {
+			command.Env = append(command.Env, key+"="+env[key])
+		}
+	}
 	return command.Run()
 }
 
@@ -97,15 +115,38 @@ func (c *Controller) refuseStaleEngine() error {
 	return nil
 }
 
+// taskEnvValue resolves one value a host-side task needs through the
+// documented precedence: the process environment wins, then the CLI-managed
+// .ggg/env/<environment>.env, then the legacy .env in development only, and
+// never a file in production. remote.LookupEnv already implements exactly
+// that order and is what `ggg provider` and `ggg deploy` resolve through, so
+// this is one contract with one implementation.
+//
+// It refuses an unresolved value rather than returning empty, and that is the
+// point. An empty connection string is not an error to libpq — it falls back
+// to its own defaults and connects to a local socket — so passing one on is
+// how a command reaches the wrong server. The refusal names the key, the
+// environment, and the file the CLI writes.
+func (c *Controller) taskEnvValue(environment, key string) (string, error) {
+	root := c.rootDir()
+	if value, ok := remote.LookupEnv(root, environment)(key); ok {
+		return value, nil
+	}
+	return "", refusalError(fmt.Errorf(
+		"%s is not set for the %s environment; export it, or run `ggg provider configure` to write it to %s",
+		key, environment, remote.EnvironmentEnvFile(environment)))
+}
+
 func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation) (Result, error) {
 	root := c.rootDir()
 	runner := c.runner()
-	run := func(dir string, argv ...string) error {
-		if err := runner.Run(ctx, dir, argv); err != nil {
+	runEnv := func(dir string, env map[string]string, argv ...string) error {
+		if err := runner.Run(ctx, dir, argv, env); err != nil {
 			return fmt.Errorf("%s: %w", strings.Join(argv, " "), err)
 		}
 		return nil
 	}
+	run := func(dir string, argv ...string) error { return runEnv(dir, nil, argv...) }
 	environment := mutation.Environment
 	if environment == "" {
 		environment = "development"
@@ -182,19 +223,37 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 			err = superviseDev(ctx, root, os.Stdout, os.Stderr)
 		}
 	case "db":
+		// Every db form needs the connection string, and it is resolved once,
+		// through the documented precedence, before any tool is invoked. The
+		// old code read os.Getenv("DATABASE_URL") straight into goose's argv,
+		// so a project whose value lives only where the CLI writes it —
+		// .ggg/env/<environment>.env — handed goose an EMPTY DSN. That is not
+		// a failure to libpq: it falls back to its own defaults and connects
+		// to a local socket, so the documented first migration of a generated
+		// project could aim at a server the project has nothing to do with.
+		//
+		// The value goes in the child's environment, never in argv, because a
+		// DSN carries a password and the process list is public. goose reads
+		// GOOSE_DRIVER/GOOSE_DBSTRING; cmd/seed reads DATABASE_URL.
+		databaseURL, resolveErr := c.taskEnvValue(environment, "DATABASE_URL")
+		if resolveErr != nil {
+			return failureEnvelope("db"+taskActionSuffix(mutation.Action), resolveErr)
+		}
+		goose := map[string]string{"GOOSE_DRIVER": "postgres", "GOOSE_DBSTRING": databaseURL}
+		seed := map[string]string{"DATABASE_URL": databaseURL}
 		switch mutation.Action {
 		case "migrate":
-			err = run(root, "go", "tool", "goose", "-dir", "internal/db/migrations", "postgres", os.Getenv("DATABASE_URL"), "up")
+			err = runEnv(root, goose, "go", "tool", "goose", "-dir", "internal/db/migrations", "up")
 		case "status":
-			err = run(root, "go", "tool", "goose", "-dir", "internal/db/migrations", "postgres", os.Getenv("DATABASE_URL"), "status")
+			err = runEnv(root, goose, "go", "tool", "goose", "-dir", "internal/db/migrations", "status")
 		case "seed":
-			err = run(root, "go", "run", "./cmd/seed", "-registry", "dev")
+			err = runEnv(root, seed, "go", "run", "./cmd/seed", "-registry", "dev")
 		case "reset":
 			if err = run(root, "docker", "compose", "-f", compose, "down", "--volumes"); err == nil {
 				err = run(root, "docker", "compose", "-f", compose, "up", "-d", "--wait")
 			}
 			if err == nil {
-				err = run(root, "go", "run", "./cmd/seed", "-reset", "-registry", "dev")
+				err = runEnv(root, seed, "go", "run", "./cmd/seed", "-reset", "-registry", "dev")
 			}
 		}
 	case "check":
@@ -236,7 +295,7 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 
 func (c *Controller) runGenerate(ctx context.Context, runner TaskRunner) error {
 	root := c.rootDir()
-	run := func(argv ...string) error { return runner.Run(ctx, root, argv) }
+	run := func(argv ...string) error { return runner.Run(ctx, root, argv, nil) }
 	// Mutable directory registries are refreshed deliberately; remote registries
 	// are immutable snapshots and are never rewritten to absorb local edits.
 	project, err := c.loadProject()

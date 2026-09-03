@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "714511c3ea54fecee3cc7a4b53e06ccb66212621974b118009d5a43da972aee7"
+      "sha256": "97a80719df5827b11c0a7591c1d5e570b9ca605d843176c84bf585efcc561f83"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "21ca3fa92c2d1b9fbac21b07edeb09b32f82af778956e1e84e52931ef341309b"
+      "sha256": "b2e2c2da8218688ef4fa297182241af056890ccadeea1ab2bfea71a7f9ab7723"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "9ec6921c2e86279db931fe105a7b18b33b9450abf2c2399ce85bf4bf53d22916"
+      "sha256": "f436665c391e59e22016d55c885ed48ab78942eebcc0136518348f0c2ee71fcd"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

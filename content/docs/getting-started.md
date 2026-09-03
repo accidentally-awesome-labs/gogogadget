@@ -121,7 +121,12 @@ Open http://localhost:8080.
   the `local_service` block of the selected target. `--environment test`
   selects `compose.test.yaml` instead.
 - **`ggg db migrate`** runs the embedded goose migrations; **`ggg db seed`**
-  loads the module-owned development fixtures through `cmd/seed`.
+  loads the module-owned development fixtures through `cmd/seed`. Both resolve
+  `DATABASE_URL` in the documented order — process environment, then
+  `.ggg/env/<environment>.env`, then `.env` in development only — and refuse
+  when nothing supplies it rather than handing the tool an empty connection
+  string, which libpq would quietly replace with its own defaults. See
+  [Configuration](/docs/configuration).
 - **`ggg dev`** regenerates, brings the development services up healthy, then
   supervises templ watch, Tailwind watch and air as one process group. Each
   log line is prefixed by its process, Ctrl+C cancels the group, and the first

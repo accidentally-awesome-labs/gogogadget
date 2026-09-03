@@ -412,3 +412,65 @@ func TestEnvExampleIsAWorkingZeroAccountSetup(t *testing.T) {
 		assert.True(t, present, "%s is declared but missing from .env.example", key)
 	}
 }
+
+// The generated compose.yaml points the app service's env_file at
+// .ggg/env/<environment>.env, and that is where `ggg provider configure` and
+// genesis write development values — but Load read only the legacy .env, so a
+// program run on the HOST rather than in the container saw none of it and fell
+// back to DATABASE_URL's declared default, localhost:5432. `ggg db seed`
+// reached the operator's own Postgres that way, migrated it, seeded it, and
+// exited 0.
+func TestLoadReadsTheCLIManagedEnvironmentFile(t *testing.T) {
+	const managed = "postgres://postgres:postgres@localhost:55432/managed?sslmode=disable"
+	const legacy = "postgres://postgres:postgres@localhost:6001/legacy?sslmode=disable"
+
+	t.Run("cli-managed file is read and outranks the legacy .env", func(t *testing.T) {
+		root := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(root, ".ggg", "env"), 0o700))
+		require.NoError(t, os.WriteFile(filepath.Join(root, ".ggg", "env", "development.env"),
+			[]byte("DATABASE_URL="+managed+"\n"), 0o600))
+		require.NoError(t, os.WriteFile(filepath.Join(root, ".env"),
+			[]byte("DATABASE_URL="+legacy+"\n"), 0o644))
+		t.Chdir(root)
+		t.Setenv("APP_ENV", "development")
+		t.Setenv("DATABASE_URL", "")
+
+		cfg, err := Load()
+		require.NoError(t, err)
+		assert.Equal(t, managed, cfg.DatabaseURL,
+			"the CLI-managed file must be read, and must outrank the legacy .env")
+	})
+
+	t.Run("process environment still wins", func(t *testing.T) {
+		const process = "postgres://postgres:postgres@localhost:6000/process?sslmode=disable"
+		root := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(root, ".ggg", "env"), 0o700))
+		require.NoError(t, os.WriteFile(filepath.Join(root, ".ggg", "env", "development.env"),
+			[]byte("DATABASE_URL="+managed+"\n"), 0o600))
+		t.Chdir(root)
+		t.Setenv("APP_ENV", "development")
+		t.Setenv("DATABASE_URL", process)
+
+		cfg, err := Load()
+		require.NoError(t, err)
+		assert.Equal(t, process, cfg.DatabaseURL)
+	})
+
+	t.Run("test reads its own file and never the legacy .env", func(t *testing.T) {
+		root := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(root, ".ggg", "env"), 0o700))
+		require.NoError(t, os.WriteFile(filepath.Join(root, ".ggg", "env", "test.env"),
+			[]byte("DATABASE_URL="+managed+"\n"), 0o600))
+		require.NoError(t, os.WriteFile(filepath.Join(root, ".env"),
+			[]byte("APP_URL=http://legacy.invalid\n"), 0o644))
+		t.Chdir(root)
+		t.Setenv("APP_ENV", "test")
+		t.Setenv("DATABASE_URL", "")
+		t.Setenv("APP_URL", "")
+
+		cfg, err := Load()
+		require.NoError(t, err)
+		assert.Equal(t, managed, cfg.DatabaseURL)
+		assert.NotEqual(t, "http://legacy.invalid", cfg.AppURL, "test must not read the legacy .env")
+	})
+}

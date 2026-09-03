@@ -56,7 +56,15 @@ func LookupEnv(root, environment string) func(string) (string, bool) {
 // readEnvLayers returns the file layers in precedence order:
 // .ggg/env/<environment>.env before the legacy .env, and the legacy layer
 // only in development. A missing file is an empty layer.
+//
+// Production reads no file at all. WriteEnvironmentEnvFile refuses to create
+// one, but an operator can still put a file there by hand, and the rule is
+// that production configuration comes from the deployment environment — so
+// this refuses to read it rather than relying on the file's absence.
 func readEnvLayers(root, environment string) []map[string]string {
+	if environment == "production" {
+		return nil
+	}
 	layers := []map[string]string{parseEnvFile(filepath.Join(root, filepath.FromSlash(EnvironmentEnvFile(environment))))}
 	if environment == "development" {
 		layers = append(layers, parseEnvFile(filepath.Join(root, ".env")))
