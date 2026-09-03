@@ -13,24 +13,52 @@ import (
 // GenerateComposeFiles renders the development and test Compose projects from
 // the selected provider targets. It is exported so genesis and focused tests
 // use the exact generator path used by sync.
+//
+// Both files are planned before either is rendered. Each file is its own
+// Compose project, so nothing inside one file can observe the other's
+// published ports — and a host has exactly one port space, which is where the
+// collision that actually bit lives. Planning the set first is what lets the
+// generator keep the promise that host-port collisions refuse generation.
 func GenerateComposeFiles(lock Lock, graph []Manifest) ([]GeneratedFile, error) {
 	byID := make(map[string]Manifest, len(graph))
 	for _, module := range graph {
 		byID[module.ID] = module
 	}
-	files := make([]GeneratedFile, 0, 2)
-	for _, environment := range []string{"development", "test"} {
-		content, err := renderCompose(environment, lock, byID)
+	plans := make([]composePlan, 0, len(composeEnvironments))
+	for _, environment := range composeEnvironments {
+		plan, err := planCompose(environment, lock, byID)
 		if err != nil {
 			return nil, err
 		}
-		name := "compose.yaml"
-		if environment == "test" {
-			name = "compose.test.yaml"
+		plans = append(plans, plan)
+	}
+	if err := refuseCrossEnvironmentPorts(plans); err != nil {
+		return nil, err
+	}
+	if err := refuseUndeclaredPortOverrides(lock.Ports, plans); err != nil {
+		return nil, err
+	}
+	files := make([]GeneratedFile, 0, len(plans))
+	for _, plan := range plans {
+		content, err := renderCompose(plan)
+		if err != nil {
+			return nil, err
 		}
-		files = append(files, GeneratedFile{Path: name, Content: content})
+		files = append(files, GeneratedFile{Path: ComposeFileName(plan.environment), Content: content})
 	}
 	return files, nil
+}
+
+// composeEnvironments are the environments that have a generated Compose file.
+// Production deploys through a deploy target and has none.
+var composeEnvironments = []string{"development", "test"}
+
+// ComposeFileName is the generated Compose file one environment stands up.
+func ComposeFileName(environment string) string {
+	if environment == composeTestEnvironment {
+		return "compose.test.yaml"
+	}
+	return "compose.yaml"
 }
 
 func emitComposeRegistry(_ context.Context, _ string, lock Lock, graph []Manifest) ([]GeneratedFile, error) {
@@ -43,27 +71,64 @@ type selectedService struct {
 	adapter string
 	target  ServiceTarget
 	service LocalService
+	// published is every declared port with the host port this environment
+	// resolved for it.
+	published []publishedPort
 }
 
-func renderCompose(environment string, lock Lock, modules map[string]Manifest) (string, error) {
-	selected := make([]selectedService, 0)
-	serviceNames := map[string]string{}
-	hostPorts := map[int]string{}
-	volumeNames := map[string]string{}
+// publishedPort is one declared container port and the host port it is
+// published on in one environment.
+type publishedPort struct {
+	host      int
+	container int
+}
 
-	slots := make([]string, 0, len(lock.Providers))
-	for slot := range lock.Providers {
-		slots = append(slots, slot)
+// composePlan is everything one generated Compose file publishes, resolved
+// before any file is written.
+type composePlan struct {
+	environment string
+	// appHost is the host port the app service publishes on, or zero when it
+	// publishes none.
+	appHost  int
+	selected []selectedService
+	// owners maps each published host port to the identity that publishes it,
+	// for the collision refusals.
+	owners map[int]string
+	// declared maps every override key this environment can honour to its
+	// owning identity, for the override refusal.
+	declared map[string]string
+}
+
+func planCompose(environment string, lock Lock, modules map[string]Manifest) (composePlan, error) {
+	plan := composePlan{
+		environment: environment,
+		selected:    make([]selectedService, 0),
+		owners:      map[int]string{},
+		declared:    map[string]string{},
 	}
-	sort.Strings(slots)
-	for _, slot := range slots {
+
+	// The app service is resolved first, so an adapter that lands on its port
+	// names `app` as the other owner rather than the reverse.
+	plan.declared[appPortKey] = composeAppService
+	appHost, overridden := lock.Ports[appPortKey].ForEnvironment(environment)
+	if !overridden && environment != composeTestEnvironment {
+		appHost = appPort
+	}
+	if appHost != 0 {
+		plan.appHost = appHost
+		plan.owners[appHost] = composeAppService
+	}
+
+	serviceNames := map[string]string{}
+	volumeNames := map[string]string{}
+	for _, slot := range sortedKeys(lock.Providers) {
 		choice := providerSelectionForEnvironment(lock.Providers[slot], environment)
 		if choice.Adapter == "" {
 			continue
 		}
 		module, ok := modules[choice.Adapter]
 		if !ok || module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
-			return "", fmt.Errorf("compose %s: selected adapter %s for %s is not installed", environment, choice.Adapter, slot)
+			return composePlan{}, fmt.Errorf("compose %s: selected adapter %s for %s is not installed", environment, choice.Adapter, slot)
 		}
 		var target *ServiceTarget
 		for i := range module.Runtime.System.Adapter.Targets {
@@ -73,79 +138,156 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 			}
 		}
 		if target == nil {
-			return "", fmt.Errorf("compose %s: selected target %s@%s is not declared", environment, choice.Adapter, choice.Target)
+			return composePlan{}, fmt.Errorf("compose %s: selected target %s@%s is not declared", environment, choice.Adapter, choice.Target)
 		}
 		if target.LocalService == nil {
 			continue
 		}
 		if target.Mode != "development" && target.Mode != "self-hosted" {
-			return "", fmt.Errorf("compose %s: target %s@%s has a local service but mode %s", environment, choice.Adapter, choice.Target, target.Mode)
+			return composePlan{}, fmt.Errorf("compose %s: target %s@%s has a local service but mode %s", environment, choice.Adapter, choice.Target, target.Mode)
 		}
 		if !strings.Contains(target.LocalService.Container, "@sha256:") {
-			return "", fmt.Errorf("compose %s: target %s@%s image must be digest-pinned", environment, choice.Adapter, choice.Target)
+			return composePlan{}, fmt.Errorf("compose %s: target %s@%s image must be digest-pinned", environment, choice.Adapter, choice.Target)
 		}
 		name := composeScopedName(choice.Adapter, choice.Target)
 		if owner, exists := serviceNames[name]; exists {
-			return "", fmt.Errorf("compose %s: service name %q collides between %s and %s", environment, name, owner, choice.Adapter)
+			return composePlan{}, fmt.Errorf("compose %s: service name %q collides between %s and %s", environment, name, owner, choice.Adapter)
 		}
 		serviceNames[name] = choice.Adapter
+		identity := choice.Adapter + "@" + choice.Target
+		item := selectedService{name: name, slot: slot, adapter: choice.Adapter, target: *target, service: *target.LocalService}
 		for _, port := range target.LocalService.Ports {
-			if owner, exists := hostPorts[port.DefaultHost]; exists {
-				return "", fmt.Errorf("compose %s: host port %d collides between %s and %s", environment, port.DefaultHost, owner, name)
+			key := identity + "/" + port.Name
+			plan.declared[key] = identity
+			host, err := effectiveHostPort(lock.Ports, environment, key, port.DefaultHost)
+			if err != nil {
+				return composePlan{}, err
 			}
-			hostPorts[port.DefaultHost] = name
+			if owner, exists := plan.owners[host]; exists {
+				return composePlan{}, fmt.Errorf("compose %s: host port %d collides between %s and %s", environment, host, owner, identity)
+			}
+			plan.owners[host] = identity
+			item.published = append(item.published, publishedPort{host: host, container: port.Container})
 		}
 		for _, volume := range target.LocalService.Volumes {
 			volumeName := composeScopedName(choice.Adapter, choice.Target, volume.Name)
 			if owner, exists := volumeNames[volumeName]; exists {
-				return "", fmt.Errorf("compose %s: volume name %q collides between %s and %s", environment, volumeName, owner, name)
+				return composePlan{}, fmt.Errorf("compose %s: volume name %q collides between %s and %s", environment, volumeName, owner, name)
 			}
 			volumeNames[volumeName] = name
 		}
-		selected = append(selected, selectedService{name: name, slot: slot, adapter: choice.Adapter, target: *target, service: *target.LocalService})
+		plan.selected = append(plan.selected, item)
 	}
+	return plan, nil
+}
 
+// effectiveHostPort resolves the host port one declared Compose port is
+// published on in one environment.
+//
+// Development publishes the port its owning target declares: that is the
+// documented address every doc and configuration default names. Test publishes
+// the same port shifted by testPortOffset, so the two stacks coexist on one
+// host by construction and the shifted address stays readable — 5432 becomes
+// 15432. Deriving it keeps a second hand-maintained set of numbers, and the
+// drift that comes with it, out of the manifests: a target declares one port
+// and both stacks follow from it.
+func effectiveHostPort(overrides map[string]PortOverrides, environment, key string, declared int) (int, error) {
+	if host, ok := overrides[key].ForEnvironment(environment); ok {
+		return host, nil
+	}
+	if environment != composeTestEnvironment {
+		return declared, nil
+	}
+	host := declared + testPortOffset
+	if host > maxHostPort {
+		return 0, fmt.Errorf(
+			"compose test: declared host port %d for %s shifts to %d, past the %d ceiling; declare a lower default_host, or set a test port for %q under \"ports\" in %s",
+			declared, key, host, maxHostPort, key, ProjectFileName)
+	}
+	return host, nil
+}
+
+// refuseCrossEnvironmentPorts refuses when two environments publish the same
+// host port. Each file is generated on its own, so this is the only place the
+// whole generated set is visible at once, and a project that cannot run its own
+// test stack beside its development stack is the failure it exists to catch.
+func refuseCrossEnvironmentPorts(plans []composePlan) error {
+	for i, left := range plans {
+		for _, right := range plans[i+1:] {
+			for _, host := range sortedInts(left.owners) {
+				owner, exists := right.owners[host]
+				if !exists {
+					continue
+				}
+				return fmt.Errorf(
+					"compose: host port %d collides between %s (%s) and %s (%s); both stacks must be able to run at once, so move one with a \"ports\" override in %s",
+					host, left.environment, left.owners[host], right.environment, owner, ProjectFileName)
+			}
+		}
+	}
+	return nil
+}
+
+// refuseUndeclaredPortOverrides refuses an override that names no port the
+// environment's stack declares. Ignoring it would leave the operator with a
+// committed decision the generator silently dropped — a service still on the
+// port they moved it off.
+func refuseUndeclaredPortOverrides(overrides map[string]PortOverrides, plans []composePlan) error {
+	for _, key := range sortedKeys(overrides) {
+		for _, plan := range plans {
+			if _, ok := overrides[key].ForEnvironment(plan.environment); !ok {
+				continue
+			}
+			if _, declared := plan.declared[key]; declared {
+				continue
+			}
+			return fmt.Errorf("compose: port override %q names no port the %s stack declares; it declares %s",
+				key, plan.environment, strings.Join(sortedKeys(plan.declared), ", "))
+		}
+	}
+	return nil
+}
+
+func renderCompose(plan composePlan) (string, error) {
 	// A distinct compose project per environment keeps container, network, and
 	// volume names from the development and test stacks from colliding, even
 	// though both files declare the same service roles.
 	root := &yaml.Node{Kind: yaml.MappingNode}
-	appendYAMLMap(root, "name", yamlScalar("gogogadget-"+environment))
+	appendYAMLMap(root, "name", yamlScalar("gogogadget-"+plan.environment))
 	services := &yaml.Node{Kind: yaml.MappingNode}
 	appendYAMLMap(root, "services", services)
 	app := &yaml.Node{Kind: yaml.MappingNode}
 	appendYAMLMap(app, "build", yamlScalar("."))
-	appendYAMLMap(app, "env_file", yamlSequence(".ggg/env/"+environment+".env"))
-	if owner, exists := hostPorts[appPort]; exists {
-		return "", fmt.Errorf("compose %s: app port %d collides with %s", environment, appPort, owner)
+	appendYAMLMap(app, "env_file", yamlSequence(".ggg/env/"+plan.environment+".env"))
+	if plan.appHost != 0 {
+		appendYAMLMap(app, "ports", yamlSequence(strconv.Itoa(plan.appHost)+":"+strconv.Itoa(appPort)))
 	}
-	hostPorts[appPort] = "app"
-	appendYAMLMap(app, "ports", yamlSequence(strconv.Itoa(appPort)+":"+strconv.Itoa(appPort)))
 	appEnv := &yaml.Node{Kind: yaml.MappingNode}
-	appendYAMLMap(appEnv, "APP_ENV", yamlScalar(environment))
-	appendYAMLMap(appEnv, "APP_URL", yamlScalar("http://localhost:"+strconv.Itoa(appPort)))
-	if url := databaseURL(selected); url != "" {
+	appendYAMLMap(appEnv, "APP_ENV", yamlScalar(plan.environment))
+	appendYAMLMap(appEnv, "APP_URL", yamlScalar(appURL(plan)))
+	if url := databaseURL(plan.selected); url != "" {
 		appendYAMLMap(appEnv, "DATABASE_URL", yamlScalar(url))
 	}
 	appendYAMLMap(app, "environment", appEnv)
-	if len(selected) > 0 {
+	if len(plan.selected) > 0 {
 		depends := &yaml.Node{Kind: yaml.MappingNode}
-		for _, item := range selected {
+		for _, item := range plan.selected {
 			condition := &yaml.Node{Kind: yaml.MappingNode}
 			appendYAMLMap(condition, "condition", yamlScalar("service_healthy"))
 			appendYAMLMap(depends, item.name, condition)
 		}
 		appendYAMLMap(app, "depends_on", depends)
 	}
-	appendYAMLMap(services, "app", app)
+	appendYAMLMap(services, composeAppService, app)
 
 	volumes := &yaml.Node{Kind: yaml.MappingNode}
-	for _, item := range selected {
+	for _, item := range plan.selected {
 		node := &yaml.Node{Kind: yaml.MappingNode}
 		appendYAMLMap(node, "image", yamlScalar(item.service.Container))
-		if len(item.service.Ports) > 0 && environment != "test" {
+		if len(item.published) > 0 {
 			ports := &yaml.Node{Kind: yaml.SequenceNode}
-			for _, port := range item.service.Ports {
-				ports.Content = append(ports.Content, yamlScalar(strconv.Itoa(port.DefaultHost)+":"+strconv.Itoa(port.Container)))
+			for _, port := range item.published {
+				ports.Content = append(ports.Content, yamlScalar(strconv.Itoa(port.host)+":"+strconv.Itoa(port.container)))
 			}
 			appendYAMLMap(node, "ports", ports)
 		}
@@ -195,12 +337,50 @@ func renderCompose(environment string, lock Lock, modules map[string]Manifest) (
 	return string(data), nil
 }
 
-// appPort is the host and container port the generated app service publishes.
+// appURL is the origin the app service reports as its own. It follows the
+// effective published port, never the declared default: a link built from a
+// port nothing is listening on is a broken redirect, and the whole point of an
+// override is that the port moved.
+//
+// An unpublished app has no host origin at all, so it reports the in-network
+// one — the same derivation DATABASE_URL uses, and honest about the only place
+// it can be reached from.
+func appURL(plan composePlan) string {
+	if plan.appHost == 0 {
+		return "http://" + composeAppService + ":" + strconv.Itoa(appPort)
+	}
+	return "http://localhost:" + strconv.Itoa(plan.appHost)
+}
+
+// appPort is the container port the generated app service listens on, and the
+// host port the development stack publishes it on.
 const appPort = 8080
+
+// composeAppService is the generated app service's name in every environment.
+const composeAppService = "app"
+
+// appPortKey is the `ports` override key for the app service's HTTP port.
+const appPortKey = composeAppService + "/http"
+
+// composeTestEnvironment is the one environment whose published ports are
+// derived rather than declared.
+const composeTestEnvironment = "test"
+
+// testPortOffset shifts every host port the test stack publishes off the
+// development stack's. It is deliberately a round 10000: the shifted port
+// stays recognisable (5432 → 15432, 1025 → 11025), which matters when an
+// operator reads it out of `docker ps` and points a tool at it.
+const testPortOffset = 10000
+
+// maxHostPort is the last valid TCP port.
+const maxHostPort = 65535
 
 // databaseURL derives the in-network DATABASE_URL from the selected database
 // adapter's local service declaration, so the compose app reaches the same
 // Postgres the environment selected without hardcoded credentials.
+//
+// It addresses the service by name and container port, so it is unaffected by
+// which host port that service is published on — including none.
 func databaseURL(selected []selectedService) string {
 	for _, item := range selected {
 		if item.slot != "ggg/database" {
@@ -225,6 +405,17 @@ func databaseURL(selected []selectedService) string {
 			user, password, item.name, port, name)
 	}
 	return ""
+}
+
+// sortedInts orders the keys of a port-indexed map, so every refusal reports
+// the same collision for the same inputs.
+func sortedInts[V any](m map[int]V) []int {
+	out := make([]int, 0, len(m))
+	for key := range m {
+		out = append(out, key)
+	}
+	sort.Ints(out)
+	return out
 }
 
 func providerSelectionForEnvironment(selections ProviderSelections, environment string) ProviderSelection {

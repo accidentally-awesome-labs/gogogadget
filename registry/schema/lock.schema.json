@@ -100,6 +100,15 @@
             "$ref": "#/$defs/ProviderSelections"
           }
         },
+        "ports": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(?:app|[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*@[a-z][a-z0-9]*(?:-[a-z0-9]+)*)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/PortOverrides"
+          }
+        },
         "go_tools": {
           "type": "array",
           "items": {
@@ -190,6 +199,24 @@
         "adapter",
         "target"
       ]
+    },
+    "PortOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "development": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "test": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      },
+      "minProperties": 1,
+      "required": []
     },
     "LockedModule": {
       "type": "object",

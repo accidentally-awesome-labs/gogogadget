@@ -72,7 +72,7 @@ func controllerProject(t *testing.T) (string, *gggcli.Controller) {
 		}
 	}
 	write("go.mod", "module example.com/acme/app\n\ngo 1.26.6\n")
-	write("gogogadget.json", `{"schema":2,"registries":[{"namespace":"ggg","source":"github","repository":"local/registry","ref":"main","public_key":"A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}],"modules":[],"exclude":[],"providers":{},"deployment":""}`)
+	write("gogogadget.json", `{"schema":2,"registries":[{"namespace":"ggg","source":"github","repository":"local/registry","ref":"main","public_key":"A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}],"modules":[],"exclude":[],"providers":{},"ports":{},"deployment":""}`)
 
 	engine := modkit.New(modkit.Options{
 		Source:    stubSource{snapshot: modkit.Snapshot{Commit: commit, FS: files}},
@@ -110,7 +110,7 @@ func TestCatalogScreenLoadsRowsFromController(t *testing.T) {
 // intent file.
 func TestProvidersScreenRendersSlotRows(t *testing.T) {
 	root, controller := controllerProject(t)
-	intent := `{"schema":2,"registries":[{"namespace":"ggg","source":"github","repository":"local/registry","ref":"main","public_key":"A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}],"modules":[],"exclude":[],"providers":{"ggg/mail":{"development":{"adapter":"ggg/system/mail-dev","target":"filesystem"},"test":{"adapter":"ggg/system/mail-dev","target":"filesystem"},"production":{"adapter":"ggg/system/mail-resend","target":"resend"}}},"deployment":""}`
+	intent := `{"schema":2,"registries":[{"namespace":"ggg","source":"github","repository":"local/registry","ref":"main","public_key":"A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}],"modules":[],"exclude":[],"providers":{"ggg/mail":{"development":{"adapter":"ggg/system/mail-dev","target":"filesystem"},"test":{"adapter":"ggg/system/mail-dev","target":"filesystem"},"production":{"adapter":"ggg/system/mail-resend","target":"resend"}}},"ports":{},"deployment":""}`
 	if err := os.WriteFile(filepath.Join(root, "gogogadget.json"), []byte(intent), 0o644); err != nil {
 		t.Fatal(err)
 	}

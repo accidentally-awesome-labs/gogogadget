@@ -166,12 +166,68 @@ final artifact carries no toolchain:
 `compose.yaml` and `compose.test.yaml` are **generated**, not hand-written.
 `ggg/system/docker` renders them from the local services the selected targets
 declare: digest-pinned images, adapter-target-scoped service and volume names,
-declared ports and health checks, and `env_file: .ggg/env/<environment>.env`.
-A host-port or name collision refuses generation. Edit a target's
-`local_service` declaration, never the YAML.
+ports and health checks derived from the declarations, and
+`env_file: .ggg/env/<environment>.env`. Edit a target's `local_service`
+declaration, never the YAML.
+
+### Which host ports each stack publishes
+
+Both stacks have to be able to run at once — a project that cannot run its own
+test stack while its development stack is up has no working test story — so the
+published ports are derived, not declared twice:
+
+| Service | development | test |
+|---|---|---|
+| every selected local service | the target's declared `default_host` (`5432` for Docker Postgres) | that port **+ 10000** (`15432`) |
+| `app` | `8080` | not published |
+
+The offset is a round 10000 so the shifted port stays recognisable in
+`docker ps` — `5432` → `15432`, `1025` → `11025`. Nothing reaches the test
+stack's app over a host port (`ggg test e2e` runs the server on the host at
+`:18080`, and CI's e2e job uses a service container and no compose at all), so
+it publishes none; publishing it would take the development port and land on
+`18080`, the exact port Playwright's `webServer` reuses instead of the server it
+builds. `APP_URL` follows the effective port, and an unpublished app reports
+its in-network origin (`http://app:8080`) because that is the only place it can
+be reached from. `DATABASE_URL` inside a stack always addresses the database by
+service name and container port, so it is unaffected by host publishing.
+
+### Moving a published port
+
+A busy host — anything already on `5432` or `8080`, including a Postgres
+installed the normal way — moves a port with a committed project decision, not
+by editing a generated file:
+
+```json
+"ports": {
+  "ggg/system/database-postgres@docker-postgres/postgres": { "development": 5433 },
+  "app/http": { "development": 8081, "test": 18081 }
+}
+```
+
+A key is `<service>/<port>`: `app/http` for the generated app service, and
+`<adapter>@<target>/<declared port name>` for a local service. Each key sets
+`development`, `test`, or both; an unset environment keeps the derived port,
+and an `app/http` test entry is the one way to publish the test app. The values
+are host ports, they are not secret, and `APP_URL` follows them.
+
+Two refusals hold the promise, both before anything is written:
+
+- An override that names no port the environment's stack declares refuses,
+  naming the ports it does declare. A silently dropped override leaves the
+  service on the port you moved it off.
+- **Two environments publishing the same host port refuse generation**, naming
+  both environments, both owners and the port — as does a collision inside one
+  file. Each file is its own Compose project, so the generated set is checked as
+  a whole; a host has one port space.
+
+A host port that a container already holds is still a runtime failure from
+`docker compose`, not a generation error: the generator is deterministic and
+offline and never probes the machine. Move it with an override.
 
 ```sh
 ggg services up --environment development    # compose.yaml
+ggg services up --environment test           # compose.test.yaml
 ggg services status
 ggg services logs
 ggg services down            # keeps named volumes

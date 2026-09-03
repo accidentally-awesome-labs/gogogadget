@@ -9,7 +9,40 @@ type Project struct {
 	Modules    []string                      `json:"modules"`
 	Exclude    []string                      `json:"exclude"`
 	Providers  map[string]ProviderSelections `json:"providers"`
-	Deployment string                        `json:"deployment"`
+	// Ports overrides the host port one generated Compose port publishes on.
+	// A key is `<service>/<port>`: `app/http` for the generated app service,
+	// and `<adapter>@<target>/<declared port name>` for an adapter's local
+	// service. Absent keys keep the derived default, so this map is empty in
+	// a project that never had to move a port.
+	//
+	// Publishing lives here, beside the provider selections that decide which
+	// services exist at all, because it is a committed project decision: a
+	// generated Compose file is registry-owned and a hand edit vanishes at the
+	// next generate, and an environment variable would not be reviewable.
+	// Nothing here is a secret.
+	Ports      map[string]PortOverrides `json:"ports"`
+	Deployment string                   `json:"deployment"`
+}
+
+// PortOverrides is the host port one declared Compose port publishes on, per
+// generated Compose file. Production has no Compose file, so it has no field
+// here; a zero value means the derived default stands.
+type PortOverrides struct {
+	Development int `json:"development,omitempty"`
+	Test        int `json:"test,omitempty"`
+}
+
+// ForEnvironment returns the overridden host port for one environment, and
+// whether an override was declared at all.
+func (o PortOverrides) ForEnvironment(environment string) (int, bool) {
+	switch environment {
+	case "development":
+		return o.Development, o.Development != 0
+	case "test":
+		return o.Test, o.Test != 0
+	default:
+		return 0, false
+	}
 }
 
 // ProjectRegistry identifies one configured registry source.
@@ -865,10 +898,15 @@ type Lock struct {
 	// environment. Keeping this in the lock makes generated consumers (health,
 	// navigation, and shell registries) deterministic without consulting mutable
 	// intent at generation time.
-	Providers    map[string]ProviderSelections `json:"providers,omitempty"`
-	GoTools      []string                      `json:"go_tools,omitempty"`
-	Dependencies []LockedDependency            `json:"dependencies"`
-	Modules      []LockedModule                `json:"modules"`
+	Providers map[string]ProviderSelections `json:"providers,omitempty"`
+	// Ports records the project's declared host-port overrides for the same
+	// reason: the Compose generator reads its inputs from the resolved lock,
+	// never from mutable intent, so a generated Compose file and the lock that
+	// produced it cannot disagree about where a stack publishes.
+	Ports        map[string]PortOverrides `json:"ports,omitempty"`
+	GoTools      []string                 `json:"go_tools,omitempty"`
+	Dependencies []LockedDependency       `json:"dependencies"`
+	Modules      []LockedModule           `json:"modules"`
 }
 
 type LockedRegistry struct {

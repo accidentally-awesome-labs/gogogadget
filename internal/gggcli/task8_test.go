@@ -101,6 +101,140 @@ func composeAdapter(id, slot, target, image string, port int) modkit.Manifest {
 	}
 }
 
+// The two generated stacks must be able to run at the same time on one host
+// out of the box: a project that cannot run its own test stack while its
+// development stack is up has no working test story. Development publishes
+// what the target declares and test publishes the same port shifted, and the
+// app service publishes nothing in test — nothing reaches it over a host port
+// (`ggg test e2e` runs the server on the host at :18080, CI's e2e job uses a
+// service container and no compose at all), and publishing it would both take
+// the development port and land on 18080, the exact port Playwright's
+// webServer reuses instead of the server it builds.
+func TestComposePublishesDerivedTestPortsAndLeavesTheTestAppUnpublished(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/db", "ggg/database", "postgres", "postgres@sha256:"+strings.Repeat("a", 64), 5432),
+	}
+	both := modkit.ProviderSelections{
+		Development: modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+		Test:        modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+	}
+	files, err := modkit.GenerateComposeFiles(modkit.Lock{Providers: map[string]modkit.ProviderSelections{"ggg/database": both}}, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	development, test := composeFile(t, files, "compose.yaml"), composeFile(t, files, "compose.test.yaml")
+	for _, want := range []string{"- 8080:8080", "- 5432:5432", "APP_URL: http://localhost:8080"} {
+		if !strings.Contains(development, want) {
+			t.Fatalf("compose.yaml does not publish %q:\n%s", want, development)
+		}
+	}
+	if !strings.Contains(test, "- 15432:5432") {
+		t.Fatalf("compose.test.yaml does not publish the derived database port:\n%s", test)
+	}
+	// The database is the only service with a ports block, so the app has none.
+	if strings.Count(test, "ports:") != 1 || strings.Contains(test, "8080:8080") {
+		t.Fatalf("compose.test.yaml publishes the app port:\n%s", test)
+	}
+	if !strings.Contains(test, "APP_URL: http://app:8080") {
+		t.Fatalf("unpublished test app does not report its in-network origin:\n%s", test)
+	}
+}
+
+// An operator on a busy host must be able to move a published port without
+// editing a generated file, and APP_URL has to follow: a redirect built from a
+// port nothing listens on is broken exactly when the override was needed.
+func TestComposePortOverrideMovesThePublishedPortAndAppURL(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/db", "ggg/database", "postgres", "postgres@sha256:"+strings.Repeat("a", 64), 5432),
+	}
+	lock := modkit.Lock{
+		Providers: map[string]modkit.ProviderSelections{"ggg/database": {
+			Development: modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+			Test:        modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+		}},
+		Ports: map[string]modkit.PortOverrides{
+			"app/http":                       {Development: 8081, Test: 18081},
+			"ggg/system/db@postgres/service": {Development: 5433},
+		},
+	}
+	files, err := modkit.GenerateComposeFiles(lock, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	development, test := composeFile(t, files, "compose.yaml"), composeFile(t, files, "compose.test.yaml")
+	for _, want := range []string{"- 8081:8080", "- 5433:5432", "APP_URL: http://localhost:8081"} {
+		if !strings.Contains(development, want) {
+			t.Fatalf("override did not move %q:\n%s", want, development)
+		}
+	}
+	// The test app is published only because the project asked for it, and the
+	// database keeps its derived port because only development was overridden.
+	for _, want := range []string{"- 18081:8080", "- 15432:5432", "APP_URL: http://localhost:18081"} {
+		if !strings.Contains(test, want) {
+			t.Fatalf("override did not move %q:\n%s", want, test)
+		}
+	}
+}
+
+// An override that names nothing is a committed decision the generator would
+// otherwise drop on the floor, leaving the service on the port the operator
+// moved it off.
+func TestComposeRefusesAnOverrideNamingNoDeclaredPort(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/db", "ggg/database", "postgres", "postgres@sha256:"+strings.Repeat("a", 64), 5432),
+	}
+	for _, override := range []string{"ggg/system/db@postgres/http", "ggg/system/other@postgres/service", "app/admin"} {
+		lock := modkit.Lock{
+			Providers: map[string]modkit.ProviderSelections{"ggg/database": {
+				Development: modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+			}},
+			Ports: map[string]modkit.PortOverrides{override: {Development: 5433}},
+		}
+		_, err := modkit.GenerateComposeFiles(lock, graph)
+		if err == nil || !strings.Contains(err.Error(), "names no port the development stack declares") {
+			t.Fatalf("override %q error = %v", override, err)
+		}
+	}
+}
+
+// Each file is its own Compose project, so only the generated set as a whole
+// can see this: a development service already sitting on the port test derives
+// for its database. AGENTS.md promises host-port collisions refuse generation,
+// and across environments is where the collision that bit actually lived.
+func TestComposeRefusesACrossEnvironmentPortCollision(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/db", "ggg/database", "postgres", "postgres@sha256:"+strings.Repeat("a", 64), 5432),
+		composeAdapter("ggg/system/cache", "ggg/cache", "valkey", "valkey@sha256:"+strings.Repeat("c", 64), 15432),
+	}
+	lock := modkit.Lock{Providers: map[string]modkit.ProviderSelections{
+		"ggg/database": {
+			Development: modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+			Test:        modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+		},
+		"ggg/cache": {Development: modkit.ProviderSelection{Adapter: "ggg/system/cache", Target: "valkey"}},
+	}}
+	_, err := modkit.GenerateComposeFiles(lock, graph)
+	if err == nil {
+		t.Fatal("cross-environment collision generated both files")
+	}
+	for _, want := range []string{"host port 15432", "development (ggg/system/cache@valkey)", "test (ggg/system/db@postgres)"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("collision error %q does not name %q", err, want)
+		}
+	}
+}
+
+func composeFile(t *testing.T, files []modkit.GeneratedFile, path string) string {
+	t.Helper()
+	for _, file := range files {
+		if file.Path == path {
+			return file.Content
+		}
+	}
+	t.Fatalf("generated set has no %s: %#v", path, files)
+	return ""
+}
+
 func TestTrustedTaskUsesFixedArgv(t *testing.T) {
 	runner := &recordingTaskRunner{}
 	root := t.TempDir()

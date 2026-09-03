@@ -39,6 +39,13 @@ func MarshalProject(project Project) ([]byte, error) {
 	if project.Exclude != nil {
 		clone.Exclude = append(make([]string, 0, len(project.Exclude)), project.Exclude...)
 	}
+	// `ports` is a fixed key of the written file, so a project that has never
+	// moved a port still carries an empty object rather than a null: a reader
+	// that has to distinguish "no overrides" from "malformed" is a reader that
+	// guesses.
+	if clone.Ports == nil {
+		clone.Ports = map[string]PortOverrides{}
+	}
 	sort.Strings(clone.Modules)
 	sort.Strings(clone.Exclude)
 	if err := validateProject(clone, true); err != nil {

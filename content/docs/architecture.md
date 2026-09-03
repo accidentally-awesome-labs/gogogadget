@@ -50,6 +50,7 @@ a path that matches it.
   "modules": ["ggg/profile/full"],
   "exclude": ["ggg/component/table-empty"],
   "providers": { "ggg/mail": { "development": { "adapter": "ggg/system/mail-dev", "target": "filesystem" }, "…": {} } },
+  "ports": {},
   "deployment": "ggg/system/deploy-fly"
 }
 ```

@@ -119,7 +119,11 @@ Open http://localhost:8080.
   need, from the generated `compose.yaml`. Nothing is hand-written: service
   names, images (digest-pinned), ports, volumes and health checks come from
   the `local_service` block of the selected target. `--environment test`
-  selects `compose.test.yaml` instead.
+  selects `compose.test.yaml` instead, which publishes each service on its
+  declared port **+ 10000** (`5432` → `15432`) and does not publish the app at
+  all — so both stacks run at once. If something on your host already holds a
+  port, move it with a `ports` entry in `gogogadget.json` rather than editing
+  the generated file; see [Deployment](/docs/deployment).
 - **`ggg db migrate`** runs the embedded goose migrations; **`ggg db seed`**
   loads the module-owned development fixtures through `cmd/seed`. Both resolve
   `DATABASE_URL` in the documented order — process environment, then

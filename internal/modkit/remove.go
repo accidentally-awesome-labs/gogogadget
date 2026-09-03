@@ -495,6 +495,7 @@ func equalProjects(left, right Project) bool {
 		left.Schema == right.Schema &&
 		slices.Equal(left.Registries, right.Registries) &&
 		maps.Equal(left.Providers, right.Providers) &&
+		maps.Equal(left.Ports, right.Ports) &&
 		left.Deployment == right.Deployment
 }
 

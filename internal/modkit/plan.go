@@ -198,6 +198,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	desiredProject.Modules = append([]string{}, currentProject.Modules...)
 	desiredProject.Exclude = append([]string{}, currentProject.Exclude...)
 	desiredProject.Providers = maps.Clone(currentProject.Providers)
+	desiredProject.Ports = maps.Clone(currentProject.Ports)
 	if op.Kind == OpUpdate {
 		switch {
 		case len(op.Modules) != 0:
@@ -414,6 +415,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}
 	finalLock.RuntimeOrders = runtimeOrders
 	finalLock.Providers = maps.Clone(desiredProject.Providers)
+	finalLock.Ports = maps.Clone(desiredProject.Ports)
 	effective, err := EffectiveDependencies(graph.modules)
 	if err != nil {
 		return Plan{}, fmt.Errorf("resolve dependencies: %w", err)

@@ -34,6 +34,9 @@ func validateProject(p Project, canonical bool) error {
 	if p.Providers == nil {
 		return fmt.Errorf("project providers object is required")
 	}
+	if err := validatePortOverrides("project", p.Ports); err != nil {
+		return err
+	}
 	if p.Deployment != "" && strings.TrimSpace(p.Deployment) != p.Deployment {
 		return fmt.Errorf("project deployment must be trimmed")
 	}
@@ -149,6 +152,56 @@ func validateProviderSelections(slot string, choices ProviderSelections) error {
 		if strings.TrimSpace(choice.Adapter) == "" || strings.TrimSpace(choice.Target) == "" {
 			return fmt.Errorf("provider %s selection for %s must name adapter and target", slot, env)
 		}
+	}
+	return nil
+}
+
+// validatePortOverrides checks the syntax of a set of host-port overrides.
+// Whether a key names a port that actually exists needs the resolved graph, so
+// that refusal belongs to the Compose generator; everything decidable from the
+// declaration alone is decided here, before any resolution runs.
+func validatePortOverrides(owner string, overrides map[string]PortOverrides) error {
+	for _, key := range sortedKeys(overrides) {
+		if err := validatePortOverrideKey(key); err != nil {
+			return fmt.Errorf("%s ports %q: %w", owner, key, err)
+		}
+		choice := overrides[key]
+		if choice.Development == 0 && choice.Test == 0 {
+			return fmt.Errorf("%s ports %q sets no environment; remove the key or name development, test, or both", owner, key)
+		}
+		for _, environment := range []string{"development", "test"} {
+			host, declared := choice.ForEnvironment(environment)
+			if declared && !validHostPort(host) {
+				return fmt.Errorf("%s ports %q %s port %d is outside 1..%d", owner, key, environment, host, maxHostPort)
+			}
+		}
+	}
+	return nil
+}
+
+// validatePortOverrideKey enforces the `<service>/<port>` grammar: the app
+// service is the literal `app`, and an adapter service is `<adapter>@<target>`
+// — the same adapter-scoped target form every other command accepts.
+func validatePortOverrideKey(key string) error {
+	service, port, ok := strings.Cut(key, "/")
+	if service == composeAppService {
+		if !ok || !validKebab(port) {
+			return fmt.Errorf("app port must be named app/<port>")
+		}
+		return nil
+	}
+	// An adapter id carries two slashes of its own, so the port name is the
+	// last segment and the adapter@target form is everything before it.
+	index := strings.LastIndex(key, "/")
+	if index < 0 || !validKebab(key[index+1:]) {
+		return fmt.Errorf("must end in /<port>")
+	}
+	adapter, target, found := strings.Cut(key[:index], "@")
+	if !found || !validKebab(target) {
+		return fmt.Errorf("must name an adapter target as <adapter>@<target>/<port>")
+	}
+	if err := ValidateScopedProjectModuleID(adapter); err != nil {
+		return err
 	}
 	return nil
 }
@@ -674,6 +727,22 @@ func validateLocalService(service LocalService) error {
 	if strings.TrimSpace(service.Container) == "" || service.Ports == nil || service.Environment == nil || service.Volumes == nil {
 		return fmt.Errorf("local service container, ports, environment, and volumes are required")
 	}
+	// A port's name is addressable: it is the second segment of the
+	// `<service>/<port>` key a project's `ports` override names, so a blank
+	// or duplicated name is a port an operator cannot move.
+	seenPorts := make(map[string]struct{}, len(service.Ports))
+	for _, port := range service.Ports {
+		if !validKebab(port.Name) {
+			return fmt.Errorf("local service port name %q is invalid", port.Name)
+		}
+		if _, exists := seenPorts[port.Name]; exists {
+			return fmt.Errorf("local service declares port %q twice", port.Name)
+		}
+		seenPorts[port.Name] = struct{}{}
+		if !validHostPort(port.Container) || !validHostPort(port.DefaultHost) {
+			return fmt.Errorf("local service port %q must declare container and default_host in 1..%d", port.Name, maxHostPort)
+		}
+	}
 	if service.Health.Kind != "tcp" && service.Health.Kind != "http" {
 		return fmt.Errorf("local service health kind is invalid")
 	}
@@ -687,6 +756,8 @@ func validateLocalService(service LocalService) error {
 	}
 	return nil
 }
+
+func validHostPort(port int) bool { return port >= 1 && port <= maxHostPort }
 
 func validateRoutes(routes []RouteContribution, canonical bool) error {
 	seen := make(map[string]struct{}, len(routes))
@@ -1228,6 +1299,9 @@ func validateLock(lock Lock, canonical bool) error {
 		return fmt.Errorf("lock registries, snapshots, order, runtime_orders, dependencies, and modules are required")
 	}
 	if err := validateStringSet("lock order", lock.Order, false, ValidateScopedProjectModuleID); err != nil {
+		return err
+	}
+	if err := validatePortOverrides("lock", lock.Ports); err != nil {
 		return err
 	}
 

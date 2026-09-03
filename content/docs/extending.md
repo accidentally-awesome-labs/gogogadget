@@ -87,6 +87,7 @@ reconciler `sync` runs; they are not a second code path. This project selects
       "production":  { "adapter": "ggg/system/mail-resend", "target": "resend" }
     }
   },
+  "ports": {},
   "deployment": "ggg/system/deploy-fly"
 }
 ```
@@ -97,6 +98,12 @@ selected closure declares — no missing slot, no extra one — with a choice fo
 `development`, `test` and `production`. Adding a slot means installing the
 seam that declares it; making one optional means removing that seam, not
 leaving the selection blank.
+
+`ports` is the other committed decision about how the stack stands up: the
+host port one generated Compose port publishes on, keyed `<service>/<port>`,
+for the environments that have a Compose file. It is empty until a busy host
+needs a port moved — the derivation rule and both refusals are in
+[Deployment](/docs/deployment).
 
 `gogogadget.lock.json` is the generated, committed counterpart: the registry
 provenance ledger, the referenced snapshots, the deterministic dependency

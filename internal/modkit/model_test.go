@@ -13,6 +13,7 @@ const canonicalProjectJSON = `{
   "modules": ["ggg/component/card","ggg/profile/full"],
   "exclude": ["ggg/component/chart"],
   "providers": {},
+  "ports": {},
   "deployment": ""
 }
 `
@@ -115,7 +116,7 @@ func TestParseProject(t *testing.T) {
 		},
 		{
 			name: "missing required field",
-			json: `{"schema":2,"registries":[],"modules":[],"providers":{},"deployment":""}`,
+			json: `{"schema":2,"registries":[],"modules":[],"providers":{},"ports":{},"deployment":""}`,
 			want: "exclude",
 		},
 		{
@@ -147,6 +148,21 @@ func TestParseProject(t *testing.T) {
 			name: "arrays are required",
 			json: strings.Replace(canonicalProjectJSON, "\"exclude\": [\"ggg/component/chart\"]", "\"exclude\": null", 1),
 			want: "exclude",
+		},
+		{
+			name: "port override key is not addressable",
+			json: strings.Replace(canonicalProjectJSON, `"ports": {}`, `"ports": {"database": {"development": 5433}}`, 1),
+			want: "ports",
+		},
+		{
+			name: "port override names no environment",
+			json: strings.Replace(canonicalProjectJSON, `"ports": {}`, `"ports": {"app/http": {}}`, 1),
+			want: "sets no environment",
+		},
+		{
+			name: "port override is outside the port range",
+			json: strings.Replace(canonicalProjectJSON, `"ports": {}`, `"ports": {"app/http": {"development": 70000}}`, 1),
+			want: "outside 1..65535",
 		},
 	}
 

@@ -309,7 +309,7 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 	modelTypes := []reflect.Type{
 		reflect.TypeOf(RegistryRoot{}), reflect.TypeOf(CatalogIndex{}),
 		reflect.TypeOf(ModuleDocument{}), reflect.TypeOf(ProfileDocument{}), reflect.TypeOf(Profile{}),
-		reflect.TypeOf(Project{}), reflect.TypeOf(ProjectRegistry{}),
+		reflect.TypeOf(Project{}), reflect.TypeOf(ProjectRegistry{}), reflect.TypeOf(PortOverrides{}),
 		reflect.TypeOf(Manifest{}), reflect.TypeOf(ManifestFile{}), reflect.TypeOf(NamespaceClaims{}),
 		reflect.TypeOf(RuntimeContributions{}), reflect.TypeOf(ProviderSlotContribution{}),
 		reflect.TypeOf(CapabilityContribution{}), reflect.TypeOf(SystemContribution{}),
