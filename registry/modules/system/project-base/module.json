@@ -19,7 +19,7 @@
         "source": ".gitignore",
         "target": ".gitignore",
         "class": "asset",
-        "sha256": "26395a1a0c9e50c3861462b5014f54a3f41233dedd3efa0700349b927068783b",
+        "sha256": "3cd9665f45f6dd19c2bc2c10a345df5216f259bb259c72dcedf05f704846fbb7",
         "rewrite_module": false,
         "contract": false
       },

@@ -227,7 +227,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "b1f809b1d3dfead0198ee55a7a36768e7b84f5afec2acaff10e21ed22136271b",
+        "sha256": "53ef0e934f0b5d176e5e2bd150bc9344601d9fd5169897b70b9897c1720647ca",
         "rewrite_module": false,
         "contract": false
       },

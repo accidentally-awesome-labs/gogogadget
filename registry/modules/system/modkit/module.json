@@ -89,6 +89,14 @@
         "contract": false
       },
       {
+        "source": "internal/gggcli/core_registry_test.go",
+        "target": "internal/gggcli/core_registry_test.go",
+        "class": "test",
+        "sha256": "1cbf8bad7649e9ea902caf22e9d77f0654cacee62ee470e95ebf05038ac1f8ee",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/gggcli/create.go",
         "target": "internal/gggcli/create.go",
         "class": "go",
@@ -164,7 +172,7 @@
         "source": "internal/gggcli/new_project.go",
         "target": "internal/gggcli/new_project.go",
         "class": "go",
-        "sha256": "592acebb57915686a127f66eb981b9c7f276512c56b94d338f01e3a709babacb",
+        "sha256": "e5001a67bee779e353ea01e51b57df3563bf75708f8d5bcf07ffd1769a2ccd96",
         "rewrite_module": true,
         "contract": true
       },

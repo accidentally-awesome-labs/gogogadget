@@ -12,9 +12,10 @@ e2e/test-results/
 
 # CLI-managed local state: env values, provider state, journals
 .ggg/
-# This repository's own registry snapshot signature is a local build artifact:
-# the core catalog is consumed as a directory source, which needs no signature.
-# Anchored to the root on purpose — a distributed registry's signature IS a
-# published artifact, and an unanchored pattern would silently refuse to commit
-# templates/external-registry/registry.snapshot.sig.
-/registry.snapshot.sig
+
+# registry.snapshot.sig is NOT ignored. It was, on the theory that this
+# repository's own catalog is only ever consumed as a directory source — false
+# the moment anyone runs `ggg new --registry github:OWNER/REPO`, which fetches
+# this tree and verifies it against the key compiled into the CLI. With the
+# signature ignored, that refused with "read registry.snapshot.sig: no such
+# file or directory" and no adoption path worked at all.

@@ -419,6 +419,41 @@ contract range, provider slot, targets, automation level, dependency set,
 lifecycle, health and verification commands — is listed in the generated
 [module reference](/docs/module-reference).
 
+### How this repository publishes itself
+
+The core catalog is a registry like any other, and `ggg new --registry
+github:OWNER/REPO --ref TAG` fetches this tree and verifies it against the
+public key compiled into the CLI (`coreRegistryPublicKey`). So
+`registry.snapshot.sig` is a **published artifact here too** — it is committed,
+not ignored. It was ignored once, on the theory that this catalog is only ever
+consumed as a directory source, and every genesis from GitHub refused with
+`read registry.snapshot.sig: no such file or directory`.
+
+A release therefore runs, in this order, on the commit being tagged:
+
+```sh
+ggg registry build              # refresh digests and indexes, rewrite the snapshot
+ggg registry sign   --dir . --key-file <core signing key>
+ggg sync --offline              # settle the lock over the signed catalog
+ggg registry verify --dir . --public-key "$(cat <core public key>)"
+git tag -a vX.Y.Z -m "gogogadget vX.Y.Z"
+```
+
+`build` before `sign`, always: building rewrites the snapshot and invalidates
+any earlier signature. `sync` after `sign`, always: the lock records the
+catalog it installed, signature included, so signing after the sync leaves one
+pending change and `sync --check` refuses.
+
+`TestCommittedSnapshotVerifiesUnderThePinnedCoreKey`
+fails when the committed signature is missing, stale relative to
+`registry.snapshot.json`, or produced by a key the shipped CLI does not pin, so
+a catalog change that forgets the re-sign cannot reach a tag.
+
+The private half never enters the tree. Changing `coreRegistryPublicKey` is a
+key rotation once anyone has consumed a tag: publish
+`registry-key-rotation.json` through `ggg registry rotate` instead of editing
+the constant.
+
 ## Rules that prevent data loss
 
 Five rules, each with the reason it exists. They are enforced, not advisory.

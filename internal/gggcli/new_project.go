@@ -15,7 +15,19 @@ import (
 	"golang.org/x/mod/module"
 )
 
-const coreRegistryPublicKey = "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="
+// coreRegistryPublicKey verifies the core catalog fetched from GitHub. It is
+// compiled in on purpose: `ggg new` runs before a project exists, so there is
+// no gogogadget.json to pin it in, and a key supplied by the same fetch it
+// authenticates would authenticate nothing.
+//
+// Its private half is held by the release owner and never lives in the tree.
+// `registry.snapshot.sig` IS a published artifact — the tree is consumed over
+// GitHub by every `ggg new --registry github:…` — so it is committed and
+// TestCommittedSnapshotVerifiesUnderThePinnedCoreKey keeps it in step with
+// registry.snapshot.json. Changing this constant is a key rotation: publish
+// registry-key-rotation.json rather than editing it in place once consumers
+// exist.
+const coreRegistryPublicKey = "bNmIybNneUcqwf1ZxSPHpWNEEm4DLbCcuNGvGwljEww="
 
 // NewProjectAnswers is the non-secret, serializable answer contract consumed by
 // --answers. Provider values are explicit adapter/target selections for every
