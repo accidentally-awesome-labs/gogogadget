@@ -187,7 +187,7 @@
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
-        "sha256": "1e8438e3a7e287840a80f98f216ed929f4f3c068aeaba9e1afecd96b52777a70",
+        "sha256": "0065190e1bb00aab7ea202b1a236502104ba5ffb3fbeffe870a9d8132c68bcc3",
         "rewrite_module": false,
         "contract": false
       },

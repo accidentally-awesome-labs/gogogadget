@@ -51,7 +51,7 @@
         "source": "templates/external-registry/registry.snapshot.json",
         "target": "templates/external-registry/registry.snapshot.json",
         "class": "asset",
-        "sha256": "fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988",
+        "sha256": "af4704331ba8c6da2ccac0c17215c1667059816ae2c77ea25f2aacf5b2c3889b",
         "rewrite_module": false,
         "contract": false
       },
@@ -59,7 +59,7 @@
         "source": "templates/external-registry/registry.snapshot.sig",
         "target": "templates/external-registry/registry.snapshot.sig",
         "class": "asset",
-        "sha256": "cb40c9a6090b2ee124c11236c6a00c8ee78f08e47ec48f6f8463b69a9660071f",
+        "sha256": "defb6edc7a48aba58fbc140d97641cbb18ef7b4fe84bce202366048b352d4781",
         "rewrite_module": false,
         "contract": false
       },
@@ -115,7 +115,7 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "class": "asset",
-        "sha256": "48dad7f40ba9c8000df15407e8c30531cf9abe87be947950dfd077b7bb0403af",
+        "sha256": "4f654fa7956f0aeba72621b612fde5508f9cc842b19088d84c0025cb90df7023",
         "rewrite_module": false,
         "contract": false
       },

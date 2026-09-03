@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/gogogadget/gogogadget/internal/modkit"
 )
 
 // `ggg db` handed goose `os.Getenv("DATABASE_URL")` straight in its argv, so a
@@ -186,10 +188,85 @@ func TestProductionReadsNoEnvironmentFile(t *testing.T) {
 	root := dbProject(t, map[string]string{"production": "DATABASE_URL=" + fileDSN + "\n"})
 	t.Setenv("DATABASE_URL", "")
 	controller := NewController(ControllerOptions{Root: root, Version: "v1.2.3", TaskRunner: &recordingRunner{}})
-	if _, err := controller.taskEnvValue("production", "DATABASE_URL"); err == nil {
+	if _, _, err := controller.taskEnvValue("production", "DATABASE_URL"); err == nil {
 		t.Fatal("production resolved a value from .ggg/env/production.env")
 	}
 	if _, err := os.Stat(filepath.Join(root, ".ggg", "env", "production.env")); err != nil {
 		t.Fatalf("the fixture must actually have the file, or this proves nothing: %v", err)
+	}
+}
+
+// DATABASE_URL's declared default is postgres://postgres:postgres@localhost:5432/
+// gogogadget — a live address on any machine that has ever run Postgres
+// locally. The default is deliberate: it matches the documented
+// `docker compose up -d db` posture and the zero-account path depends on it.
+// But it is a documented guess, not something an operator told the tool, so a
+// command that MUTATES must refuse it while a command that reads may use it.
+func TestMutatingDBFormsRefuseADefaultSourcedDSN(t *testing.T) {
+	const declared = "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"
+	root := t.TempDir()
+	lock, err := modkit.MarshalLock(modkit.Lock{
+		Schema: 2, RegistryCommit: strings.Repeat("a", 64),
+		Registries: []modkit.LockedRegistry{}, Snapshots: []modkit.LockedSnapshot{},
+		Order: []string{"ggg/system/database"}, Dependencies: []modkit.LockedDependency{},
+		Modules: []modkit.LockedModule{{
+			ID: "ggg/system/database", Revision: 1, Contract: 1,
+			RegistryNamespace: "ggg", SourceCommit: strings.Repeat("b", 40), SnapshotSHA256: strings.Repeat("c", 64), Reason: "explicit", RequiredBy: []string{},
+			Files: []modkit.LockedFile{}, Migrations: []modkit.LockedMigration{},
+			Manifest: modkit.Manifest{
+				ID: "ggg/system/database", Kind: modkit.ModuleSystem, Name: "database",
+				Revision: 1, Contract: 1, Title: "Database", Description: "The Postgres seam.",
+				Requires: []modkit.Requirement{}, Files: []modkit.ManifestFile{}, Claims: modkit.NamespaceClaims{},
+				Runtime: modkit.RuntimeContributions{}, Migrations: []modkit.ManifestMigration{},
+				Docs: []modkit.DocumentationRef{}, Data: []modkit.DataDeclaration{},
+				Dependencies:  modkit.Dependencies{Go: []modkit.GoDependency{}, Tools: []modkit.ToolArtifact{}, Containers: []modkit.ContainerDependency{}},
+				RemovalPolicy: "free",
+				Environment: []modkit.EnvironmentVariable{{
+					Key: "DATABASE_URL", Field: "DatabaseURL", Type: modkit.EnvString,
+					Description: "Postgres connection string.", Default: declared,
+				}},
+			},
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, modkit.LockFileName, lock)
+	t.Setenv("DATABASE_URL", "")
+
+	// Reading is allowed, and it uses the declared default.
+	runner, err := driveDBTask(t, root, "status", "")
+	if err != nil {
+		t.Fatalf("db status on the declared default: %v", err)
+	}
+	if got := injectedFor(t, runner, "goose")["GOOSE_DBSTRING"]; got != declared {
+		t.Fatalf("db status injected %q, want the declared default %q", got, declared)
+	}
+
+	// Mutating is refused, and no tool runs.
+	for _, action := range []string{"migrate", "seed"} {
+		t.Run(action, func(t *testing.T) {
+			runner, err := driveDBTask(t, root, action, "")
+			if err == nil {
+				t.Fatalf("db %s mutated a database supplied only by the declared default", action)
+			}
+			if exitOf(t, err) != exitRefusal {
+				t.Fatalf("db %s exit = %d, want %d", action, exitOf(t, err), exitRefusal)
+			}
+			for _, want := range []string{"declared default", declared, "provider configure", "db status"} {
+				if !strings.Contains(err.Error(), want) {
+					t.Fatalf("refusal %q does not mention %q", err, want)
+				}
+			}
+			if len(runner.calls) != 0 {
+				t.Fatalf("a tool ran despite the refusal: %v", runner.calls)
+			}
+		})
+	}
+
+	// A configured value is trusted again, even when it equals nothing special.
+	t.Setenv("DATABASE_URL", fileDSN)
+	if _, err := driveDBTask(t, root, "migrate", ""); err != nil {
+		t.Fatalf("db migrate with a configured value: %v", err)
 	}
 }

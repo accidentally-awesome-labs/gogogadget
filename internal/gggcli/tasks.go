@@ -115,6 +115,19 @@ func (c *Controller) refuseStaleEngine() error {
 	return nil
 }
 
+// envProvenance records where a resolved value came from, so a command can
+// decide whether to trust it with a mutation.
+type envProvenance int
+
+const (
+	// envConfigured: the operator supplied it — process environment, the
+	// CLI-managed .ggg/env/<environment>.env, or the legacy .env.
+	envConfigured envProvenance = iota
+	// envDeclaredDefault: nobody supplied it and the owning manifest declares
+	// a fallback. Fine to read, refused for anything that mutates.
+	envDeclaredDefault
+)
+
 // taskEnvValue resolves one value a host-side task needs through the
 // documented precedence: the process environment wins, then the CLI-managed
 // .ggg/env/<environment>.env, then the legacy .env in development only, and
@@ -127,14 +140,55 @@ func (c *Controller) refuseStaleEngine() error {
 // to its own defaults and connects to a local socket — so passing one on is
 // how a command reaches the wrong server. The refusal names the key, the
 // environment, and the file the CLI writes.
-func (c *Controller) taskEnvValue(environment, key string) (string, error) {
+//
+// The declared default is returned as a distinct provenance rather than
+// silently blended in. DATABASE_URL's default is
+// postgres://postgres:postgres@localhost:5432/gogogadget, which is a live
+// address on any machine that has ever run Postgres locally — so a caller
+// that is about to mutate a database must be able to tell "the operator told
+// me this" from "nobody told me anything and this is the documented guess".
+func (c *Controller) taskEnvValue(environment, key string) (string, envProvenance, error) {
 	root := c.rootDir()
 	if value, ok := remote.LookupEnv(root, environment)(key); ok {
-		return value, nil
+		return value, envConfigured, nil
 	}
-	return "", refusalError(fmt.Errorf(
+	if value, ok := c.declaredEnvDefault(key); ok {
+		return value, envDeclaredDefault, nil
+	}
+	return "", envConfigured, refusalError(fmt.Errorf(
 		"%s is not set for the %s environment; export it, or run `ggg provider configure` to write it to %s",
 		key, environment, remote.EnvironmentEnvFile(environment)))
+}
+
+// declaredEnvDefault reports the default the owning manifest declares for one
+// key. It comes from the lock's embedded manifests — the same records the
+// generated config parser is rendered from — so the CLI and the runtime agree
+// on what the fallback is without the CLI reading generated Go.
+func (c *Controller) declaredEnvDefault(key string) (string, bool) {
+	lock, ok, err := readProjectLock(c.rootDir())
+	if err != nil || !ok {
+		return "", false
+	}
+	for _, locked := range lock.Modules {
+		for _, declaration := range locked.Manifest.Environment {
+			if declaration.Key == key && declaration.Default != "" {
+				return declaration.Default, true
+			}
+		}
+	}
+	return "", false
+}
+
+// refuseDeclaredDefault is the refusal a mutating command emits when the only
+// value available is the manifest's declared default. `go run ./cmd/seed`
+// outside the CLI resolves that default and would migrate and seed whatever
+// answers at that address; a ggg command that mutates must be told which
+// database it is mutating.
+func refuseDeclaredDefault(action, environment, key, value string) error {
+	return refusalError(fmt.Errorf(
+		"db %s refuses to mutate a database it was not told about: %s is only supplied by its declared default (%s) for the %s environment; "+
+			"export it, or run `ggg provider configure` to write it to %s. `ggg db status` reads the default.",
+		action, key, value, environment, remote.EnvironmentEnvFile(environment)))
 }
 
 func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation) (Result, error) {
@@ -235,9 +289,17 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		// The value goes in the child's environment, never in argv, because a
 		// DSN carries a password and the process list is public. goose reads
 		// GOOSE_DRIVER/GOOSE_DBSTRING; cmd/seed reads DATABASE_URL.
-		databaseURL, resolveErr := c.taskEnvValue(environment, "DATABASE_URL")
+		databaseURL, provenance, resolveErr := c.taskEnvValue(environment, "DATABASE_URL")
 		if resolveErr != nil {
 			return failureEnvelope("db"+taskActionSuffix(mutation.Action), resolveErr)
+		}
+		// `db status` reads; the rest mutate. A default-sourced value is a
+		// documented guess at a live local address, so reading through it is
+		// a diagnostic and migrating or seeding through it is how a command
+		// reaches a database nobody pointed it at.
+		if provenance == envDeclaredDefault && mutation.Action != "status" {
+			return failureEnvelope("db"+taskActionSuffix(mutation.Action),
+				refuseDeclaredDefault(mutation.Action, environment, "DATABASE_URL", databaseURL))
 		}
 		goose := map[string]string{"GOOSE_DRIVER": "postgres", "GOOSE_DBSTRING": databaseURL}
 		seed := map[string]string{"DATABASE_URL": databaseURL}

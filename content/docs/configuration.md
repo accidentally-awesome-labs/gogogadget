@@ -45,6 +45,15 @@ nothing to do with. `--environment test` reads `.ggg/env/test.env` and never
 (`GOOSE_DBSTRING`, `DATABASE_URL`), never on the command line, because the
 process list is public and a DSN carries a password.
 
+A **declared default is not a configured value**. `DATABASE_URL`'s default,
+`postgres://postgres:postgres@localhost:5432/gogogadget`, matches the
+documented `docker compose up -d db` posture and the zero-account path depends
+on it — but it is also a live address on any machine that has ever run
+Postgres locally. So `ggg db status` reads through it, and `ggg db migrate`,
+`seed` and `reset` **refuse** it, naming what to configure: a command that
+mutates has to be told which database it is mutating. Supplying the same value
+through the environment or the CLI-managed file is what makes it trusted.
+
 ## The full table
 
 See the generated [Configuration reference](/docs/configuration-reference) for
