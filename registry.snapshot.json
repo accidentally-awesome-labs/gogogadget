@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "96a6a71ac86664d4379f0ab1a6d488ea13d9d714881c5c2f651e97af4acc0621"
+      "sha256": "d91e9814191cfe54d6273aaee63c3d3822b1f55ed7e64aa059b4b092d1c759e0"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

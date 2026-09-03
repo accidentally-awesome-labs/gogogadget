@@ -102,6 +102,18 @@ var skippedSweepDirs = map[string]bool{
 	".git": true, "node_modules": true, "tmp": true, "bin": true, "test-results": true,
 }
 
+// isNestedCheckout reports whether dir is the root of another checkout, which
+// this project must never prune. Name matching is not enough: `.git` is a
+// directory in a clone but a *file* in a linked worktree or a submodule, so a
+// `git worktree add .worktrees/feature` inside the project root was walked as
+// project tree and every one of its aggregates reported `generated_stale` —
+// `sync --check` refused with 23 findings that named another checkout's files
+// and could not be cleared by the `run ggg sync` the message prescribed.
+func isNestedCheckout(dir string) bool {
+	_, err := os.Lstat(filepath.Join(dir, ".git"))
+	return err == nil
+}
+
 // StaleRegistryOutputs lists the registry-owned generated files present in the
 // tree that the supplied render does not produce. Both `sync --check` and
 // Generate call this, so the file the gate reports is exactly the file the
@@ -118,7 +130,10 @@ func StaleRegistryOutputs(root string, rendered map[string]struct{}) ([]string, 
 		}
 		slashed := filepath.ToSlash(rel)
 		if entry.IsDir() {
-			if slashed != "." && skippedSweepDirs[entry.Name()] {
+			if slashed == "." {
+				return nil
+			}
+			if skippedSweepDirs[entry.Name()] || isNestedCheckout(full) {
 				return fs.SkipDir
 			}
 			return nil
