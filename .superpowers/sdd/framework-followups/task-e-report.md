@@ -247,7 +247,7 @@ Not run, per the brief: `make check`, e2e, visual, any formatter or linter.
 
 # Fix round 1 — response to `task-e-review-findings.md`
 
-Commit: **(see below)**, on top of e281317 (which already carried the sibling's
+Commit: **5dfecf9**, on top of e281317 (which already carried the sibling's
 `dce9e7e` contract fixes and its own doc updates to architecture/deployment/
 roadmap/testing).
 
