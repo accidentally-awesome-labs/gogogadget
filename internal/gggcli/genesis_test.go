@@ -64,6 +64,24 @@ func genesisTree(t *testing.T) string {
 		           "deploy":[{"id":"fixture","package":"internal/deploy/fixture","constructor":"NewDeployTarget"}]},
 		"migrations":[],"environment":[],"docs":[],"tests":{},
 		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
+	// Three declarations that exercise the posture rule: an example that
+	// differs from its default is written, a secret is never written whatever
+	// it declares, and an example equal to the default adds nothing.
+	widgetBody := "package widget\n\nconst Version = 1\n"
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2,"module":{
+		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+		"title":"Widget","description":"A widget system.","requires":[],
+		"files":[{"source":"internal/widget/widget.go","target":"internal/widget/widget.go",
+		          "class":"go","sha256":"`+sha256Hex([]byte(widgetBody))+`","rewrite_module":true,"contract":true}],
+		"claims":{"packages":["internal/widget"],"environment":["FIXTURE_BYPASS","FIXTURE_LEVEL","FIXTURE_TOKEN"]},
+		"runtime":{},"migrations":[],
+		"environment":[
+		  {"key":"FIXTURE_BYPASS","field":"FixtureBypass","type":"bool","description":"Local posture.","default":"false","example":"true"},
+		  {"key":"FIXTURE_LEVEL","field":"FixtureLevel","type":"string","description":"Already defaulted.","default":"info","example":"info"},
+		  {"key":"FIXTURE_TOKEN","field":"FixtureToken","type":"string","description":"A credential.","default":"","example":"never-write-me","secret":true}
+		],
+		"docs":[],"tests":{},
+		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
 	writeTestFile(t, root, "registry/systems.json", []byte(`{"schema":2,"kind":"system","items":[`+
 		`"registry/modules/system/config/module.json",`+
 		`"registry/modules/system/deploy-fixture/module.json","registry/modules/system/widget/module.json"]}`))
@@ -124,6 +142,73 @@ func TestNewGeneratesToolOutputsAndVerifiesTheTreeCompiles(t *testing.T) {
 	}
 	if _, statErr := os.Stat(filepath.Join(target, modkit.LockFileName)); statErr != nil {
 		t.Fatalf("genesis kept no lock: %v", statErr)
+	}
+}
+
+// A created project must boot in the posture its own documentation and the
+// clean-project gate assume: /dev/login reachable with zero SaaS accounts.
+// The env files were created empty, so DEV_AUTH_BYPASS was unset, /login
+// self-redirected, and `ggg test smoke` failed on a project that had done
+// nothing wrong. .env.example carries the posture but nothing reads it —
+// .ggg/env/<environment>.env is what compose and the CLI actually load.
+func TestNewSeedsTheDeclaredDevelopmentPosture(t *testing.T) {
+	target, err := runGenesis(t, &recordingRunner{})
+	if err != nil {
+		t.Fatalf("new: %v", err)
+	}
+	for _, environment := range []string{"development", "test"} {
+		path := filepath.Join(target, ".ggg", "env", environment+".env")
+		info, statErr := os.Stat(path)
+		if statErr != nil {
+			t.Fatalf("genesis left no %s env file: %v", environment, statErr)
+		}
+		if got := info.Mode().Perm(); got != 0o600 {
+			t.Fatalf("%s env mode = %04o, want 0600", environment, got)
+		}
+		body, readErr := os.ReadFile(path)
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		if string(body) != "FIXTURE_BYPASS=true\n" {
+			t.Fatalf("%s env = %q, want only the declared non-secret posture", environment, body)
+		}
+		// A secret is never written, whatever its declaration states, and a
+		// key already at its default adds nothing.
+		if strings.Contains(string(body), "FIXTURE_TOKEN") || strings.Contains(string(body), "never-write-me") {
+			t.Fatalf("%s env leaked a declared secret: %q", environment, body)
+		}
+		if strings.Contains(string(body), "FIXTURE_LEVEL") {
+			t.Fatalf("%s env restated a compiled default: %q", environment, body)
+		}
+	}
+	// Production configuration is never written to disk.
+	if _, statErr := os.Stat(filepath.Join(target, ".ggg", "env", "production.env")); !os.IsNotExist(statErr) {
+		t.Fatalf("genesis wrote a production env file (%v)", statErr)
+	}
+}
+
+// `ggg provider configure` owns the file after creation, so a value an
+// operator put there must survive every later run that ensures the file
+// exists.
+func TestEnvironmentFileSeedNeverClobbersOperatorValues(t *testing.T) {
+	target, err := runGenesis(t, &recordingRunner{})
+	if err != nil {
+		t.Fatalf("new: %v", err)
+	}
+	path := filepath.Join(target, ".ggg", "env", "development.env")
+	operator := []byte("FIXTURE_BYPASS=false\nOPERATOR_ONLY=kept\n")
+	if err := os.WriteFile(path, operator, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := ensureEnvironmentFile(target, "development"); err != nil {
+		t.Fatalf("ensure: %v", err)
+	}
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != string(operator) {
+		t.Fatalf("env file = %q, want the operator's bytes %q", body, operator)
 	}
 }
 

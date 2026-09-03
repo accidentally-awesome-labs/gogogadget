@@ -115,8 +115,7 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		compose = "compose.test.yaml"
 	}
 	// Compose parses env_file for every subcommand, so the per-environment
-	// file must exist before anything invokes compose. It is created empty and
-	// mode 0600: `ggg provider configure` fills it, and it is gitignored.
+	// file must exist before anything invokes compose.
 	switch mutation.Task {
 	case "services", "dev", "db", "setup":
 		if mutation.Task != "setup" || mutation.Action == "" {
@@ -124,14 +123,8 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 				if mutation.Task != "setup" && name != environment {
 					continue
 				}
-				path := filepath.Join(root, ".ggg", "env", name+".env")
-				if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-					if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-						return Result{}, runtimeError(err)
-					}
-					if err := os.WriteFile(path, nil, 0o600); err != nil {
-						return Result{}, runtimeError(err)
-					}
+				if err := ensureEnvironmentFile(root, name); err != nil {
+					return Result{}, runtimeError(err)
 				}
 			}
 		}
@@ -338,6 +331,52 @@ func readProjectLock(root string) (modkit.Lock, bool, error) {
 		return modkit.Lock{}, false, err
 	}
 	return lock, true, nil
+}
+
+// ensureEnvironmentFile creates .ggg/env/<environment>.env carrying the
+// declared development posture, and leaves a file that already has content
+// completely alone: `ggg provider configure` owns it after creation and an
+// operator's values must survive every re-run.
+//
+// The file is what the stack actually reads — compose names it as the app
+// service's env_file, and the CLI reads it after the process environment.
+// .env.example is generated reference and nothing loads it, which is how a
+// created project ended up outside the zero-account posture its own docs
+// describe: `/dev/login` was unreachable because DEV_AUTH_BYPASS was unset.
+//
+// Values come from the manifests' own declarations, never from this file:
+// non-secret keys whose module states an example that differs from its
+// default. Mode stays 0600 because configured credentials land here later,
+// and only development and test are ever written.
+func ensureEnvironmentFile(root, environment string) error {
+	path := filepath.Join(root, ".ggg", "env", environment+".env")
+	if info, err := os.Stat(path); err == nil {
+		if info.Size() > 0 {
+			return nil
+		}
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	body := []byte(nil)
+	if lock, ok, err := readProjectLock(root); err != nil {
+		return err
+	} else if ok {
+		graph := make([]modkit.Manifest, 0, len(lock.Modules))
+		for _, locked := range lock.Modules {
+			graph = append(graph, locked.Manifest)
+		}
+		lines, postureErr := modkit.DeclaredEnvironmentPosture(lock, graph, environment)
+		if postureErr != nil {
+			return postureErr
+		}
+		if len(lines) > 0 {
+			body = []byte(strings.Join(lines, "\n") + "\n")
+		}
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return err
+	}
+	return os.WriteFile(path, body, 0o600)
 }
 
 // selfArgv re-invokes the running ggg binary. `go run ./cmd/ggg` would force

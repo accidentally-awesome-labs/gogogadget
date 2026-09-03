@@ -60,6 +60,19 @@ Those outputs are inputs to compilation, not conveniences:
 `//go:embed` pattern. A project without them cannot compile at all — including
 the `bin/ggg` that `ggg setup` has to build before it can run anything else.
 
+Genesis also writes `.ggg/env/development.env` and `.ggg/env/test.env` (mode
+`0600`) with the declared development posture, which is what puts a created
+project in zero-account mode. The values are declarations, not inventions:
+every non-secret key whose module states an example differing from its
+default — today that is `DEV_AUTH_BYPASS=true`. A secret is never written,
+production is never written, and a file that already has content is never
+touched again, because `ggg provider configure` owns it after creation.
+
+Two files are easy to confuse. **`.env.example` is generated reference** and
+nothing loads it. **`.ggg/env/<environment>.env` is what the stack actually
+reads**: the generated `compose.yaml` names it as the app service's `env_file`,
+and the CLI reads it after the process environment. It is gitignored.
+
 So the last thing genesis does is `go build ./...` in the created project. If
 that fails the genesis rolls back — a directory `ggg new` created is removed
 outright — and the diagnostic names the check instead of reporting success

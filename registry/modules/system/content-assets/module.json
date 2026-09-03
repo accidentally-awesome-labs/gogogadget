@@ -259,7 +259,7 @@
         "source": "content/docs/getting-started.md",
         "target": "content/docs/getting-started.md",
         "class": "content",
-        "sha256": "f4f691eddaf7706fa2c501f4b7a29ab6e9737578663f4fc1a65ba224e69039cd",
+        "sha256": "c0434df3f9ee3b15437da3fef5d0ce9709db95ab180cb2f201eb388194f97c86",
         "rewrite_module": false,
         "contract": false
       },

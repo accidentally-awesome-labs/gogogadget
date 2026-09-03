@@ -3000,6 +3000,59 @@ func emitEnvExample(ctx context.Context, modulePath string, lock Lock, graph []M
 	return &GeneratedFile{Path: ".env.example", Content: b.String()}, nil
 }
 
+// DeclaredEnvironmentPosture returns the KEY=VALUE lines a fresh
+// .ggg/env/<environment>.env starts with, so a created project boots in the
+// posture its own documentation and gate assume: `/dev/login` reachable with
+// zero SaaS accounts.
+//
+// The values are declarations, never inventions. A module's `example` is the
+// value a working local setup uses — that is exactly how .env.example
+// presents it — so a declaration whose example equals its default adds
+// nothing the binary does not already default and is skipped. A secret is
+// never written under any circumstance, and an adapter's keys apply only to
+// the environment that selected it.
+//
+// Only development and test are askable. Production configuration is never
+// written to disk, and this writes declared defaults rather than resurrecting
+// any credential-presence fallback: a managed adapter selected for production
+// without its keys still refuses to boot.
+func DeclaredEnvironmentPosture(lock Lock, graph []Manifest, environment string) ([]string, error) {
+	if environment != "development" && environment != "test" {
+		return nil, fmt.Errorf("environment %q is never written to disk", environment)
+	}
+	declarations, err := declaredEnvironment(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+	byID := make(map[string]Manifest, len(graph))
+	for _, module := range graph {
+		byID[module.ID] = module
+	}
+	owner := envOwners(lock, graph)
+	lines := make([]string, 0)
+	for _, declaration := range declarations {
+		if declaration.Secret || declaration.Example == "" || declaration.Example == declaration.Default {
+			continue
+		}
+		if !moduleActiveInEnvironment(lock, byID[owner[declaration.Key]], environment) {
+			continue
+		}
+		lines = append(lines, declaration.Key+"="+declaration.Example)
+	}
+	return lines, nil
+}
+
+// moduleActiveInEnvironment reports whether a module's declarations apply to
+// one environment. An adapter's do only when it is that environment's
+// selection; every other installed module runs everywhere.
+func moduleActiveInEnvironment(lock Lock, module Manifest, environment string) bool {
+	if module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
+		return true
+	}
+	choice := providerSelectionForEnvironment(lock.Providers[module.Runtime.System.Adapter.Slot], environment)
+	return choice.Adapter == module.ID
+}
+
 // emitConfigReference renders the exhaustive key table. It is generated from the
 // same records as the parse, so the documented surface and the parsed surface
 // cannot drift — the omissions this repo shipped with were exactly that.

@@ -529,6 +529,14 @@ func genesisBuildOut(ctx context.Context, root string, runner TaskRunner) error 
 	if err := installDeclaredTools(ctx, root); err != nil {
 		return err
 	}
+	// The created project's stack reads .ggg/env/<environment>.env, so genesis
+	// leaves development and test carrying the declared development posture.
+	// Production is never written.
+	for _, environment := range []string{"development", "test"} {
+		if err := ensureEnvironmentFile(root, environment); err != nil {
+			return err
+		}
+	}
 	lock, _, err := readProjectLock(root)
 	if err != nil {
 		return err

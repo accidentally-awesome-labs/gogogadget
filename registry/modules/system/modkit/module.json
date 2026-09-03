@@ -156,7 +156,7 @@
         "source": "internal/gggcli/genesis_test.go",
         "target": "internal/gggcli/genesis_test.go",
         "class": "test",
-        "sha256": "c13df89cd5af9aaf407ee9ecf157a17435d2f5f627982ff287acc75eb2a3a68b",
+        "sha256": "e06ea938f6597380d02363fd21c37bd03451771ba998b92725238278ad300581",
         "rewrite_module": true,
         "contract": true
       },
@@ -180,7 +180,7 @@
         "source": "internal/gggcli/new_project.go",
         "target": "internal/gggcli/new_project.go",
         "class": "go",
-        "sha256": "95221343f3119c538246b63e8adec47ff465f1a044c0038705998261f90e273e",
+        "sha256": "c35185ff4571f4f52db81ce469a9f5a4baeba89b52064f53164d3e83f5555df6",
         "rewrite_module": true,
         "contract": true
       },
@@ -308,7 +308,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "e9dd72ab4d3339218bfcbae60a04d3db67368d0144e0fad9ea1d973faf290795",
+        "sha256": "d8834871460a332a29e820a9ef0ba1b6f086ee9f7c74a18ed42ef0a4d37b6eb3",
         "rewrite_module": true,
         "contract": true
       },
@@ -492,7 +492,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "5b0ff1fbba4d4844379e03f1dcff5045e673642398dd0a9fb9ae3861d576a9a6",
+        "sha256": "588af875781fec5ffdd46e26a9771ab977c6e805ed17f542567da77ec37594fc",
         "rewrite_module": true,
         "contract": false
       },
