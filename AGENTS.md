@@ -24,6 +24,19 @@ ui,slots,scenarios,queries,content_types,assets,visual}`, `environment`,
 `locales`, `migrations`, `data`, `removal_policy`. Everything else —
 handlers, templates, queries, `input.css` — is ordinary editable source.
 
+A `class:"test"` payload may also set `self_host: true`. That marks an
+assertion about THIS repository — the committed snapshot signature, the
+`registry/testdata` and `registry/external-testdata` fixtures,
+`templates/external-registry`, `registry/schema`, `.github/workflows`, the
+vendored bytes, the git-index ownership sweep — and the installer skips it in
+any project whose `go.mod` module path is not the registry's
+`canonical_module`. So a new self-hosting test goes in a `self_host` payload
+(the `*_selfhost_test.go` files, or `ci_workflow_test.go`,
+`e2e_ownership_test.go`, `fuzz_gate_test.go`, `registry_build_internal_test.go`,
+`external_template_test.go`); anything portable stays in a normal test payload
+so generated projects keep running it. NEVER reach for `t.Skip` when an
+artifact is absent: that lets the core gate pass by skipping.
+
 ## The loop
 
 ```sh

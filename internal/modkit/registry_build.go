@@ -62,13 +62,13 @@ func refreshManifestDocument(root, rel string) (bool, error) {
 
 	changed := false
 	for i, file := range document.Module.Files {
-		// A generated payload's digest is read by nothing: readPlannedPayloads
-		// returns early on FileClassGenerated, before the verification that
-		// raises "payload ... sha256 mismatch", because the registry does not
-		// distribute bytes the build produces. Recording one rewrote manifests
-		// on every build for no consumer, and a stale value sitting there reads
-		// as authoritative when nothing will ever check it. Cleared once, then
-		// left alone.
+		// A generated payload's digest is read by nothing:
+		// readPlannedPayloadsWithSources returns early on FileClassGenerated,
+		// before the verification that raises "payload ... sha256 mismatch",
+		// because the registry does not distribute bytes the build produces.
+		// Recording one rewrote manifests on every build for no consumer, and a
+		// stale value sitting there reads as authoritative when nothing will
+		// ever check it. Cleared once, then left alone.
 		if file.Class == FileClassGenerated {
 			if file.SHA256 != "" {
 				document.Module.Files[i].SHA256 = ""

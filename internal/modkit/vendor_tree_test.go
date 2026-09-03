@@ -43,10 +43,3 @@ func TestNoVendoredFileExecutesStrings(t *testing.T) {
 	}
 	assert.Empty(t, offenders, "vendored files that build code from strings")
 }
-
-// Every declared artifact must survive the same verification the build runs, so
-// a stale pin fails here as well as at the CLI.
-func TestDeclaredVendorsMatchTheTree(t *testing.T) {
-	root := treeRoot(t)
-	require.NoError(t, VerifyCatalogVendors(root))
-}

@@ -299,6 +299,16 @@ type ManifestFile struct {
 	SHA256        string    `json:"sha256"`
 	RewriteModule bool      `json:"rewrite_module"`
 	Contract      bool      `json:"contract"`
+	// SelfHost marks a payload that asserts something about the registry's own
+	// repository rather than about the source it distributes: the committed
+	// snapshot signature, the example and external fixtures, the CI workflows,
+	// the vendored bytes, the repository-wide ownership sweep. A project only
+	// installs it when the project IS that repository — when its go.mod module
+	// path equals the owning registry's canonical_module, the same
+	// discriminator rewrite_module keys off. Everywhere else the payload is
+	// declared, verified and skipped: a derivative must never receive an
+	// assertion about artifacts it neither has nor should have.
+	SelfHost bool `json:"self_host,omitempty"`
 }
 
 // NamespaceClaims contains collision-checked names. Empty claims encode as {}.

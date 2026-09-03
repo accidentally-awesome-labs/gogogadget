@@ -118,26 +118,34 @@ func containsString(values []string, target string) bool {
 	return false
 }
 
-func readPlannedPayloads(ctx context.Context, registryFS fs.FS, modules []Manifest, canonicalModule, modulePath string) ([]plannedAuthoredPayload, error) {
-	return readPlannedPayloadsWithSources(ctx, func(Manifest) fs.FS { return registryFS }, modules, []string{canonicalModule}, modulePath)
-}
-
 func readPlannedPayloadsFromCatalog(ctx context.Context, catalog Catalog, modules []Manifest, prefixes []string, modulePath string) ([]plannedAuthoredPayload, error) {
-	return readPlannedPayloadsWithSources(ctx, func(module Manifest) fs.FS {
-		if source := catalog.ModuleSources[module.ID]; source != nil {
-			return source
-		}
-		return nil
+	return readPlannedPayloadsWithSources(ctx, func(module Manifest) (fs.FS, string) {
+		return catalog.ModuleSources[module.ID], catalog.ModuleCanonical[module.ID]
 	}, modules, prefixes, modulePath)
 }
 
-func readPlannedPayloadsWithSources(ctx context.Context, source func(Manifest) fs.FS, modules []Manifest, prefixes []string, modulePath string) ([]plannedAuthoredPayload, error) {
+// InstallsSelfHostPayloads reports whether a project is the repository that
+// publishes a module: its go.mod module path is that registry's
+// canonical_module. Only there does a self-host assertion have the artifacts
+// it asserts on.
+func InstallsSelfHostPayloads(modulePath, canonicalModule string) bool {
+	return canonicalModule != "" && modulePath == canonicalModule
+}
+
+func readPlannedPayloadsWithSources(
+	ctx context.Context,
+	source func(Manifest) (fs.FS, string),
+	modules []Manifest,
+	prefixes []string,
+	modulePath string,
+) ([]plannedAuthoredPayload, error) {
 	payloads := make([]plannedAuthoredPayload, 0)
 	for _, module := range modules {
-		registryFS := source(module)
+		registryFS, canonicalModule := source(module)
 		if registryFS == nil {
 			return nil, fmt.Errorf("module %s has no registry source", module.ID)
 		}
+		selfHost := InstallsSelfHostPayloads(modulePath, canonicalModule)
 		for _, file := range module.Files {
 			if err := ctx.Err(); err != nil {
 				return nil, err
@@ -145,12 +153,18 @@ func readPlannedPayloadsWithSources(ctx context.Context, source func(Manifest) f
 			if file.Class == FileClassGenerated {
 				continue
 			}
+			// The payload is still read and verified here — a self-host
+			// assertion is part of the signed snapshot and a tampered one must
+			// refuse everywhere — it simply does not become an install.
 			content, err := fs.ReadFile(registryFS, file.Source)
 			if err != nil {
 				return nil, fmt.Errorf("module %s payload %s: %w", module.ID, file.Source, err)
 			}
 			if digestBytes(content) != file.SHA256 {
 				return nil, fmt.Errorf("module %s payload %s sha256 mismatch", module.ID, file.Source)
+			}
+			if file.SelfHost && !selfHost {
+				continue
 			}
 			installed := append([]byte(nil), content...)
 			if file.RewriteModule {
@@ -428,9 +442,18 @@ func reconcilePlannedState(
 		oldFiles := map[string]LockedFile{}
 		if hadOld {
 			oldFiles = lockedFilesByPath(oldModule.Files)
+			// What this plan keeps is what it installs, not everything the
+			// manifest declares: a self-host payload a previous install of the
+			// publishing repository left behind leaves with the plan that stops
+			// installing it, instead of lingering unowned by the lock.
 			newTargets := make(map[string]struct{}, len(module.Files))
 			for _, file := range module.Files {
-				newTargets[file.Target] = struct{}{}
+				if file.Class == FileClassGenerated {
+					newTargets[file.Target] = struct{}{}
+				}
+			}
+			for target := range payloadByModule[module.ID] {
+				newTargets[target] = struct{}{}
 			}
 			for _, oldFile := range oldModule.Files {
 				if _, exists := newTargets[oldFile.Path]; exists {

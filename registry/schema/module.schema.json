@@ -532,6 +532,9 @@
         },
         "contract": {
           "type": "boolean"
+        },
+        "self_host": {
+          "type": "boolean"
         }
       },
       "required": [

@@ -8,26 +8,6 @@ import (
 	"github.com/gogogadget/gogogadget/internal/modkit"
 )
 
-// `ggg new --registry github:OWNER/REPO` fetches this tree and verifies it
-// against coreRegistryPublicKey, so registry.snapshot.sig is a published
-// artifact of this repository, not a local build leftover. It was gitignored on
-// the opposite theory, and every genesis from GitHub refused with
-// "read registry.snapshot.sig: no such file or directory" — no adoption path
-// worked at all. This test is the gate: it fails if the signature is missing,
-// stale relative to registry.snapshot.json, or produced by a key the shipped
-// CLI does not pin.
-func TestCommittedSnapshotVerifiesUnderThePinnedCoreKey(t *testing.T) {
-	root := repoRootFromTest(t)
-	digest, err := modkit.VerifyRegistrySnapshot(root, coreRegistryPublicKey)
-	if err != nil {
-		t.Fatalf("the committed core snapshot does not verify under the pinned key: %v\n"+
-			"remedy: ggg registry build && ggg registry sign --dir . --key-file <core signing key>", err)
-	}
-	if digest == "" {
-		t.Fatal("verification returned an empty digest, so nothing was checked")
-	}
-}
-
 // The default --dir must resolve to the directory that actually holds
 // registry.json. This repository declares a directory registry at path
 // "registry" while its registry.json and registry.snapshot.json live at the

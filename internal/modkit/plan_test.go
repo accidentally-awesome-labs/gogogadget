@@ -717,3 +717,120 @@ templ Sample() {
 		}
 	})
 }
+
+// Guard 2. A self_host payload is an assertion about the publishing
+// repository, so the planner installs it only into that repository — module
+// path equal to the registry's canonical_module, the same discriminator
+// rewrite_module keys off. Both directions are pinned here, because either one
+// alone passes for the wrong reason: skipping everywhere would silently delete
+// the core gate, and installing everywhere is the defect this exists to fix.
+// A tampered payload must still refuse in both, so verification happens before
+// the skip.
+func TestSelfHostPayloadsInstallOnlyIntoThePublishingRepository(t *testing.T) {
+	const canonical = "github.com/gogogadget/gogogadget"
+	const selfHostTarget = "internal/modules/button_selfhost_test.go"
+	selfHostContent := []byte("package modules\n\nconst SelfHostFixture = 1\n")
+
+	fixture := func(t *testing.T) fstest.MapFS {
+		t.Helper()
+		files := plannerRegistry(t)
+		mutatePlannerModule(t, files, "ggg/element/button", func(module *Manifest) {
+			module.Files = append(module.Files, ManifestFile{
+				Source: "registry/modules/element/button/repository_selfhost_test.go", Target: selfHostTarget,
+				Class: FileClassTest, SHA256: sha256Hex(selfHostContent), RewriteModule: true, SelfHost: true,
+			})
+		})
+		files["registry/modules/element/button/repository_selfhost_test.go"] = &fstest.MapFile{Data: selfHostContent}
+		return files
+	}
+	planFor := func(t *testing.T, modulePath string, files fstest.MapFS) (Plan, error) {
+		t.Helper()
+		root := writeTargetProject(t, modulePath, Project{
+			Schema:     2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}},
+			Providers:  map[string]ProviderSelections{}, Deployment: "",
+			Modules: []string{"ggg/component/card"}, Exclude: []string{},
+		})
+		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: files}}})
+		return engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	}
+	lockedButton := func(t *testing.T, plan Plan) LockedModule {
+		t.Helper()
+		for _, module := range plan.Lock.Modules {
+			if module.ID == "ggg/element/button" {
+				return module
+			}
+		}
+		t.Fatal("planned lock omits element/button")
+		return LockedModule{}
+	}
+	installs := func(plan Plan) bool {
+		for _, change := range plan.Changes {
+			if change.Path == selfHostTarget {
+				return true
+			}
+		}
+		return false
+	}
+
+	t.Run("publishing repository installs it", func(t *testing.T) {
+		plan, err := planFor(t, canonical, fixture(t))
+		if err != nil {
+			t.Fatalf("Plan: %v", err)
+		}
+		if !installs(plan) {
+			t.Fatalf("the publishing repository did not install its own self_host payload %s", selfHostTarget)
+		}
+		found := false
+		for _, file := range lockedButton(t, plan).Files {
+			if file.Path == selfHostTarget {
+				found = true
+				if file.State != FileClean || file.BaseSHA256 == "" {
+					t.Fatalf("self_host lock row = state %q base %q, want a pinned clean install", file.State, file.BaseSHA256)
+				}
+			}
+		}
+		if !found {
+			t.Fatalf("the publishing repository's lock has no row for %s", selfHostTarget)
+		}
+	})
+
+	t.Run("derivative installs none of it", func(t *testing.T) {
+		plan, err := planFor(t, "example.com/acme/app", fixture(t))
+		if err != nil {
+			t.Fatalf("Plan: %v", err)
+		}
+		if installs(plan) {
+			t.Fatalf("a derivative was given the publishing repository's self_host payload %s", selfHostTarget)
+		}
+		button := lockedButton(t, plan)
+		for _, file := range button.Files {
+			if file.Path == selfHostTarget {
+				t.Fatalf("a derivative's lock records %s as installed", selfHostTarget)
+			}
+		}
+		// The declaration is still carried verbatim: the lock records what the
+		// module owns, and the skip is derived from it rather than hidden by
+		// rewriting the manifest.
+		declared := false
+		for _, file := range button.Manifest.Files {
+			if file.Target == selfHostTarget && file.SelfHost {
+				declared = true
+			}
+		}
+		if !declared {
+			t.Fatalf("a derivative's lock lost the self_host declaration for %s", selfHostTarget)
+		}
+		if _, err := MarshalLock(plan.Lock); err != nil {
+			t.Fatalf("a lock with a skipped self_host target must stay valid: %v", err)
+		}
+	})
+
+	t.Run("tampering refuses in a derivative too", func(t *testing.T) {
+		files := fixture(t)
+		files["registry/modules/element/button/repository_selfhost_test.go"] = &fstest.MapFile{Data: []byte("package modules\n")}
+		if _, err := planFor(t, "example.com/acme/app", files); err == nil || !strings.Contains(err.Error(), "sha256") {
+			t.Fatalf("tampered self_host payload error = %v, want a digest refusal", err)
+		}
+	})
+}

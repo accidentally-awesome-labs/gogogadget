@@ -1,3 +1,10 @@
+// Self-host assertions. This file is declared self_host by ggg/system/modkit:
+// the repository that publishes the registry installs and runs it, and no
+// derivative ever receives it. Everything here asserts about THIS repository —
+// its committed snapshot signature, its example and external fixtures, its CI
+// workflows, its vendored bytes, its ownership sweep — never about the source
+// the registry distributes.
+
 package modkit
 
 import (
@@ -10,7 +17,7 @@ import (
 )
 
 // The manifest digest of a generated payload is written by `registry build`
-// and read by nothing: readPlannedPayloads returns early on FileClassGenerated,
+// and read by nothing: readPlannedPayloadsWithSources returns early on FileClassGenerated,
 // before the check that raises "payload ... sha256 mismatch". Recording one
 // rewrote manifests on every build for no consumer.
 func TestRegistryBuildRecordsNoDigestForGeneratedPayloads(t *testing.T) {

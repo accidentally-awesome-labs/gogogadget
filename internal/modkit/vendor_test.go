@@ -1,7 +1,6 @@
 package modkit
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -149,53 +148,6 @@ func TestVendorByteCountMustMatch(t *testing.T) {
 	err := VerifyVendorArtifacts(dir, []VendorArtifact{artifact})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "bytes")
-}
-
-// Every vendored byte in the tree must be declared by some module. An
-// undeclared file is third-party code with no provenance and no owner, which is
-// also a file no removal will ever clean up.
-func TestEveryVendoredFileIsDeclared(t *testing.T) {
-	root := treeRoot(t)
-	catalog, err := LoadCatalog(os.DirFS(root))
-	require.NoError(t, err)
-
-	declared := map[string]struct{}{}
-	for _, module := range catalog.Modules {
-		for _, artifact := range module.Vendors {
-			declared[artifact.Path] = struct{}{}
-		}
-	}
-
-	entries, err := os.ReadDir(filepath.Join(root, "static", "vendor"))
-	require.NoError(t, err)
-
-	var undeclared []string
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		path := filepath.Join("static", "vendor", entry.Name())
-		if _, ok := declared[path]; !ok {
-			undeclared = append(undeclared, path)
-		}
-	}
-	assert.Empty(t, undeclared, "vendored files with no declared provenance")
-}
-
-// The published schema has to describe the field, or an adopter's editor and
-// validator disagree with the tool that reads it.
-func TestVendorSchemaIsPublished(t *testing.T) {
-	root := treeRoot(t)
-	raw, err := os.ReadFile(filepath.Join(root, "registry", "schema", "module.schema.json"))
-	require.NoError(t, err)
-
-	var doc map[string]any
-	require.NoError(t, json.Unmarshal(raw, &doc))
-
-	defs, ok := doc["$defs"].(map[string]any)
-	require.True(t, ok)
-	_, ok = defs["VendorArtifact"]
-	assert.True(t, ok, "VendorArtifact must be published in the module schema")
 }
 
 // treeRoot walks up to the repository root. The internal test package cannot use

@@ -27,7 +27,7 @@
         "source": "AGENTS.md",
         "target": "AGENTS.md",
         "class": "docs",
-        "sha256": "1a30a761c15b6ae924c3bbf5b8ae0b3b19212609379d3127642de42e77c2570e",
+        "sha256": "37e1ce8fc2ea4477b6f1c75acba02853e0854825cd7d700f0e17b2b72d88efb9",
         "rewrite_module": false,
         "contract": false
       },

@@ -11,13 +11,38 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Load is environment-driven: every test pins the whole relevant env via
-// t.Setenv (auto-restored) and a .env is never loaded because APP_ENV is
-// always set to test explicitly.
+// Load reads the process environment, so a test that asserts on which keys are
+// missing owns the whole declared surface or it is really asserting about the
+// operator's shell. `ggg check` exports DATABASE_URL and TEST_DATABASE_URL for
+// the integration packages, and that alone used to delete a key from the
+// production expectation below. Every declared key is cleared first; a .env is
+// never loaded because APP_ENV is always set explicitly.
+func clearDeclaredEnvironment(t *testing.T) {
+	t.Helper()
+	for _, key := range ConfigRegistry {
+		t.Setenv(key, "")
+	}
+}
+
 func baseEnv(t *testing.T) {
 	t.Helper()
+	clearDeclaredEnvironment(t)
 	t.Setenv("APP_ENV", "test")
 	t.Setenv("DATABASE_URL", "postgres://test")
+}
+
+// requiredKeys extracts the declared keys a validation error reports as
+// missing. The generated validator words them "<KEY> is required" and
+// "<KEY> is required when APP_ENV=production"; both name the key first.
+func requiredKeys(err error) []string {
+	keys := []string{}
+	for _, line := range strings.Split(err.Error(), "\n") {
+		key, rest, found := strings.Cut(strings.TrimSpace(line), " ")
+		if found && strings.HasPrefix(rest, "is required") {
+			keys = append(keys, key)
+		}
+	}
+	return keys
 }
 
 func TestLoadMinimalValidEnv(t *testing.T) {
@@ -74,12 +99,33 @@ func TestLoadDevAuthBypassRefusedInProduction(t *testing.T) {
 	assert.Contains(t, err.Error(), "DEV_AUTH_BYPASS=true is refused")
 }
 
-func TestLoadProductionRequiresDatabaseAndClerk(t *testing.T) {
+// Which credentials production requires is a property of the project's provider
+// selection, not a fixed list: this closure selects the Neon database target, so
+// NEON_API_KEY is required and DATABASE_URL is required alongside it, while a
+// closure selecting a self-hosted Postgres target requires neither in the same
+// shape. The expectation is therefore read off the generated validator — which
+// is generated from that selection — instead of naming one provider's keys.
+func TestLoadProductionRequiresEverySelectedProviderCredential(t *testing.T) {
+	clearDeclaredEnvironment(t)
 	t.Setenv("APP_ENV", "production")
+
 	_, err := Load()
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "DATABASE_URL is required")
-	assert.Contains(t, err.Error(), "CLERK_SECRET_KEY is required")
+	require.Error(t, err, "production with no credentials at all must never boot")
+	missing := requiredKeys(err)
+	require.NotEmpty(t, missing, "a production boot with an empty environment must name the keys it needs:\n%v", err)
+	for _, key := range missing {
+		assert.Contains(t, ConfigRegistry, key, "%s is reported required but is not a declared key", key)
+	}
+
+	// Every requirement is reported in one pass: supplying the whole reported
+	// set must leave nothing further required, or a fix-and-rerun loop is what
+	// an operator gets instead of one actionable error.
+	for _, key := range missing {
+		t.Setenv(key, "x")
+	}
+	if _, err = Load(); err != nil {
+		assert.Empty(t, requiredKeys(err), "production credentials must be reported together, not one round at a time")
+	}
 }
 
 func TestLoadMaintenanceModeParsing(t *testing.T) {

@@ -14,7 +14,7 @@ type resolvedRegistry struct {
 }
 
 func mergeResolvedCatalogs(ctx context.Context, sources []resolvedRegistry) (Catalog, error) {
-	merged := Catalog{ModuleSources: map[string]fs.FS{}, ModuleRegistries: map[string]string{}}
+	merged := Catalog{ModuleSources: map[string]fs.FS{}, ModuleRegistries: map[string]string{}, ModuleCanonical: map[string]string{}}
 	moduleSeen := map[string]string{}
 	profileSeen := map[string]string{}
 	canonicalSeen := map[string]string{}
@@ -47,6 +47,7 @@ func mergeResolvedCatalogs(ctx context.Context, sources []resolvedRegistry) (Cat
 			merged.Modules = append(merged.Modules, module)
 			merged.ModuleRegistries[module.ID] = catalog.ModuleRegistries[module.ID]
 			merged.ModuleSources[module.ID] = catalog.ModuleSources[module.ID]
+			merged.ModuleCanonical[module.ID] = catalog.ModuleCanonical[module.ID]
 		}
 		for _, profile := range catalog.Profiles {
 			if previous := profileSeen[profile.ID]; previous != "" {

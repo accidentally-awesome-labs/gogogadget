@@ -2,7 +2,6 @@ package gggcli
 
 import (
 	"context"
-	"encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -859,83 +858,6 @@ var exampleResourceFixtures = []struct {
 		module:   "example-notice",
 		mutation: CreateMutation{Name: "example-notice", Scope: "platform"},
 	},
-}
-
-// The fixtures are only a statement about this generator if they are
-// byte-for-byte what it emits. Set GGG_UPDATE_RESOURCE_FIXTURE=1 to rewrite
-// them after a deliberate change, then re-run `go run ./cmd/ggg registry
-// validate`.
-func TestCreateResourceMatchesExampleFixtures(t *testing.T) {
-	root := repositoryRoot(t)
-	for _, fixture := range exampleResourceFixtures {
-		t.Run(fixture.module, func(t *testing.T) {
-			files, _ := buildResource(t, fixture.mutation)
-			dir := resourceFixtureRegistry + "/registry/modules/workflow/" + fixture.module
-
-			// Checked before either branch: the update mode writes every key
-			// it is given, so a generator that started emitting outside the
-			// fixture directory would scatter files through the tree and only
-			// be caught on the next assert run.
-			for name := range files {
-				if !strings.HasPrefix(name, dir+"/") {
-					t.Fatalf("the generator wrote %s, which is outside the fixture directory", name)
-				}
-			}
-
-			if os.Getenv("GGG_UPDATE_RESOURCE_FIXTURE") != "" {
-				if err := os.RemoveAll(filepath.Join(root, filepath.FromSlash(dir))); err != nil {
-					t.Fatal(err)
-				}
-				for name, body := range files {
-					full := filepath.Join(root, filepath.FromSlash(name))
-					if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-						t.Fatal(err)
-					}
-					if err := os.WriteFile(full, body, 0o644); err != nil {
-						t.Fatal(err)
-					}
-				}
-				t.Logf("rewrote %d fixture file(s) under %s", len(files), dir)
-				return
-			}
-
-			for name, want := range files {
-				got, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(name)))
-				if err != nil {
-					t.Fatalf("read %s: %v", name, err)
-				}
-				if string(got) != string(want) {
-					t.Fatalf("%s differs from what the generator emits; "+
-						"re-run with GGG_UPDATE_RESOURCE_FIXTURE=1 if the change is deliberate", name)
-				}
-			}
-			entries := walkFixture(t, filepath.Join(root, filepath.FromSlash(dir)), dir)
-			expected := make([]string, 0, len(files))
-			for name := range files {
-				expected = append(expected, name)
-			}
-			sort.Strings(expected)
-			if !slices.Equal(entries, expected) {
-				t.Fatalf("fixture files = %v, want exactly %v", entries, expected)
-			}
-
-			// The fixture is only installable if its own manifest parses as
-			// one, which is the same check the catalog loader runs.
-			var document struct {
-				Schema int             `json:"schema"`
-				Module modkit.Manifest `json:"module"`
-			}
-			if err := json.Unmarshal(files[dir+"/module.json"], &document); err != nil {
-				t.Fatalf("fixture manifest does not parse: %v", err)
-			}
-			if got, want := document.Module.ID, "ggg/workflow/"+fixture.module; got != want {
-				t.Fatalf("fixture module id = %q, want %q", got, want)
-			}
-			if err := modkit.ValidateManifest(document.Module); err != nil {
-				t.Fatalf("fixture manifest is invalid: %v", err)
-			}
-		})
-	}
 }
 
 // The two fixtures must not overlap on anything the registry treats as a

@@ -69,6 +69,11 @@ type Catalog struct {
 	CanonicalModules []string
 	ModuleSources    map[string]fs.FS
 	ModuleRegistries map[string]string
+	// ModuleCanonical maps each module to the canonical_module of the registry
+	// that published it. It is the discriminator a self-host payload turns on:
+	// only a project whose own module path equals this is the publishing
+	// repository.
+	ModuleCanonical map[string]string
 }
 
 var catalogIncludes = []struct {
@@ -93,6 +98,7 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 	catalog.CanonicalModules = []string{root.CanonicalModule}
 	catalog.ModuleSources = map[string]fs.FS{}
 	catalog.ModuleRegistries = map[string]string{}
+	catalog.ModuleCanonical = map[string]string{}
 	if root.Includes == nil {
 		return catalog, fmt.Errorf("registry.json includes array is required")
 	}
@@ -171,6 +177,7 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 			catalog.Modules = append(catalog.Modules, document.Module)
 			catalog.ModuleSources[document.Module.ID] = fsys
 			catalog.ModuleRegistries[document.Module.ID] = root.Namespace
+			catalog.ModuleCanonical[document.Module.ID] = root.CanonicalModule
 		}
 	}
 

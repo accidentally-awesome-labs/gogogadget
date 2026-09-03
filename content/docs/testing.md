@@ -41,6 +41,34 @@ wrapper that execs `scripts/visual-run.sh compare`, the harness described
 under **Visual** below — never a plain `playwright test`, because baselines
 only match inside the pinned container.
 
+## What a derivative runs {#what-a-derivative-runs}
+
+`ggg check` is the same gate in your project as it is in this repository, with
+one declared exception. A handful of payloads assert about the repository that
+**publishes** the registry — that its committed snapshot verifies under the
+pinned core key, that its example and external fixtures are digest-exact, that
+its CI workflows exercise every closure family, that its vendored bytes match
+their declarations, that every file it tracks has exactly one owning module.
+Those are declared `self_host: true` in their manifest (see
+[Modules → Files](/docs/modules#files)) and the installer skips them unless the
+project's `go.mod` module path is the registry's `canonical_module`. They are
+still fetched and digest-verified, so a tampered one refuses everywhere; they
+are never installed, and never run, in a generated project.
+
+That is a subtraction, not a weakening. Those assertions need this
+repository's `registry/testdata`, `registry/external-testdata`,
+`templates/external-registry`, `registry/schema`, `.github/workflows` and git
+index — artifacts a derivative does not have and should not carry. Everything
+that tests the engine, the CLI, the seams and your own source ships and runs
+normally, including the registry, planner, apply, removal, vendor and
+ownership tests that are portable. Three guards keep the line honest:
+`TestSelfHostPayloadsAreDeclaredAndPresent` (the set is non-empty and every
+member is really in the tree), `TestCoreRepositoryInstallsEverySelfHostPayload`
+(the publishing repository still installs and runs all of them), and
+`TestSelfHostPayloadsInstallOnlyIntoThePublishingRepository` (the planner
+installs them there and nowhere else) — the last of which is portable, so your
+project checks the rule too.
+
 ## Unit
 
 Plain `go test`, no database. Examples: the `Entitled` status matrix, plan

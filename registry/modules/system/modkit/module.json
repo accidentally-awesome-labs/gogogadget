@@ -92,7 +92,7 @@
         "source": "internal/gggcli/core_registry_test.go",
         "target": "internal/gggcli/core_registry_test.go",
         "class": "test",
-        "sha256": "c7e64b54b0636474546d2fc6c86e9e23b4ca966c364fe76fefef48a24e7fbe98",
+        "sha256": "20ac4dc8824173c4774b6111ea7f660855a7b4f9e7aeb9e8f5ed1042e3c31c37",
         "rewrite_module": true,
         "contract": false
       },
@@ -124,7 +124,7 @@
         "source": "internal/gggcli/create_resource_test.go",
         "target": "internal/gggcli/create_resource_test.go",
         "class": "test",
-        "sha256": "d36fa9d1532302c868c166a90fb4f16185e7cd58311395b1fc4e1cf460c5afec",
+        "sha256": "c8ccf0115d9dd05aedf06d8a2823e7d8ebec289bd6f898a20b092fa82ceb4c68",
         "rewrite_module": true,
         "contract": true
       },
@@ -140,7 +140,7 @@
         "source": "internal/gggcli/external_template_test.go",
         "target": "internal/gggcli/external_template_test.go",
         "class": "test",
-        "sha256": "7ec9b44e70bcf0aa41322e0861e68978c6ef8aecbfce48ce56637f2d2ae8018d",
+        "sha256": "d066d03bb0b864adedaf40fc346c1cebdf76d69ccda6f1edb0d5cef1008216be",
         "rewrite_module": true,
         "contract": false
       },
@@ -273,6 +273,15 @@
         "contract": true
       },
       {
+        "source": "internal/gggcli/selfhost_test.go",
+        "target": "internal/gggcli/selfhost_test.go",
+        "class": "test",
+        "sha256": "9ab9637a08b49f4e78404879d3a7ad4188931666cb4ca8109b270ed5073661aa",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/gggcli/spec.go",
         "target": "internal/gggcli/spec.go",
         "class": "go",
@@ -364,7 +373,7 @@
         "source": "internal/modkit/catalog_union.go",
         "target": "internal/modkit/catalog_union.go",
         "class": "go",
-        "sha256": "133ee3b2aeb75c2e66806cd8a9e5e15ec4b85b17974c48b01bbcc28a55a76b77",
+        "sha256": "cacf654d3cb1be764d6004b3b75264d196b39baaad1be8610e71c2dc7229bbc4",
         "rewrite_module": true,
         "contract": false
       },
@@ -372,9 +381,10 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "e8b9b1e178406f21fc94286afcb6c39a3429d43d2ffda920c755878e3e933082",
+        "sha256": "ef55378d9522082d4467524743739ea9d4c09208d67fad2fa09186dfbc03635b",
         "rewrite_module": true,
-        "contract": false
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/cli_scan.go",
@@ -444,9 +454,10 @@
         "source": "internal/modkit/e2e_ownership_test.go",
         "target": "internal/modkit/e2e_ownership_test.go",
         "class": "test",
-        "sha256": "66432eaf550eb56688b644ac3fcf7f88130188ee21667dea2652b235058f2033",
+        "sha256": "e3d8fbfdff1e30c8366f2ee74d8ec05c96176713d69f490ec503897707a5a38e",
         "rewrite_module": true,
-        "contract": false
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/example.go",
@@ -457,18 +468,36 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/example_selfhost_test.go",
+        "target": "internal/modkit/example_selfhost_test.go",
+        "class": "test",
+        "sha256": "35d30e032d9a6af9db59d47d6b62a252d76e312637aa734434b3e0c65bcf7aa4",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/example_test.go",
         "target": "internal/modkit/example_test.go",
         "class": "test",
-        "sha256": "c3abb61a393a46aeb3e31a87297ce39552884e6c2d3989592ddca2b80c2e926c",
+        "sha256": "d3dda0b4057bb2aec76e86446d9a803f11d6df19025975e6adfa8e8f607c19b2",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/modkit/external_registry_selfhost_test.go",
+        "target": "internal/modkit/external_registry_selfhost_test.go",
+        "class": "test",
+        "sha256": "936e9de968eb07bef21d68fd4f94ecef6c68c178babd52453a44b9a2e192908a",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/external_registry_test.go",
         "target": "internal/modkit/external_registry_test.go",
         "class": "test",
-        "sha256": "c00d21e0afb3286acb91e2f7a3b7001d7fdac53ae730f4bf3cc2b3392c6abece",
+        "sha256": "95a81d235fae7239b8b522071861c38c85d0d54494877151cb7242edff897978",
         "rewrite_module": true,
         "contract": false
       },
@@ -476,17 +505,19 @@
         "source": "internal/modkit/external_template_test.go",
         "target": "internal/modkit/external_template_test.go",
         "class": "test",
-        "sha256": "66ac3ad20fd04a630674444100763ddd043168fd4a52d9b44371c40c2bd89785",
+        "sha256": "fe0a54a902dc29ba6f7507c2b6718573af3e28852f0ec9537ac23b67092651b0",
         "rewrite_module": true,
-        "contract": false
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/fuzz_gate_test.go",
         "target": "internal/modkit/fuzz_gate_test.go",
         "class": "test",
-        "sha256": "11ee8c61f187fc7408dd2fc7704f8ea408d70b654a25516187df52b914a1ca34",
+        "sha256": "c2a0cbb2d8616d545176ffa481c9838337af25c0de7aefeab3b2487ceae0e0a2",
         "rewrite_module": true,
-        "contract": false
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/generate.go",
@@ -580,7 +611,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "ffd0a35b2143b7e2fb923cc0f9e82ff0f418cea5d96a59175f6fd7de68c03c22",
+        "sha256": "095f982d1b7adc397476a89bdb7b3200a09a1dc909cbf0c6cb6f65ee4b4d7476",
         "rewrite_module": true,
         "contract": true
       },
@@ -617,10 +648,19 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/ownership_selfhost_test.go",
+        "target": "internal/modkit/ownership_selfhost_test.go",
+        "class": "test",
+        "sha256": "32aa50a30ffd6e9f0073a8ee484255b5418e54874e1acd4265a1dbe12b39f108",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/ownership_test.go",
         "target": "internal/modkit/ownership_test.go",
         "class": "test",
-        "sha256": "9cb75634750871920134ad32a20f7c32e9a631e27d22f191a90d0e05f8737563",
+        "sha256": "efaca89f62ac72d3faa65f880b0c5c97e2f946a4b4516d806d5637148345ea07",
         "rewrite_module": true,
         "contract": false
       },
@@ -636,7 +676,7 @@
         "source": "internal/modkit/plan_test.go",
         "target": "internal/modkit/plan_test.go",
         "class": "test",
-        "sha256": "63f6045ddf01236331802391aa980b21b613df12f44564200025e52ce76a6233",
+        "sha256": "772d4251541b5da208dfb4e496e7a8405a8f00bdc892fe225f11507f1772b831",
         "rewrite_module": true,
         "contract": false
       },
@@ -660,7 +700,7 @@
         "source": "internal/modkit/reconcile.go",
         "target": "internal/modkit/reconcile.go",
         "class": "go",
-        "sha256": "f8393c63067f644322f9d588e31d6d615195008d1d618a1ef72b73a39c07428e",
+        "sha256": "e68402891d6d0f81c9d0f4127905d908e56b7630850208dcdd5de3eb6eb3e192",
         "rewrite_module": true,
         "contract": false
       },
@@ -684,7 +724,7 @@
         "source": "internal/modkit/registry.go",
         "target": "internal/modkit/registry.go",
         "class": "go",
-        "sha256": "9a03a10aed09a05af3477bbde5defaa6fbb1d68123e6a63f5a2da179531a67e2",
+        "sha256": "ffa288eba661ce4dfea97b6e684b63dc6db0af599cb11179dbee02a50869fcee",
         "rewrite_module": true,
         "contract": false
       },
@@ -692,7 +732,7 @@
         "source": "internal/modkit/registry_build.go",
         "target": "internal/modkit/registry_build.go",
         "class": "go",
-        "sha256": "e1e8c25197d4d9aaa40e9deb16f9180c4f839904cbeb3a0c84203414a7e17550",
+        "sha256": "f348d12be9f0f43db7ee5eb4ed4ea75d525279217fef4aefdf9a18f2a076f4c6",
         "rewrite_module": true,
         "contract": false
       },
@@ -700,9 +740,10 @@
         "source": "internal/modkit/registry_build_internal_test.go",
         "target": "internal/modkit/registry_build_internal_test.go",
         "class": "test",
-        "sha256": "5281e672148d2c446bb040863b6c5f33dc5f84a81b24d70def2af8c9ea20fcbd",
+        "sha256": "ef8638a0d2931a0cb1f8c6f119e3ecfe539062edcf0e7301b6803c38b6152847",
         "rewrite_module": true,
-        "contract": false
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/registry_lifecycle.go",
@@ -713,10 +754,19 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/registry_published_selfhost_test.go",
+        "target": "internal/modkit/registry_published_selfhost_test.go",
+        "class": "test",
+        "sha256": "5fa8cbbd854608cb4f535efda6a400b3b24cf294e2b6c65de72e9ac8c2b3a343",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/registry_test.go",
         "target": "internal/modkit/registry_test.go",
         "class": "test",
-        "sha256": "dc23826916238cbf170f86faf1e6264e8984b5d6358f393d37e3aa1bf633ffae",
+        "sha256": "00812e70b5e6c36063d475683afda9dbc7d6302a5a5cba3db267317c8865e850",
         "rewrite_module": true,
         "contract": false
       },
@@ -759,6 +809,15 @@
         "sha256": "61fe73b5936bbbe70915f1e1aa9828c6a4556ed3e3233373e3db68edb7c4c12a",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/modkit/selfhost_test.go",
+        "target": "internal/modkit/selfhost_test.go",
+        "class": "test",
+        "sha256": "ee4a604a1a71976f98395937984afcd07834136834b0f01f6c9dfa6482d1f1f3",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/snapshot.go",
@@ -860,7 +919,7 @@
         "source": "internal/modkit/targeted_update_test.go",
         "target": "internal/modkit/targeted_update_test.go",
         "class": "test",
-        "sha256": "581fcd3a41740b6becddc7fc396cd55f7c39d6d4241b0fb7c6fe685e5afb298f",
+        "sha256": "10e8e00a9d42c497546e43957c5d624a1fb02a25675d4fedfdfa51763c1bddb5",
         "rewrite_module": true,
         "contract": false
       },
@@ -876,7 +935,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "0787df6f35ba1128bf1e57321e279c63bc3e22c53dec76bacf656639bb66f898",
+        "sha256": "e5d384a3edebc68b8ee6649aefc9b7c36edebb574444308997ac64d5f649badc",
         "rewrite_module": true,
         "contract": false
       },
@@ -889,10 +948,19 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/vendor_selfhost_test.go",
+        "target": "internal/modkit/vendor_selfhost_test.go",
+        "class": "test",
+        "sha256": "ca2cc56e2620afe028382d4de8a5717d7c1296d19772f5d4688e3bf90f60ab69",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/vendor_test.go",
         "target": "internal/modkit/vendor_test.go",
         "class": "test",
-        "sha256": "a1efe82145e3461776f7ef90d130ccbcc3f83b246d9a3351e85e05d4f49cd167",
+        "sha256": "1d534484d2a6688e17f1de4fd7b0047cd29badc3bc6a4b94d8e9bbf3f11561f0",
         "rewrite_module": true,
         "contract": false
       },
@@ -900,7 +968,7 @@
         "source": "internal/modkit/vendor_tree_test.go",
         "target": "internal/modkit/vendor_tree_test.go",
         "class": "test",
-        "sha256": "d58a04b7976d4af75f0b26ca7a4103d73271cd04e90baf69b754430e950fd7b3",
+        "sha256": "d2ff04234e3a112f65543819f9d0f085c3cc7a91c04cb5cfd827ea6795793ca6",
         "rewrite_module": true,
         "contract": false
       },

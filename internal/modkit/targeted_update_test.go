@@ -185,46 +185,6 @@ func (s dualNamespaceSource) Resolve(_ context.Context, registry ProjectRegistry
 	return snapshot, nil
 }
 
-func TestTargetedUpdateRefChangeMovesOnlyTheNamedRegistry(t *testing.T) {
-	first, _ := conflictRegistries(t)
-	core := Snapshot{Commit: testCommitA, FS: first}
-	source := dualNamespaceSource{snapshots: map[string]map[string]Snapshot{
-		"ggg":  {"main": core, "v1": core},
-		"acme": {"pin": {Commit: "ext-commit-1", FS: externalFixtureMapFS(t, nil)}},
-	}}
-	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
-		Registries: []ProjectRegistry{
-			{Namespace: "ggg", Source: "github", Repository: "local/core", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="},
-			{Namespace: "acme", Source: "github", Repository: "local/ext", Ref: "pin", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="},
-		},
-		Modules: []string{"ggg/component/card"}, Exclude: []string{},
-		Providers: map[string]ProviderSelections{}, Deployment: "",
-	})
-	engine := New(Options{Source: source})
-	plan, err := engine.Plan(context.Background(), root, Operation{
-		Kind: OpUpdate, TargetedRegistry: "acme", RegistryRef: "pin",
-	})
-	if err != nil {
-		t.Fatalf("Plan(ref move): %v", err)
-	}
-	var coreRef, extRef string
-	for _, registry := range plan.Project.Registries {
-		switch registry.Namespace {
-		case "ggg":
-			coreRef = registry.Ref
-		case "acme":
-			extRef = registry.Ref
-		}
-	}
-	if coreRef != "main" || extRef != "pin" {
-		t.Fatalf("refs after targeted ref move = ggg:%q acme:%q, want ggg untouched", coreRef, extRef)
-	}
-	if len(plan.Lock.Registries) != 2 {
-		t.Fatalf("lock registries = %d, want both recorded", len(plan.Lock.Registries))
-	}
-}
-
 func TestSetRegistriesReplacesSourcesInOnePlan(t *testing.T) {
 	root, engine := targetedUpdateFixture(t)
 	plan, err := engine.Plan(context.Background(), root, Operation{

@@ -341,6 +341,12 @@ func validateManifestFiles(files []ManifestFile, canonical bool) error {
 		if file.Class == FileClassGenerated && file.SHA256 != "" && !validSHA256(file.SHA256) {
 			return fmt.Errorf("manifest files[%d] sha256 is invalid", i)
 		}
+		// A self-host payload is an assertion about the publishing repository,
+		// so it is only ever a test. Allowing it on ordinary source would let a
+		// manifest ship a derivative a package that silently loses a file.
+		if file.SelfHost && file.Class != FileClassTest {
+			return fmt.Errorf("manifest files[%d] self_host requires class %q, got %q", i, FileClassTest, file.Class)
+		}
 		if _, ok := seen[file.Target]; ok {
 			return fmt.Errorf("manifest files contain duplicate target %q", file.Target)
 		}
@@ -1389,8 +1395,17 @@ func validateLockedModule(module *LockedModule, canonical bool) error {
 		}
 		last = file.Path
 	}
+	// Every declared target is covered exactly once, with one exception: a
+	// self-host payload is not installed outside the publishing repository, so
+	// a derivative's lock has no row for it. Anything else missing is a lock
+	// that does not describe what the manifest owns.
 	if len(seenFiles) != len(manifestFiles) {
-		return fmt.Errorf("files must cover every manifest file target exactly")
+		for _, manifestFile := range module.Manifest.Files {
+			if _, covered := seenFiles[manifestFile.Target]; covered || manifestFile.SelfHost {
+				continue
+			}
+			return fmt.Errorf("files must cover every manifest file target exactly; %q is missing", manifestFile.Target)
+		}
 	}
 
 	seenMigrations := make(map[string]struct{}, len(module.Migrations))

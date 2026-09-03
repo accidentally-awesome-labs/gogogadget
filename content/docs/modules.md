@@ -121,6 +121,19 @@ this is not a text substitution over the file.
 contract files pin wiring; a behavior file stays locally editable without
 freezing anything downstream.
 
+`self_host: true` marks a payload that asserts something about the repository
+**publishing** the registry rather than about the source it distributes: the
+committed snapshot signature, the example and external fixtures, the CI
+workflows, the vendored bytes, the repository-wide ownership sweep. The
+installer skips it unless the project *is* that repository — its `go.mod`
+module path equals the registry's `canonical_module`, the same discriminator
+`rewrite_module` keys off. It is still fetched and digest-verified everywhere,
+so a tampered self-host payload refuses in a derivative too; it simply never
+becomes a file. Only `class: "test"` may set it, and a derivative's lock
+carries the declaration with no installed row for it. See
+[Testing](/docs/testing#what-a-derivative-runs) for what that leaves a
+generated project.
+
 Ownership is **exclusive**. Exactly one module owns each authored file, and
 identical bytes never imply shared ownership — shared behavior moves into a
 shared module that consumers depend on. `TestEveryTrackedSourceFileHasAnOwner`

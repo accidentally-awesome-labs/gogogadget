@@ -1,7 +1,6 @@
 package gggcli
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,36 +28,6 @@ func templateAdapterManifest(t *testing.T) modkit.Manifest {
 	}
 	t.Fatal("the external-registry template contributes no command")
 	return modkit.Manifest{}
-}
-
-func TestExternalTemplateCommandDoesNotShadowABuiltIn(t *testing.T) {
-	module := templateAdapterManifest(t)
-	require.Len(t, module.Runtime.CLI, 1)
-	command := module.Runtime.CLI[0]
-
-	assert.False(t, IsReservedName(command.Name),
-		"contributed command %q collides with a built-in and would be skipped", command.Name)
-	assert.NotEmpty(t, command.Summary)
-
-	// The contributed command joins the real table and is dispatchable by
-	// that name, which is what "installing the module adds a command" means.
-	table, conflicts := commandTable([]ContributedCommand{{
-		Spec:    CommandSpec{Name: command.Name, Summary: command.Summary, Usage: "ggg " + command.Name, SourceModule: module.ID},
-		Handler: func(context.Context, CommandContext, []string) (Result, error) { return Result{}, nil },
-	}})
-	assert.Empty(t, conflicts)
-	spec, ok := lookupSpec(table, command.Name)
-	require.True(t, ok)
-	assert.Equal(t, module.ID, spec.SourceModule)
-}
-
-// The template's declared verification commands are the ones `ggg info`
-// prints, which is the promise the generated module reference repeats.
-func TestExternalTemplateVerificationCommandsAreRunnable(t *testing.T) {
-	module := templateAdapterManifest(t)
-	commands := modkit.VerificationCommands(module)
-	require.NotEmpty(t, commands)
-	assert.Contains(t, commands[0], "go test -count=1 ./internal/gadgetworks/ledger")
 }
 
 // registryBuildDir is what lets `ggg registry build --dir templates/external-registry`

@@ -281,6 +281,10 @@ The fields that carry weight:
   contract and pins dependents through an update. `rewrite_module: true` lets
   the installer rewrite a canonical Go import prefix — any configured
   registry's — into the derivative project's own module path.
+  `self_host: true` (test payloads only) marks an assertion about the
+  publishing repository itself, installed only where the project's module path
+  *is* that registry's `canonical_module` — see
+  [Modules → Files](/docs/modules#files).
 - **`requires`** — a hard dependency edge with an inclusive contract range,
   `{id, contract: {min, max}}`. It is what makes `add` install a closure and
   `remove` refuse while a dependent is present, and an out-of-range contract

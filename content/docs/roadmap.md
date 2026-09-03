@@ -29,7 +29,7 @@ at; everything under **Delegated** is a decision not to build something.
 | Remote operations | `ggg provider list\|set\|configure\|provision\|test`, `ggg deployment set`, `ggg deploy plan\|apply\|status\|logs\|rollback\|secrets`, `ggg db backup\|restore\|restore-drill`, `ggg doctor --runtime [--fix]`, stale-plan refusal, `--resume RUN_ID`. `deploy plan` calls the deploy target's own `Plan` and reports the ordered change set; `deploy status` is the observation. Every mutating form confirms: `--yes` (or `--resume`) is the noninteractive confirmation, and its absence off a TTY refuses with exit 3 |
 | Targeted updates | `ggg update MODULES…` and `ggg update --registry NAMESPACE --ref REF`, per-module snapshots, conflict staging and `ggg resolve` |
 | Publishing | `ggg registry init\|keygen\|build\|sign\|verify\|rotate\|add\|remove\|update\|validate` plus the maintained `templates/external-registry/` template and its CI workflow |
-| Verification | `ggg registry validate --closures core\|external\|all` as two CI jobs, per-module e2e spec ownership with a mechanical no-orphan check, seam contract suites, provider permutation fixtures, race, fuzz, smoke, docker and visual gates |
+| Verification | `ggg registry validate --closures core\|external\|all` as two CI jobs, per-module e2e spec ownership with a mechanical no-orphan check, seam contract suites, provider permutation fixtures, race, fuzz, smoke, docker and visual gates. Assertions about the publishing repository itself are declared `self_host: true` and installed only where `go.mod` matches the registry's `canonical_module`, so `ggg check` is the same passing gate in a generated project |
 
 ## Known gaps
 
