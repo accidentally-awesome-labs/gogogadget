@@ -126,7 +126,7 @@
         "key": "POLAR_ACCESS_TOKEN",
         "field": "PolarAccessToken",
         "type": "string",
-        "description": "Polar API token. Empty means billing routes render 503 not-configured",
+        "description": "Polar API token. The adapter refuses to construct without it, so selecting billing-polar without this key is a boot error",
         "secret": true
       },
       {

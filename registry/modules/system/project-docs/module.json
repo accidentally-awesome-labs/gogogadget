@@ -51,7 +51,7 @@
         "source": "README.md",
         "target": "README.md",
         "class": "docs",
-        "sha256": "dbc0982401833c3ca7a32b34aa6a48cbddc1d557240b04b2dad0a7e6137abb5f",
+        "sha256": "a93fdc37665dd1f789570ea8c87e22a3b384afc196c4dcbbcc41e5a666cc4046",
         "rewrite_module": false,
         "contract": false
       }

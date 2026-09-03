@@ -536,31 +536,55 @@ module owning the read surface and a workflow module owning the mutations.
 
 ## Add a plan
 
-1. **Plan truth** — append to the `Plans` slice in
-   `internal/billing/plans.go` (owned by `ggg/system/billing`). Order is render
-   order; keep `free` first (`PlanByKey` falls back to index 0).
-2. **Polar product** — create it in the Polar dashboard; copy the id.
-3. **Env** — add an `environment` record to `ggg/system/billing`'s manifest
-   (`"key": "POLAR_PRODUCT_BUSINESS", "field": "PolarProductBusiness",
-   "type": "string"`). Do **not** touch `.env.example` or the config struct;
-   both are generated from that record. Copy the new line into your own `.env`.
-4. **Wiring** — extend `billing.SetPolarProductIDs` with the new case.
+Plan truth is one immutable catalog, and the provider product ids are bound to
+it by the **adapter**, not by the seam. Both halves matter: the seam knows what
+a Business plan *is*, and each billing adapter knows what a Business plan is
+*called* at its provider.
 
-The pricing page, upgrade CTAs and usage meters render from `billing.Plans`
-automatically. Enforcement (`MaxProjects`) applies the moment the plan exists.
+1. **Plan truth** — append an entry to `defaultPlans` in
+   `internal/billing/plans.go` (owned by `ggg/system/billing`). Order is render
+   order; keep `free` first — `planCatalog.ByKey` falls back to the `free`
+   entry for an unknown key, and `FreePlan()` reads `defaultPlans[0]`. Leave
+   `ProviderProductID` empty here: it is provider-specific.
+2. **Provider product** — create the product in the Polar dashboard; copy the
+   id.
+3. **Env** — add an `environment` record to **`ggg/system/billing-polar`**'s
+   manifest (`"key": "POLAR_PRODUCT_BUSINESS", "field": "PolarProductBusiness",
+   "type": "string"`). Every Polar key belongs to the adapter, never to the
+   seam. Do **not** touch `.env.example` or the config struct; both are
+   generated from that record. Copy the new line into your own `.env`, or use
+   `ggg provider configure`.
+4. **Adapter wiring** — extend the `switch p.Key` in
+   `internal/billing/polar/module.go` with a `case "business"` that sets
+   `p.ProviderProductID = d.Config.PolarProductBusiness`, then hand the plans
+   to `billing.NewPlanCatalog`. Nothing else constructs a catalog for Polar.
+5. **The local adapter needs nothing.** `billinglocal.LocalPlanCatalog` uses
+   each plan's own key as its product id, so a new paid plan is checkout-able
+   in development and test the moment step 1 lands.
+
+The pricing page, upgrade CTAs and usage meters render from the injected
+`billing.PlanCatalog`, and the webhook's product-id → plan-key reverse map is
+built from `catalog.All()`, so both follow automatically. Enforcement
+(`MaxProjects`, `MaxStorageMB`, the meters) applies the moment the plan exists.
 See [Billing](/docs/billing).
+
+`NewPlanCatalog` refuses an empty catalog, an empty plan key, a duplicate key
+and a duplicate non-empty product id — so a copy-paste mistake in step 1 or 4
+is a boot error naming the collision, not a plan that silently shadows another.
 
 ## Add annual pricing
 
 1. Add an `Interval` field (`"month"` / `"year"`) to `billing.Plan` and set it
-   on each entry.
-2. A second Polar product per paid plan, each with its own `environment`
-   record, then extend `SetPolarProductIDs`.
-3. Teach the webhook's product-id → plan-key reverse map that the annual ids
-   map to the same keys, and persist the interval on the subscription row
-   (new column, new migration).
-4. Fix the math: `MRR` in `internal/billing/plans.go` divides annual
-   subscriptions by 12.
+   on each `defaultPlans` entry.
+2. A second provider product per paid plan, each with its own `environment`
+   record on the adapter's manifest, then a matching `case` in the adapter's
+   product-id switch.
+3. Teach the webhook's product-id → plan-key reverse map (built from
+   `catalog.All()` in `internal/web/workflow_billing_webhook.go`) that the
+   annual ids map to the same keys, and persist the interval on the
+   subscription row (new column, new migration).
+4. Fix the math: `MRRWithCatalog` in `internal/billing/plans.go` must divide an
+   annual subscription's price by 12.
 5. Pricing page: group `ui.PlanCard`s by plan, toggle by interval.
 
 ## Add an email kind

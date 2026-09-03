@@ -11,11 +11,11 @@ across five kinds:
 
 | Kind | What it is | Example |
 |---|---|---|
-| `element` | A leaf renderer with no dependencies beyond the UI core | `element/button` |
-| `component` | A composed renderer, usually built on elements | `component/data-table` |
-| `page` | One route, its template, its strings, its tests | `page/projects` |
-| `workflow` | A vertical slice: mutation handlers, jobs, effects, contracts | `workflow/billing-checkout` |
-| `system` | A provider with a lifecycle the runtime boots and closes | `system/jobs` |
+| `element` | A leaf renderer with no dependencies beyond the UI core | `ggg/element/button` |
+| `component` | A composed renderer, usually built on elements | `ggg/component/data-table` |
+| `page` | One route, its template, its strings, its tests | `ggg/page/projects` |
+| `workflow` | A vertical slice: mutation handlers, jobs, effects, contracts | `ggg/workflow/billing-checkout` |
+| `system` | A provider with a lifecycle the runtime boots and closes | `ggg/system/jobs` |
 
 The full inventory is on the [Module reference](/docs/module-reference) page,
 generated from the manifests themselves.

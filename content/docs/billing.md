@@ -29,13 +29,16 @@ from it:
 | `pro` | $20/mo | unlimited (−1) | 10 | Unlimited projects · 10 team members · Priority support |
 | `team` | $50/mo | unlimited (−1) | unlimited (−1) | Unlimited everything · Unlimited members · SSO via Clerk |
 
-`Plans` is an **ordered slice** — a Go map would shuffle the pricing cards
-per run. `PlanByKey` falls back to `free` for unknown keys, so a stale
-`product_key` in the database can never widen access. `MaxMembers` is
-informational only (invitations are Clerk-hosted — see
-[Organizations](/docs/organizations)). At boot, `SetPolarProductIDs` injects
-`POLAR_PRODUCT_PRO` / `POLAR_PRODUCT_TEAM` from the environment; the free
-plan has no Polar product and can never be checked out.
+`defaultPlans` is an **ordered slice** — a Go map would shuffle the pricing
+cards per run. `PlanCatalog.ByKey` falls back to `free` for unknown keys, so a
+stale `product_key` in the database can never widen access. `MaxMembers` is
+informational only (invitations are hosted by the identity provider — see
+[Organizations](/docs/organizations)). Provider product ids are bound by the
+selected **adapter**, not by the seam: `internal/billing/polar/module.go`
+copies `POLAR_PRODUCT_PRO` / `POLAR_PRODUCT_TEAM` onto the `pro` and `team`
+plans and builds its catalog with `billing.NewPlanCatalog`, while
+`billinglocal.LocalPlanCatalog` uses each plan's own key. The free plan has no
+product id in either and can never be checked out.
 
 ## Polar sandbox setup
 

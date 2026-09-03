@@ -36,8 +36,10 @@ $ ggg info ggg/workflow/projects
 
 Go packages become `go test -count=1 ./<pkg>`, declared e2e and accessibility
 specs become `cd e2e && npx playwright test <spec> --reporter=line`, and a
-declared visual surface becomes `./scripts/visual.sh` — never a plain
-`playwright test`, because baselines only match inside the pinned container.
+declared visual surface becomes `./scripts/visual.sh` — which is a two-line
+wrapper that execs `scripts/visual-run.sh compare`, the harness described
+under **Visual** below — never a plain `playwright test`, because baselines
+only match inside the pinned container.
 
 ## Unit
 

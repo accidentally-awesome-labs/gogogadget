@@ -856,7 +856,7 @@
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",
-      "sha256": "e0321a8f6624b9570972dee56a013ef53cea8d5ae2719e3342498f72f303f799"
+      "sha256": "ad5b4c8c1d13692ec2d8a8391c1ce564416225ae0f289cde9e88b5ce0322aea5"
     },
     {
       "path": "registry/modules/system/billing/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "4c4f2c7244ec8db6906a48165e7ea1a64b1f116b14502bfd85c4972f545c311b"
+      "sha256": "24c3d2b465e2373dc18e7a518dc7f37677c45e5e0ed651b4031975e9b0ad16f5"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "cd31c14a88eb058c58947c2c2ddfd80371d7d45c9891df672311fd8163e5e321"
+      "sha256": "211f76c997ebbd4d9f192004bc36404c3c510938c56884961e6f2200683e7345"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",

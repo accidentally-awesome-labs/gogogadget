@@ -242,3 +242,138 @@ Not run, per the brief: `make check`, e2e, visual, any formatter or linter.
   pre-framework and are the obvious follow-up batch.
 - `internal/web` tests take ~85s; if the parent's gate is time-boxed, budget for
   it.
+
+---
+
+# Fix round 1 — response to `task-e-review-findings.md`
+
+Commit: **(see below)**, on top of e281317 (which already carried the sibling's
+`dce9e7e` contract fixes and its own doc updates to architecture/deployment/
+roadmap/testing).
+
+## C1 — the two billing recipes, rewritten against the shipped API
+
+`extending.md` "Add a plan" and "Add annual pricing" named three things that do
+not exist. Re-derived every step from code:
+
+| Was | Is |
+|---|---|
+| "append to the `Plans` slice" | append to `defaultPlans` (`internal/billing/plans.go:28`, unexported); catalog reached through `DefaultPlanCatalog()` |
+| "`PlanByKey` falls back to index 0" | `planCatalog.ByKey` falls back to the `free` entry (`catalog.go:52-57`); `FreePlan()` reads `defaultPlans[0]` |
+| "add the env record to `ggg/system/billing`'s manifest" | add it to **`ggg/system/billing-polar`** — all five Polar keys are declared there, and the seam declares none |
+| "extend `billing.SetPolarProductIDs`" (symbol deleted) | extend the `switch p.Key` in `internal/billing/polar/module.go:33-41`, then `billing.NewPlanCatalog` |
+| "surfaces render from `billing.Plans`" | they render from the injected `billing.PlanCatalog`; the webhook's product-id → plan-key map is built from `catalog.All()` (`workflow_billing_webhook.go:62`) |
+| — (missing) | `billinglocal.LocalPlanCatalog` uses each plan's key as its product id, so a new paid plan is checkout-able in dev/test with no adapter work |
+| "`MRR` divides annual by 12" | `MRRWithCatalog` is the function to change |
+
+Added the `NewPlanCatalog` refusal set (empty catalog, empty key, duplicate key,
+duplicate non-empty product id) so a step-1/step-4 mistake is a named boot
+error.
+
+Same dead symbol found and fixed one page over: `billing.md:32-38` claimed
+"`Plans` is an ordered slice… at boot, `SetPolarProductIDs` injects…". Rewritten
+against `defaultPlans` / `PlanCatalog.ByKey` / the two adapters' catalogs.
+
+## I1 — README default table now names one profile and matches it
+
+The table is now stated as `ggg/profile/full`'s seeds, with a sentence naming
+how `minimal` differs. Two rows were wrong for **any** profile reading and are
+corrected against `registry/profiles/full.json`: `ggg/realtime` production is
+`realtime-ably@ably` (was `realtime-postgres@postgres`) and `ggg/observability`
+production is `observability-sentry@sentry` (was `observability-log@log`).
+Verified with jq that `full`'s `test` column is identical to `development` for
+all 18 slots, which the header now says.
+
+## I2 — the Neon keys
+
+`ggg/database` / Neon now reads `DATABASE_URL`, `NEON_API_KEY`, optional
+`NEON_PROJECT_ID`. `NEON_API_KEY` is `required: true` on the target's inputs and
+enforced by the generated validator (`config_registry_gen.go:208-210`). Also
+added optional `POLAR_SERVER`, which the adapter declares and the table omitted.
+
+## I3 — the joined-error claim, made accurate in four places
+
+`README.md`, `content/docs/index.md`, `getting-started.md` and
+`architecture.md` now say: nothing falls back silently, **and** there are two
+mechanisms. The generated validator joins the `production_required` keys into
+one error — verified as exactly `DATABASE_URL`, `NEON_API_KEY`,
+`RESEND_API_KEY`, four `STORAGE_R2_*` (from the generated `is required` checks)
+and four `CLERK_*` (from `requireProductionKeys`), all collected through
+`errors.Join` at `internal/config/config.go:71`. Polar, PostHog, Sentry and the
+OpenAI-compatible LLM adapter validate inside their own constructors, so those
+fail on the first one reached.
+
+Related manifest defect fixed: `POLAR_ACCESS_TOKEN`'s description in
+`registry/modules/system/billing-polar/module.json` no longer claims a 503
+not-configured fallback. Applied as a one-line text edit (a JSON round-trip
+would have reordered the whole file), then regenerated — the new text
+propagated to `.env.example` and `content/docs/configuration-reference.md` and
+nothing else moved.
+
+## Minor
+
+- **M1** — `full`'s gloss now says "every product module in the catalog" and
+  explains why `saas` (296) is larger: `full` leaves the nine
+  environment-selected adapter modules to the provider selections. Verified by
+  diffing the catalog against `full.json`'s members: exactly 11 absent — the
+  nine mail/storage/identity/billing adapters plus the two this repo excludes.
+- **M2** — `security.md`'s chain now includes `recover` in its restored
+  position (inside the telemetry span, outside every named middleware), with a
+  sentence on why that position matters. The "panic detail only outside
+  production" line is true again as a result.
+- **M3** — already correct: the sibling's commit rewrote `deployment.md`'s
+  health paragraph and `/readyz` row. Re-read against `handleReadyz` and
+  confirmed critical ⇒ 503 naming the slot, non-critical ⇒ 200 degraded, names
+  only.
+- **M4** — `modules.md`'s five kind examples are now scoped ids.
+- **M5** — `testing.md` now says `visual.sh` execs `visual-run.sh compare`
+  (verified: `scripts/visual.sh` is exactly that two-line wrapper). Used a bold
+  cross-reference rather than an in-page anchor, since the docs renderer's
+  heading ids are not part of the link contract the test checks.
+
+## Six-gap sections re-read against the shipped behaviour
+
+`architecture.md`, `deployment.md`, `roadmap.md` and `testing.md` were already
+updated by `dce9e7e`; I re-read each against the code rather than trusting the
+diff, and they are precise: the `deploy_plan` payload (`plan_hash`,
+`observed_state_hash`, ordered `deploy://<id>/<resource>` changes, secret key
+names only) matches `executeDeployPlan`; the uniform `--yes`/`--resume`
+confirmation matches `runDeploy:266-276`; `/readyz` matches `handleReadyz`;
+`make fuzz` matches the two-line target. `roadmap.md`'s gap list is down to four
+rows and none of the six remain. The one place still describing old behaviour
+was `getting-started.md`'s `provider list --json`, which now shows the human
+form too (verified against a real run: `provider list --slot ggg/mail` prints
+three rows).
+
+## Commands run
+
+```
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline
+registry 9dbfdb35d1a4da3e67f102b8a085ab58db4d463f9f46abc7cab2c8e93b7f29e6
+  update    lock       gogogadget.lock.json
+
+$ go run ./cmd/ggg sync --check --offline
+check_exit=0
+
+$ git diff --stat -- content/docs/{module,component}-reference.md
+(no output — unchanged; configuration-reference.md and .env.example changed by
+exactly the one regenerated POLAR_ACCESS_TOKEN description)
+
+$ go test ./internal/content -count=1
+ok  github.com/gogogadget/gogogadget/internal/content  3.263s
+
+$ /tmp/ggg-docs2 provider list --slot ggg/mail
+ggg/mail  development  ggg/system/mail-dev@filesystem     development/manual
+ggg/mail  test         ggg/system/mail-dev@filesystem     development/manual
+ggg/mail  production   ggg/system/mail-resend@resend      managed/manual
+```
+
+`go vet ./internal/content ./internal/billing/...` clean. `make check`, e2e and
+visual still not run, per the brief.
+
+## Remaining concern
+
+`roadmap.md` keeps two rows for the identity/billing vendor-SDK gap — one for
+the seam source imports, one for the seam manifests' declared Go dependencies.
+They are genuinely two fixes (move the webhook parsers; then move the
+`dependencies.go` entries), so both stay until both land.

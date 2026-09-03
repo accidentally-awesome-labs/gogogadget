@@ -16,10 +16,15 @@ writes.
 Assembled in `Server.Handler()`, outermost first:
 
 ```
-MaxBytesReader (10 MB) → provider environment → telemetry.HTTP → routeBodyLimit
-→ requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit
-→ secureHeaders → sessionLoad → csrf → route groups
+MaxBytesReader (10 MB) → provider environment → telemetry.HTTP → recover
+→ routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode
+→ rateLimit → secureHeaders → sessionLoad → csrf → route groups
 ```
+
+`recover` sits inside the telemetry span and outside every named middleware,
+so a handler panic renders the 500 page with normal chrome, is captured once
+through the `observability.Reporter` capability, and closes its span instead
+of unwinding past it.
 
 Route groups add their own chains: `/app/*` is `requireAuth` →
 `requireNotDisabled` → `requireOrg` → `loadPlan`; `/admin/*` is that chain

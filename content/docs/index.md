@@ -71,7 +71,10 @@ Two rules make that work:
    the adapter holds the SDK, its keys, its lifecycle and its health check.
    See [Architecture](/docs/architecture).
 2. **Nothing degrades silently.** A managed adapter selected without its keys
-   is one joined boot error naming every missing key — never a quiet fallback
-   to the local implementation. The local implementations are the *default*
-   for development and test, so a new project runs end to end with zero
-   accounts. See [Getting started](/docs/getting-started).
+   fails the boot — never a quiet fallback to the local implementation. Keys
+   declared `production_required` are collected by the generated validator and
+   reported as one joined error listing all of them; the adapters that check
+   their own keys in their constructors fail on the first one reached. The
+   local implementations are the *default* for development and test, so a new
+   project runs end to end with zero accounts. See
+   [Getting started](/docs/getting-started).

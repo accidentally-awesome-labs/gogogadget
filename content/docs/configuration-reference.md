@@ -37,7 +37,7 @@ degradation behave.
 | `RESEND_API_KEY` | `ggg/system/mail-resend` | `ggg` | **always** |  | Resend API key. Secret: ships blank in `.env.example` |
 | `SENTRY_DSN` | `ggg/system/observability-sentry` | `ggg` |  |  | Sentry Dsn. Secret: ships blank in `.env.example` |
 | `AUDIT_RETENTION_DAYS` | `ggg/system/audit` | `ggg` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
-| `POLAR_ACCESS_TOKEN` | `ggg/system/billing-polar` | `ggg` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
+| `POLAR_ACCESS_TOKEN` | `ggg/system/billing-polar` | `ggg` |  |  | Polar API token. The adapter refuses to construct without it, so selecting billing-polar without this key is a boot error. Secret: ships blank in `.env.example` |
 | `POLAR_PRODUCT_PRO` | `ggg/system/billing-polar` | `ggg` |  |  | Polar product id for the Pro plan |
 | `POLAR_PRODUCT_TEAM` | `ggg/system/billing-polar` | `ggg` |  |  | Polar product id for the Team plan |
 | `POLAR_SERVER` | `ggg/system/billing-polar` | `ggg` |  | `sandbox` | sandbox \| production |

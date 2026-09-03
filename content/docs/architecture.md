@@ -147,8 +147,11 @@ adapters yet — see [Roadmap](/docs/roadmap). Handlers are clean in every case:
 
 `web.NewModule` receives non-nil capabilities from the generated boot wiring
 and refuses a missing required one rather than quietly building a dev
-implementation. That is why an unconfigured managed selection is one joined
-boot error instead of a silent local fallback.
+implementation. That is why an unconfigured managed selection is a boot
+failure instead of a silent local fallback — the keys declared
+`production_required` are joined into one error by the generated validator,
+and the adapters that validate in their own constructors fail on the first
+missing key.
 
 ## Package map
 

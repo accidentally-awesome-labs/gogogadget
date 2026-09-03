@@ -51,7 +51,7 @@ differs from what the module ships.
 | `web` | 167 | 9 | Public content, internationalization, discovery surfaces |
 | `api` | 170 | 10 | Identity and the JSON API transport |
 | `saas` | 296 | 18 | Organizations, billing, jobs, notifications, admin, product workflows |
-| `full` | 286 | 18 | Every module the catalog publishes |
+| `full` | 286 | 18 | Every product module in the catalog. It is not the largest list: `saas` names the nine environment-selected adapter modules explicitly, which `full` leaves to the provider selections, and `full` also drops the two modules this repository excludes |
 
 A profile also carries **provider defaults** — the local adapter for
 development and test, the managed one for production — and a
@@ -119,11 +119,17 @@ real request path.
 ## Connect a managed service
 
 Nothing degrades silently. Selecting a managed adapter for an environment and
-leaving its keys unset is one joined boot error naming every missing key — it
-never falls back to the local adapter.
+leaving its keys unset fails the boot; it never falls back to the local
+adapter. Keys the manifests mark `production_required` — today `DATABASE_URL`,
+`NEON_API_KEY`, `RESEND_API_KEY`, the four `STORAGE_R2_*` and the four
+`CLERK_*` — are collected by the generated validator and reported as one
+joined error naming all of them. The Polar, PostHog, Sentry and
+OpenAI-compatible adapters check their own keys inside their constructors, so
+those fail on the first one reached.
 
 ```sh
-bin/ggg provider list --json                       # committed selections and the key names each needs
+bin/ggg provider list          # one row per slot and environment: adapter@target, mode, automation, key names
+bin/ggg provider list --json   # the same rows as the machine envelope
 bin/ggg provider set --provider ggg/mail:production=ggg/system/mail-resend@resend
 bin/ggg provider configure --slot ggg/identity --environment production
 bin/ggg provider test --slot ggg/database --environment production

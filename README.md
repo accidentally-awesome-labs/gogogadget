@@ -84,6 +84,12 @@ Every slot has a deterministic zero-account local option and one maintained
 managed reference. 18 slots, 36 adapter modules, 42 selectable
 adapter@target pairs.
 
+The table below is `ggg/profile/full`'s seeded defaults — every row is that
+one profile, and its `test` column is identical to `development` throughout.
+Other profiles seed differently (`minimal`, for instance, keeps
+`observability-log@log` and `realtime-postgres@postgres` in production and
+picks `mail-smtp@smtp` over Resend).
+
 | Slot | Development / test default | Production default | Other targets |
 |---|---|---|---|
 | `ggg/database` | `database-postgres@docker-postgres` | `database-postgres@neon` | — |
@@ -94,19 +100,19 @@ adapter@target pairs.
 | `ggg/cache` | `cache-memory@memory` | `cache-redis@upstash` | `cache-redis@valkey` |
 | `ggg/rate-limit` | `rate-limit-memory@memory` | `rate-limit-redis@upstash` | `rate-limit-redis@valkey` |
 | `ggg/search` | `search-postgres@postgres` | `search-postgres@postgres` | `search-typesense@typesense` |
-| `ggg/realtime` | `realtime-postgres@postgres` | `realtime-postgres@postgres` | `realtime-ably@ably` |
+| `ggg/realtime` | `realtime-postgres@postgres` | `realtime-ably@ably` | — |
 | `ggg/feature-flags` | `feature-flags-postgres@postgres` | `feature-flags-postgres@postgres` | `feature-flags-launchdarkly@launchdarkly` |
 | `ggg/notifications` | `notifications-postgres@postgres` | `notifications-postgres@postgres` | `notifications-knock@knock` |
 | `ggg/webhooks` | `webhooks-postgres@postgres` | `webhooks-postgres@postgres` | `webhooks-svix@svix` |
 | `ggg/usage` | `usage-postgres@postgres` | `usage-postgres@postgres` | `usage-openmeter@openmeter` |
 | `ggg/analytics` | `analytics-noop@local` | `analytics-posthog@posthog` | — |
-| `ggg/observability` | `observability-log@log` | `observability-log@log` | `observability-sentry@sentry` |
+| `ggg/observability` | `observability-log@log` | `observability-sentry@sentry` | — |
 | `ggg/telemetry` | `telemetry-noop@stdout` | `telemetry-otlp@otlp` | `telemetry-otlp@collector` |
 | `ggg/audit-export` | `audit-export-noop@noop` | `audit-export-otlp@otlp` | — |
 | `ggg/llm` | `llm-fake@fake` | `llm-openai-compatible@openai` | — |
 
-Defaults are the `ggg/profile/minimal` seeds; a created project writes explicit
-values into `gogogadget.json`. Change one with:
+A created project writes these as explicit values into `gogogadget.json`;
+nothing stays implicit. Change one with:
 
 ```sh
 ggg provider set --provider ggg/mail:production=ggg/system/mail-smtp@smtp
@@ -205,21 +211,28 @@ registries; nothing forks the core catalog.
 
 Each managed target declares its own keys in its adapter's manifest, and the
 generated [configuration reference](content/docs/configuration-reference.md)
-and `.env.example` come from those declarations. Required keys are enforced
-only for the adapter and target actually selected for the running environment;
-a managed selection with missing keys is one joined boot error, never a silent
+and `.env.example` come from those declarations. Nothing degrades silently:
+a managed adapter selected without its keys is a boot **error**, never a quiet
 fallback to the local adapter.
+
+Two mechanisms enforce that, and they report differently. The generated config
+validator collects every key declared `production_required` and joins them into
+one error listing all of them — today that is `DATABASE_URL`, `NEON_API_KEY`,
+`RESEND_API_KEY`, the four `STORAGE_R2_*` and the four `CLERK_*`. The remaining
+managed adapters check their own keys inside their constructors, so a missing
+`POLAR_ACCESS_TOKEN`, `POSTHOG_API_KEY`, `SENTRY_DSN` or `LLM_API_KEY` fails
+the boot on the first one reached rather than as part of the joined list.
 
 | Slot | Managed reference | Keys |
 |---|---|---|
 | `ggg/identity` | Clerk | `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SECRET`, `CLERK_PORTAL_URL` |
-| `ggg/billing` | Polar.sh | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRODUCT_PRO`, `POLAR_PRODUCT_TEAM` |
+| `ggg/billing` | Polar.sh | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRODUCT_PRO`, `POLAR_PRODUCT_TEAM`, optional `POLAR_SERVER` |
 | `ggg/mail` | Resend | `RESEND_API_KEY`, `EMAIL_FROM` |
 | `ggg/storage` | Cloudflare R2 | `STORAGE_R2_ACCOUNT_ID`, `STORAGE_R2_ACCESS_KEY_ID`, `STORAGE_R2_SECRET_ACCESS_KEY`, `STORAGE_R2_BUCKET` |
 | `ggg/llm` | Any OpenAI-compatible API | `LLM_API_KEY`, `LLM_MODEL`, optional `LLM_BASE_URL` |
 | `ggg/analytics` | PostHog | `POSTHOG_API_KEY`, `POSTHOG_HOST` |
 | `ggg/observability` | Sentry | `SENTRY_DSN` |
-| `ggg/database` | Neon | `DATABASE_URL` |
+| `ggg/database` | Neon | `DATABASE_URL`, `NEON_API_KEY`, optional `NEON_PROJECT_ID` |
 
 Development and test values the CLI manages live in gitignored,
 mode-`0600` `.ggg/env/<environment>.env`; `ggg provider configure` writes them.
