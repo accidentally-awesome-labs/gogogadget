@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "fdbe71c732b442e963ee7a5d9af3b4c74faf0be5676f6f6c708d44df6346e7f0"
+      "sha256": "befb0ee6b3f2c003420cd1168512f299e7374e21a75649121be0c8a39b41a763"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -900,7 +900,7 @@
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "3cdaefdb8612dc512a455625e5b09d6d7d5ed2775805f38c5deba3aff6c785c9"
+      "sha256": "b963d3e0f4371cf5e1fc3f7204172d1f483a2889b9807d5f1e82aaaae6e1d854"
     },
     {
       "path": "registry/modules/system/deploy-docker/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "9ee9165be4438b70a67c20358a393c48a7ee408142839019e988287b4f708b52"
+      "sha256": "49e9ad079593f6472079c0ddf089874ea2b5518c46f8d987d9cdf3d9e3999761"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "591e59eb3099bb34694bf42db0614a04bf465e72708987a2b873ddca87b77aff"
+      "sha256": "79822b121afe1cee8b47c274efa65daf665dff0a80e044786667207f28e85846"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1300,7 +1300,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "f55e70a3961c94e83f32098f6cc42ca2c12c8a1ce60c7a79678d9f687a70603c"
+      "sha256": "30817ed9c205161d8a4ee39cf12989d162feb09947167376262377aa72bd24fd"
     },
     {
       "path": "registry/schema/project.schema.json",

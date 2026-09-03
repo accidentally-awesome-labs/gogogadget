@@ -86,13 +86,13 @@ stages the upstream candidate under `tmp/ggg/conflicts/` and exits 4 for
 - `make dev` — one-terminal loop (templ watch + tailwind watch + air).
 - `make check` — THE gate: generate + `ggg sync --check --offline` + vet + test + build. Run before every commit.
 - `make seed` / `make db-reset` — demo data / nuke local db.
-- `make e2e` — Playwright suite (needs `docker compose up -d db`).
+- `make e2e` — Playwright suite (`ggg test e2e` brings the test stack up itself; the server it drives runs on the host at `:18080`).
 - `make visual` — compare visual baselines in the pinned Linux container (what CI's required `visual` job runs). `make visual-update` — the ONLY thing allowed to overwrite a committed screenshot; macOS screenshots diff by design.
 
 ## Run without accounts
 
 Fresh clone works end-to-end: `.env.example` ships `DEV_AUTH_BYPASS=true`;
-`make setup && docker compose up -d db && make seed && make dev` →
+`make setup && bin/ggg services up && make seed && make dev` →
 `/dev/login` signs in as the demo user. No Clerk/Polar/Resend account needed.
 E2E auth shape: cookie `__session=e2e:<userID>:<orgID>:<role>` (empty org = no
 active org). `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.

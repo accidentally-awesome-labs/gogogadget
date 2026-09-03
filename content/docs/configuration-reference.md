@@ -27,7 +27,7 @@ degradation behave.
 | `TEST_NOW` | `ggg/system/config` | `ggg` |  |  | RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic |
 | `POSTHOG_API_KEY` | `ggg/system/analytics-posthog` | `ggg` |  |  | Posthog Api Key. Secret: ships blank in `.env.example` |
 | `POSTHOG_HOST` | `ggg/system/analytics-posthog` | `ggg` |  |  | Posthog Host |
-| `DATABASE_URL` | `ggg/system/database` | `ggg` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
+| `DATABASE_URL` | `ggg/system/database` | `ggg` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches the host port the development stack publishes (`ggg services up`); production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
 | `NEON_API_KEY` | `ggg/system/database-postgres` | `ggg` | **always** |  | Neon API key for provisioning. Secret: ships blank in `.env.example` |
 | `NEON_PROJECT_ID` | `ggg/system/database-postgres` | `ggg` |  |  | Existing Neon project id; leave unset to provision one |
 | `LLM_API_KEY` | `ggg/system/llm-openai-compatible` | `ggg` |  |  | Llm Api Key. Secret: ships blank in `.env.example` |

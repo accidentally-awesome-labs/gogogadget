@@ -317,7 +317,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "059ce10c14eef90b35f6bec5a3da15a0c2903c95371bfd5f383350b9347a9049",
+        "sha256": "56fe2d643c1ce31313d4713aa651fec965bf94f3b84cd25068c4888b2e1b4edf",
         "rewrite_module": true,
         "contract": false
       },
@@ -414,7 +414,7 @@
         "source": "internal/modkit/compose.go",
         "target": "internal/modkit/compose.go",
         "class": "go",
-        "sha256": "6cd8c4d5664ae148ad8cf7e4f9fb2bb2ebb1f28567487b68916795dfa178468a",
+        "sha256": "345493c26cd48a1046e463e2bc08b2bd1b883efd796d511acb177e1b3b8adac9",
         "rewrite_module": true,
         "contract": true
       },

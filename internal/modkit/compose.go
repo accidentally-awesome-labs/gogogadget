@@ -91,12 +91,17 @@ type composePlan struct {
 	// publishes none.
 	appHost  int
 	selected []selectedService
-	// owners maps each published host port to the identity that publishes it,
-	// for the collision refusals.
+	// owners maps each published host port to the `<service>/<port>` key that
+	// publishes it, for the collision refusals. The key, not the service, is
+	// the useful owner: two ports of ONE service can land on one host port
+	// (nothing refuses a duplicate default_host within a declaration), and
+	// naming the service twice would report "collides between X and X" without
+	// saying which two ports to move. It is also exactly the string an
+	// operator writes under `ports` to fix it.
 	owners map[int]string
-	// declared maps every override key this environment can honour to its
-	// owning identity, for the override refusal.
-	declared map[string]string
+	// declared is every override key this environment can honour, for the
+	// override refusal and the list it prints.
+	declared map[string]struct{}
 }
 
 func planCompose(environment string, lock Lock, modules map[string]Manifest) (composePlan, error) {
@@ -104,19 +109,19 @@ func planCompose(environment string, lock Lock, modules map[string]Manifest) (co
 		environment: environment,
 		selected:    make([]selectedService, 0),
 		owners:      map[int]string{},
-		declared:    map[string]string{},
+		declared:    map[string]struct{}{},
 	}
 
 	// The app service is resolved first, so an adapter that lands on its port
-	// names `app` as the other owner rather than the reverse.
-	plan.declared[appPortKey] = composeAppService
+	// names `app/http` as the other owner rather than the reverse.
+	plan.declared[appPortKey] = struct{}{}
 	appHost, overridden := lock.Ports[appPortKey].ForEnvironment(environment)
 	if !overridden && environment != composeTestEnvironment {
 		appHost = appPort
 	}
 	if appHost != 0 {
 		plan.appHost = appHost
-		plan.owners[appHost] = composeAppService
+		plan.owners[appHost] = appPortKey
 	}
 
 	serviceNames := map[string]string{}
@@ -158,15 +163,15 @@ func planCompose(environment string, lock Lock, modules map[string]Manifest) (co
 		item := selectedService{name: name, slot: slot, adapter: choice.Adapter, target: *target, service: *target.LocalService}
 		for _, port := range target.LocalService.Ports {
 			key := identity + "/" + port.Name
-			plan.declared[key] = identity
+			plan.declared[key] = struct{}{}
 			host, err := effectiveHostPort(lock.Ports, environment, key, port.DefaultHost)
 			if err != nil {
 				return composePlan{}, err
 			}
 			if owner, exists := plan.owners[host]; exists {
-				return composePlan{}, fmt.Errorf("compose %s: host port %d collides between %s and %s", environment, host, owner, identity)
+				return composePlan{}, fmt.Errorf("compose %s: host port %d collides between %s and %s", environment, host, owner, key)
 			}
-			plan.owners[host] = identity
+			plan.owners[host] = key
 			item.published = append(item.published, publishedPort{host: host, container: port.Container})
 		}
 		for _, volume := range target.LocalService.Volumes {

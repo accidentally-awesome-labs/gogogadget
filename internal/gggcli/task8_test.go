@@ -232,10 +232,74 @@ func TestComposeRefusesACrossEnvironmentPortCollision(t *testing.T) {
 	if err == nil {
 		t.Fatal("cross-environment collision generated both files")
 	}
-	for _, want := range []string{"host port 15432", "development (ggg/system/cache@valkey)", "test (ggg/system/db@postgres)"} {
+	// The owner is the `<service>/<port>` key, which is also what an operator
+	// writes under `ports` to move it.
+	for _, want := range []string{"host port 15432", "development (ggg/system/cache@valkey/service)", "test (ggg/system/db@postgres/service)"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("collision error %q does not name %q", err, want)
 		}
+	}
+}
+
+// Two ports of ONE service can land on one host port: validateLocalService
+// refuses a duplicated port NAME but nothing refuses a duplicated
+// default_host, so the manifest-declared form reaches the generator. Keying
+// the owners map by service would report "collides between X and X" and never
+// say which two ports to move.
+func TestComposeRefusesASameServicePortCollisionByNamingBothPorts(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/store", "ggg/storage", "minio", "minio@sha256:"+strings.Repeat("d", 64), 9000),
+	}
+	service := graph[0].Runtime.System.Adapter.Targets[0].LocalService
+	service.Ports = append(service.Ports, modkit.LocalServicePort{Name: "console", Container: 9001, DefaultHost: 9000})
+	lock := modkit.Lock{Providers: map[string]modkit.ProviderSelections{
+		"ggg/storage": {Development: modkit.ProviderSelection{Adapter: "ggg/system/store", Target: "minio"}},
+	}}
+	_, err := modkit.GenerateComposeFiles(lock, graph)
+	if err == nil {
+		t.Fatal("same-service collision generated a file")
+	}
+	for _, want := range []string{"host port 9000", "ggg/system/store@minio/service", "ggg/system/store@minio/console"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("collision error %q does not name %q", err, want)
+		}
+	}
+}
+
+// The derived test port has a ceiling. `validateLocalService` bounds a
+// declared default_host to 65535, so this is reachable only through a
+// third-party adapter declaring above 55535 — precisely the case nobody hits
+// by accident and nobody would debug quickly from an invalid port in a
+// generated file.
+func TestComposeRefusesADerivedTestPortPastTheCeiling(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("acme/system/bus", "acme/bus", "broker", "broker@sha256:"+strings.Repeat("e", 64), 60000),
+	}
+	lock := modkit.Lock{Providers: map[string]modkit.ProviderSelections{
+		"acme/bus": {
+			Development: modkit.ProviderSelection{Adapter: "acme/system/bus", Target: "broker"},
+			Test:        modkit.ProviderSelection{Adapter: "acme/system/bus", Target: "broker"},
+		},
+	}}
+	_, err := modkit.GenerateComposeFiles(lock, graph)
+	if err == nil {
+		t.Fatal("a derived port past the ceiling generated a file")
+	}
+	// The declared port, the shift it produced, the ceiling, and the override
+	// key that fixes it — an invalid port number alone would say none of that.
+	for _, want := range []string{"declared host port 60000", "shifts to 70000", "past the 65535 ceiling", `"acme/system/bus@broker/service"`} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("ceiling error %q does not name %q", err, want)
+		}
+	}
+	// An explicit test override is the documented way out, and it works.
+	lock.Ports = map[string]modkit.PortOverrides{"acme/system/bus@broker/service": {Test: 16000}}
+	files, err := modkit.GenerateComposeFiles(lock, graph)
+	if err != nil {
+		t.Fatalf("override did not clear the ceiling: %v", err)
+	}
+	if !strings.Contains(composeFile(t, files, "compose.test.yaml"), "- 16000:60000") {
+		t.Fatalf("override port not published:\n%s", composeFile(t, files, "compose.test.yaml"))
 	}
 }
 

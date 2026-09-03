@@ -140,7 +140,7 @@
         "key": "DATABASE_URL",
         "field": "DatabaseURL",
         "type": "string",
-        "description": "Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting",
+        "description": "Postgres connection string. The dev default matches the host port the development stack publishes (`ggg services up`); production has no fallback because booting into the wrong database is worse than not booting",
         "default": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
         "example": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
         "production_required": true,
