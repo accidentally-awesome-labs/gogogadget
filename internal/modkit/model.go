@@ -228,6 +228,15 @@ const (
 
 // ExclusiveShellSlots are the mount slots: at most one active contribution,
 // and the shell's own container is the fallback rather than a wrapper.
+//
+// The generator enforces this over the INSTALLED UNION, not per environment,
+// which is stricter than the runtime needs: two identity adapters that never
+// run in the same environment still cannot both own a mount, so a development
+// org-switcher stub beside the hosted one is refused today. That is a
+// deliberate deferral, not a claim that the union is the right boundary — the
+// per-environment form would resolve it against the same selection
+// providerActive already uses, and the day someone wants that stub is the day
+// to write it.
 var ExclusiveShellSlots = []ShellSlot{ShellSlotOrgSwitcher, ShellSlotUserButton}
 
 // GalleryFamily is the closed component-reference family set.

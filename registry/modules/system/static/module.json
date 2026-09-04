@@ -4,7 +4,7 @@
     "id": "ggg/system/static",
     "kind": "system",
     "name": "static",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Static asset serving",
     "description": "The embedded static file set — built CSS, client JavaScript, fonts, icons, and the vendored browser assets — served with content-addressed caching.",
@@ -41,14 +41,6 @@
         "target": "input.css",
         "class": "style",
         "sha256": "e4770b10359482fbf84905b36627d0b9825dc82c9950f1d80fa3b57b69dfbae8",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/analytics.js",
-        "target": "static/analytics.js",
-        "class": "asset",
-        "sha256": "cf50dd90a1c75c36b0cfae421904342cbc374528a14f3b4c27e7b3fd7be78316",
         "rewrite_module": false,
         "contract": false
       },

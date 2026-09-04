@@ -2,6 +2,10 @@ package modkit
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"path"
 	"regexp"
 	"sort"
 	"strings"
@@ -82,6 +86,128 @@ func ValidateShellProviderNeutrality(modules []Manifest, files map[string][]byte
 		}
 	}
 	return nil
+}
+
+// shellSlotRendererSignature is the contract every shell-slot renderer
+// satisfies, spelled the way a manifest author reads it.
+const shellSlotRendererSignature = "func(context.Context, map[string]string) templ.Component"
+
+// ValidateShellSlotRenderers refuses a runtime.slots contribution whose
+// declared renderer is missing or has the wrong signature.
+//
+// The generated registry assigns each renderer into
+// map[string]templates.ShellSlotRenderer, so a wrong shape is already caught —
+// as a compile error inside a DO-NOT-EDIT file, about code nobody wrote,
+// pointing at neither the manifest that declared it nor the module that owns
+// it. That is the diagnostic the typed map was introduced to replace, not one
+// to inherit. This is the same failure reported before any write, naming the
+// module, the symbol and the shape it must have.
+//
+// It checks the renderer's actual signature rather than a contract range on
+// the module that owns the slot mechanism, and that is structural rather than
+// stylistic: a slot contributor CANNOT declare a requirement on
+// ggg/system/server. resolveRuntimeOrders turns every literal requires into a
+// runtime CONSTRUCTION edge (resolve.go:472-479), and the shell consumes
+// identity.verifier and analytics.capturer, so the capability edge already
+// orders server after those adapters — the reverse edge is a boot cycle in
+// production. A contract range therefore cannot express "my code compiles
+// against this module's exported type" for any module whose capability the
+// requirement target consumes, and the signature is what a consumer actually
+// breaks against.
+//
+// The residual is worth naming: this checks the SHAPE, not type identity
+// across a version boundary. A renderer whose signature still matches but
+// whose semantics moved lands as a compile error, as it should. Nothing here
+// is a version check.
+func ValidateShellSlotRenderers(modules []Manifest, files map[string][]byte) error {
+	for _, module := range modules {
+		for _, contribution := range module.Runtime.Slots {
+			pkg := strings.Trim(contribution.Package, "/")
+			found := false
+			for _, target := range sortedKeys(files) {
+				if !strings.HasSuffix(target, ".go") || path.Dir(target) != pkg {
+					continue
+				}
+				parsed, err := parser.ParseFile(token.NewFileSet(), target, files[target], parser.SkipObjectResolution)
+				if err != nil {
+					return fmt.Errorf("scan %s: %w", target, err)
+				}
+				for _, decl := range parsed.Decls {
+					fn, ok := decl.(*ast.FuncDecl)
+					if !ok || fn.Recv != nil || fn.Name == nil || fn.Name.Name != contribution.Renderer {
+						continue
+					}
+					found = true
+					if !isShellSlotRenderer(fn.Type) {
+						return fmt.Errorf(
+							"shell slot %s declared by %s names renderer %s.%s, which is not %s; a renderer receives the request context and its own module's declared non-secret configuration, and returns templ.NopComponent to render nothing",
+							contribution.ID, module.ID, pkg, contribution.Renderer, shellSlotRendererSignature)
+					}
+				}
+			}
+			if !found {
+				return fmt.Errorf(
+					"shell slot %s declared by %s names renderer %s.%s, which no installed payload in that package declares; it must be an exported %s",
+					contribution.ID, module.ID, pkg, contribution.Renderer, shellSlotRendererSignature)
+			}
+		}
+	}
+	return nil
+}
+
+// isShellSlotRenderer reports whether a declaration is
+// func(context.Context, map[string]string) templ.Component. The renderer is
+// referenced from generated code by name only, so the shape is checked
+// structurally rather than against a string a manifest would have to repeat
+// and could get wrong in a second place.
+func isShellSlotRenderer(fn *ast.FuncType) bool {
+	if fn.TypeParams != nil || fn.Params == nil || fn.Results == nil {
+		return false
+	}
+	params := flattenFields(fn.Params)
+	results := flattenFields(fn.Results)
+	if len(params) != 2 || len(results) != 1 {
+		return false
+	}
+	return isQualifiedType(params[0], "context", "Context") &&
+		isStringMap(params[1]) &&
+		isQualifiedType(results[0], "templ", "Component")
+}
+
+// flattenFields expands a field list into one entry per declared value, so
+// `func(_ context.Context, values map[string]string)` and a grouped
+// declaration read the same.
+func flattenFields(list *ast.FieldList) []ast.Expr {
+	out := make([]ast.Expr, 0, len(list.List))
+	for _, field := range list.List {
+		count := len(field.Names)
+		if count == 0 {
+			count = 1
+		}
+		for range count {
+			out = append(out, field.Type)
+		}
+	}
+	return out
+}
+
+func isQualifiedType(expr ast.Expr, pkg, name string) bool {
+	selector, ok := expr.(*ast.SelectorExpr)
+	if !ok || selector.Sel == nil || selector.Sel.Name != name {
+		return false
+	}
+	ident, ok := selector.X.(*ast.Ident)
+	return ok && ident.Name == pkg
+}
+
+func isStringMap(expr ast.Expr) bool {
+	mapType, ok := expr.(*ast.MapType)
+	if !ok {
+		return false
+	}
+	key, keyOK := mapType.Key.(*ast.Ident)
+	value, valueOK := mapType.Value.(*ast.Ident)
+	return keyOK && key.Name == "string" && valueOK && value.Name == "string"
 }
 
 // isProviderAdapter reports whether the module implements a provider slot.

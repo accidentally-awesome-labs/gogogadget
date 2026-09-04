@@ -310,6 +310,35 @@ The fields that carry weight:
   `database_ops`, `deploy`, `cli`. Each generates real Go, so a wrong package
   or handler name is a compile error on a named generated line, not a mystery
   at boot.
+- **`runtime.slots`** — markup contributed into the shell. Each entry is
+  `{id, slot, package, renderer}`, the `slot` is one of the closed ids
+  (`head`, `topbar`, `persistent-body`, `org-switcher`, `user-button`, …), and
+  the renderer is
+  `func(context.Context, map[string]string) templ.Component` living in
+  `internal/web/templates/slots` — one file per owning module, the same
+  arrangement `internal/web/templates/ui` uses for components. `values` is
+  **your module's own declared non-secret `environment` keys**, resolved per
+  request; a `secret` key is never passed, because anything a renderer
+  receives reaches the document. Return `templ.NopComponent` to render
+  nothing. `org-switcher` and `user-button` are exclusive: at most one
+  contribution, and the shell renders its own empty container when there is
+  none, so the contribution owns the whole element including its id and its
+  classes. A contribution owned by a provider adapter renders only in the
+  environments that select that adapter.
+
+  **Do not add `requires: ggg/system/server` for this.** A `requires` entry is
+  a runtime *construction* edge, not "my code compiles against this module's
+  exported type", and the shell already consumes `identity.verifier`,
+  `analytics.capturer`, `mail.sender` and friends — so a capability provider
+  that also contributes a slot inverts an edge that must point the other way,
+  and the plan refuses with `runtime dependency cycle in production`. A
+  contract range therefore cannot express compile-time compatibility for any
+  module whose capability the requirement target consumes. The renderer's
+  signature is checked directly instead: `ValidateShellSlotRenderers` parses
+  your payload before any write and names the module, the symbol and the shape
+  it must have. It checks the shape, not type identity across a version
+  boundary — a renderer whose signature still matches but whose semantics
+  moved is a compile error, which is the right place for it.
 - **`runtime.system`** — the constructor a system module contributes:
   `package`, `constructor`, its `needs` and `provides` capabilities, and
   `start` / `stop` / `health` flags. Add an `adapter` block (`slot` plus

@@ -1,6 +1,7 @@
 package modkit
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -157,4 +158,103 @@ func TestShellProviderNeutralityScansTemplateBytesOnly(t *testing.T) {
 	}
 
 	require.NoError(t, ValidateShellProviderNeutrality(modules, files))
+}
+
+// A mount slot is exclusive because the contribution carries the same id the
+// shell's fallback does. Two contributions would emit one id twice, and the
+// shell has no way to choose, so generation refuses and names both modules.
+// The check runs over the installed union — see ExclusiveShellSlots for why
+// that is stricter than the runtime needs.
+func TestShellSlotsRegistryRefusesTwoContributionsToAnExclusiveSlot(t *testing.T) {
+	mount := func(id, module string) Manifest {
+		return Manifest{ID: module, Kind: ModuleSystem, Runtime: RuntimeContributions{
+			System: &SystemContribution{Adapter: &AdapterContribution{
+				Slot:    "ggg/identity",
+				Targets: []ServiceTarget{{ID: "local", Mode: "development"}},
+			}},
+			Slots: []SlotContribution{{
+				ID: id, Slot: ShellSlotOrgSwitcher,
+				Package: "internal/web/templates/slots", Renderer: "Mount",
+			}},
+		}}
+	}
+	first, second := mount("first.mount", "ggg/system/identity-a"), mount("second.mount", "ggg/system/identity-b")
+	lock := Lock{Schema: 2, Order: []string{first.ID, second.ID}}
+
+	_, err := emitShellSlotsRegistry(context.Background(), "example.com/app", lock, []Manifest{first, second})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `shell slot "org-switcher" is exclusive`)
+	assert.Contains(t, err.Error(), "ggg/system/identity-a")
+	assert.Contains(t, err.Error(), "ggg/system/identity-b")
+
+	// One contribution is the whole point: it must still generate.
+	out, err := emitShellSlotsRegistry(context.Background(), "example.com/app",
+		Lock{Schema: 2, Order: []string{first.ID}}, []Manifest{first})
+	require.NoError(t, err)
+	assert.Contains(t, out.Content, `"org-switcher": []string{`)
+	assert.Contains(t, out.Content, `"first.mount": shellSlot0.Mount,`)
+
+	// An additive slot takes both, in installed-module order.
+	head := func(id, module string) Manifest {
+		m := mount(id, module)
+		m.Runtime.Slots[0].Slot = ShellSlotHead
+		return m
+	}
+	headA, headB := head("a.head", "ggg/system/identity-a"), head("b.head", "ggg/system/identity-b")
+	out, err = emitShellSlotsRegistry(context.Background(), "example.com/app",
+		Lock{Schema: 2, Order: []string{headA.ID, headB.ID}}, []Manifest{headA, headB})
+	require.NoError(t, err)
+	assert.Contains(t, out.Content, "\t\t\"a.head\",\n\t\t\"b.head\",\n")
+}
+
+// The renderer signature is the thing a slot contributor actually breaks
+// against, and it is checked before any write rather than inherited as a
+// compile error inside the generated registry. A contract range could not do
+// this job: requires is a construction edge, so a slot contributor cannot
+// declare one on the module that owns the slot mechanism at all.
+func TestShellSlotRenderersRefuseAWrongSignature(t *testing.T) {
+	contributor := func(renderer string) Manifest {
+		return Manifest{ID: "ggg/system/identity-clerk", Kind: ModuleSystem, Name: "identity-clerk",
+			Runtime: RuntimeContributions{Slots: []SlotContribution{{
+				ID: "identity-clerk-head", Slot: ShellSlotHead,
+				Package: "internal/web/templates/slots", Renderer: renderer,
+			}}}}
+	}
+	source := func(body string) map[string][]byte {
+		return map[string][]byte{"internal/web/templates/slots/clerk.go": []byte(
+			"package slots\n\nimport (\n\t\"context\"\n\n\t\"github.com/a-h/templ\"\n)\n\n" + body)}
+	}
+
+	require.NoError(t, ValidateShellSlotRenderers([]Manifest{contributor("ClerkHead")}, source(
+		"func ClerkHead(_ context.Context, values map[string]string) templ.Component {\n\treturn templ.NopComponent\n}\n")))
+
+	// The pre-v0.5.0 shape: no context, no values.
+	err := ValidateShellSlotRenderers([]Manifest{contributor("ClerkHead")}, source(
+		"func ClerkHead() templ.Component {\n\treturn templ.NopComponent\n}\n"))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "identity-clerk-head")
+	assert.Contains(t, err.Error(), "ggg/system/identity-clerk")
+	assert.Contains(t, err.Error(), shellSlotRendererSignature)
+
+	// The right arity with the wrong value type, which a contract number would
+	// have called compatible.
+	require.ErrorContains(t, ValidateShellSlotRenderers([]Manifest{contributor("ClerkHead")}, source(
+		"func ClerkHead(_ context.Context, values map[string]any) templ.Component {\n\treturn templ.NopComponent\n}\n")),
+		"is not "+shellSlotRendererSignature)
+
+	// A symbol nothing declares: the generated registry would not compile, and
+	// no version range would ever have caught it.
+	require.ErrorContains(t, ValidateShellSlotRenderers([]Manifest{contributor("ClerkHeader")}, source(
+		"func ClerkHead(_ context.Context, values map[string]string) templ.Component {\n\treturn templ.NopComponent\n}\n")),
+		"which no installed payload in that package declares")
+
+	// A method with the right name is not a renderer.
+	require.ErrorContains(t, ValidateShellSlotRenderers([]Manifest{contributor("ClerkHead")}, source(
+		"type shell struct{}\n\nfunc (shell) ClerkHead(_ context.Context, values map[string]string) templ.Component {\n\treturn templ.NopComponent\n}\n")),
+		"which no installed payload in that package declares")
+
+	// Grouped parameters are the same declaration.
+	require.NoError(t, ValidateShellSlotRenderers([]Manifest{contributor("Mount")}, source(
+		"func Mount(ctx context.Context, values map[string]string) templ.Component {\n\t_, _ = ctx, values\n\treturn templ.NopComponent\n}\n"+
+			"func Mount2(ctx context.Context, values map[string]string) templ.Component { return templ.NopComponent }\n")))
 }

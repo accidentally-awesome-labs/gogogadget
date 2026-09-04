@@ -249,7 +249,7 @@ func (s *Server) invalidateAnnouncementCache() {
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
-	h = s.sessionLoad(h) // Clerk claims, optional; absent cookie → unauthenticated
+	h = s.sessionLoad(h) // verified provider claims, optional; absent cookie → unauthenticated
 	h = s.secureHeaders(h)
 	h = s.rateLimit(h)
 	h = s.maintenanceMode(h) // 503 everything (except probes/static) when on
