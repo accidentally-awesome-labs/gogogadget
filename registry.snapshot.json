@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "f471eeae3262c56877771f5afa99e31d85775303245d2a74dfb7affdd53234ae"
+      "sha256": "303567fe1b5516df41a098b39f728752a637fd1554f73bcc20c3baadf8d4272c"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -944,7 +944,7 @@
     },
     {
       "path": "registry/modules/system/identity-clerk/module.json",
-      "sha256": "537d144ed033af8e0d9b18438b262e9261f5d70c115ee2aebe97bf41721c65ae"
+      "sha256": "139dfe39775cf590bd9135fa2eb0bdea02c633b7c06d36345edd57a851315834"
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "f898f1ebbf0f8815ea3cfce755f3f68d45b9052d91ad74151ee7b748a38c1d5e"
+      "sha256": "930382e5982e83bd0e1c121d0912da873b87df2435ddfe4b242e592aef55aab1"
     },
     {
       "path": "registry/modules/system/static/module.json",

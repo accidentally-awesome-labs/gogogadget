@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",
@@ -53,42 +53,33 @@
         "contract": false
       },
       {
-        "source": "internal/analytics/posthog/shell/shell.go",
-        "target": "internal/analytics/posthog/shell/shell.go",
+        "source": "internal/web/templates/slots/posthog.go",
+        "target": "internal/web/templates/slots/posthog.go",
         "class": "go",
-        "sha256": "f72a15e65476e04570c05cdf91328d2d92c919ad4d4d8749d0acc8bc4424f32a",
+        "sha256": "f6ec98a4b5af416ce377f336c98ba384792d1751fb37c475aa45d52cdcc08a24",
         "rewrite_module": true,
         "contract": true
       },
       {
-        "source": "internal/analytics/posthog/shell/shell.templ",
-        "target": "internal/analytics/posthog/shell/shell.templ",
+        "source": "internal/web/templates/slots/posthog.templ",
+        "target": "internal/web/templates/slots/posthog.templ",
         "class": "templ",
-        "sha256": "16c75f619aa12683c240886008210456507399bed3ea89145afb57487544bc9b",
+        "sha256": "bf5ab812a94756d249dcf2f6a16dfec688dbf6a50c6c42da52251f9267d5c687",
         "rewrite_module": true,
         "contract": false
       },
       {
-        "source": "internal/analytics/posthog/shell/shell_test.go",
-        "target": "internal/analytics/posthog/shell/shell_test.go",
+        "source": "internal/web/templates/slots/posthog_test.go",
+        "target": "internal/web/templates/slots/posthog_test.go",
         "class": "test",
-        "sha256": "438a8dd363d31fcb0f5602fcd700909d0e4bb86d5085166e00e26d7b04069ebe",
+        "sha256": "ccc07e5e135f2df907b735dd8d2ef9c1a9b642081f345dd4ddf8040835799ca9",
         "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/styles/analytics-posthog.css",
-        "target": "internal/web/styles/analytics-posthog.css",
-        "class": "style",
-        "sha256": "415a528e0037b7ad75043351280c1c527c785d6e5d73aa082e2dab0b84c5cce4",
-        "rewrite_module": false,
         "contract": false
       }
     ],
     "claims": {
       "packages": [
-        "internal/analytics/posthog",
-        "internal/analytics/posthog/shell"
+        "internal/analytics/posthog"
       ]
     },
     "runtime": {
@@ -130,14 +121,14 @@
         {
           "id": "analytics-posthog-consent",
           "slot": "persistent-body",
-          "package": "internal/analytics/posthog/shell",
-          "renderer": "Consent"
+          "package": "internal/web/templates/slots",
+          "renderer": "PostHogConsent"
         },
         {
           "id": "analytics-posthog-head",
           "slot": "head",
-          "package": "internal/analytics/posthog/shell",
-          "renderer": "Head"
+          "package": "internal/web/templates/slots",
+          "renderer": "PostHogHead"
         }
       ]
     },
@@ -180,7 +171,7 @@
     "tests": {
       "go_packages": [
         "internal/analytics/posthog",
-        "internal/analytics/posthog/shell"
+        "internal/web/templates/slots"
       ]
     },
     "data": [],

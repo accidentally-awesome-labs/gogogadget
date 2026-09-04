@@ -1,4 +1,4 @@
-package shell_test
+package slots_test
 
 import (
 	"strings"
@@ -14,10 +14,10 @@ import (
 
 // The package under test is imported by the generated shell-slot registry in
 // package templates, so these assertions live in the external test package:
-// shell_test may reach templates, templates may reach shell, and neither
+// slots_test may reach templates, templates may reach slots, and neither
 // direction is a cycle.
 
-func appShell(t *testing.T, environment string, values map[string]string) string {
+func clerkAppShell(t *testing.T, environment string, values map[string]string) string {
 	t.Helper()
 	ctx := templates.WithProviderEnvironment(t.Context(), environment)
 	ctx = templates.WithConfigLookup(ctx, func(key string) string { return values[key] })
@@ -42,7 +42,7 @@ func appShell(t *testing.T, environment string, values map[string]string) string
 // asserts the rendered document, not the Go shape — the shape moved, the HTML
 // must not have.
 func TestClerkConfiguredShellRendersLoaderAndLiveMounts(t *testing.T) {
-	body := appShell(t, "production", map[string]string{
+	body := clerkAppShell(t, "production", map[string]string{
 		"CLERK_PUBLISHABLE_KEY": "pk_test_fixture",
 	})
 
@@ -72,7 +72,7 @@ func TestClerkConfiguredShellRendersLoaderAndLiveMounts(t *testing.T) {
 // The same project in an environment that selects another identity adapter
 // gets the shell's own containers and no trace of this one.
 func TestClerkDeselectedEnvironmentRendersNeutralShell(t *testing.T) {
-	body := appShell(t, "development", map[string]string{
+	body := clerkAppShell(t, "development", map[string]string{
 		"CLERK_PUBLISHABLE_KEY": "pk_test_fixture",
 	})
 
@@ -86,7 +86,7 @@ func TestClerkDeselectedEnvironmentRendersNeutralShell(t *testing.T) {
 // but not the loader: clerk.browser.js without a key throws and mounts
 // nothing.
 func TestClerkSelectedWithoutKeyRendersMountsButNoLoader(t *testing.T) {
-	body := appShell(t, "production", nil)
+	body := clerkAppShell(t, "production", nil)
 
 	assert.Contains(t, body, `<div id="org-switcher" class="clerk-org-slot min-h-8"`)
 	assert.NotContains(t, body, "clerk.browser.js")

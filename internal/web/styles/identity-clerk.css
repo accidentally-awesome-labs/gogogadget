@@ -3,9 +3,8 @@
    adapter takes these rules with it instead of leaving two dead classes in the
    shell's stylesheet.
 
-   @source is required: the Tailwind entry scans internal/web/templates only,
-   and the utilities this adapter's own markup uses live outside it. */
-@source "../../identity/clerk/shell";
+   The utilities its markup uses need no @source of their own: slot renderers
+   live under internal/web/templates, which the Tailwind entry already scans. */
 
 @layer components {
   /* Keep Clerk controls visually stable while clerk-js mounts. The live

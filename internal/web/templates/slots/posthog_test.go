@@ -1,4 +1,4 @@
-package shell_test
+package slots_test
 
 import (
 	"strings"
@@ -10,7 +10,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 )
 
-func publicShell(t *testing.T, environment string, values map[string]string) string {
+func posthogPublicShell(t *testing.T, environment string, values map[string]string) string {
 	t.Helper()
 	ctx := templates.WithProviderEnvironment(t.Context(), environment)
 	ctx = templates.WithConfigLookup(ctx, func(key string) string { return values[key] })
@@ -24,7 +24,7 @@ func publicShell(t *testing.T, environment string, values map[string]string) str
 // key and autocapture cannot work without it. array.js is proxied through
 // /ingest so the CSP stays script-src 'self'.
 func TestPostHogConfiguredShellRendersLoaderAndConsent(t *testing.T) {
-	body := publicShell(t, "production", map[string]string{
+	body := posthogPublicShell(t, "production", map[string]string{
 		"POSTHOG_API_KEY": "phc_fixture",
 	})
 
@@ -41,7 +41,7 @@ func TestPostHogConfiguredShellRendersLoaderAndConsent(t *testing.T) {
 }
 
 func TestPostHogDeselectedEnvironmentRendersNothing(t *testing.T) {
-	body := publicShell(t, "development", map[string]string{
+	body := posthogPublicShell(t, "development", map[string]string{
 		"POSTHOG_API_KEY": "phc_fixture",
 	})
 
@@ -51,7 +51,7 @@ func TestPostHogDeselectedEnvironmentRendersNothing(t *testing.T) {
 }
 
 func TestPostHogSelectedWithoutKeyRendersNothing(t *testing.T) {
-	body := publicShell(t, "production", nil)
+	body := posthogPublicShell(t, "production", nil)
 
 	assert.NotContains(t, body, "ph-key")
 	assert.NotContains(t, body, `x-data="phConsent"`)

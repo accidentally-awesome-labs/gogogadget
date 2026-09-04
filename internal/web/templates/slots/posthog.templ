@@ -1,4 +1,4 @@
-package shell
+package slots
 
 import "github.com/gogogadget/gogogadget/internal/i18n"
 
@@ -12,7 +12,7 @@ import "github.com/gogogadget/gogogadget/internal/i18n"
 // script-src 'self' and no third-party origin is contacted from the document.
 // analytics.js reads the meta tag below, gates posthog.init on stored consent,
 // and registers the Alpine data the consent dialog binds to.
-templ head(projectKey string) {
+templ posthogHead(projectKey string) {
 	<meta name="ph-key" content={ projectKey }/>
 	<script defer src="/ingest/static/array.js"></script>
 	<script defer src="/static/analytics.js"></script>
@@ -24,7 +24,7 @@ templ head(projectKey string) {
 // It renders into the shell's persistent-body slot rather than inside
 // #content, because boosted navigation swaps #content and would remount the
 // dialog (and lose its Alpine state) on every page change.
-templ consent() {
+templ posthogConsent() {
 	<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-(--z-overlay) card max-w-sm text-sm" role="dialog" aria-label={ i18n.T(ctx, "a11y.analytics_consent") }>
 		<p>{ i18n.T(ctx, "layout.analytics_consent_body") }</p>
 		<div class="flex gap-2 mt-3">

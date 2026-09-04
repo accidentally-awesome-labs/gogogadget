@@ -1,9 +1,0 @@
-/* The consent dialog's utilities. This file ships with
-   ggg/system/analytics-posthog and is imported through the generated
-   per-module style registry.
-
-   @source is the whole point: the Tailwind entry scans internal/web/templates
-   only, so the classes on markup this adapter owns would otherwise be absent
-   from the built stylesheet and the dialog would render unstyled — in
-   production, on the one path no local run exercises. */
-@source "../../analytics/posthog/shell";

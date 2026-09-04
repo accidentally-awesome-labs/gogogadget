@@ -4,7 +4,7 @@
     "id": "ggg/system/identity-clerk",
     "kind": "system",
     "name": "identity-clerk",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Clerk identity",
     "description": "Hosted Clerk identity provider",
@@ -87,30 +87,6 @@
         "contract": true
       },
       {
-        "source": "internal/identity/clerk/shell/shell.go",
-        "target": "internal/identity/clerk/shell/shell.go",
-        "class": "go",
-        "sha256": "2be5eba603c7c8bf4108ef66a964771c6ddcab8c293b07832ca0a3dda2feeabc",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/clerk/shell/shell.templ",
-        "target": "internal/identity/clerk/shell/shell.templ",
-        "class": "templ",
-        "sha256": "4ea61fce80a236a45509128a8511009b655105f485e637deedc2b00cf666c7d8",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/clerk/shell/shell_test.go",
-        "target": "internal/identity/clerk/shell/shell_test.go",
-        "class": "test",
-        "sha256": "851e69cf8460f8aa3b7892ce9435b962ba032e97ab281f326f307e38afca2a19",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/identity/clerk/webhook.go",
         "target": "internal/identity/clerk/webhook.go",
         "class": "go",
@@ -138,8 +114,32 @@
         "source": "internal/web/styles/identity-clerk.css",
         "target": "internal/web/styles/identity-clerk.css",
         "class": "style",
-        "sha256": "0ca22b9b9812a8eb74b2a60dc5cff8df9e2703aebba6733a0cabfe9c16d08d1b",
+        "sha256": "b3d609f53fac0098ee79b02218c5ff5f76ca8920c1e3dea5605ef28f5b9383a6",
         "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/slots/clerk.go",
+        "target": "internal/web/templates/slots/clerk.go",
+        "class": "go",
+        "sha256": "8c8bfaec7aa216373e0f7571f1f5850946ce400adf58551f0de5af67813f6388",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/slots/clerk.templ",
+        "target": "internal/web/templates/slots/clerk.templ",
+        "class": "templ",
+        "sha256": "b6a3c249d8cbdb9428e1f4b8a26000e186ddbc3e9ef5ef24f675fed8e885811e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/slots/clerk_test.go",
+        "target": "internal/web/templates/slots/clerk_test.go",
+        "class": "test",
+        "sha256": "d214562f3535d43217c1721925abfda654a10a1b07d9b806d27358cc93cd1a80",
+        "rewrite_module": true,
         "contract": false
       },
       {
@@ -586,7 +586,6 @@
     "claims": {
       "packages": [
         "internal/identity/clerk",
-        "internal/identity/clerk/shell",
         "internal/identity/clerkurl"
       ]
     },
@@ -672,20 +671,20 @@
         {
           "id": "identity-clerk-head",
           "slot": "head",
-          "package": "internal/identity/clerk/shell",
-          "renderer": "Head"
+          "package": "internal/web/templates/slots",
+          "renderer": "ClerkHead"
         },
         {
           "id": "identity-clerk-org-switcher",
           "slot": "org-switcher",
-          "package": "internal/identity/clerk/shell",
-          "renderer": "OrgSwitcher"
+          "package": "internal/web/templates/slots",
+          "renderer": "ClerkOrgSwitcher"
         },
         {
           "id": "identity-clerk-user-button",
           "slot": "user-button",
-          "package": "internal/identity/clerk/shell",
-          "renderer": "UserButton"
+          "package": "internal/web/templates/slots",
+          "renderer": "ClerkUserButton"
         }
       ]
     },
@@ -1262,7 +1261,7 @@
         "key": "CLERK_FRONTEND_API_URL",
         "field": "ClerkFrontendAPIURL",
         "type": "string",
-        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise",
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.\u003chost\u003e` in production, the Clerk dev wildcard otherwise",
         "derivation": {
           "package": "internal/identity/clerkurl",
           "function": "FrontendAPIURL",
@@ -1308,8 +1307,8 @@
     "tests": {
       "go_packages": [
         "internal/identity/clerk",
-        "internal/identity/clerk/shell",
-        "internal/identity/clerkurl"
+        "internal/identity/clerkurl",
+        "internal/web/templates/slots"
       ]
     },
     "data": [],

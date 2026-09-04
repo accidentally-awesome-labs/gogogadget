@@ -1,4 +1,4 @@
-package shell
+package slots
 
 // head is the clerk-js loader.
 //
@@ -11,7 +11,7 @@ package shell
 //
 // The script is self-hosted from static/vendor/, an asset THIS module owns and
 // checksums, so the CSP stays script-src 'self' and nothing is inline.
-templ head(publishableKey string) {
+templ clerkHead(publishableKey string) {
 	<meta name="clerk-publishable-key" content={ publishableKey }/>
 	<script defer src="/static/vendor/clerk.browser.js" data-clerk-publishable-key={ publishableKey }></script>
 }
@@ -25,10 +25,10 @@ templ head(publishableKey string) {
 //
 // data-clerk-placeholder is rendered by .clerk-org-slot:empty::before and
 // vanishes the moment clerk-js mounts its own children.
-templ orgSwitcher(placeholder string) {
+templ clerkOrgSwitcher(placeholder string) {
 	<div id="org-switcher" class="clerk-org-slot min-h-8" data-clerk-placeholder={ placeholder }></div>
 }
 
-templ userButton(placeholder string) {
+templ clerkUserButton(placeholder string) {
 	<div id="user-button" class="clerk-user-slot min-h-8 min-w-8" data-clerk-placeholder={ placeholder }></div>
 }
