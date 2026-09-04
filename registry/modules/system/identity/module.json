@@ -4,7 +4,7 @@
     "id": "ggg/system/identity",
     "kind": "system",
     "name": "identity",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Identity",
     "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",

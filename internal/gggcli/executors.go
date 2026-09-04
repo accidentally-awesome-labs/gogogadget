@@ -410,6 +410,14 @@ func (c *Controller) applyRegistryBuild(dir string) (Result, error) {
 	if err != nil {
 		return failureEnvelope("registry build", runtimeError(err))
 	}
+	// Refusing here rather than warning: revision is what every consumer reads
+	// to decide an update exists, so publishing changed bytes under an
+	// unchanged revision is the one failure a registry cannot recover from
+	// downstream. The digests are already rewritten at this point, so the
+	// remedy is a one-line edit and a re-run.
+	if err := modkit.ValidateManifestRevisions(dir); err != nil {
+		return failureEnvelope("registry build", refusalError(err))
+	}
 	built, discovered, err := modkit.BuildRegistryIndexes(dir)
 	if err != nil {
 		return failureEnvelope("registry build", runtimeError(err))

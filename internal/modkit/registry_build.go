@@ -189,3 +189,120 @@ func BuildRegistryIndexes(root string) (written []string, discovered []string, e
 	sort.Strings(discovered)
 	return written, discovered, nil
 }
+
+// ValidateManifestRevisions refuses a module whose payload digests moved while
+// its revision stood still.
+//
+// revision is the module's version of record: it feeds indexSHA, `ggg info`,
+// and every consumer's decision about whether an update is available. The
+// convention — revision on any implementation change, contract only when a
+// caller must change code — held only as habit, and habit failed seventeen
+// times in one range. This turns it into a gate.
+//
+// The reference point is the lock, not the manifest's own bytes, and that
+// distinction is what makes the rule livable. Comparing a manifest against
+// itself would demand a bump per edit, so a second payload change in the same
+// session would refuse even after a correct bump. The lock records what this
+// project last consumed — revision and per-payload digest together — so one
+// bump covers a whole editing session, and the next `sync` moves the reference
+// forward.
+//
+// Scope: modules with a lock entry. A registry with no lock beside it (a fresh
+// clone before the first sync, `ggg create` writing into a project-local
+// registry, a standalone publisher's tree) has no previous published state to
+// compare against, and inventing a refusal there would block genesis.
+func ValidateManifestRevisions(root string) error {
+	raw, err := os.ReadFile(filepath.Join(root, LockFileName))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var lock Lock
+	if err := json.Unmarshal(raw, &lock); err != nil {
+		// A lock this command cannot read is the planner's problem to report.
+		return nil
+	}
+	previous := make(map[string]LockedModule, len(lock.Modules))
+	for _, module := range lock.Modules {
+		if module.Reason == TombstoneReason {
+			continue
+		}
+		previous[module.ID] = module
+	}
+
+	stale := make([]string, 0)
+	for _, include := range catalogIncludes {
+		if include.kind == CatalogProfile {
+			continue
+		}
+		dir := filepath.Join(root, "registry", "modules", string(include.kind))
+		entries, readErr := os.ReadDir(dir)
+		if errors.Is(readErr, fs.ErrNotExist) {
+			continue
+		}
+		if readErr != nil {
+			return fmt.Errorf("scan %s: %w", dir, readErr)
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			rel := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
+			data, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+			if readErr != nil {
+				continue
+			}
+			var document ModuleDocument
+			if err := decodeStrict(data, &document); err != nil {
+				continue
+			}
+			locked, known := previous[document.Module.ID]
+			if !known {
+				continue
+			}
+			if document.Module.Revision != locked.Revision {
+				continue
+			}
+			if manifestPayloadDigest(document.Module) != lockedPayloadDigest(locked) {
+				stale = append(stale, fmt.Sprintf("%s (revision %d)", document.Module.ID, locked.Revision))
+			}
+		}
+	}
+	if len(stale) == 0 {
+		return nil
+	}
+	sort.Strings(stale)
+	return fmt.Errorf(
+		"payload digests changed without a revision bump: %s. revision is the module's version of record — it feeds indexSHA and `ggg info` — so an implementation change that leaves it alone publishes a lie. Bump revision (contract moves only when a consumer must change code)",
+		strings.Join(stale, ", "))
+}
+
+// manifestPayloadDigest is a stable digest over one manifest's declared
+// payloads. Targets are included because moving a payload is an implementation
+// change even when its bytes are identical.
+func manifestPayloadDigest(m Manifest) string {
+	parts := make([]string, 0, len(m.Files)+len(m.Migrations))
+	for _, file := range m.Files {
+		parts = append(parts, file.Target+"\x00"+file.SHA256)
+	}
+	for _, migration := range m.Migrations {
+		parts = append(parts, migration.ID+"\x00"+migration.SHA256)
+	}
+	sort.Strings(parts)
+	return digestBytes([]byte(strings.Join(parts, "\n")))
+}
+
+// lockedPayloadDigest is the same digest over what the project last consumed.
+func lockedPayloadDigest(locked LockedModule) string {
+	parts := make([]string, 0, len(locked.Files)+len(locked.Migrations))
+	for _, file := range locked.Files {
+		parts = append(parts, file.Path+"\x00"+file.BaseSHA256)
+	}
+	for _, migration := range locked.Migrations {
+		parts = append(parts, migration.ID+"\x00"+migration.SHA256)
+	}
+	sort.Strings(parts)
+	return digestBytes([]byte(strings.Join(parts, "\n")))
+}

@@ -4,7 +4,7 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",

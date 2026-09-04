@@ -4,7 +4,7 @@
     "id": "ggg/system/registry-template",
     "kind": "system",
     "name": "registry-template",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "External registry template",
     "description": "The maintained, signed registry a third party copies to publish modules against this framework.",
@@ -51,7 +51,7 @@
         "source": "templates/external-registry/registry.snapshot.json",
         "target": "templates/external-registry/registry.snapshot.json",
         "class": "asset",
-        "sha256": "af4704331ba8c6da2ccac0c17215c1667059816ae2c77ea25f2aacf5b2c3889b",
+        "sha256": "c63cbd12fd5f0d7bb0cf1b188015a7ceccd8b424a904c4c924393dae3d7f59d5",
         "rewrite_module": false,
         "contract": false
       },
@@ -59,7 +59,7 @@
         "source": "templates/external-registry/registry.snapshot.sig",
         "target": "templates/external-registry/registry.snapshot.sig",
         "class": "asset",
-        "sha256": "defb6edc7a48aba58fbc140d97641cbb18ef7b4fe84bce202366048b352d4781",
+        "sha256": "22d6defb9ca86cb360ac170908bf50b72d79d050d14d4de4916fb6505a466c09",
         "rewrite_module": false,
         "contract": false
       },
@@ -115,7 +115,7 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "class": "asset",
-        "sha256": "4f654fa7956f0aeba72621b612fde5508f9cc842b19088d84c0025cb90df7023",
+        "sha256": "fb7ff943e44501a57d1b5ccc126cf1dd04d878193d946fb7560ab86736b30cff",
         "rewrite_module": false,
         "contract": false
       },

@@ -4,7 +4,7 @@
     "id": "ggg/system/identity-dev",
     "kind": "system",
     "name": "identity-dev",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Development identity",
     "description": "Synthetic identity for development and tests",

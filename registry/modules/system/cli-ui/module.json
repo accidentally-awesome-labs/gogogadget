@@ -4,7 +4,7 @@
     "id": "ggg/system/cli-ui",
     "kind": "system",
     "name": "cli-ui",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Interactive ggg console",
     "description": "The Bubble Tea console screens and Huh guided forms over the gggcli controller: Home, Catalog, Providers, Plan, Conflicts, Tasks, and Diagnostics, with linear accessible rendering and no mouse requirement.",
@@ -13,7 +13,7 @@
         "id": "ggg/system/modkit",
         "contract": {
           "min": 2,
-          "max": 3
+          "max": 4
         }
       }
     ],

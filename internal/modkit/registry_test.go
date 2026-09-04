@@ -2,6 +2,9 @@ package modkit
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -645,5 +648,70 @@ func TestValidateDerivationPackagesRefusesAReachBackToConfig(t *testing.T) {
 	}
 	if err := ValidateDerivationPackages(modules, indirect, "example.com/app"); err == nil {
 		t.Fatal("a derivation package reaching internal/config through one hop was accepted")
+	}
+}
+
+// revisionFixture writes a one-module registry plus the lock that records what
+// the project last consumed, so the gate has a previous published state to
+// compare against.
+func revisionFixture(t *testing.T, revision int, payload string) string {
+	t.Helper()
+	root := t.TempDir()
+	dir := filepath.Join(root, "registry", "modules", "system", "hatch")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := fmt.Sprintf(`{"schema":2,"module":{"id":"ggg/system/hatch","kind":"system","name":"hatch",
+"revision":%d,"contract":1,"title":"Hatch","description":"Hatch system.","requires":[],
+"dependencies":{"go":[],"tools":[],"containers":[]},
+"files":[{"source":"internal/hatch/hatch.go","target":"internal/hatch/hatch.go","class":"go","sha256":%q,"rewrite_module":true,"contract":true}],
+"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},"data":[],"removal_policy":"free"}}`,
+		revision, payload)
+	if err := os.WriteFile(filepath.Join(dir, "module.json"), []byte(manifest), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lock := `{"schema":2,"engine_contract":2,"registry_commit":"` + testCommitA + `","order":["ggg/system/hatch"],
+"modules":[{"id":"ggg/system/hatch","revision":1,"contract":1,"source_commit":"` + testCommitA + `","reason":"explicit","required_by":[],
+"files":[{"path":"internal/hatch/hatch.go","source":"internal/hatch/hatch.go","base_sha256":"` + strings.Repeat("a", 64) + `","local_sha256":"` + strings.Repeat("a", 64) + `","state":"clean"}],
+"migrations":[]}]}`
+	if err := os.WriteFile(filepath.Join(root, LockFileName), []byte(lock), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
+// revision is the module's version of record: it feeds indexSHA and `ggg info`,
+// so changed payloads under an unchanged revision publish a lie. The convention
+// held only as habit until this gate, and habit failed seventeen times in one
+// range — including, on the gate's very first run, an eighteenth module nobody
+// had noticed.
+func TestValidateManifestRevisionsRefusesChangedPayloadsAtTheSameRevision(t *testing.T) {
+	unchanged := strings.Repeat("a", 64)
+	changed := strings.Repeat("b", 64)
+
+	if err := ValidateManifestRevisions(revisionFixture(t, 1, unchanged)); err != nil {
+		t.Fatalf("an untouched module was refused: %v", err)
+	}
+	err := ValidateManifestRevisions(revisionFixture(t, 1, changed))
+	if err == nil {
+		t.Fatal("changed payload digests at the locked revision were accepted")
+	}
+	if !strings.Contains(err.Error(), "ggg/system/hatch") || !strings.Contains(err.Error(), "revision") {
+		t.Fatalf("the refusal must name the module and the remedy: %v", err)
+	}
+	// The bump is the remedy, and it must be enough on its own: comparing a
+	// manifest against its own previous bytes would demand one bump per edit.
+	if err := ValidateManifestRevisions(revisionFixture(t, 2, changed)); err != nil {
+		t.Fatalf("a bumped revision was still refused: %v", err)
+	}
+
+	// Scope: no lock beside the registry means no previous published state, so
+	// there is nothing to compare and genesis must not be blocked.
+	bare := revisionFixture(t, 1, changed)
+	if err := os.Remove(filepath.Join(bare, LockFileName)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateManifestRevisions(bare); err != nil {
+		t.Fatalf("a registry with no lock was refused: %v", err)
 	}
 }

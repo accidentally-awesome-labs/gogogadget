@@ -4,7 +4,7 @@
     "id": "ggg/workflow/dev-session",
     "kind": "workflow",
     "name": "dev-session",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Zero-account dev session",
     "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",

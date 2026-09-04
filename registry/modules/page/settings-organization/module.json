@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-organization",
     "kind": "page",
     "name": "settings-organization",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Organization settings",
     "description": "Renders the organization settings tab with the member roster, the hosted Clerk organization-portal link, and the admin-only export control.",

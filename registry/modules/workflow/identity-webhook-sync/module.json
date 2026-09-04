@@ -4,7 +4,7 @@
     "id": "ggg/workflow/identity-webhook-sync",
     "kind": "workflow",
     "name": "identity-webhook-sync",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Identity provider sync",
     "description": "Receives Clerk user and organization events and mirrors them into the local tables.",

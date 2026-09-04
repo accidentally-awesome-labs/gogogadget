@@ -4,7 +4,7 @@
     "id": "ggg/system/billing",
     "kind": "system",
     "name": "billing",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Billing",
     "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",

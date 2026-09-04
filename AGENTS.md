@@ -50,7 +50,10 @@ make generate                         # ggg sync --offline → templ → sqlc �
 After editing a file a manifest owns, run
 `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` **as one
 command** — build refreshes payload digests, and a sync without it fails with
-`sha256 mismatch`. `update` never overwrites locally modified source: it
+`sha256 mismatch`. Build also REFUSES a module whose payload digests moved while
+`revision` stood still (`modkit.ValidateManifestRevisions`, measured against the
+lock, so one bump covers a whole editing session): revision moves on any
+implementation change, contract only when a consumer must change code. `update` never overwrites locally modified source: it
 stages the upstream candidate under `tmp/ggg/conflicts/` and exits 4 for
 `ggg resolve`. Exit codes: 0 ok, 1 runtime, 2 usage, 3 refusal, 4 conflict,
 5 rolled back. Full workflows: **[/docs/extending](content/docs/extending.md)**.

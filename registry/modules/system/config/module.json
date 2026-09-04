@@ -4,7 +4,7 @@
     "id": "ggg/system/config",
     "kind": "system",
     "name": "config",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Configuration",
     "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",

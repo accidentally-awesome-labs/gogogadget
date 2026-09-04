@@ -355,7 +355,8 @@ The fields that carry weight:
 Then build and validate:
 
 ```sh
-ggg registry build       # rescan the registry tree, refresh payload digests, verify vendored bytes
+ggg registry build       # rescan the registry tree, refresh payload digests, verify vendored bytes,
+                         # refuse a module whose payloads changed at an unchanged revision
 ggg registry validate    # check the catalog, then prove the closure lifecycle in a derivative
 ggg sync --offline       # install into this tree and regenerate
 ```

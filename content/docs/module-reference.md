@@ -273,7 +273,7 @@ itself.
 | `ggg/system/cache-memory` | `ggg` | 1 | Cache Memory | `ggg/system/cache` [1,1] | `free` |
 | `ggg/system/cache-redis` | `ggg` | 1 | Cache Redis | `ggg/system/cache` [1,1] | `free` |
 | `ggg/system/ci-github` | `ggg` | 1 | Ci Github | `ggg/system/project-base` [1,1] | `free` |
-| `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,3] | `free` |
+| `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,4] | `free` |
 | `ggg/system/config` | `ggg` | 1 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/content-assets` | `ggg` | 1 | Embedded content corpus | `ggg/system/content` [1,1] | `free` |
@@ -300,7 +300,7 @@ itself.
 | `ggg/system/mail-dev` | `ggg` | 1 | Filesystem mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
 | `ggg/system/mail-resend` | `ggg` | 1 | Resend mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
 | `ggg/system/metrics` | `ggg` | 1 | Runtime metrics endpoint | `ggg/system/server` [1,1] | `free` |
-| `ggg/system/modkit` | `ggg` | 3 | Module registry engine | — | `replacement-required` |
+| `ggg/system/modkit` | `ggg` | 4 | Module registry engine | — | `replacement-required` |
 | `ggg/system/notifications` | `ggg` | 1 | In-app notifications | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/notifications-postgres` | `ggg` | 1 | Notifications Postgres | `ggg/system/notifications` [1,1] | `free` |
 | `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |

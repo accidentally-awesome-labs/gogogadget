@@ -4,7 +4,7 @@
     "id": "ggg/page/dev-gallery",
     "kind": "page",
     "name": "dev-gallery",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Component gallery",
     "description": "The dev-only reference page that renders every design token and component variant on one URL, doubling as the visual baseline for the component layer.",

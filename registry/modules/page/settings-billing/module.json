@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-billing",
     "kind": "page",
     "name": "settings-billing",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Billing settings",
     "description": "Renders the organization's plan, subscription state, project count, storage use and metered usage for the current month.",

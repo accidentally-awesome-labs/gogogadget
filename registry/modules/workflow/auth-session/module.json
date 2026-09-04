@@ -4,7 +4,7 @@
     "id": "ggg/workflow/auth-session",
     "kind": "workflow",
     "name": "auth-session",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Sign-in, sign-up and sign-out",
     "description": "Redirects the hosted Clerk Account Portal flows for sign-in, sign-up and sign-out, and owns the session cookie clear plus the account-portal link builder the settings pages use.",
