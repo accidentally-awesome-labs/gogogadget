@@ -40,7 +40,7 @@
         "source": "cmd/seed/main_test.go",
         "target": "cmd/seed/main_test.go",
         "class": "test",
-        "sha256": "8d8f3d83e4b78bec3ca5182bcf5bc6632890f2a818d83ee8b6b4d27feea5d5f3",
+        "sha256": "febb95d0312007e9c5f9505f62fc679b63c1d85b5b8e4ccac74375ae98ddea7a",
         "rewrite_module": true,
         "contract": false
       }

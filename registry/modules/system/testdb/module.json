@@ -10,6 +10,13 @@
     "description": "Gives every integration-test package its own database so parallel packages cannot nuke each other's fixtures. Skips when no server is reachable.",
     "requires": [
       {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/database",
         "contract": {
           "min": 1,
@@ -40,7 +47,7 @@
         "source": "internal/db/testdb/testdb_test.go",
         "target": "internal/db/testdb/testdb_test.go",
         "class": "test",
-        "sha256": "8cce972ee4cd8e8933b393ffed64fef7d772666276aa9b6539b7222d031d90ff",
+        "sha256": "c61054a0d4b56ed4e6b2a13bb4e854678485e52d4099621d9fa4658fee3b3279",
         "rewrite_module": true,
         "contract": false
       }

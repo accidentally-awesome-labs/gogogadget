@@ -78,14 +78,15 @@ every key, its owning module, whether production requires it, its default, and
 its notes. It is rendered from the same records the parser is, so it cannot
 drift from what the code actually reads.
 
-Two more variables matter but are **not** read by `config.Load()`. Both are
-overrides: with neither exported, each consumer resolves the address the
+Three more variables matter but are **not** read by `config.Load()`. All are
+overrides: with none exported, each consumer resolves the address the
 project's own test stack publishes, through the same derivation `ggg db` uses.
 
 | Key | Read by | Default | Notes |
 |---|---|---|---|
 | `TEST_DATABASE_URL` | `internal/db/testdb` | the derived test address (`localhost:15432` out of the box) | Server integration tests create their per-package databases on. See [Database](/docs/database) |
 | `E2E_DATABASE_URL` | `e2e/playwright.config.ts` | the derived test address | Database the Playwright suite reseeds and drives. CI exports it to name its own service container |
+| `VISUAL_DATABASE_URL` | `scripts/visual-run.sh` | the derived test address | Database the visual harness **drops** and reseeds. Its own key, passed explicitly to both children, so an ambient `DATABASE_URL` cannot redirect the one command allowed to write baselines |
 
 `DB_PORT` is gone. Host ports are a project decision now: declare them under
 `ports` in `gogogadget.json` and both the generated Compose files and every

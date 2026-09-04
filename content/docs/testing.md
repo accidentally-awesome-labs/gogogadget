@@ -160,6 +160,13 @@ brings up (`localhost:15432`) rather than a literal that drifts from it.
 Export `E2E_DATABASE_URL` to override, which is how CI names its own service
 container.
 
+It is the same database the test stack's own `app` service runs against, and
+`-reset` drops it (`WITH (FORCE)`, so a stale connection cannot block the
+reset). Nothing drives that container — Playwright runs its own `webServer` on
+`:18080`, and container mode uses `E2E_NO_WEBSERVER` with a host server — so
+one disposable database per server is deliberate rather than a collision. The
+visual harness resets the same one.
+
 Login is a cookie, not a hosted page:
 
 ```ts
@@ -270,10 +277,14 @@ make visual          # compare against the committed baselines — read-only
 make visual-update   # the only thing allowed to overwrite a committed screenshot
 ```
 
-Both go through `scripts/visual-run.sh`, which extracts the
-`@playwright/test` version from `e2e/package.json`, resets the derived test
-database (it names none itself — the seed and the server resolve
-`DATABASE_URL` through the project's own precedence),
+Both need the **test stack** up first (`ggg services up --environment test`),
+because that is the server they connect to: the prerequisite moved off `5432`
+when the harness stopped hardcoding an address. Both go through
+`scripts/visual-run.sh`, which extracts the `@playwright/test` version from
+`e2e/package.json`, resets the database `VISUAL_DATABASE_URL` names — empty
+falls through to the project's derived test-stack address, and the value is
+passed explicitly to the seed and the server so an ambient `DATABASE_URL`
+cannot redirect a run that DROPS a database —
 starts the host server on `:18080` with `APP_ENV=test`, `DEV_AUTH_BYPASS=true`,
 `TEST_NOW=2026-01-15T00:00:00Z` and blank `CLERK_*`, then runs
 `mcr.microsoft.com/playwright:v<version>-jammy` with

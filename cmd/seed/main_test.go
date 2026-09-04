@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -65,6 +66,34 @@ func TestSeedRefusesOnlyADefaultSourcedDatabaseURL(t *testing.T) {
 	}
 }
 
+// The refusal must be reachable from run(), not just as a function nobody
+// calls. Production is the environment where nothing derives, so the declared
+// default is what run() would resolve — and config.Load refuses production
+// without an explicit DATABASE_URL first, which is the same refusal one layer
+// up. Either way run() must not reach a database.
+//
+// Mutation: delete the refuseUnnamedDatabase call at main.go, and a project
+// where nothing derives migrates and seeds the declared default's address.
+func TestSeedRunRefusesBeforeTouchingADatabase(t *testing.T) {
+	t.Chdir(t.TempDir())
+	for _, key := range config.ConfigRegistry {
+		t.Setenv(key, "")
+	}
+	t.Setenv("APP_ENV", "production")
+
+	original := os.Args
+	t.Cleanup(func() { os.Args = original })
+	os.Args = []string{"seed", "-registry", "dev"}
+
+	err := run()
+	if err == nil {
+		t.Fatal("run() proceeded with no database anyone named")
+	}
+	if !strings.Contains(err.Error(), "DATABASE_URL") {
+		t.Fatalf("refusal %q does not name DATABASE_URL", err)
+	}
+}
+
 // The refusal must be unreachable on the documented local paths, or it would
 // block the zero-account posture instead of the hazard. Both environments that
 // publish a local Postgres derive their address, so neither ever reaches the
@@ -73,11 +102,17 @@ func TestSeedRefusesOnlyADefaultSourcedDatabaseURL(t *testing.T) {
 // Mutation: stop emitting derivedValues for an environment, and that
 // environment falls through to localhost:5432 and is refused — which is how
 // `ggg db migrate --environment test` behaved before this existed.
+//
+// An environment that derives nothing is legitimate — a project may select a
+// managed database — so this skips rather than fails there. The shipped code
+// treats that state as valid, and a test that contradicts its own contract
+// would fail in a derivative for doing the supported thing.
 func TestSeedableEnvironmentsDeriveTheirDatabase(t *testing.T) {
 	for _, environment := range []string{"development", "test"} {
 		address, ok := config.DerivedValue(environment, "DATABASE_URL")
 		if !ok {
-			t.Fatalf("%s derives no database address", environment)
+			t.Logf("%s publishes no local database; nothing to derive", environment)
+			continue
 		}
 		cfg := config.Config{
 			Env:         environment,

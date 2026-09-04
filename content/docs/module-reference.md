@@ -330,7 +330,7 @@ itself.
 | `ggg/system/telemetry` | `ggg` | 1 | Telemetry | — | `replacement-required` |
 | `ggg/system/telemetry-noop` | `ggg` | 1 | Telemetry Noop | `ggg/system/telemetry` [1,1] | `free` |
 | `ggg/system/telemetry-otlp` | `ggg` | 1 | Telemetry Otlp | `ggg/system/telemetry` [1,1] | `free` |
-| `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/database` [1,1] | `free` |
+| `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/config` [1,1] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/usage` | `ggg` | 1 | Usage metering | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/usage-postgres` | `ggg` | 1 | Usage Postgres | `ggg/system/usage` [1,1] | `free` |
 | `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |

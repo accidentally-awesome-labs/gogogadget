@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "931763f8b7d9fcec05a19d11d9fd6808bdc7e57c2b28e9ffc49c36454f45877d"
+      "sha256": "a0826ae11f463135b6d2aa87b50369b106d43f137e3b0c5adc76f513b17b6c87"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "78fec73665999efd1cca677a02ab3d8c640ab64e898983474bf8fb0944c2aaf3"
+      "sha256": "74328d42019327d354fa7088e09f6e9b46756eb6721dec995daa7b4907e0a1c9"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "e5c5b3c89e0d7b908e753899821afd0843d5291da63a446de5845bb9d9f74be2"
+      "sha256": "acd8fb12e08d230ab6ae30fea8035c3f7301c0277b4ad7be902005029aee98dc"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "874648ea6ba17b174470eeb8582676614c5e979c057165cce53a6fe47f3e5915"
+      "sha256": "b7400be38f3af524581742f58c62bb64a038fa10654fd0cf1c5bdaed57218a3c"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "c12e6c24582117b1cfb0413d2a556149fd820e6c33b4c41c6f007ce06bbdc933"
+      "sha256": "eb4715d0bec6cf90ffb4a52db4ce5f2d8c1a59f7e3eb90084ad857b39d2ea220"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1088,7 +1088,7 @@
     },
     {
       "path": "registry/modules/system/seed/module.json",
-      "sha256": "e14ccab45079d2f0888665264462b2a18cf43fb16d998594211ce6e6a22961a3"
+      "sha256": "a30973285cb22943fe71d77e7db80ebca4b4b6a732ae2be2be897cdae06256a7"
     },
     {
       "path": "registry/modules/system/seo/module.json",
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "registry/modules/system/testdb/module.json",
-      "sha256": "5bbf0a83f0b92ee96118a4e1d5c3e10a63331cd8cc5c4dfc4c6ef2db87a597c5"
+      "sha256": "2157806988654f4e8ec4a05c050cfa56873bb32ba5ea192c4db9b0b8c96ad81c"
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",

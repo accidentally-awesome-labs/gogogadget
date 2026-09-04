@@ -2792,7 +2792,10 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 			fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, e.Default)
 		}
 		fmt.Fprintf(b, "\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
-		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(""))
+		// The declared default goes through resolve rather than being applied
+		// above it, so Sources reports declared-default rather than unset for
+		// a key like PORT that has one. Parsing it again is the same value.
+		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(e.Default))
 		b.WriteString("\t\tvalue, err := strconv.Atoi(raw)\n")
 		condition, explanation := intBound(e)
 		fmt.Fprintf(b, "\t\tif err != nil%s {\n", condition)
@@ -2802,7 +2805,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 		fmt.Fprintf(b, "\t\t\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
 		b.WriteString("\t\t}\n\t}\n")
 	case EnvTime:
-		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(""))
+		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(e.Default))
 		b.WriteString("\t\tvalue, err := time.Parse(time.RFC3339, raw)\n\t\tif err != nil {\n")
 		fmt.Fprintf(b, "\t\terrs = append(errs, fmt.Errorf(\"%s: %%v\", err))\n\t\t} else {\n", e.Key)
 		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)

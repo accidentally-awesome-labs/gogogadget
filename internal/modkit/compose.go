@@ -398,26 +398,41 @@ func selectedDatabaseService(selected []selectedService) (selectedService, bool)
 }
 
 // postgresDSN renders one connection string from a local service's declared
-// credentials and one address.
+// credentials and one address, and reports whether it could be derived at all.
 //
 // The two derivations — the in-network one the compose app reads and the host
 // one every host-side consumer reads — differ in nothing but that address, so
 // they share this. Credentials come from the service's own declaration rather
 // than from a literal, which is what keeps a changed POSTGRES_PASSWORD from
 // splitting the two apart.
-func postgresDSN(service LocalService, host string, port int) string {
+//
+// A LocalServiceEnv legally sets exactly one of value or from_key, and a
+// from_key names a value that exists only in the environment Compose expands
+// against — nothing here can read it. Substituting the zero value would derive
+// postgres://postgres:@host:port/… : silently wrong, written into a committed
+// generated artifact, and trusted enough for `ggg db migrate` to mutate
+// through. So a referenced credential derives NOTHING, and every consumer
+// falls through to explicit configuration.
+func postgresDSN(service LocalService, host string, port int) (string, bool) {
 	user, password, name := "postgres", "postgres", "gogogadget"
 	for _, variable := range service.Environment {
+		var target *string
 		switch variable.Key {
 		case "POSTGRES_USER":
-			user = variable.Value
+			target = &user
 		case "POSTGRES_PASSWORD":
-			password = variable.Value
+			target = &password
 		case "POSTGRES_DB":
-			name = variable.Value
+			target = &name
+		default:
+			continue
 		}
+		if variable.FromKey != "" {
+			return "", false
+		}
+		*target = variable.Value
 	}
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, name)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, name), true
 }
 
 // databaseURL derives the in-network DATABASE_URL from the selected database
@@ -425,7 +440,8 @@ func postgresDSN(service LocalService, host string, port int) string {
 // Postgres the environment selected without hardcoded credentials.
 //
 // It addresses the service by name and container port, so it is unaffected by
-// which host port that service is published on — including none.
+// which host port that service is published on — including none. An empty
+// result means nothing could be derived; postgresDSN says when.
 func databaseURL(selected []selectedService) string {
 	item, ok := selectedDatabaseService(selected)
 	if !ok {
@@ -435,7 +451,8 @@ func databaseURL(selected []selectedService) string {
 	if len(item.service.Ports) > 0 {
 		port = item.service.Ports[0].Container
 	}
-	return postgresDSN(item.service, item.name, port)
+	url, _ := postgresDSN(item.service, item.name, port)
+	return url
 }
 
 // hostDatabaseURL is databaseURL's sibling for a process running on the host
@@ -446,13 +463,15 @@ func databaseURL(selected []selectedService) string {
 // derives 15432 without a second set of hand-maintained numbers.
 //
 // A service published on no host port yields nothing rather than a guess: the
-// address would not exist.
+// address would not exist. So does a service whose credentials are declared by
+// reference — see postgresDSN.
 func hostDatabaseURL(selected []selectedService) string {
 	item, ok := selectedDatabaseService(selected)
 	if !ok || len(item.published) == 0 {
 		return ""
 	}
-	return postgresDSN(item.service, "localhost", item.published[0].host)
+	url, _ := postgresDSN(item.service, "localhost", item.published[0].host)
+	return url
 }
 
 // DerivedEnvironmentValues is what this project's own provider selection and

@@ -53,19 +53,31 @@ if [[ "${PLATFORM}" != */"${HOST_ARCH}" ]]; then
   WORKERS="--workers=1"
 fi
 
-# This harness names no database. Both children below run with APP_ENV=test and
-# resolve DATABASE_URL through the project's own precedence: an exported value
-# wins (CI supplies its service container that way), and with nothing exported
-# they derive the address the test stack publishes — the selected database
-# adapter's local service on the test environment's effective host port, 5432
-# shifted to 15432.
+# The harness pins its own database and never inherits one. VISUAL_DATABASE_URL
+# is its key; empty falls through to the project's derivation, which is the
+# address the test stack publishes (the selected database adapter's local
+# service on the test environment's effective host port, 5432 shifted to
+# 15432). Both children below get DATABASE_URL set EXPLICITLY to that value, so
+# an ambient DATABASE_URL in the caller's shell cannot redirect them: an
+# exported-but-empty value counts as unset everywhere downstream, which is what
+# makes the fall-through work while still shadowing what was inherited.
+#
+# That matters more here than anywhere else. `-reset` DROPS and recreates the
+# database it is given, and this script is the only thing in the repository
+# allowed to write a visual baseline.
 #
 # It used to build the DSN here from DB_PORT with a localhost:5432 default,
 # which is the DEVELOPMENT port. On a machine running its own Postgres there,
 # this harness reset, migrated and served a database the project had nothing to
 # do with.
-echo "==> Reseeding e2e database (APP_ENV=test)"
-APP_ENV=test go run ./cmd/seed -reset -registry e2e
+HOST_DB="${VISUAL_DATABASE_URL:-}"
+
+if [[ -n "${HOST_DB}" ]]; then
+  echo "==> Reseeding e2e database (VISUAL_DATABASE_URL)"
+else
+  echo "==> Reseeding e2e database (derived from the test stack)"
+fi
+APP_ENV=test DATABASE_URL="${HOST_DB}" go run ./cmd/seed -reset -registry e2e
 
 echo "==> Building test server"
 # Remove the target first. `go build -o` refuses to overwrite a path that is not
@@ -81,7 +93,7 @@ echo "==> Starting test server on :18080"
 # mounts a user button and a portal that CI, having no `.env`, never renders.
 # Baselines recorded here would then differ from CI's by real pixels, and the
 # person who regenerated them would have no idea why.
-APP_ENV=test PORT=18080 \
+APP_ENV=test PORT=18080 DATABASE_URL="${HOST_DB}" \
   DEV_AUTH_BYPASS=true CLERK_PORTAL_URL=https://accounts.example.test \
   CLERK_PUBLISHABLE_KEY= CLERK_SECRET_KEY= \
   TEST_NOW=2026-01-15T00:00:00Z RATE_LIMIT_RPM=100000 \

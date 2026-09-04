@@ -70,6 +70,155 @@ func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 	return lock, []Manifest{config, system, page}
 }
 
+// databaseFixtureAdapter is a selected database adapter whose local service
+// publishes one port, which is everything the derivation reads.
+func databaseFixtureAdapter(environment []LocalServiceEnv) Manifest {
+	return Manifest{
+		ID: "ggg/system/database-postgres", Kind: ModuleSystem, Name: "database-postgres",
+		Revision: 1, Contract: 1, Title: "Postgres", Description: "The Postgres adapter.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Package: "internal/db/postgres", Constructor: "NewModule",
+			Needs:    []RuntimeNeed{},
+			Provides: []RuntimeProvide{{Field: "Pool", Capability: "database.pool", Type: "*pgxpool.Pool"}},
+			Adapter: &AdapterContribution{Slot: "ggg/database", Targets: []ServiceTarget{{
+				ID: "docker-postgres", Title: "Docker Postgres", Mode: "self-hosted", Automation: "manual",
+				DocsURL: "https://example.test/docs", Environments: []string{"development", "test"},
+				Inputs: []TargetInput{},
+				LocalService: &LocalService{
+					Container:   "postgres@sha256:" + strings.Repeat("d", 64),
+					Ports:       []LocalServicePort{{Name: "postgres", Container: 5432, DefaultHost: 5432}},
+					Environment: environment, Volumes: []LocalServiceVolume{},
+					Health: LocalServiceHealth{Kind: "tcp", Port: 5432},
+				},
+			}}},
+		}},
+	}
+}
+
+// databaseFixtureSelection selects that adapter for development and test.
+func databaseFixtureSelection() map[string]ProviderSelections {
+	choice := ProviderSelection{Adapter: "ggg/system/database-postgres", Target: "docker-postgres"}
+	return map[string]ProviderSelections{"ggg/database": {Development: choice, Test: choice}}
+}
+
+// Node lives only under e2e/, so the Playwright harness cannot call the
+// derivation; it reads a generated TypeScript module the way it already reads
+// personas, surfaces and the test inventory. The emitter has to be reachable
+// through GenerateAll or the committed file simply goes stale on disk while
+// every suite keeps passing against it.
+//
+// Mutation: deregister the e2e-database emitter, and this fails — where
+// `make e2e` does not.
+func TestE2EDatabaseAddressIsGeneratedForEveryPublishedEnvironment(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	lock.Providers = databaseFixtureSelection()
+	adapter := databaseFixtureAdapter([]LocalServiceEnv{})
+	lock.Order = append(lock.Order, adapter.ID)
+	lock.Modules = append(lock.Modules, LockedModule{
+		ID: adapter.ID, Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "provider",
+		RequiredBy: []string{}, Manifest: adapter, Files: []LockedFile{}, Migrations: []LockedMigration{},
+	})
+	graph = append(graph, adapter)
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var content string
+	for _, file := range files {
+		if file.Path == "e2e/generated/database.ts" {
+			content = file.Content
+		}
+	}
+	if content == "" {
+		t.Fatal("GenerateAll emitted no e2e/generated/database.ts")
+	}
+	for _, want := range []string{
+		"export const databaseURLs: Record<string, string> = {",
+		`"development": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"`,
+		// The test stack's shifted port is the whole reason a literal could
+		// not stand here.
+		`"test": "postgres://postgres:postgres@localhost:15432/gogogadget?sslmode=disable"`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("generated address missing %q:\n%s", want, content)
+		}
+	}
+
+	// A managed selection publishes no local service, so the table is empty
+	// and the harness's own throw is what reports it. Mutation: emit a literal
+	// for an environment that publishes nothing, and a project with a hosted
+	// test database is pointed at localhost.
+	lock.Providers = map[string]ProviderSelections{}
+	files, err = GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll without a selection: %v", err)
+	}
+	for _, file := range files {
+		if file.Path != "e2e/generated/database.ts" {
+			continue
+		}
+		if !strings.Contains(file.Content, "Record<string, string> = {}") {
+			t.Fatalf("an unselected database still generated an address:\n%s", file.Content)
+		}
+	}
+}
+
+// A LocalServiceEnv legally sets exactly one of value or from_key, and a
+// from_key names a value only Compose's own expansion can read. Substituting
+// the zero value derives postgres://postgres:@host:port/… — silently wrong,
+// committed into a generated artifact, and trusted enough for `ggg db migrate`
+// to mutate through.
+//
+// Mutation: read variable.Value regardless of from_key, and a self-hosted
+// Postgres with an operator-supplied password derives an empty password for
+// every consumer at once.
+func TestDerivedAddressRefusesCredentialsDeclaredByReference(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	lock.Providers = databaseFixtureSelection()
+
+	// Declared values derive; that is the baseline this contrasts with.
+	declared := databaseFixtureAdapter([]LocalServiceEnv{
+		{Key: "POSTGRES_USER", Value: "app"},
+		{Key: "POSTGRES_PASSWORD", Value: "secret"},
+		{Key: "POSTGRES_DB", Value: "shop"},
+	})
+	values, err := DerivedEnvironmentValues(lock, append(graph, declared), "development")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values["DATABASE_URL"] != "postgres://app:secret@localhost:5432/shop?sslmode=disable" {
+		t.Fatalf("declared credentials derived %q", values["DATABASE_URL"])
+	}
+
+	for _, referenced := range []LocalServiceEnv{
+		{Key: "POSTGRES_PASSWORD", FromKey: "POSTGRES_PASSWORD"},
+		{Key: "POSTGRES_USER", FromKey: "DB_USER"},
+		{Key: "POSTGRES_DB", FromKey: "DB_NAME"},
+	} {
+		t.Run(referenced.Key, func(t *testing.T) {
+			adapter := databaseFixtureAdapter([]LocalServiceEnv{referenced})
+			values, err := DerivedEnvironmentValues(lock, append(graph, adapter), "development")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(values) != 0 {
+				t.Fatalf("a referenced %s still derived %#v", referenced.Key, values)
+			}
+			// The in-network sibling must agree: one of the two deriving a
+			// half-empty DSN is the drift this shares one function to avoid.
+			plan, err := planCompose("development", lock, map[string]Manifest{adapter.ID: adapter})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if url := databaseURL(plan.selected); url != "" {
+				t.Fatalf("the in-network derivation still produced %q", url)
+			}
+		})
+	}
+}
+
 // Two modules contributing the same command name cannot share the one
 // dispatch table: generation refuses rather than emitting a registry where
 // one declaration silently shadows the other.

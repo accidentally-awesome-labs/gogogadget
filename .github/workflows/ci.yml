@@ -113,12 +113,12 @@ jobs:
   visual:
     needs: test
     runs-on: ubuntu-latest
-    # scripts/visual-run.sh names no database: its seed and its server resolve
-    # DATABASE_URL through the project's precedence, deriving the test stack's
-    # address when nothing is exported. This job has a service container on
-    # 5432 instead, so it exports it.
+    # scripts/visual-run.sh pins its own database through VISUAL_DATABASE_URL
+    # and falls through to the project's derived test-stack address when it is
+    # empty. This job runs no stack: it uses a service container on 5432, so it
+    # names that explicitly.
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_e2e?sslmode=disable
+      VISUAL_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_e2e?sslmode=disable
     services:
       postgres:
         image: postgres:16-alpine
