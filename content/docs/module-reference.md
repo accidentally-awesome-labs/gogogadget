@@ -256,7 +256,7 @@ itself.
 
 | Module | Source | Contract | Title | Requires | Removal |
 |---|---|---|---|---|---|
-| `ggg/system/analytics` | `ggg` | 1 | Product analytics | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/analytics` | `ggg` | 1 | Product analytics | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/analytics-noop` | `ggg` | 1 | analytics-noop | `ggg/system/analytics` [1,1] | `free` |
 | `ggg/system/analytics-posthog` | `ggg` | 1 | analytics-posthog | `ggg/system/analytics` [1,1] | `free` |
 | `ggg/system/announcements` | `ggg` | 1 | Product announcements | `ggg/system/database` [1,1] | `retain-data` |
@@ -267,18 +267,18 @@ itself.
 | `ggg/system/audit-export-noop` | `ggg` | 1 | Audit Export Noop | `ggg/system/audit-export` [1,1] | `free` |
 | `ggg/system/audit-export-otlp` | `ggg` | 1 | Audit Export Otlp | `ggg/system/audit-export` [1,1] | `free` |
 | `ggg/system/billing` | `ggg` | 1 | Billing | `ggg/system/organizations` [1,1] | `major-version-only` |
-| `ggg/system/billing-local` | `ggg` | 1 | Local billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] | `free` |
-| `ggg/system/billing-polar` | `ggg` | 1 | Polar billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/billing-local` | `ggg` | 1 | Local billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] | `free` |
+| `ggg/system/billing-polar` | `ggg` | 1 | Polar billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/cache` | `ggg` | 1 | Cache | — | `replacement-required` |
 | `ggg/system/cache-memory` | `ggg` | 1 | Cache Memory | `ggg/system/cache` [1,1] | `free` |
 | `ggg/system/cache-redis` | `ggg` | 1 | Cache Redis | `ggg/system/cache` [1,1] | `free` |
 | `ggg/system/ci-github` | `ggg` | 1 | Ci Github | `ggg/system/project-base` [1,1] | `free` |
-| `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,4] | `free` |
-| `ggg/system/config` | `ggg` | 1 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
+| `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,5] | `free` |
+| `ggg/system/config` | `ggg` | 2 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/content-assets` | `ggg` | 1 | Embedded content corpus | `ggg/system/content` [1,1] | `free` |
-| `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `replacement-required` |
-| `ggg/system/database-postgres` | `ggg` | 1 | Database Postgres | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] | `free` |
+| `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `replacement-required` |
+| `ggg/system/database-postgres` | `ggg` | 1 | Database Postgres | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/deploy-fly` | `ggg` | 1 | Deploy Fly | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/dev-tools` | `ggg` | 1 | Dev Tools | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/docker` | `ggg` | 1 | Docker | `ggg/system/project-base` [1,1] | `free` |
@@ -288,29 +288,29 @@ itself.
 | `ggg/system/feature-flags-postgres` | `ggg` | 1 | Feature Flags Postgres | `ggg/system/feature-flags` [1,1] | `free` |
 | `ggg/system/i18n` | `ggg` | 1 | Localization | `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/identity` | `ggg` | 1 | Identity | `ggg/system/organizations` [1,1] | `major-version-only` |
-| `ggg/system/identity-clerk` | `ggg` | 1 | Clerk identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/identity` [1,1] | `free` |
-| `ggg/system/identity-dev` | `ggg` | 1 | Development identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/identity` [1,1] | `free` |
-| `ggg/system/identity-session` | `ggg` | 1 | Identity sessions | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/identity-clerk` | `ggg` | 1 | Clerk identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/identity-dev` | `ggg` | 1 | Development identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/identity-session` | `ggg` | 1 | Identity sessions | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] `ggg/system/identity` [1,1] | `free` |
 | `ggg/system/impersonation` | `ggg` | 1 | Support impersonation | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
-| `ggg/system/jobs` | `ggg` | 1 | Background job queue | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] `ggg/system/mail` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `drain-required` |
-| `ggg/system/llm` | `ggg` | 1 | Language model | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/jobs` | `ggg` | 1 | Background job queue | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] `ggg/system/mail` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `drain-required` |
+| `ggg/system/llm` | `ggg` | 1 | Language model | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/llm-fake` | `ggg` | 1 | llm-fake | `ggg/system/llm` [1,1] | `free` |
 | `ggg/system/llm-openai-compatible` | `ggg` | 1 | llm-openai-compatible | `ggg/system/llm` [1,1] | `free` |
-| `ggg/system/mail` | `ggg` | 1 | Transactional mail seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
-| `ggg/system/mail-dev` | `ggg` | 1 | Filesystem mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
-| `ggg/system/mail-resend` | `ggg` | 1 | Resend mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
+| `ggg/system/mail` | `ggg` | 1 | Transactional mail seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
+| `ggg/system/mail-dev` | `ggg` | 1 | Filesystem mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/mail` [1,1] | `free` |
+| `ggg/system/mail-resend` | `ggg` | 1 | Resend mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/mail` [1,1] | `free` |
 | `ggg/system/metrics` | `ggg` | 1 | Runtime metrics endpoint | `ggg/system/server` [1,2] | `free` |
-| `ggg/system/modkit` | `ggg` | 4 | Module registry engine | — | `replacement-required` |
+| `ggg/system/modkit` | `ggg` | 5 | Module registry engine | — | `replacement-required` |
 | `ggg/system/notifications` | `ggg` | 1 | In-app notifications | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/notifications-postgres` | `ggg` | 1 | Notifications Postgres | `ggg/system/notifications` [1,1] | `free` |
-| `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/observability-log` | `ggg` | 1 | observability-log | `ggg/system/observability` [1,1] | `free` |
 | `ggg/system/observability-sentry` | `ggg` | 1 | observability-sentry | `ggg/system/observability` [1,1] | `free` |
 | `ggg/system/organizations` | `ggg` | 1 | Users, organizations, and membership | `ggg/system/database` [1,1] | `replacement-required` |
 | `ggg/system/project-base` | `ggg` | 1 | Project Base | — | `free` |
 | `ggg/system/project-docs` | `ggg` | 1 | Project Docs | `ggg/system/project-base` [1,1] | `free` |
-| `ggg/system/rate-limit` | `ggg` | 1 | Request rate limiting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `major-version-only` |
-| `ggg/system/rate-limit-memory` | `ggg` | 1 | Rate Limit Memory | `ggg/system/config` [1,1] `ggg/system/rate-limit` [1,1] | `free` |
+| `ggg/system/rate-limit` | `ggg` | 1 | Request rate limiting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `major-version-only` |
+| `ggg/system/rate-limit-memory` | `ggg` | 1 | Rate Limit Memory | `ggg/system/config` [1,2] `ggg/system/rate-limit` [1,1] | `free` |
 | `ggg/system/rate-limit-redis` | `ggg` | 1 | Rate Limit Redis | `ggg/system/rate-limit` [1,1] | `free` |
 | `ggg/system/realtime` | `ggg` | 1 | Realtime | — | `replacement-required` |
 | `ggg/system/realtime-ably` | `ggg` | 1 | Realtime Ably | `ggg/system/realtime` [1,1] | `free` |
@@ -322,15 +322,15 @@ itself.
 | `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
 | `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] | `free` |
-| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/system/analytics` [1,1] `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/llm` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `replacement-required` |
+| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/system/analytics` [1,1] `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/llm` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `replacement-required` |
 | `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/server` [1,2] | `replacement-required` |
-| `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `retain-data` |
-| `ggg/system/storage-filesystem` | `ggg` | 1 | Filesystem storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/storage` [1,1] | `free` |
-| `ggg/system/storage-s3` | `ggg` | 1 | S3-compatible storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/storage` [1,1] | `retain-data` |
+| `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `retain-data` |
+| `ggg/system/storage-filesystem` | `ggg` | 1 | Filesystem storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/storage` [1,1] | `free` |
+| `ggg/system/storage-s3` | `ggg` | 1 | S3-compatible storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/storage` [1,1] | `retain-data` |
 | `ggg/system/telemetry` | `ggg` | 1 | Telemetry | — | `replacement-required` |
 | `ggg/system/telemetry-noop` | `ggg` | 1 | Telemetry Noop | `ggg/system/telemetry` [1,1] | `free` |
 | `ggg/system/telemetry-otlp` | `ggg` | 1 | Telemetry Otlp | `ggg/system/telemetry` [1,1] | `free` |
-| `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/config` [1,1] `ggg/system/database` [1,1] | `free` |
+| `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/usage` | `ggg` | 1 | Usage metering | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/usage-postgres` | `ggg` | 1 | Usage Postgres | `ggg/system/usage` [1,1] | `free` |
 | `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |

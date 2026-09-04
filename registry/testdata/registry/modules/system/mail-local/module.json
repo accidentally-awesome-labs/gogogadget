@@ -9,24 +9,108 @@
     "title": "Fixture local mail adapter",
     "description": "A deterministic local candidate for provider permutation validation.",
     "requires": [
-      {"id":"ggg/system/apphost","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/config","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/mail","contract":{"min":1,"max":1}}
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 2
+        }
+      },
+      {
+        "id": "ggg/system/mail",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
     ],
-    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
     "files": [
-      {"source":"registry/modules/system/mail-local/mail_local.go","target":"internal/fixture/maillocal/mail_local.go","class":"go","sha256":"f30ea598044e42808a3d600708fba5f4aa4c5021125869d5cea3ad2cd6808a49","rewrite_module":true,"contract":true},
-      {"source":"registry/modules/system/mail-local/mail_local_test.go","target":"internal/fixture/maillocal/mail_local_test.go","class":"test","sha256":"9a265b7341689f041a54f7d705903561dd44e17c359649aed1ab4cc18a89b173","rewrite_module":true,"contract":false}
+      {
+        "source": "registry/modules/system/mail-local/mail_local.go",
+        "target": "internal/fixture/maillocal/mail_local.go",
+        "class": "go",
+        "sha256": "f30ea598044e42808a3d600708fba5f4aa4c5021125869d5cea3ad2cd6808a49",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/mail-local/mail_local_test.go",
+        "target": "internal/fixture/maillocal/mail_local_test.go",
+        "class": "test",
+        "sha256": "9a265b7341689f041a54f7d705903561dd44e17c359649aed1ab4cc18a89b173",
+        "rewrite_module": true,
+        "contract": false
+      }
     ],
-    "claims": {"packages":["internal/fixture/maillocal"]},
-    "runtime": {"system": {
-      "package":"internal/fixture/maillocal","constructor":"NewModule",
-      "needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],
-      "provides":[{"field":"Sender","capability":"mail.sender","type":"mail.Sender"}],
-      "type_imports":["internal/mail"],"start":false,"stop":false,
-      "adapter":{"slot":"ggg/mail","targets":[{"id":"filesystem","title":"Fixture filesystem mail","mode":"development","environments":["development","test"],"automation":"manual","docs_url":"https://example.invalid/fixture/mail-local","inputs":[]}]}
-    }},
-    "migrations": [], "environment": [], "docs": [],
-    "tests":{"go_packages":["internal/fixture/maillocal"]}, "data":[], "removal_policy":"free"
+    "claims": {
+      "packages": [
+        "internal/fixture/maillocal"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/fixture/maillocal",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Sender",
+            "capability": "mail.sender",
+            "type": "mail.Sender"
+          }
+        ],
+        "type_imports": [
+          "internal/mail"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/mail",
+          "targets": [
+            {
+              "id": "filesystem",
+              "title": "Fixture filesystem mail",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://example.invalid/fixture/mail-local",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/fixture/maillocal"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

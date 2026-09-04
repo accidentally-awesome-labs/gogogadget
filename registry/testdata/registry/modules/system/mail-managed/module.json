@@ -9,24 +9,108 @@
     "title": "Fixture managed mail adapter",
     "description": "A managed candidate with health reporting for provider permutation validation.",
     "requires": [
-      {"id":"ggg/system/apphost","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/config","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/mail","contract":{"min":1,"max":1}}
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 2
+        }
+      },
+      {
+        "id": "ggg/system/mail",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
     ],
-    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
     "files": [
-      {"source":"registry/modules/system/mail-managed/mail_managed.go","target":"internal/fixture/mailmanaged/mail_managed.go","class":"go","sha256":"34772e0737cfe5b380f1ab3f503a05a9306554bcec5b5e06a584e769e78ac18b","rewrite_module":true,"contract":true},
-      {"source":"registry/modules/system/mail-managed/mail_managed_test.go","target":"internal/fixture/mailmanaged/mail_managed_test.go","class":"test","sha256":"e67ccbc7670fe116b6c96f0907697456f8e39e9c5e97a26f17f30d1ddaa0e8c0","rewrite_module":true,"contract":false}
+      {
+        "source": "registry/modules/system/mail-managed/mail_managed.go",
+        "target": "internal/fixture/mailmanaged/mail_managed.go",
+        "class": "go",
+        "sha256": "34772e0737cfe5b380f1ab3f503a05a9306554bcec5b5e06a584e769e78ac18b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/mail-managed/mail_managed_test.go",
+        "target": "internal/fixture/mailmanaged/mail_managed_test.go",
+        "class": "test",
+        "sha256": "e67ccbc7670fe116b6c96f0907697456f8e39e9c5e97a26f17f30d1ddaa0e8c0",
+        "rewrite_module": true,
+        "contract": false
+      }
     ],
-    "claims": {"packages":["internal/fixture/mailmanaged"]},
-    "runtime": {"system": {
-      "package":"internal/fixture/mailmanaged","constructor":"NewModule",
-      "needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],
-      "provides":[{"field":"Sender","capability":"mail.sender","type":"mail.Sender"}],
-      "type_imports":["internal/mail"],"start":false,"stop":false,"health":true,
-      "adapter":{"slot":"ggg/mail","targets":[{"id":"managed","title":"Fixture managed mail","mode":"managed","environments":["production"],"automation":"manual","docs_url":"https://example.invalid/fixture/mail-managed","inputs":[]}]}
-    }},
-    "migrations": [], "environment": [], "docs": [],
-    "tests":{"go_packages":["internal/fixture/mailmanaged"]}, "data":[], "removal_policy":"free"
+    "claims": {
+      "packages": [
+        "internal/fixture/mailmanaged"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/fixture/mailmanaged",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Sender",
+            "capability": "mail.sender",
+            "type": "mail.Sender"
+          }
+        ],
+        "type_imports": [
+          "internal/mail"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/mail",
+          "targets": [
+            {
+              "id": "managed",
+              "title": "Fixture managed mail",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://example.invalid/fixture/mail-managed",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/fixture/mailmanaged"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

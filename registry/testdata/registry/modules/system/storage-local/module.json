@@ -9,24 +9,108 @@
     "title": "Fixture filesystem storage adapter",
     "description": "A deterministic local candidate for provider permutation validation.",
     "requires": [
-      {"id":"ggg/system/apphost","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/config","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/storage","contract":{"min":1,"max":1}}
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 2
+        }
+      },
+      {
+        "id": "ggg/system/storage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
     ],
-    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
     "files": [
-      {"source":"registry/modules/system/storage-local/storage_filesystem.go","target":"internal/fixture/storagefilesystem/storage_filesystem.go","class":"go","sha256":"1d5ec43de543f278a47b4562f88c5df91241ba4d20a9708426b7b8198fa6d134","rewrite_module":true,"contract":true},
-      {"source":"registry/modules/system/storage-local/storage_filesystem_test.go","target":"internal/fixture/storagefilesystem/storage_filesystem_test.go","class":"test","sha256":"5490d169b614a0bfdb49c0a4a379a9e1012d4a0f81ed24e28940b63c3590ad2e","rewrite_module":true,"contract":false}
+      {
+        "source": "registry/modules/system/storage-local/storage_filesystem.go",
+        "target": "internal/fixture/storagefilesystem/storage_filesystem.go",
+        "class": "go",
+        "sha256": "1d5ec43de543f278a47b4562f88c5df91241ba4d20a9708426b7b8198fa6d134",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/storage-local/storage_filesystem_test.go",
+        "target": "internal/fixture/storagefilesystem/storage_filesystem_test.go",
+        "class": "test",
+        "sha256": "5490d169b614a0bfdb49c0a4a379a9e1012d4a0f81ed24e28940b63c3590ad2e",
+        "rewrite_module": true,
+        "contract": false
+      }
     ],
-    "claims": {"packages":["internal/fixture/storagefilesystem"]},
-    "runtime": {"system": {
-      "package":"internal/fixture/storagefilesystem","constructor":"NewModule",
-      "needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],
-      "provides":[{"field":"Store","capability":"storage.store","type":"storage.Store"}],
-      "type_imports":["internal/storage"],"start":false,"stop":false,
-      "adapter":{"slot":"ggg/storage","targets":[{"id":"filesystem","title":"Fixture filesystem storage","mode":"development","environments":["development","test"],"automation":"manual","docs_url":"https://example.invalid/fixture/storage-filesystem","inputs":[]}]}
-    }},
-    "migrations": [], "environment": [], "docs": [],
-    "tests":{"go_packages":["internal/fixture/storagefilesystem"]}, "data":[], "removal_policy":"free"
+    "claims": {
+      "packages": [
+        "internal/fixture/storagefilesystem"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/fixture/storagefilesystem",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Store",
+            "capability": "storage.store",
+            "type": "storage.Store"
+          }
+        ],
+        "type_imports": [
+          "internal/storage"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/storage",
+          "targets": [
+            {
+              "id": "filesystem",
+              "title": "Fixture filesystem storage",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://example.invalid/fixture/storage-filesystem",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/fixture/storagefilesystem"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

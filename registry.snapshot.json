@@ -820,7 +820,7 @@
     },
     {
       "path": "registry/modules/system/analytics/module.json",
-      "sha256": "f56797eee6122f7381d9264dddad30b19a84c85f35ddc96160ab70110beaf006"
+      "sha256": "34e2046826583628ccee3442d1d793b1bd6c649b24092ba42cbf7dd5236140e3"
     },
     {
       "path": "registry/modules/system/announcements/module.json",
@@ -852,11 +852,11 @@
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
-      "sha256": "f316f12b35676e38f4338e546e563121383a5424292b10fbe5311e753b4f3b0e"
+      "sha256": "1d743e84b97f42c71f62df757f81650796103e1adae462df7c366bbad3cc8cc9"
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",
-      "sha256": "2e825f8ca1e36016175e40a9632ee342520b1efc646bf07b4e796adf6b3b4e58"
+      "sha256": "66c7e658732be8c3c02df5cd2ad27d95d27931692ef3f0c6c494d0412ab804bf"
     },
     {
       "path": "registry/modules/system/billing/module.json",
@@ -880,11 +880,11 @@
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
-      "sha256": "5dc0b5ab6835d1fe93c14fd3be64821d4ba3818ced9bf5036ced2dca2df68e51"
+      "sha256": "305bbf0c5c2d0412d0ad6e6471df240f714f9462b696d3072b4d1183592721c2"
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "395d5c2eeccd955c82fc2f7dd4480421fbe68e8f8ad1c4b0fda3bcfe37925773"
+      "sha256": "9589700c21d2acee5ab87379b1abb8d30c41fb75bcb710a7608ff18adf9b4e74"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
@@ -896,11 +896,11 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "347d185309f29258abfb24a7b7e3acad67f5bc887f70d8fd6a449c71276e25d3"
+      "sha256": "eb3d60e9b0e3ec852ffb56e0c3b76ced5317ad8593f4c174d6a454729b19eeaf"
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "b963d3e0f4371cf5e1fc3f7204172d1f483a2889b9807d5f1e82aaaae6e1d854"
+      "sha256": "579cc6389c65083b88618b3584fbc5f56a66aef0a47503c31bfd041e9de0b971"
     },
     {
       "path": "registry/modules/system/deploy-docker/module.json",
@@ -944,15 +944,15 @@
     },
     {
       "path": "registry/modules/system/identity-clerk/module.json",
-      "sha256": "98e2e008a70f63b1671b166812ec9906009a2fdb61e7951590d1d891bf18d84e"
+      "sha256": "55ed5b5066e4cd4c20aed4679e3be5893624883a0aaf9e47ebc02abb0d4f6197"
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
-      "sha256": "ede7b08eae22b7c0f369ebca30c37a8abc01a3809492329e08898fdf04a052fa"
+      "sha256": "2af7b117b2fe1b0d4ce461771ac0f7b93271d725865d6db965094dc4b2b227ae"
     },
     {
       "path": "registry/modules/system/identity-session/module.json",
-      "sha256": "5585b599499e76a9d5f772b4a45e86ccb5d199e1b73a025365162b08abdf8b8f"
+      "sha256": "e7df36edaa16b4c19afbbeee67b50a2ab00713ef8de060a2c764a1bdbba473c4"
     },
     {
       "path": "registry/modules/system/identity/module.json",
@@ -964,7 +964,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "767421899a6e357ed8d69777f7c63f5b47f96d9c908c6bca468c20d7a02fe717"
+      "sha256": "6ebdb20ce24c9407ff1fc83c13a4f289752eef7ddf5157ebbcea26738a8d992a"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
@@ -976,23 +976,23 @@
     },
     {
       "path": "registry/modules/system/llm/module.json",
-      "sha256": "f44d8ae9c2c35ae089ed02a7adcbad59b7833fecb1eab2454e050c5c906e05af"
+      "sha256": "881faba7bc28ece0831effb45928116fa74d24c82a6fee01adec8ed32bddcc91"
     },
     {
       "path": "registry/modules/system/mail-dev/module.json",
-      "sha256": "d9fd60780e8ec176be6a52017d97057b5031e96c5e687dfa270a64911f92d480"
+      "sha256": "d2e679f32d8bfcd48ebffe0a2dded1d1483a772f3ebc41f046df0494616033e3"
     },
     {
       "path": "registry/modules/system/mail-resend/module.json",
-      "sha256": "b8ed21c3b793850de2c3b23e79c72f25f24658192c042f7989bbb63ec2bf6113"
+      "sha256": "27c4b6b39afd6b551b6d412a33fe22a181d310b5f7d7018abe7b96ef33b248fa"
     },
     {
       "path": "registry/modules/system/mail-smtp/module.json",
-      "sha256": "b62b787c8b908b41fd9a43e041819950382550df9ef7ff51344b9f4ac1ae9514"
+      "sha256": "8eef1fb2880189b3ddf339bccbef163140f547d3350af7704cda63923e8c0e14"
     },
     {
       "path": "registry/modules/system/mail/module.json",
-      "sha256": "66ea66a480901a2f429f9344edb8787638ed2d7c9e2f14a3b0b5500b5cc420fa"
+      "sha256": "9e65866db6f8961c94748a4283175fe2138bf2bf33fa97706740c2dde6d02605"
     },
     {
       "path": "registry/modules/system/metrics/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "23cc1b0e3e4bee032eda030551b97e09630ff7a722f2977ca34523dd594541aa"
+      "sha256": "10732a8b8e2eb0ecc7b7ae620ebfc3ad67b849a3dfc7d94e5b8adedd0e7d6e94"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1024,7 +1024,7 @@
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "d0059dfe763d76d21e9939ff52eb0b648ccd9cd15e1e1ca48348bf98ca8817c9"
+      "sha256": "ffcba5ec837f376a18d87fc7a1cda807829487ff655fe37a70503f02b144f059"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
@@ -1040,7 +1040,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
-      "sha256": "f579604f4786cf0654bbf5888db0a419ee0d58d1e34da435c66e4e0927f069b2"
+      "sha256": "de1909f2e35c5c98db41085bfebdd321ef25dbd4e8a3f96a7a3441ebec5afc69"
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",
@@ -1048,7 +1048,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
-      "sha256": "f6c8ed5f4a1e23bf9cfa050d11b26443db247f4bd19989ca68c93573cd841a02"
+      "sha256": "ef67c49ae0573d0447cc47810e3e4058eb00f98876656fa2d4e937ab756c81f3"
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",
@@ -1064,7 +1064,7 @@
     },
     {
       "path": "registry/modules/system/registry-template/module.json",
-      "sha256": "06161532f78793dc8559ab33e2c1e365143df1b619021aec6bded09337ec8f96"
+      "sha256": "b24e072a2e663c2bf72ad72e8928ccc5d029cb3c745b4fdb1821d20920554267"
     },
     {
       "path": "registry/modules/system/schedules/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "1f70bdfe36f5c4b0bb6c7832f2c9c2f7670e34209b869f9fe14f3ff6163d6bc2"
+      "sha256": "97e04f5601950b1cd4a90a73252bc0d855f2015bfd1757ea181777ef4309f511"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1104,15 +1104,15 @@
     },
     {
       "path": "registry/modules/system/storage-filesystem/module.json",
-      "sha256": "36630562bf6e44cd8de480f25963d3054d1d6e4926aaaadaddcbe900533b9aae"
+      "sha256": "130e94cf4496c3712698303b40fe24d1343acd38d9e961fc61868833b204975e"
     },
     {
       "path": "registry/modules/system/storage-s3/module.json",
-      "sha256": "d0a6370c38e1f7bbece6adea03383bad345f56cff0c60f2e9ab739fe2ee48d5c"
+      "sha256": "69bef1b1c8949022eb4c6743e985b1ee9737b0c719794523f42ddc712c454f7a"
     },
     {
       "path": "registry/modules/system/storage/module.json",
-      "sha256": "11c300840bb92f38e4a5f536020b1d11938e2d5a3a4bcb2dce387a2f5848a3e0"
+      "sha256": "3c101792ed6b9050b2e0fc237f9f2007bc64b7761bf57293c12a88fd650a44e8"
     },
     {
       "path": "registry/modules/system/telemetry-noop/module.json",
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "registry/modules/system/testdb/module.json",
-      "sha256": "2157806988654f4e8ec4a05c050cfa56873bb32ba5ea192c4db9b0b8c96ad81c"
+      "sha256": "9726518e53ca38821354edea6168f325c1f56d9ad3c804334c943a73f5f05aed"
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",
@@ -1396,7 +1396,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/example-clock/module.json",
-      "sha256": "15cabc9e5b5c0a63c7587aee662e23455d43df939362f474f67ea2cb5343102f"
+      "sha256": "5eee7a50b8e113138a2cd07c39c3116ecf747fd91e8f1cada19a7961e6ff23cf"
     },
     {
       "path": "registry/testdata/registry/modules/system/identity-hosted/identity_hosted.go",
@@ -1408,7 +1408,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/identity-hosted/module.json",
-      "sha256": "9e63ffdaf0891377f10e63832dae2365eb8bf6ccabbd1bf76fe4021e17605dc6"
+      "sha256": "5a5117c3b54d4943ec3ece99f29b9d8b25aa6af382e6353e73197dab209fd024"
     },
     {
       "path": "registry/testdata/registry/modules/system/identity-local/identity_local.go",
@@ -1420,7 +1420,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/identity-local/module.json",
-      "sha256": "7f9c4f2b3af0cd052988ff01e3a1e0647eca8a0f3263cc47c8e2208d925691e2"
+      "sha256": "475bb28bd590a638b9eb6adbbd0760f53ce90562e196ebcb0083d50d883d0ec1"
     },
     {
       "path": "registry/testdata/registry/modules/system/identity-providers/module.json",
@@ -1436,7 +1436,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/mail-local/module.json",
-      "sha256": "531949791d812abf9858a6bfefa8d2a618ad1c2798b33ce1ac507b79eddc7199"
+      "sha256": "d31cea496afff8b09235ac882d3bc2602925b5d09d61215363223a5c0037de85"
     },
     {
       "path": "registry/testdata/registry/modules/system/mail-managed/mail_managed.go",
@@ -1448,7 +1448,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/mail-managed/module.json",
-      "sha256": "fe9bd2785661830a9037ca382dd46946dc4c2b65bf829c5a4fa4cf992de20fd5"
+      "sha256": "9d9dad1e5ba33edd19de8b5c2e75cd5fdc13e598367b6de8c5722117b0ac769e"
     },
     {
       "path": "registry/testdata/registry/modules/system/mail-providers/module.json",
@@ -1456,7 +1456,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/storage-local/module.json",
-      "sha256": "2dd0c379217fb55e5822f5a14a0f010a3000003fd91ba1c01fefcc8396e4e7b5"
+      "sha256": "ce99f22abde068a3c60b517ab7a158325a8e761d2d3539ff5ac8af2d7c3dc607"
     },
     {
       "path": "registry/testdata/registry/modules/system/storage-local/storage_filesystem.go",
@@ -1468,7 +1468,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/system/storage-managed/module.json",
-      "sha256": "d4344678e202dbc5c04bd1143ea735319f8a84dadd798ad38c303f61faacdebd"
+      "sha256": "e7d01952f37f612a1775f6ab26b80273cd6e28842f45780483f7481dbebf37db"
     },
     {
       "path": "registry/testdata/registry/modules/system/storage-managed/storage_s3.go",

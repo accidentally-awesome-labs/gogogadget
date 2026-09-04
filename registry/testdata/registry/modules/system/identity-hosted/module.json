@@ -9,30 +9,128 @@
     "title": "Fixture hosted identity adapter",
     "description": "A managed identity candidate with health reporting for provider permutation validation.",
     "requires": [
-      {"id":"ggg/system/apphost","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/config","contract":{"min":1,"max":1}},
-      {"id":"ggg/system/identity","contract":{"min":1,"max":1}}
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 2
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
     ],
-    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
     "files": [
-      {"source":"registry/modules/system/identity-hosted/identity_hosted.go","target":"internal/fixture/identityhosted/identity_hosted.go","class":"go","sha256":"38122ef8f924ebce01b6cef1d2159205b62ac1a18add9bc0b2c498906f854661","rewrite_module":true,"contract":true},
-      {"source":"registry/modules/system/identity-hosted/identity_hosted_test.go","target":"internal/fixture/identityhosted/identity_hosted_test.go","class":"test","sha256":"252b69d39f70a83c2b8f00c8f159f1341dc937c14bcc240a57c3b6039c5dc30f","rewrite_module":true,"contract":false}
+      {
+        "source": "registry/modules/system/identity-hosted/identity_hosted.go",
+        "target": "internal/fixture/identityhosted/identity_hosted.go",
+        "class": "go",
+        "sha256": "38122ef8f924ebce01b6cef1d2159205b62ac1a18add9bc0b2c498906f854661",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/identity-hosted/identity_hosted_test.go",
+        "target": "internal/fixture/identityhosted/identity_hosted_test.go",
+        "class": "test",
+        "sha256": "252b69d39f70a83c2b8f00c8f159f1341dc937c14bcc240a57c3b6039c5dc30f",
+        "rewrite_module": true,
+        "contract": false
+      }
     ],
-    "claims": {"packages":["internal/fixture/identityhosted"]},
-    "runtime": {"system": {
-      "package":"internal/fixture/identityhosted","constructor":"NewModule",
-      "needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],
-      "provides":[
-        {"field":"Deleter","capability":"identity.deleter","type":"identity.Deleter"},
-        {"field":"Fetcher","capability":"identity.fetcher","type":"identity.UserFetcher"},
-        {"field":"Navigator","capability":"identity.navigator","type":"identity.Navigator"},
-        {"field":"Verifier","capability":"identity.verifier","type":"identity.Verifier"},
-        {"field":"Webhook","capability":"identity.webhook","type":"identity.Webhook"}
-      ],
-      "type_imports":["internal/identity"],"start":false,"stop":false,"health":true,
-      "adapter":{"slot":"ggg/identity","targets":[{"id":"managed","title":"Fixture hosted identity","mode":"managed","environments":["production"],"automation":"manual","docs_url":"https://example.invalid/fixture/identity-hosted","inputs":[]}]}
-    }},
-    "migrations": [], "environment": [], "docs": [],
-    "tests":{"go_packages":["internal/fixture/identityhosted"]}, "data":[], "removal_policy":"free"
+    "claims": {
+      "packages": [
+        "internal/fixture/identityhosted"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/fixture/identityhosted",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Deleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter"
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher"
+          },
+          {
+            "field": "Navigator",
+            "capability": "identity.navigator",
+            "type": "identity.Navigator"
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier"
+          },
+          {
+            "field": "Webhook",
+            "capability": "identity.webhook",
+            "type": "identity.Webhook"
+          }
+        ],
+        "type_imports": [
+          "internal/identity"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/identity",
+          "targets": [
+            {
+              "id": "managed",
+              "title": "Fixture hosted identity",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://example.invalid/fixture/identity-hosted",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/fixture/identityhosted"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

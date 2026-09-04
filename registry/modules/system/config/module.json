@@ -5,7 +5,7 @@
     "kind": "system",
     "name": "config",
     "revision": 4,
-    "contract": 1,
+    "contract": 2,
     "title": "Configuration",
     "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",
     "requires": [
