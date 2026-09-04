@@ -1379,21 +1379,42 @@ func restoreLegacyPayloads(template, derivative string, baseline Lock, ids []str
 			continue
 		}
 		for _, file := range locked.Manifest.Files {
-			source := filepath.Join(template, filepath.FromSlash(file.Source))
-			target := filepath.Join(derivative, filepath.FromSlash(file.Target))
-			data, err := os.ReadFile(source)
-			if err != nil {
-				return fmt.Errorf("read %s: %w", file.Source, err)
-			}
-			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+			if err := copyTemplateFile(template, derivative, file.Source, file.Target); err != nil {
 				return err
 			}
-			if err := os.WriteFile(target, data, 0o644); err != nil {
+			// templ output is not distributed, so a restored .templ has no
+			// generated sibling until something regenerates it — and removal
+			// deleted the one that was there (remove.go prunes it on purpose:
+			// a surviving X_templ.go would keep compiling a deleted
+			// renderer). The template's committed copy is exactly what `make
+			// generate` would rewrite, so restoring it keeps the tree
+			// comparison a statement about authored source, the same way the
+			// generated query package is restored above.
+			if !strings.HasSuffix(file.Target, ".templ") {
+				continue
+			}
+			generated := strings.TrimSuffix(file.Target, ".templ") + "_templ.go"
+			source := strings.TrimSuffix(file.Source, ".templ") + "_templ.go"
+			if err := copyTemplateFile(template, derivative, source, generated); err != nil {
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+// copyTemplateFile copies one path out of the template tree into the
+// derivative, creating parent directories.
+func copyTemplateFile(template, derivative, source, target string) error {
+	data, err := os.ReadFile(filepath.Join(template, filepath.FromSlash(source)))
+	if err != nil {
+		return fmt.Errorf("read %s: %w", source, err)
+	}
+	full := filepath.Join(derivative, filepath.FromSlash(target))
+	if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(full, data, 0o644)
 }
 
 // sqlcOutputDir and sqlcQueryDir are the generated query package and its input
