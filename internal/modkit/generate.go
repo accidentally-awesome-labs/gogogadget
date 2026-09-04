@@ -594,6 +594,115 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	if err := emitBranch("Production", "production", orders["production"]); err != nil {
 		return nil, err
 	}
+	// Per-slot accessors let a command construct the adapter selected for a
+	// named environment without booting the runtime, so nothing outside this
+	// generated file ever names an adapter package. Only slots whose selected
+	// adapters need configuration alone qualify: an adapter that needs a pool
+	// or another capability belongs to Boot, and half-generating it would give
+	// callers a surface that is true for some slots and quietly false for
+	// others. The excluded slots are named in the generated output so the next
+	// caller finds the reason instead of reaching for an adapter import, which
+	// ValidateCoreCLIPackages refuses.
+	if configID != "" {
+		configProvides := byID[configID].Runtime.System.Provides
+		slotEnvAdapters := map[string]map[string]Manifest{}
+		for _, env := range []string{"development", "test", "production"} {
+			for _, id := range orders[env] {
+				module := byID[id]
+				sys := module.Runtime.System
+				if sys == nil || sys.Adapter == nil || sys.Package == "" || sys.Constructor == "" {
+					continue
+				}
+				if slotEnvAdapters[sys.Adapter.Slot] == nil {
+					slotEnvAdapters[sys.Adapter.Slot] = map[string]Manifest{}
+				}
+				slotEnvAdapters[sys.Adapter.Slot][env] = module
+			}
+		}
+		configOnly := func(module Manifest) bool {
+			for _, need := range module.Runtime.System.Needs {
+				satisfied := false
+				for _, provide := range configProvides {
+					if provide.Capability == need.Capability {
+						satisfied = true
+						break
+					}
+				}
+				if !satisfied && !need.Optional {
+					return false
+				}
+			}
+			return true
+		}
+		accessible, excluded := make([]string, 0, len(slotEnvAdapters)), make([]string, 0, len(slotEnvAdapters))
+		for slot, envAdapters := range slotEnvAdapters {
+			eligible := len(envAdapters) == 3 && validIdentifier(providerSlotIdent(slot))
+			for _, module := range envAdapters {
+				if !configOnly(module) {
+					eligible = false
+				}
+			}
+			if eligible {
+				accessible = append(accessible, slot)
+			} else {
+				excluded = append(excluded, slot)
+			}
+		}
+		sort.Strings(accessible)
+		sort.Strings(excluded)
+		if len(excluded) > 0 {
+			fmt.Fprintf(&b, "// These provider slots have no accessor because their selected adapters\n// need more than configuration, so they can only be constructed by Boot:\n// %s.\n// Import one of their adapter packages from internal/gggcli and\n// ValidateCoreCLIPackages refuses the plan before any write.\n\n", strings.Join(excluded, ", "))
+		}
+		for _, slot := range accessible {
+			envAdapters := slotEnvAdapters[slot]
+			capabilities := map[string]struct{}{}
+			for _, module := range envAdapters {
+				for _, provide := range module.Runtime.System.Provides {
+					capabilities[provide.Capability] = struct{}{}
+				}
+			}
+			ordered := make([]string, 0, len(capabilities))
+			for capability := range capabilities {
+				ordered = append(ordered, capability)
+			}
+			sort.Strings(ordered)
+			ident := providerSlotIdent(slot)
+			fmt.Fprintf(&b, "// %sSlot are the %s capabilities of the adapter selected for one named\n// environment.\ntype %sSlot struct {\n", ident, slot, ident)
+			for _, capability := range ordered {
+				fmt.Fprintf(&b, "\t%s %s\n", capabilityField(capability), providedTypes[capability])
+			}
+			b.WriteString("}\n\n")
+			fmt.Fprintf(&b, "// %sSlotFor constructs the %s adapter selected for environment. A caller\n// asks for a slot in a named environment and never names an adapter package,\n// so an unselected adapter stays out of its build.\nfunc %sSlotFor(ctx context.Context, h apphost.Host, cfg %s, environment string) (%sSlot, error) {\n\tswitch environment {\n",
+				ident, slot, ident, providedTypes[configProvides[0].Capability], ident)
+			for _, env := range []string{"development", "test", "production"} {
+				module := envAdapters[env]
+				sys := module.Runtime.System
+				pkgPath := resolveTypeImport(modulePath, sys.Package)
+				pkg := importAliases[pkgPath]
+				if pkg == "" {
+					pkg = uniqueImportName(pkgPath, importAliases)
+				}
+				fmt.Fprintf(&b, "\tcase %q:\n\t\tadapter, err := %s.%s(ctx, h, %s.Deps{", env, pkg, sys.Constructor, pkg)
+				for _, need := range sys.Needs {
+					for _, provide := range configProvides {
+						if provide.Capability == need.Capability {
+							fmt.Fprintf(&b, "%s: cfg", need.Field)
+						}
+					}
+				}
+				fmt.Fprintf(&b, "})\n\t\tif err != nil {\n\t\t\treturn %sSlot{}, fmt.Errorf(\"%s adapter %s: %%w\", err)\n\t\t}\n\t\treturn %sSlot{",
+					ident, env, strings.ReplaceAll(module.ID, "\"", "\\\""), ident)
+				assignments := make([]string, 0, len(sys.Provides))
+				for _, provide := range sys.Provides {
+					assignments = append(assignments, fmt.Sprintf("%s: adapter.%s", capabilityField(provide.Capability), provide.Field))
+				}
+				sort.Strings(assignments)
+				b.WriteString(strings.Join(assignments, ", "))
+				b.WriteString("}, nil\n")
+			}
+			fmt.Fprintf(&b, "\t}\n\treturn %sSlot{}, fmt.Errorf(\"unknown environment %%q\", environment)\n}\n\n", ident)
+		}
+	}
 	b.WriteString("func providerActive(env, slot, adapter string) bool {\n\tswitch env {\n")
 	for _, env := range []string{"development", "test", "production"} {
 		fmt.Fprintf(&b, "\tcase %q:\n", env)
@@ -4025,4 +4134,29 @@ func emitRemoteRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("\t\t\toperator, ok := operators[id]\n\t\t\treturn operator, ok\n\t\t},\n")
 	b.WriteString("\t}\n}\n")
 	return &GeneratedFile{Path: "internal/gggcli/commands/remote_registry_gen.go", Content: b.String()}, nil
+}
+
+// providerSlotIdent turns a scoped provider slot id into the Go identifier its
+// generated accessor uses: `ggg/identity` becomes `Identity`, and
+// `ggg/feature-flags` becomes `FeatureFlags`.
+func providerSlotIdent(slot string) string {
+	name := slot
+	if i := strings.LastIndex(slot, "/"); i >= 0 {
+		name = slot[i+1:]
+	}
+	out := make([]rune, 0, len(name))
+	upper := true
+	for _, r := range name {
+		if r == '-' || r == '_' || r == '.' {
+			upper = true
+			continue
+		}
+		if upper {
+			out = append(out, []rune(strings.ToUpper(string(r)))...)
+			upper = false
+			continue
+		}
+		out = append(out, r)
+	}
+	return string(out)
 }

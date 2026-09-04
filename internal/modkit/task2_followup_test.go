@@ -229,8 +229,17 @@ func TestBootstrapBranchesByEnvironmentAndGatesAdapters(t *testing.T) {
 			t.Fatalf("bootstrap missing %q:\\n%s", want, out.Content)
 		}
 	}
-	if strings.Count(out.Content, "local.New(ctx") != 2 || strings.Count(out.Content, "remote.New(ctx") != 1 {
+	// Two calls per adapter now: one in the environment's boot branch, one in
+	// the per-slot accessor a CLI command uses instead of importing the
+	// adapter. Development and test both select local, production selects
+	// remote, and no branch or accessor arm constructs the other.
+	if strings.Count(out.Content, "local.New(ctx") != 4 || strings.Count(out.Content, "remote.New(ctx") != 2 {
 		t.Fatalf("adapter constructors should be selected per environment: len=%d", len(out.Content))
+	}
+	for _, want := range []string{"type MailSlot struct", "func MailSlotFor(ctx context.Context, h apphost.Host, cfg "} {
+		if !strings.Contains(out.Content, want) {
+			t.Fatalf("bootstrap missing the per-slot accessor %q:\n%s", want, out.Content)
+		}
 	}
 	if !strings.Contains(out.Content, `Target: "managed"`) {
 		t.Fatalf("production health registration did not persist selected target: %s", out.Content)

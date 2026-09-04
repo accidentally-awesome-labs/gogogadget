@@ -13,11 +13,9 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db"
-	"github.com/gogogadget/gogogadget/internal/identity"
-	identityclerk "github.com/gogogadget/gogogadget/internal/identity/clerk"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/modkit"
+	"github.com/gogogadget/gogogadget/internal/modules"
 )
 
 // parsedArgs is the outcome of parsing one command's operands against its
@@ -625,10 +623,8 @@ func (c *Controller) applyIdentityLink(ctx context.Context, mutation TaskMutatio
 	if choice.Adapter == "" || choice.Target == "" {
 		return Result{}, refusalError(fmt.Errorf("identity provider selection is incomplete for %s", mutation.Environment))
 	}
-	if (strings.HasSuffix(choice.Adapter, "/identity-dev") && mutation.Provider != "dev") ||
-		(strings.HasSuffix(choice.Adapter, "/identity-clerk") && mutation.Provider != "clerk") {
-		return Result{}, refusalError(fmt.Errorf("provider %q does not match selected adapter %q", mutation.Provider, choice.Adapter))
-	}
+	// No adapter-id matching here: the adapter stamps its own provider on the
+	// claims it returns, and Linker refuses a mismatch against --provider.
 	lookup := func(key string) string {
 		if key == "APP_ENV" {
 			return mutation.Environment
@@ -640,23 +636,11 @@ func (c *Controller) applyIdentityLink(ctx context.Context, mutation TaskMutatio
 		return Result{}, refusalError(err)
 	}
 	h := apphost.Map(nil, time.Now(), c.version)
-	var verifier identity.Verifier
-	switch {
-	case strings.HasSuffix(choice.Adapter, "/identity-dev"):
-		adapter, createErr := identitydev.NewModule(ctx, h, identitydev.Deps{Config: &cfg})
-		if createErr != nil {
-			return Result{}, runtimeError(createErr)
-		}
-		verifier = adapter.Verifier
-	case strings.HasSuffix(choice.Adapter, "/identity-clerk"):
-		adapter, createErr := identityclerk.NewModule(ctx, h, identityclerk.Deps{Config: &cfg})
-		if createErr != nil {
-			return Result{}, runtimeError(createErr)
-		}
-		verifier = adapter.Verifier
-	default:
-		return Result{}, refusalError(fmt.Errorf("unsupported identity adapter %q", choice.Adapter))
+	slot, err := modules.IdentitySlotFor(ctx, h, &cfg, mutation.Environment)
+	if err != nil {
+		return Result{}, runtimeError(err)
 	}
+	verifier := slot.IdentityVerifier
 	pool, err := db.Open(ctx, cfg.DatabaseURL)
 	if err != nil {
 		return Result{}, runtimeError(err)

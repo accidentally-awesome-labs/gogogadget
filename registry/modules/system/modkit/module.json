@@ -172,7 +172,7 @@
         "source": "internal/gggcli/handlers.go",
         "target": "internal/gggcli/handlers.go",
         "class": "go",
-        "sha256": "fac6fb88c440d8c9234dd93711c6963a3a9629be612f80ef2b4d7f606ebdbde1",
+        "sha256": "2d0d2c932a0e08e92c1c2e62007b5edaa26287949eb13b7a92ead9e64707ef87",
         "rewrite_module": true,
         "contract": false
       },
@@ -398,9 +398,17 @@
         "source": "internal/modkit/cli_scan.go",
         "target": "internal/modkit/cli_scan.go",
         "class": "go",
-        "sha256": "4adaeb884e9ccef76538bde81f8e67ddbae440cf34e9406e656ac41fbc1c6b45",
+        "sha256": "d3d1588b2bb5eea95679d64e285af5a230e5dd47340b20e129ac0c52397a7e7b",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/modkit/cli_scan_core_test.go",
+        "target": "internal/modkit/cli_scan_core_test.go",
+        "class": "test",
+        "sha256": "5d907ed5bd222378969a473fdaee47004b53fa7e5ffc0c1c6da89b390128fb6d",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/modkit/codec.go",
@@ -540,7 +548,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "73c9670b596846c0857dbb6117a721cc84d0686adb58413ae502516a1fb88e5e",
+        "sha256": "8ea2c47ceadb984c984edfa77646329a0ca758e50b790f265960a90abcf87371",
         "rewrite_module": true,
         "contract": false
       },
@@ -685,7 +693,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "b8475622f505942be190e7fd9eddc63b1b120a90a5fc29d3178230f589c58649",
+        "sha256": "9fdbdf98e8db06eff4988b861fdc58c9419bbd155823e68d564469d7847d55f3",
         "rewrite_module": true,
         "contract": true
       },
@@ -952,7 +960,7 @@
         "source": "internal/modkit/task2_followup_test.go",
         "target": "internal/modkit/task2_followup_test.go",
         "class": "test",
-        "sha256": "ca5e7146ae68ab1105eccb13e4f64d255b285ec650a134acd7797bd215eaa8f7",
+        "sha256": "f91a691827a7c6ccb88e571a123ae39bcb0d89aa58e0d89fdf662f4c004ea6fc",
         "rewrite_module": false,
         "contract": false
       },

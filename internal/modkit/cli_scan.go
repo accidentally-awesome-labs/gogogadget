@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"path"
+	"sort"
 	"strings"
 )
 
@@ -101,4 +102,55 @@ func matchBannedImport(raw string, seams map[string]string) (string, string) {
 		}
 	}
 	return "", ""
+}
+
+// coreCLIPackagePrefix is the core CLI presentation tree. Nothing under it may
+// name an adapter package.
+const coreCLIPackagePrefix = "internal/gggcli/"
+
+// ValidateCoreCLIPackages refuses an adapter-package import anywhere under
+// internal/gggcli. The CLI reaches a selected adapter only through the
+// generated per-slot accessors in internal/modules, which are the sole thing
+// that names an adapter package; a direct import pins an unselected adapter
+// into every build, which is exactly what made a project that does not select
+// ggg/system/identity-clerk impossible to compile. The scan is
+// direct-import-only, which is the right shape here: the defect prevented IS a
+// direct import, and the generated accessor is the sanctioned indirection.
+func ValidateCoreCLIPackages(modules []Manifest, files map[string][]byte) error {
+	adapters := map[string]string{}
+	for _, module := range modules {
+		sys := module.Runtime.System
+		if sys == nil || sys.Adapter == nil || sys.Package == "" {
+			continue
+		}
+		adapters[strings.Trim(sys.Package, "/")] = module.ID
+	}
+	if len(adapters) == 0 {
+		return nil
+	}
+	targets := make([]string, 0, len(files))
+	for target := range files {
+		if strings.HasPrefix(target, coreCLIPackagePrefix) && strings.HasSuffix(target, ".go") {
+			targets = append(targets, target)
+		}
+	}
+	sort.Strings(targets)
+	for _, target := range targets {
+		parsed, err := parser.ParseFile(token.NewFileSet(), target, files[target], parser.ImportsOnly)
+		if err != nil {
+			return fmt.Errorf("scan %s: %w", target, err)
+		}
+		for _, spec := range parsed.Imports {
+			raw := strings.Trim(spec.Path.Value, "\"`")
+			for pkg, id := range adapters {
+				if raw != pkg && !strings.HasSuffix(raw, "/"+pkg) {
+					continue
+				}
+				return fmt.Errorf(
+					"%s imports adapter package %s owned by %s; the CLI must reach a selected adapter through the generated per-slot accessors in internal/modules, so an unselected adapter stays out of the build",
+					target, pkg, id)
+			}
+		}
+	}
+	return nil
 }
