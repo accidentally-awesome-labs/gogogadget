@@ -53,7 +53,7 @@
         "source": "internal/web/workflow_dev_session.go",
         "target": "internal/web/workflow_dev_session.go",
         "class": "go",
-        "sha256": "d09eae9bc0056a75efcfcd7e4354224143d1baeed9f735ee155f23ee7abda665",
+        "sha256": "e06866b09b40709f11f9266ec527708fbedb7a5c83d19bf684443a7ce94fdee3",
         "rewrite_module": true,
         "contract": true
       },

@@ -360,6 +360,20 @@ func validateManifest(m Manifest, canonical bool) error {
 			return fmt.Errorf("manifest runtime cli %q requires a claims.cli entry", command.Name)
 		}
 	}
+	// A derivation runs inside generated config code, so the function has to
+	// leave with the module that declared the key. Requiring the package to be
+	// one this manifest claims is what makes that true: claims.packages is
+	// exclusive, so nobody can point a derivation at code another module owns
+	// and outlive its own removal.
+	for _, item := range m.Environment {
+		if item.Derivation == nil {
+			continue
+		}
+		if !slices.Contains(m.Claims.Packages, item.Derivation.Package) {
+			return fmt.Errorf("manifest environment %s derivation package %q requires a claims.packages entry",
+				item.Key, item.Derivation.Package)
+		}
+	}
 	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil {
 		return err
 	}
@@ -1191,10 +1205,54 @@ func validateEnvironment(items []EnvironmentVariable, canonical bool) error {
 		if item.Type == EnvInt && item.Min != nil && item.Max != nil && *item.Min > *item.Max {
 			return fmt.Errorf("manifest environment[%d] min exceeds max", i)
 		}
+		if item.RefusedInProduction && item.Type != EnvBool {
+			return fmt.Errorf("manifest environment[%d] refused_in_production requires a bool declaration", i)
+		}
+		if err := validateEnvironmentDerivation(item); err != nil {
+			return fmt.Errorf("manifest environment[%d] %w", i, err)
+		}
 		if canonical && i > 0 && last > item.Key {
 			return fmt.Errorf("manifest environment must be sorted by key")
 		}
 		last = item.Key
+	}
+	return nil
+}
+
+// validateEnvironmentDerivation enforces the shape a generated call needs. The
+// derived field is assigned from the function's single string result, and the
+// inputs are passed as generated string fields, so anything other than string
+// declarations would emit code that does not compile. A key deriving itself
+// would emit a call that reads the value it is about to write.
+func validateEnvironmentDerivation(item EnvironmentVariable) error {
+	d := item.Derivation
+	if d == nil {
+		return nil
+	}
+	if item.Type != EnvString {
+		return fmt.Errorf("derivation requires a string declaration")
+	}
+	if err := validateSafePath(d.Package); err != nil {
+		return fmt.Errorf("derivation package: %w", err)
+	}
+	if !validIdentifier(d.Function) || d.Function[0] < 'A' || d.Function[0] > 'Z' {
+		return fmt.Errorf("derivation function %q must be an exported identifier", d.Function)
+	}
+	if len(d.Inputs) == 0 {
+		return fmt.Errorf("derivation inputs are required")
+	}
+	inputs := make(map[string]struct{}, len(d.Inputs))
+	for _, input := range d.Inputs {
+		if !validEnvironmentKey(input) {
+			return fmt.Errorf("derivation input %q is invalid", input)
+		}
+		if input == item.Key {
+			return fmt.Errorf("derivation input %q is the derived key", input)
+		}
+		if _, ok := inputs[input]; ok {
+			return fmt.Errorf("derivation has duplicate input %q", input)
+		}
+		inputs[input] = struct{}{}
 	}
 	return nil
 }

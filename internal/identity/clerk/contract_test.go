@@ -277,3 +277,57 @@ func signSvix(t *testing.T, secret, msgID string, payload []byte) http.Header {
 	h.Set("svix-signature", sig)
 	return h
 }
+
+// TestFrontendAPIURLIsDerivedAtConfigLoad pins the half of this adapter's
+// contract that is not a Go interface: CLERK_FRONTEND_API_URL is what CSP
+// connect-src allows, and clerk-js cannot refresh the session JWT without it,
+// so it must be resolved by the time internal/web reads it — not by the web
+// module, and not by hand-written code in the config seam that would outlive
+// removing this adapter.
+//
+// The read asserted here is Value, because that is the read a module which
+// does not declare the key is allowed to make; the typed field is checked
+// alongside it so the generated parse and the generated derivation cannot
+// disagree.
+func TestFrontendAPIURLIsDerivedAtConfigLoad(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		env  map[string]string
+		want string
+	}{
+		{
+			name: "production derives from APP_URL",
+			env: map[string]string{
+				"APP_ENV": "production", "APP_URL": "https://app.example.com",
+				"DATABASE_URL": "postgres://x", "NEON_API_KEY": "x", "RESEND_API_KEY": "x",
+				"STORAGE_R2_ACCESS_KEY_ID": "x", "STORAGE_R2_ACCOUNT_ID": "x",
+				"STORAGE_R2_BUCKET": "x", "STORAGE_R2_SECRET_ACCESS_KEY": "x",
+				"CLERK_PORTAL_URL": "https://accounts.example.com", "CLERK_PUBLISHABLE_KEY": "pk",
+				"CLERK_SECRET_KEY": "sk", "CLERK_WEBHOOK_SECRET": "whsec",
+			},
+			want: "https://clerk.app.example.com",
+		},
+		{
+			name: "development uses the shared wildcard host",
+			env:  map[string]string{"APP_ENV": "development", "APP_URL": "http://localhost:8080"},
+			want: "https://*.clerk.accounts.dev",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg, err := config.LoadFrom(func(key string) string { return tc.env[key] })
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, cfg.Value("CLERK_FRONTEND_API_URL"))
+			assert.Equal(t, tc.want, cfg.ClerkFrontendAPIURL)
+		})
+	}
+
+	// An explicit value is never overwritten: the derivation only fills.
+	cfg, err := config.LoadFrom(func(key string) string {
+		return map[string]string{
+			"APP_ENV": "development", "APP_URL": "http://localhost:8080",
+			"CLERK_FRONTEND_API_URL": "https://clerk.chosen.test",
+		}[key]
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "https://clerk.chosen.test", cfg.Value("CLERK_FRONTEND_API_URL"))
+}

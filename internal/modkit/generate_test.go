@@ -1349,6 +1349,143 @@ func TestConfigRegistryRejectsDuplicateKeys(t *testing.T) {
 	}
 }
 
+// Both halves of "an adapter's configuration behaviour leaves with the
+// adapter" are generated, so both are asserted on the emitted bytes: a
+// refusal the declaring module owns, and a derivation whose function lives in
+// a leaf package the declaring module owns.
+func TestConfigRegistryEmitsDeclaredRefusalAndDerivation(t *testing.T) {
+	base := Manifest{
+		ID: "ggg/system/config", Kind: ModuleSystem, Name: "config",
+		Revision: 1, Contract: 1, Title: "Config", Description: "Config system.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Environment: []EnvironmentVariable{
+			{Key: "APP_ENV", Field: "Env", Type: EnvString, Description: "environment", Default: "development"},
+			{Key: "APP_URL", Field: "AppURL", Type: EnvString, Description: "base URL", Default: "http://localhost:8080"},
+		},
+	}
+	adapter := Manifest{
+		ID: "ggg/system/hatch", Kind: ModuleSystem, Name: "hatch",
+		Revision: 1, Contract: 1, Title: "Hatch", Description: "Hatch system.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Claims: NamespaceClaims{Packages: []string{"internal/hatch/origin"}},
+		Environment: []EnvironmentVariable{
+			{Key: "HATCH_BYPASS", Field: "HatchBypass", Type: EnvBool, Description: "synthetic sessions",
+				Default: "false", RefusedInProduction: true},
+			{Key: "HATCH_ORIGIN", Field: "HatchOrigin", Type: EnvString, Description: "browser origin",
+				Derivation: &EnvironmentDerivation{
+					Package: "internal/hatch/origin", Function: "Origin", Inputs: []string{"APP_ENV", "APP_URL"},
+				}},
+		},
+	}
+	locked := func(m Manifest) LockedModule {
+		return LockedModule{ID: m.ID, Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: m,
+			Files: []LockedFile{}, Migrations: []LockedMigration{}}
+	}
+	lock := Lock{
+		Schema: 2, RegistryCommit: testCommitA,
+		Order:   []string{"ggg/system/config", "ggg/system/hatch"},
+		Modules: []LockedModule{locked(base), locked(adapter)},
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{base, adapter})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/config/config_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("config registry was not emitted")
+	}
+	for _, want := range []string{
+		// The refusal is the declaring module's, worded from its own key, and
+		// tests the resolved environment rather than a field that may not have
+		// been parsed yet.
+		`if cfg.HatchBypass && environment == "production" {`,
+		`errors.New("HATCH_BYPASS=true is refused when APP_ENV=production")`,
+		// The derivation imports the declaring module's leaf package, is
+		// module-relative so a derivative imports its own copy, only fills an
+		// unset value, and passes declared inputs as typed fields.
+		`origin "example.com/acme/internal/hatch/origin"`,
+		`if cfg.HatchOrigin == "" { cfg.HatchOrigin = origin.Origin(cfg.Env, cfg.AppURL)`,
+		`cfg.Values["HATCH_ORIGIN"] = cfg.HatchOrigin }`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("config registry missing %q:\n%s", want, registry)
+		}
+	}
+
+	// Removing the declaring module removes the refusal, the import and the
+	// call. That is the whole point of declaring them.
+	soloLock := Lock{Schema: 2, RegistryCommit: testCommitA,
+		Order: []string{"ggg/system/config"}, Modules: []LockedModule{locked(base)}}
+	files, err = GenerateAll(context.Background(), "example.com/acme", soloLock, []Manifest{base})
+	if err != nil {
+		t.Fatalf("GenerateAll without the adapter: %v", err)
+	}
+	for _, file := range files {
+		if file.Path != "internal/config/config_registry_gen.go" {
+			continue
+		}
+		for _, unwanted := range []string{"HATCH_BYPASS", "HATCH_ORIGIN", "internal/hatch/origin"} {
+			if strings.Contains(file.Content, unwanted) {
+				t.Fatalf("config registry still mentions %q after the declaring module was removed", unwanted)
+			}
+		}
+	}
+}
+
+// A derivation reads other declared values, so the generator refuses one that
+// names a key nothing declares or a key it cannot pass as a string. Emitting
+// it anyway would produce a generated file that does not compile, and the
+// operator would read the failure as a Go error rather than a manifest one.
+func TestConfigRegistryRefusesUnsatisfiableDerivation(t *testing.T) {
+	mk := func(inputs []string, portType EnvType) []Manifest {
+		base := Manifest{
+			ID: "ggg/system/config", Kind: ModuleSystem, Name: "config",
+			Revision: 1, Contract: 1, Title: "Config", Description: "Config system.",
+			Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+			Environment: []EnvironmentVariable{
+				{Key: "PORT", Field: "Port", Type: portType, Description: "listen port", Default: "8080"},
+			},
+		}
+		adapter := Manifest{
+			ID: "ggg/system/hatch", Kind: ModuleSystem, Name: "hatch",
+			Revision: 1, Contract: 1, Title: "Hatch", Description: "Hatch system.",
+			Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+			Claims: NamespaceClaims{Packages: []string{"internal/hatch/origin"}},
+			Environment: []EnvironmentVariable{
+				{Key: "HATCH_ORIGIN", Field: "HatchOrigin", Type: EnvString, Description: "browser origin",
+					Derivation: &EnvironmentDerivation{
+						Package: "internal/hatch/origin", Function: "Origin", Inputs: inputs,
+					}},
+			},
+		}
+		return []Manifest{base, adapter}
+	}
+	for name, graph := range map[string][]Manifest{
+		"undeclared input": mk([]string{"APP_URL"}, EnvString),
+		"non-string input": mk([]string{"PORT"}, EnvInt),
+	} {
+		t.Run(name, func(t *testing.T) {
+			lock := Lock{Schema: 2, RegistryCommit: testCommitA,
+				Order: []string{"ggg/system/config", "ggg/system/hatch"}}
+			for _, m := range graph {
+				lock.Modules = append(lock.Modules, LockedModule{
+					ID: m.ID, Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+					RequiredBy: []string{}, Manifest: m, Files: []LockedFile{}, Migrations: []LockedMigration{}})
+			}
+			if _, err := GenerateAll(context.Background(), "example.com/acme", lock, graph); err == nil {
+				t.Fatal("GenerateAll accepted a derivation it cannot emit a compiling call for")
+			}
+		})
+	}
+}
+
 // .env.example and the configuration reference are rendered from the same
 // declarations as the parse, so neither can omit a key the code reads. The five
 // keys this repo shipped without were exactly that kind of drift.

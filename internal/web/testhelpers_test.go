@@ -49,12 +49,18 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	t.Helper()
 	pool := integrationPool(t)
 	cfg := config.Config{
-		Env:                 "test",
-		AppURL:              "http://localhost:18080",
-		ClerkPortalURL:      "https://accounts.example.test",
-		ClerkFrontendAPIURL: "https://*.clerk.accounts.dev",
-		ClerkWebhookSecret:  testWebhookSecret,
-		DevAuthBypass:       true,
+		Env:    "test",
+		AppURL: "http://localhost:18080",
+		// Adapter-owned keys reach a consumer that does not declare them
+		// through Values, exactly as the generated parse fills it. Setting the
+		// typed field here instead would test a read no module is allowed to
+		// make.
+		Values: map[string]string{
+			"CLERK_PORTAL_URL":       "https://accounts.example.test",
+			"CLERK_FRONTEND_API_URL": "https://*.clerk.accounts.dev",
+			"DEV_AUTH_BYPASS":        "true",
+		},
+		ClerkWebhookSecret: testWebhookSecret,
 	}
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",

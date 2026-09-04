@@ -8,9 +8,12 @@ import (
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
 
-// devAuthBypass gates every zero-account dev route. config refuses
-// DEV_AUTH_BYPASS under APP_ENV=production, so this is false on a live site.
-func (s *Server) devAuthBypass() bool { return s.cfg.DevAuthBypass }
+// devAuthBypass gates every zero-account dev route. The key belongs to
+// ggg/system/identity-dev, whose declaration also carries the boot refusal
+// under APP_ENV=production, so this is false on a live site. It is read by key
+// rather than by field because this module does not declare it: deselecting
+// the dev adapter must take the field with it, and leave this reading false.
+func (s *Server) devAuthBypass() bool { return s.cfg.BoolValue("DEV_AUTH_BYPASS") }
 
 // GET /dev/login — zero-account mode only: set the synthetic session cookie
 // for the seeded demo user and land in /app. Never registered in production.

@@ -59,7 +59,7 @@ func TestRequireAuthAcceptsValidSession(t *testing.T) {
 
 func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.ClerkPublishableKey = "pk_test_fixture"
+		d.Config.Values["CLERK_PUBLISHABLE_KEY"] = "pk_test_fixture"
 	})
 	seedMembership(t, s, "user_shell", "org_shell", "org:admin")
 	cookie := sessionCookie("user_shell", "org_shell", "org:admin")
@@ -90,7 +90,7 @@ func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
 	assert.NotContains(t, body, `hx-history="`)
 	assert.Contains(t, body, `<main id="content" hx-history-elt="true"`)
 
-	s.cfg.ClerkPublishableKey = ""
+	s.cfg.Values["CLERK_PUBLISHABLE_KEY"] = ""
 	code, _, body = serve(t, s, "GET", "/app", nil, nil, cookie)
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, `id="org-switcher" class="min-h-8"`)
@@ -117,7 +117,7 @@ func TestSettingsUseCurrentClerkAccountPortalLinks(t *testing.T) {
 
 func TestSettingsHideClerkLinksWhenAccountPortalIsUnconfigured(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.ClerkPortalURL = ""
+		d.Config.Values["CLERK_PORTAL_URL"] = ""
 	})
 	seedMembership(t, s, "user_no_portal", "org_no_portal", "org:admin")
 	cookie := sessionCookie("user_no_portal", "org_no_portal", "org:admin")
@@ -133,7 +133,7 @@ func TestSettingsHideClerkLinksWhenAccountPortalIsUnconfigured(t *testing.T) {
 
 func TestRequireAuthWhenNoProviderIsSelected(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.DevAuthBypass = false
+		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
 		d.Config.ClerkSecretKey = ""
 	})
 	code, hdr, _ := serve(t, s, "GET", "/app/settings/account", nil, nil)
@@ -278,7 +278,7 @@ func TestLazyOrgSync(t *testing.T) {
 func TestLoginRedirectRoutes(t *testing.T) {
 	nav := identitydev.Navigator{BaseURL: "https://accounts.example.test"}
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.DevAuthBypass = false
+		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
 		d.Config.ClerkSecretKey = "sk_test_x"
 		d.IdentityNavigator = nav
 	})

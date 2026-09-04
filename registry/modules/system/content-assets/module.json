@@ -147,7 +147,7 @@
         "source": "content/docs/authentication.md",
         "target": "content/docs/authentication.md",
         "class": "content",
-        "sha256": "510773ebc10fd8dbff15262ee9b09876a91b6e89114554aff47c50b64e615551",
+        "sha256": "2e32af3b1e17dec1d746ef86dc8de802f7f76b3a8c8face8493010d5b4e25179",
         "rewrite_module": false,
         "contract": false
       },
@@ -187,7 +187,7 @@
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
-        "sha256": "e81151b5f6c540c9f7f3c5497ef07002f2e2585c1ee99cb41d5a4793ff677060",
+        "sha256": "2abec1304ff1b4d7113c7af86627b013ebe274c3a712e6668b56f4af69e4ec10",
         "rewrite_module": false,
         "contract": false
       },
@@ -227,7 +227,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "0859d171537d6782695f642faa1e376d95434e4dde9cde743b9551b63af20460",
+        "sha256": "b0f4bc422f8cf7d82cf0ad98e39b9d371d0de20cbeb4e93f58b955d99970e192",
         "rewrite_module": false,
         "contract": false
       },
@@ -323,7 +323,7 @@
         "source": "content/docs/roadmap.md",
         "target": "content/docs/roadmap.md",
         "class": "content",
-        "sha256": "5adfcd480bf84af8d615e2c374a690c851934fa25aba8f7c0aa80b5025032a24",
+        "sha256": "a1139d164620a86d0aac85551d9ef4c882132b3532a5adf397c045b5b0f890b5",
         "rewrite_module": false,
         "contract": false
       },

@@ -11,7 +11,7 @@ import (
 func (s *Server) handleSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	user := identity.UserFrom(r.Context())
 	accountURL := clerkAccountPortalLink(
-		s.cfg.ClerkPortalURL,
+		s.cfg.Value("CLERK_PORTAL_URL"),
 		"/user",
 		s.cfg.AppURL+r.URL.Path,
 	)

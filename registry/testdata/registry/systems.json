@@ -1,6 +1,9 @@
 {
   "items": [
     "registry/modules/system/example-clock/module.json",
+    "registry/modules/system/identity-hosted/module.json",
+    "registry/modules/system/identity-local/module.json",
+    "registry/modules/system/identity-providers/module.json",
     "registry/modules/system/mail-local/module.json",
     "registry/modules/system/mail-managed/module.json",
     "registry/modules/system/mail-providers/module.json",

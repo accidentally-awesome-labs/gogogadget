@@ -37,9 +37,11 @@ func (unavailableCompleter) Chat(context.Context, llm.ChatRequest) (llm.ChatResp
 func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	t.Helper()
 	cfg := config.Config{
-		Env:                 "development",
-		AppURL:              "http://localhost:8080",
-		ClerkFrontendAPIURL: "https://clerk.example.com",
+		Env:    "development",
+		AppURL: "http://localhost:8080",
+		// CLERK_FRONTEND_API_URL is identity-clerk's declaration; the shell
+		// reads it by key, not by field, so the fixture supplies it by key.
+		Values: map[string]string{"CLERK_FRONTEND_API_URL": "https://clerk.example.com"},
 	}
 	if mutate != nil {
 		mutate(&cfg)

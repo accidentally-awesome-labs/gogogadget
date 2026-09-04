@@ -16,7 +16,7 @@ func (s *Server) handleSettingsOrg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	organizationURL := clerkAccountPortalLink(
-		s.cfg.ClerkPortalURL,
+		s.cfg.Value("CLERK_PORTAL_URL"),
 		"/organization",
 		s.cfg.AppURL+r.URL.Path,
 	)

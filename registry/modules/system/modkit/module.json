@@ -488,7 +488,7 @@
         "source": "internal/modkit/example.go",
         "target": "internal/modkit/example.go",
         "class": "go",
-        "sha256": "6021ef288f1d4e417f57d939dca4d225d58d6933bd249f86883b10b29b9cb0c3",
+        "sha256": "5a678163e758859699013ee141517acc53f5120ead0b7f777127a29ef31ee429",
         "rewrite_module": true,
         "contract": false
       },
@@ -496,7 +496,7 @@
         "source": "internal/modkit/example_selfhost_test.go",
         "target": "internal/modkit/example_selfhost_test.go",
         "class": "test",
-        "sha256": "35d30e032d9a6af9db59d47d6b62a252d76e312637aa734434b3e0c65bcf7aa4",
+        "sha256": "22465e82328149a57e352e704959abc49448d1d9561cbeaa87fe61e2c117462d",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -548,7 +548,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "8ea2c47ceadb984c984edfa77646329a0ca758e50b790f265960a90abcf87371",
+        "sha256": "c3569b2d718c85f9cb20c23325807cf96b43048f5f029a911e27a9d7af3945c7",
         "rewrite_module": true,
         "contract": false
       },
@@ -556,7 +556,7 @@
         "source": "internal/modkit/generate_test.go",
         "target": "internal/modkit/generate_test.go",
         "class": "test",
-        "sha256": "e992dabc40466870f2d51c6b8ddb6b24b57f741193d8c24415b51d8a5cc5f98d",
+        "sha256": "ead692876ac093417774661cf341de2fa6af794e069c15c26a0b775f299acc52",
         "rewrite_module": true,
         "contract": false
       },
@@ -636,7 +636,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "7f81cf384ca6ca42ab82e9dd9b8b30e501f7cb8a788d3513da824feca4fa9ee6",
+        "sha256": "58d0bff1c165684a4fae4880da00cf81dea999815baa94ee91632339afe894c3",
         "rewrite_module": true,
         "contract": true
       },
@@ -790,7 +790,7 @@
         "source": "internal/modkit/registry_published_selfhost_test.go",
         "target": "internal/modkit/registry_published_selfhost_test.go",
         "class": "test",
-        "sha256": "f9bea46f605b3a2aa690f1a69fd33eb24ccb4421cc1ee9f8be658a739509ebf7",
+        "sha256": "9be52c07d4e68a9aca1ac55f4ec71490e9b5caa8d97095fe667a40b1dbf5379c",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -799,7 +799,7 @@
         "source": "internal/modkit/registry_test.go",
         "target": "internal/modkit/registry_test.go",
         "class": "test",
-        "sha256": "00812e70b5e6c36063d475683afda9dbc7d6302a5a5cba3db267317c8865e850",
+        "sha256": "ad69f5792949ff28662467dfa2ab6a6851c9c425d6b06ecaa1e847c598f6f543",
         "rewrite_module": true,
         "contract": false
       },
@@ -968,7 +968,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "efafd0a6f8b6d253392928b1fd1c0f042f6ae67b27cde0e9ed5debf0bbed59f3",
+        "sha256": "257594d0514f826f145b53e7c98f16a178d6073a47011177a5ba72f4d511a6b9",
         "rewrite_module": true,
         "contract": false
       },

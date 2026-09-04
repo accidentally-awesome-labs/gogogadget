@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "fixture/system/identity-local",
+    "kind": "system",
+    "name": "identity-local",
+    "revision": 1,
+    "contract": 1,
+    "title": "Fixture local identity adapter",
+    "description": "A zero-account identity candidate for provider permutation validation.",
+    "requires": [
+      {"id":"ggg/system/apphost","contract":{"min":1,"max":1}},
+      {"id":"ggg/system/config","contract":{"min":1,"max":1}},
+      {"id":"ggg/system/identity","contract":{"min":1,"max":1}}
+    ],
+    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "files": [
+      {"source":"registry/modules/system/identity-local/identity_local.go","target":"internal/fixture/identitylocal/identity_local.go","class":"go","sha256":"6f749d0e5d7a926a88b3a700ef02e2ef2d943514b164e97ece3918c42b791216","rewrite_module":true,"contract":true},
+      {"source":"registry/modules/system/identity-local/identity_local_test.go","target":"internal/fixture/identitylocal/identity_local_test.go","class":"test","sha256":"6e18ff10efb79e080932f783bccdc16bcd8e2aa5d435c894ecc5c26d1d00cf3a","rewrite_module":true,"contract":false}
+    ],
+    "claims": {"packages":["internal/fixture/identitylocal"]},
+    "runtime": {"system": {
+      "package":"internal/fixture/identitylocal","constructor":"NewModule",
+      "needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],
+      "provides":[
+        {"field":"Deleter","capability":"identity.deleter","type":"identity.Deleter"},
+        {"field":"Fetcher","capability":"identity.fetcher","type":"identity.UserFetcher"},
+        {"field":"Navigator","capability":"identity.navigator","type":"identity.Navigator"},
+        {"field":"Verifier","capability":"identity.verifier","type":"identity.Verifier"},
+        {"field":"Webhook","capability":"identity.webhook","type":"identity.Webhook"}
+      ],
+      "type_imports":["internal/identity"],"start":false,"stop":false,
+      "adapter":{"slot":"ggg/identity","targets":[{"id":"local","title":"Fixture local identity","mode":"development","environments":["development","test"],"automation":"manual","docs_url":"https://example.invalid/fixture/identity-local","inputs":[]}]}
+    }},
+    "migrations": [], "environment": [], "docs": [],
+    "tests":{"go_packages":["internal/fixture/identitylocal"]}, "data":[], "removal_policy":"free"
+  }
+}

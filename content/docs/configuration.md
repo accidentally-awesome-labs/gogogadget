@@ -105,6 +105,23 @@ Validated in every environment: `APP_ENV` must be one of the three values,
 `PORT` must be a valid port, `POLAR_SERVER` must be `sandbox` or `production`,
 and a malformed `TEST_NOW` under `APP_ENV=test` is an error.
 
+None of that is hand-written in `internal/config`. Each rule is declared by the
+module that owns the key, and the parse is generated from those declarations:
+
+- `production_required` makes a key a production boot requirement.
+- `refused_in_production` makes a `true` bool a production boot refusal. That is
+  what `ggg/system/identity-dev` declares for `DEV_AUTH_BYPASS`, so removing the
+  dev adapter removes the key and its refusal together.
+- `derivation` names a pure function in a leaf package the declaring module owns
+  and the inputs to pass it, and fills the key when the operator supplies
+  nothing. `ggg/system/identity-clerk` declares one for `CLERK_FRONTEND_API_URL`
+  pointing at `internal/identity/clerkurl.FrontendAPIURL(APP_ENV, APP_URL)`.
+
+A module that does not declare a key reads it with `cfg.Value("KEY")` /
+`cfg.BoolValue("KEY")` rather than the typed field: the field belongs to the
+declaring module and leaves with it, while the key-shaped read still compiles
+and resolves to the empty value.
+
 ## Degradation, not crashes
 
 Everything optional degrades cleanly when unset: Clerk → `/app` 503s (or dev

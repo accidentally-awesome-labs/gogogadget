@@ -486,3 +486,68 @@ func TestInvalidContentTypeManifestRejected(t *testing.T) {
 		})
 	}
 }
+
+// envManifest is a manifest whose only interesting content is one environment
+// declaration, so a validation failure names the declaration rather than some
+// unrelated missing array.
+func envManifest(item EnvironmentVariable, packages ...string) Manifest {
+	return Manifest{
+		ID: "ggg/system/hatch", Kind: ModuleSystem, Name: "hatch",
+		Revision: 1, Contract: 1, Title: "Hatch", Description: "Hatch system.",
+		Requires: []Requirement{}, Files: []ManifestFile{}, Migrations: []ManifestMigration{},
+		Docs: []DocumentationRef{}, Data: []DataDeclaration{}, RemovalPolicy: RemovalFree,
+		Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		Claims:       NamespaceClaims{Packages: packages},
+		Environment:  []EnvironmentVariable{item},
+	}
+}
+
+// The two declarations that let an adapter own its configuration behaviour are
+// only safe if their semantics are enforced: a refusal reads a bool field, and
+// a derivation emits a call into a package the declaring module owns. Anything
+// else generates code that does not compile, or code that outlives the module.
+func TestValidateManifestEnforcesRefusalAndDerivationSemantics(t *testing.T) {
+	derivation := func(mutate func(*EnvironmentDerivation)) *EnvironmentDerivation {
+		d := EnvironmentDerivation{Package: "internal/hatch/origin", Function: "Origin", Inputs: []string{"APP_URL"}}
+		if mutate != nil {
+			mutate(&d)
+		}
+		return &d
+	}
+	good := EnvironmentVariable{Key: "HATCH_ORIGIN", Field: "HatchOrigin", Type: EnvString,
+		Description: "browser origin", Derivation: derivation(nil)}
+	if err := ValidateManifest(envManifest(good, "internal/hatch/origin")); err != nil {
+		t.Fatalf("a well-formed derivation was refused: %v", err)
+	}
+	bypass := EnvironmentVariable{Key: "HATCH_BYPASS", Field: "HatchBypass", Type: EnvBool,
+		Description: "synthetic sessions", RefusedInProduction: true}
+	if err := ValidateManifest(envManifest(bypass)); err != nil {
+		t.Fatalf("a well-formed refusal was refused: %v", err)
+	}
+
+	for name, manifest := range map[string]Manifest{
+		"refusal on a non-bool": envManifest(EnvironmentVariable{Key: "HATCH_BYPASS", Field: "HatchBypass",
+			Type: EnvString, Description: "synthetic sessions", RefusedInProduction: true}),
+		"derivation on a non-string": envManifest(EnvironmentVariable{Key: "HATCH_ORIGIN", Field: "HatchOrigin",
+			Type: EnvBool, Description: "browser origin", Derivation: derivation(nil)}, "internal/hatch/origin"),
+		"derivation into an unclaimed package": envManifest(good),
+		"derivation with no inputs": envManifest(EnvironmentVariable{Key: "HATCH_ORIGIN", Field: "HatchOrigin",
+			Type: EnvString, Description: "browser origin",
+			Derivation: derivation(func(d *EnvironmentDerivation) { d.Inputs = nil })}, "internal/hatch/origin"),
+		"derivation calling an unexported function": envManifest(EnvironmentVariable{Key: "HATCH_ORIGIN",
+			Field: "HatchOrigin", Type: EnvString, Description: "browser origin",
+			Derivation: derivation(func(d *EnvironmentDerivation) { d.Function = "origin" })}, "internal/hatch/origin"),
+		"derivation reading itself": envManifest(EnvironmentVariable{Key: "HATCH_ORIGIN", Field: "HatchOrigin",
+			Type: EnvString, Description: "browser origin",
+			Derivation: derivation(func(d *EnvironmentDerivation) { d.Inputs = []string{"HATCH_ORIGIN"} })}, "internal/hatch/origin"),
+		"derivation escaping the project": envManifest(EnvironmentVariable{Key: "HATCH_ORIGIN", Field: "HatchOrigin",
+			Type: EnvString, Description: "browser origin",
+			Derivation: derivation(func(d *EnvironmentDerivation) { d.Package = "../elsewhere" })}, "../elsewhere"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := ValidateManifest(manifest); err == nil {
+				t.Fatal("ValidateManifest accepted a declaration the generator cannot emit safely")
+			}
+		})
+	}
+}

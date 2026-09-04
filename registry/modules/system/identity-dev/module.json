@@ -143,7 +143,8 @@
         "type": "bool",
         "description": "Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error",
         "default": "false",
-        "example": "true"
+        "example": "true",
+        "refused_in_production": true
       }
     ],
     "docs": [],

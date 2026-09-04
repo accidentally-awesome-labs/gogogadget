@@ -14,7 +14,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, r, Page{Title: "Auth", Layout: templates.LayoutPublic}, templates.NotConfigured("Auth", "authentication"))
 		return
 	}
-	if s.cfg.DevAuthBypass {
+	if s.cfg.BoolValue("DEV_AUTH_BYPASS") {
 		http.Redirect(w, r, "/dev/login", http.StatusSeeOther)
 		return
 	}
@@ -32,7 +32,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, r, Page{Title: "Auth", Layout: templates.LayoutPublic}, templates.NotConfigured("Auth", "authentication"))
 		return
 	}
-	if s.cfg.DevAuthBypass {
+	if s.cfg.BoolValue("DEV_AUTH_BYPASS") {
 		http.Redirect(w, r, "/dev/login", http.StatusSeeOther)
 		return
 	}
@@ -41,7 +41,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 // GET /logout → Clerk hosted sign-out (dev: clear the cookie).
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
-	if s.cfg.DevAuthBypass {
+	if s.cfg.BoolValue("DEV_AUTH_BYPASS") {
 		s.clearSessionCookie(w)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return

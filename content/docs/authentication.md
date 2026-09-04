@@ -160,9 +160,11 @@ When neither Clerk nor the bypass is configured, `/app` routes render a 503
 ## Dev bypass and e2e tokens
 
 Selecting `ggg/system/identity-dev` (with `DEV_AUTH_BYPASS=true`) wires
-`identitydev.Verifier` in place of the Clerk adapter's. The
-config loader **hard-errors at boot if this is combined with
-`APP_ENV=production`**. Synthetic tokens have the exact shape:
+`identitydev.Verifier` in place of the Clerk adapter's. The generated config
+loader **hard-errors at boot if this is combined with `APP_ENV=production`** —
+`identity-dev`'s manifest declares `refused_in_production` on the key, so the
+refusal is emitted from that declaration and disappears with the adapter rather
+than outliving it in the config seam. Synthetic tokens have the exact shape:
 
 ```
 __session=e2e:<userID>:<orgID>:<role>

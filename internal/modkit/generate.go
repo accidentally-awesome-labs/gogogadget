@@ -2646,9 +2646,51 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 			needsTime = true
 		}
 	}
+
+	// A declared derivation calls a pure function the declaring module owns,
+	// so the generated loader imports that package — and stops importing it
+	// the moment the module leaves. Inputs are resolved to generated fields
+	// here, which is what makes the emitted call type-checked by the compiler
+	// rather than trusted from manifest data.
+	declarationByKey := make(map[string]EnvironmentVariable, len(declarations))
+	for _, e := range declarations {
+		declarationByKey[e.Key] = e
+	}
+	derivationAliases := map[string]string{}
+	usedAliases := map[string]string{}
+	for _, e := range declarations {
+		if e.Derivation == nil {
+			continue
+		}
+		path := resolveTypeImport(modulePath, e.Derivation.Package)
+		if _, seen := derivationAliases[path]; !seen {
+			derivationAliases[path] = uniqueImportName(path, usedAliases)
+		}
+		for _, input := range e.Derivation.Inputs {
+			source, declared := declarationByKey[input]
+			if !declared {
+				return nil, fmt.Errorf("env key %s derives from %s, which no selected module declares", e.Key, input)
+			}
+			if source.Type != EnvString {
+				return nil, fmt.Errorf("env key %s derives from %s, which is %s rather than string", e.Key, input, source.Type)
+			}
+		}
+	}
+
 	b.WriteString("import (\n\t\"errors\"\n\t\"fmt\"\n\t\"strconv\"\n\t\"strings\"\n")
 	if needsTime {
 		b.WriteString("\t\"time\"\n")
+	}
+	if len(derivationAliases) > 0 {
+		lines := make([]string, 0, len(derivationAliases))
+		for path, alias := range derivationAliases {
+			lines = append(lines, "\t"+alias+" \""+path+"\"\n")
+		}
+		sort.Strings(lines)
+		b.WriteString("\n")
+		for _, line := range lines {
+			b.WriteString(line)
+		}
 	}
 	b.WriteString(")\n\n")
 
@@ -2715,6 +2757,34 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	for _, e := range declarations {
 		if err := writeEnvParse(&b, e, requiredExpression(e, lock)); err != nil {
 			return nil, err
+		}
+		if e.RefusedInProduction {
+			// The escape hatch is refused by the module that ships it, so
+			// removing that module removes the refusal along with the key it
+			// guards — and while the module is installed the refusal is a
+			// boot error, not a warning, because a hatch that reaches
+			// production is indistinguishable from no hatch at all.
+			fmt.Fprintf(&b, "\tif cfg.%s && environment == \"production\" {\n", e.Field)
+			fmt.Fprintf(&b, "\t\terrs = append(errs, errors.New(%s))\n\t}\n",
+				goString(e.Key+"=true is refused when APP_ENV=production"))
+		}
+	}
+	if len(derivationAliases) > 0 {
+		b.WriteString("\n\t// Declared derivations fill keys the operator left unset, from values\n")
+		b.WriteString("\t// this parse already resolved. They run after every parse so an input is\n")
+		b.WriteString("\t// complete whatever order the declarations landed in.\n")
+		for _, e := range declarations {
+			if e.Derivation == nil {
+				continue
+			}
+			args := make([]string, 0, len(e.Derivation.Inputs))
+			for _, input := range e.Derivation.Inputs {
+				args = append(args, "cfg."+declarationByKey[input].Field)
+			}
+			alias := derivationAliases[resolveTypeImport(modulePath, e.Derivation.Package)]
+			fmt.Fprintf(&b, "\tif cfg.%s == \"\" {\n", e.Field)
+			fmt.Fprintf(&b, "\t\tcfg.%s = %s.%s(%s)\n", e.Field, alias, e.Derivation.Function, strings.Join(args, ", "))
+			fmt.Fprintf(&b, "\t\tcfg.Values[%s] = cfg.%s\n\t}\n", goString(e.Key), e.Field)
 		}
 	}
 	b.WriteString("\treturn cfg, errs\n}\n\n")

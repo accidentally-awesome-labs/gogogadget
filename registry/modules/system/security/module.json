@@ -61,7 +61,7 @@
         "source": "internal/web/auth.go",
         "target": "internal/web/auth.go",
         "class": "go",
-        "sha256": "3d14ae851e1d667a3d60e89c0ac4c7dee7b89c33f4142115bac02b38ce463d59",
+        "sha256": "78c269165165ca88ff6e8609c90765b40a175329f6e2ca57168f7ef7c2db1d2c",
         "rewrite_module": true,
         "contract": true
       },
@@ -85,7 +85,7 @@
         "source": "internal/web/middleware.go",
         "target": "internal/web/middleware.go",
         "class": "go",
-        "sha256": "792c5b6d23be8afe7bb2b2ba5bd1d3bdbd3b9c31ebc0ca701b0473519b95a58b",
+        "sha256": "6db7f232d9c616cdceb2576c159c4fa6b63dbe43183fb71096fdc6712e07c8b3",
         "rewrite_module": true,
         "contract": true
       }

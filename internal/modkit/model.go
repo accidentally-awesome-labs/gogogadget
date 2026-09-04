@@ -823,8 +823,33 @@ type EnvironmentVariable struct {
 	TrimSlash          bool     `json:"trim_slash,omitempty"`
 	Required           bool     `json:"required,omitempty"`
 	ProductionRequired bool     `json:"production_required,omitempty"`
-	Secret             bool     `json:"secret,omitempty"`
-	Targets            []string `json:"targets,omitempty"`
+	// RefusedInProduction makes a true value a boot refusal under
+	// APP_ENV=production. It exists so an escape hatch that only makes sense
+	// off production is refused by the module that ships it, rather than by
+	// hand-written code in the config seam that outlives the module's removal.
+	RefusedInProduction bool `json:"refused_in_production,omitempty"`
+	// Derivation fills the key when the operator supplies nothing. It leaves
+	// with the declaring module, which is the whole point: a derivation
+	// written into the config seam by hand survives removing the adapter that
+	// gave the key meaning.
+	Derivation *EnvironmentDerivation `json:"derivation,omitempty"`
+	Secret     bool                   `json:"secret,omitempty"`
+	Targets    []string               `json:"targets,omitempty"`
+}
+
+// EnvironmentDerivation names a pure function that computes one declared value
+// from other declared values. The function lives in a leaf package the
+// declaring module owns and imports nothing that imports config, because the
+// generated loader calls it: a derivation expressed as manifest data instead
+// would be a template language, and this repository would rather compile three
+// lines of Go.
+//
+// Inputs are declared keys, resolved to their generated fields in order, so
+// the call is type-checked by the compiler rather than by the generator.
+type EnvironmentDerivation struct {
+	Package  string   `json:"package"`
+	Function string   `json:"function"`
+	Inputs   []string `json:"inputs"`
 }
 
 // EnvType is the parse a declared key needs.

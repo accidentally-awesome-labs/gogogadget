@@ -55,7 +55,7 @@
         "source": "internal/web/page_settings_account.go",
         "target": "internal/web/page_settings_account.go",
         "class": "go",
-        "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+        "sha256": "9f5523d311aaf67c358d107c6afb145a1ee41d745e6036c7ac8ba5af1f473b86",
         "rewrite_module": true,
         "contract": false
       },

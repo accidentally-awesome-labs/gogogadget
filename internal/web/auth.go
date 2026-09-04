@@ -113,7 +113,7 @@ func (s *Server) requireOrg(next http.Handler) http.Handler {
 				return
 			}
 			if len(orgs) == 0 {
-				target := s.cfg.ClerkPortalURL + "/create-organization?redirect_url=" + s.cfg.AppURL + "/app"
+				target := s.cfg.Value("CLERK_PORTAL_URL") + "/create-organization?redirect_url=" + s.cfg.AppURL + "/app"
 				Redirect(w, r, target)
 				return
 			}

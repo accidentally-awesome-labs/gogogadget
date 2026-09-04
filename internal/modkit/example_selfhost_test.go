@@ -95,7 +95,10 @@ func TestExampleClosuresCoverEveryKindInDependencyOrder(t *testing.T) {
 		// resource-generator shapes — the full slice, the narrowed
 		// platform/API-only one, and platform with its UI.
 		"workflow", "workflow", "workflow", "workflow",
-		"system", "system", "system",
+		// Four system closures: the plain example, plus one provider
+		// permutation per slot whose swap the framework claims to support
+		// end to end — identity, mail and storage.
+		"system", "system", "system", "system",
 	}
 	if !slices.Equal(kinds, want) {
 		t.Fatalf("closure kinds = %v, want exactly %v", kinds, want)
@@ -117,6 +120,10 @@ func TestProviderExampleClosuresDeclareEnvironmentSelections(t *testing.T) {
 		"fixture/system/mail-providers": {
 			slot:       "ggg/mail",
 			candidates: []string{"fixture/system/mail-local", "fixture/system/mail-managed"},
+		},
+		"fixture/system/identity-providers": {
+			slot:       "ggg/identity",
+			candidates: []string{"fixture/system/identity-local", "fixture/system/identity-hosted"},
 		},
 		"fixture/system/storage-providers": {
 			slot:       "ggg/storage",

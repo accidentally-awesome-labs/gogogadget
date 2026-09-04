@@ -69,7 +69,7 @@
         "source": "internal/web/page_settings_organization.go",
         "target": "internal/web/page_settings_organization.go",
         "class": "go",
-        "sha256": "fefae7da9871db9b09b19ce280e09cd76cadb73f17a94cb45699903e7eac84a7",
+        "sha256": "0f41445479c8ee0f83ecf5291d1622de055cfbcc12111a9bcbd598ad86f2196d",
         "rewrite_module": true,
         "contract": false
       }

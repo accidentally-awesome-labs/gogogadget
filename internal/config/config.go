@@ -47,26 +47,8 @@ func LoadFrom(lookup func(string) string) (Config, error) {
 		}
 	}
 
-	// DEV_AUTH_BYPASS mints synthetic sessions. Booting production with it on
-	// would accept forged identities, so it is a hard refusal rather than a warning.
-	if cfg.DevAuthBypass && cfg.Production() {
-		errs = append(errs, errors.New("DEV_AUTH_BYPASS=true is refused when APP_ENV=production"))
-	}
-
 	if cfg.Production() {
 		errs = append(errs, requireProductionKeys(lookup)...)
-	}
-
-	// Clerk fronts the Frontend API at clerk.<domain> on a production instance
-	// and at a wildcard dev host otherwise. Derived from APP_URL rather than
-	// asked for, because getting it wrong breaks CSP in a way that is hard to read.
-	if cfg.ClerkFrontendAPIURL == "" {
-		if cfg.Production() {
-			host := strings.TrimPrefix(strings.TrimPrefix(cfg.AppURL, "https://"), "http://")
-			cfg.ClerkFrontendAPIURL = "https://clerk." + host
-		} else {
-			cfg.ClerkFrontendAPIURL = "https://*.clerk.accounts.dev"
-		}
 	}
 
 	return cfg, errors.Join(errs...)
@@ -212,9 +194,15 @@ func (c Config) IntValue(key string) (int, error) {
 	}
 	return value, nil
 }
-func (c Config) Test() bool           { return c.Env == "test" }
-func (c Config) PostHogEnabled() bool { return c.Value("POSTHOG_API_KEY") != "" }
-func (c Config) SentryEnabled() bool  { return c.Value("SENTRY_DSN") != "" }
+
+// BoolValue reads a generated boolean declaration by key. It is the read a
+// module that does not own the key must use: the typed field belongs to the
+// declaring module and disappears with it, while the key either resolves or
+// reads false.
+func (c Config) BoolValue(key string) bool { return parseBool(c.Value(key)) }
+func (c Config) Test() bool                { return c.Env == "test" }
+func (c Config) PostHogEnabled() bool      { return c.Value("POSTHOG_API_KEY") != "" }
+func (c Config) SentryEnabled() bool       { return c.Value("SENTRY_DSN") != "" }
 
 // LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
 // the AI route renders a 503 not-configured (same degrade as billing).

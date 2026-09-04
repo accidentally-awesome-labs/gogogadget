@@ -317,13 +317,24 @@ The fields that carry weight:
   add `provider_slots` instead and it becomes the constructor-free seam that
   declares one.
 - **`environment`** — one record per env key (`key`, `field`, `type`,
-  `description`, plus `secret`, `default`, `required`, `production_required`
-  and `targets`). This is the only place an env key is declared: the config
-  struct, its validation, `.env.example` and the
-  [configuration reference](/docs/configuration-reference) all come from here.
-  `targets` narrows a key to specific service targets of the owning adapter —
-  the parser is generated for the installed union, but `required` is enforced
-  only for the adapter and target actually selected.
+  `description`, plus `secret`, `default`, `required`, `production_required`,
+  `refused_in_production`, `derivation` and `targets`). This is the only place
+  an env key is declared: the config struct, its validation, `.env.example` and
+  the [configuration reference](/docs/configuration-reference) all come from
+  here. `targets` narrows a key to specific service targets of the owning
+  adapter — the parser is generated for the installed union, but `required` is
+  enforced only for the adapter and target actually selected.
+  `refused_in_production` (bool keys only) emits a boot refusal when the value
+  is true and `APP_ENV=production`; `ggg/system/identity-dev` uses it for
+  `DEV_AUTH_BYPASS`. `derivation` (`package`, `function`, `inputs`) fills an
+  unset string key by calling a pure function in a leaf package the module
+  claims, passing other declared keys as its arguments;
+  `ggg/system/identity-clerk` uses it to derive `CLERK_FRONTEND_API_URL` from
+  `APP_ENV` and `APP_URL`. Both exist so an adapter's configuration behaviour
+  is generated from its own manifest and leaves when the adapter does, instead
+  of being hand-written in `internal/config` where it would outlive removal.
+  A module reading a key it does **not** declare must use `cfg.Value("KEY")` or
+  `cfg.BoolValue("KEY")`, never the typed field.
 - **`locales`** — `{"en": {...}, "es": {...}}`, inline in the manifest. Every
   key must exist in every declared locale with matching format placeholders,
   and two modules may not own the same key. Generation refuses otherwise.

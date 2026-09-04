@@ -138,6 +138,12 @@ func providerFixtureSpecFor(id string) (providerFixtureSpec, bool) {
 			candidates: []string{"fixture/system/storage-local", "fixture/system/storage-managed"},
 			legacy:     []string{"ggg/system/storage-filesystem", "ggg/system/storage-s3"},
 		}, true
+	case "fixture/system/identity-providers":
+		return providerFixtureSpec{
+			slot:       "ggg/identity",
+			candidates: []string{"fixture/system/identity-local", "fixture/system/identity-hosted"},
+			legacy:     []string{"ggg/system/identity-dev", "ggg/system/identity-clerk"},
+		}, true
 	case externalTemplateAdapterID:
 		return providerFixtureSpec{
 			slot:       externalTemplateSlot,
