@@ -261,7 +261,10 @@ func TestShellSlotRenderersRefuseAWrongSignature(t *testing.T) {
 
 func presenceAdapter() Manifest {
 	m := vendorAdapterManifest("ggg/system/analytics-posthog", "analytics-posthog", "ggg/analytics", "posthog", "managed")
-	m.Environment = []EnvironmentVariable{{Key: "POSTHOG_API_KEY"}, {Key: "POSTHOG_HOST"}}
+	m.Environment = []EnvironmentVariable{
+		{Key: "POSTHOG_API_KEY", Field: "PostHogAPIKey"},
+		{Key: "POSTHOG_HOST", Field: "PostHogHost"},
+	}
 	return m
 }
 
@@ -296,6 +299,17 @@ func TestNoCredentialPresenceSelectorsRefusesTheDeletedShape(t *testing.T) {
 		"func (c Config) Missing() bool { return \"\" == c.Value(\"POSTHOG_HOST\") }\n")),
 		"credential-presence selector")
 
+	// The typed-field form is the same defect in the shape most natural for
+	// the module that declares the key — and that module is precisely the one
+	// allowed to touch the field, so this is the form a well-behaved adapter
+	// author would reach for.
+	require.ErrorContains(t, ValidateNoCredentialPresenceSelectors(modules(FileClassGo), source(
+		"func (c Config) PostHogEnabled() bool { return c.PostHogAPIKey != \"\" }\n")),
+		"credential-presence selector")
+	require.ErrorContains(t, ValidateNoCredentialPresenceSelectors(modules(FileClassGo), source(
+		"func (c Config) Both() bool {\n\treturn c.PostHogAPIKey != \"\" && c.Value(\"POSTHOG_HOST\") != \"\"\n}\n")),
+		"credential-presence selector")
+
 	// A test may name a provider's key deliberately: proving the boot matrix
 	// reacts to a credential is not branching on one in product code.
 	require.NoError(t, ValidateNoCredentialPresenceSelectors(modules(FileClassTest), source(
@@ -316,6 +330,8 @@ func TestNoCredentialPresenceSelectorsAllowsOrdinaryReads(t *testing.T) {
 		"func (c Config) DevBypass() bool { return c.Value(\"DEV_AUTH_BYPASS\") != \"\" }\n",
 		// A bool that is not a presence test.
 		"func (c Config) Production() bool { return c.Env == \"production\" }\n",
+		// A field this adapter does not own.
+		"func (c Config) HasURL() bool { return c.AppURL != \"\" }\n",
 		// More than one statement: not a named stand-in for selection.
 		"func (c Config) Ready() bool {\n\tlog()\n\treturn c.Value(\"POSTHOG_HOST\") != \"\"\n}\n",
 	} {

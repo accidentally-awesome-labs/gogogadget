@@ -50,9 +50,13 @@ func TestPostHogDeselectedEnvironmentRendersNothing(t *testing.T) {
 	assert.NotContains(t, body, "/ingest/")
 }
 
-func TestPostHogSelectedWithoutKeyRendersNothing(t *testing.T) {
-	body := posthogPublicShell(t, "production", nil)
+// There is no "selected but unconfigured" case to assert: New() refuses an
+// empty API key at construction, so a server that renders with this adapter
+// selected has one. The renderers used to check anyway, which read as a
+// supported degraded mode for a state no booted server can reach.
+func TestPostHogSelectedRendersRegardlessOfHostDefault(t *testing.T) {
+	body := posthogPublicShell(t, "production", map[string]string{"POSTHOG_API_KEY": "phc_fixture"})
 
-	assert.NotContains(t, body, "ph-key")
-	assert.NotContains(t, body, `x-data="phConsent"`)
+	assert.Contains(t, body, `<meta name="ph-key" content="phc_fixture">`)
+	assert.Contains(t, body, `x-data="phConsent"`)
 }

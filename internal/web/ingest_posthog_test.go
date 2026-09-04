@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -70,7 +72,21 @@ func TestPostHogIngestPolicyIsTheDeclaredOne(t *testing.T) {
 	assert.True(t, policy.CSRFExempt)
 	assert.NotEmpty(t, policy.CSRFReason, "csrf_exempt without a reason is refused at generation")
 	assert.True(t, policy.RateExempt)
-	assert.Equal(t, int64(1<<20), policy.MaxBodyBytes, "a telemetry firehose is capped tighter than the 10 MB global")
+	// No route-specific cap, which is a decision with evidence behind it.
+	// PostHog's proxy reference asks for up to 64 MB per message because large
+	// session recordings fail below that. This chain caps every route at
+	// globalMaxBodyBytes (10 MiB) in the outermost handler, and a declared
+	// policy may only NARROW that — generation refuses a value that does not
+	// (`does not narrow the global 10485760-byte cap`), so 64 MB is not
+	// expressible on a route at all. Declaring anything here would therefore
+	// mean tightening below the 10 MiB this proxy already had, and dropping
+	// session recordings that used to get through. Zero means "the chain
+	// ceiling governs", which is exactly the pre-existing behaviour.
+	// Supporting the vendor maximum needs globalMaxBodyBytes raised for every
+	// route: a seam-wide decision, named in the report rather than smuggled in
+	// under a telemetry route.
+	assert.Zero(t, policy.MaxBodyBytes,
+		"a route may only narrow the global cap, and narrowing this one would drop session recordings")
 	assert.False(t, policy.MaintenanceExempt, "telemetry is not worth serving during maintenance")
 }
 
@@ -106,4 +122,33 @@ func TestPostHogIngestUnparseableEndpointAnswers503(t *testing.T) {
 
 	code, _, _ := serve(t, s, "POST", "/ingest/e/", []byte(`{}`), nil)
 	assert.Equal(t, http.StatusServiceUnavailable, code)
+}
+
+// The cap is defended, not merely declared: a body above it must be rejected
+// rather than silently truncated into the upstream. This is the failure mode a
+// tighter-than-status-quo cap would have introduced for session recordings,
+// which is why the declared value is the prior ceiling.
+func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
+	var upstreamBytes int
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		n, _ := io.Copy(io.Discard, r.Body)
+		upstreamBytes = int(n)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer upstream.Close()
+
+	s := ingestServer(t, "production", upstream.URL)
+
+	oversized := bytes.Repeat([]byte("x"), int(globalMaxBodyBytes)+1024)
+	code, _, _ := serve(t, s, "POST", "/ingest/e/", oversized, nil)
+	assert.NotEqual(t, http.StatusOK, code, "a body over the cap must not proxy successfully")
+	assert.Less(t, upstreamBytes, len(oversized),
+		"the upstream must never receive more than the cap allows")
+
+	// And a body under the cap still goes through untouched, so the cap is a
+	// ceiling rather than a throttle.
+	sized := bytes.Repeat([]byte("y"), 512<<10)
+	code, _, _ = serve(t, s, "POST", "/ingest/e/", sized, nil)
+	assert.Equal(t, http.StatusOK, code)
+	assert.Equal(t, len(sized), upstreamBytes)
 }

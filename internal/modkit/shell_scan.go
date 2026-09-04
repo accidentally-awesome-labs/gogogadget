@@ -330,9 +330,15 @@ func ValidateNoCredentialPresenceSelectors(modules []Manifest, files map[string]
 	return nil
 }
 
-// adapterDeclaredKeys is every environment key a provider adapter owns. Only
-// adapter keys qualify: a seam's own key cannot disappear, and a presence test
-// on one is a plain option check rather than a stand-in for selection.
+// adapterDeclaredKeys is every environment key a provider adapter owns, indexed
+// by BOTH the key and the generated typed field name. Only adapter keys
+// qualify: a seam's own key cannot disappear, and a presence test on one is a
+// plain option check rather than a stand-in for selection.
+//
+// The field name matters because every declared key also gets a typed field on
+// the generated Config, and `c.PostHogAPIKey != ""` is the same defect in the
+// shape most natural for the module that declares the key — which is exactly
+// the module allowed to touch that field.
 func adapterDeclaredKeys(modules []Manifest) map[string]string {
 	keys := make(map[string]string)
 	for _, module := range modules {
@@ -341,6 +347,9 @@ func adapterDeclaredKeys(modules []Manifest) map[string]string {
 		}
 		for _, item := range module.Environment {
 			keys[item.Key] = module.ID
+			if item.Field != "" {
+				keys[item.Field] = module.ID
+			}
 		}
 	}
 	return keys
@@ -398,10 +407,17 @@ func isEmptyString(expr ast.Expr) bool {
 	return ok && literal.Kind == token.STRING && (literal.Value == `""` || literal.Value == "``")
 }
 
-// configReadKey extracts the adapter key from a by-key configuration read.
+// configReadKey extracts the adapter key or field a configuration read names.
+// Both shapes count: the by-key call a non-declaring module must use, and the
+// typed field the declaring module may.
 func configReadKey(expr ast.Expr, keys map[string]string) (string, bool) {
 	call, ok := expr.(*ast.CallExpr)
 	if !ok || len(call.Args) != 1 {
+		if field, isSelector := expr.(*ast.SelectorExpr); isSelector {
+			if _, owned := keys[field.Sel.Name]; owned {
+				return field.Sel.Name, true
+			}
+		}
 		return "", false
 	}
 	selector, ok := call.Fun.(*ast.SelectorExpr)

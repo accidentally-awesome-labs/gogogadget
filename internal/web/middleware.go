@@ -249,8 +249,8 @@ func (s *Server) secureHeaders(next http.Handler) http.Handler {
 }
 
 // csrf wraps nosurf. Which requests are exempt is decided by the policy each
-// route declared, not by a path pattern; see structurallyCSRFExempt for the two
-// surfaces that are registered outside the route table by design.
+// route declared, not by a path pattern; see structurallyCSRFExempt for the one
+// surface that is registered outside the route table by design.
 //
 // The token is published to the page along two paths, and both are live: an
 // inherited request header for htmx (the only path a fragment request has, since

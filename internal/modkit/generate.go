@@ -1052,15 +1052,22 @@ func smokeRequestPath(pattern string) string {
 }
 
 // smokeCases is the subset of the route table a smoke run can request by a fixed
-// URL with no session: scope public, method GET, no path parameter, and no
-// enable predicate. A parameterized pattern needs an instance id that is seed
-// data rather than a declaration, and a predicated route is absent in some
-// deployments, so neither can be derived from the registry alone. Sorted by path
-// so the emitted list reads like the site map it is.
+// URL with no session: scope public, method GET, no path parameter, no enable
+// predicate, and not contributed by a provider adapter. A parameterized pattern
+// needs an instance id that is seed data rather than a declaration; a predicated
+// route is absent in some deployments; and an adapter-contributed route is
+// absent in every environment that does not select that adapter, which is the
+// same property reached through a different declaration. The analytics ingest
+// proxy is the live case: it is public and GET, it is selected in production
+// only, and a smoke run at APP_ENV=development correctly 404s it — so emitting
+// it produced a case the run could never pass.
 func smokeCases(lock Lock, graph []Manifest) []route {
 	cases := make([]route, 0)
 	for _, r := range selectedRoutes(lock, graph) {
 		if r.contrib.Scope != RoutePublic || r.contrib.Method != "GET" || r.contrib.Enabled != "" {
+			continue
+		}
+		if _, _, isAdapter := adapterForModule(graph, r.moduleID); isAdapter {
 			continue
 		}
 		if strings.Contains(smokeRequestPath(r.contrib.Pattern), "{") {
