@@ -1406,65 +1406,100 @@ func orderNavEntries(entries []navEntry) ([]navEntry, error) {
 	return out, nil
 }
 
+// emitShellSlotsRegistry renders the installed shell contributions: which ids
+// sit in which slot, the typed renderer for each, the configuration keys each
+// renderer is handed, and the per-environment activation predicate.
+//
+// The value keys are the CONTRIBUTING MODULE's own declared non-secret
+// environment keys — the v0.5.0 ownership rule applied to rendering. A slot
+// sees the keys its own module declares and nothing else, which is what lets
+// templates.Page carry no provider field: the shell never learns that a
+// publishable key exists, it only hands a module its own configuration.
+// Secrets are excluded unconditionally. A renderer runs in the browser's
+// document; anything it receives is one `view source` away from being public,
+// so a key declared `secret` is not a rendering input and no declaration
+// language is offered to ask for one.
 func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	type renderer struct {
-		id, pkg, name string
+		id, pkg, name, symbol string
 	}
 	var renderers []renderer
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package templates\n\n")
 	counter := 0
+	values := make(map[string][]string)
+	bySlot := make(map[string][]string)
+	owners := make(map[string]string)
+	exclusive := make(map[string]string)
+	for _, slot := range ExclusiveShellSlots {
+		exclusive[string(slot)] = ""
+	}
 	for _, m := range orderedModules(lock, graph) {
+		nonSecret := make([]string, 0, len(m.Environment))
+		for _, item := range m.Environment {
+			if !item.Secret {
+				nonSecret = append(nonSecret, item.Key)
+			}
+		}
+		sort.Strings(nonSecret)
 		for _, s := range m.Runtime.Slots {
-			renderers = append(renderers, renderer{id: s.ID, pkg: qualifyPackage(modulePath, s.Package), name: fmt.Sprintf("shellSlot%d", counter)})
+			if !validIdentifier(s.Renderer) {
+				return nil, fmt.Errorf("shell slot %s renderer %q is invalid", s.ID, s.Renderer)
+			}
+			key := string(s.Slot)
+			if prior, ok := exclusive[key]; ok {
+				if prior != "" {
+					return nil, fmt.Errorf(
+						"shell slot %q is exclusive and already filled by %s: %s cannot also render it, because the contribution owns the whole element and two of them would emit one id twice",
+						key, prior, m.ID)
+				}
+				exclusive[key] = m.ID
+			}
+			renderers = append(renderers, renderer{
+				id:     s.ID,
+				pkg:    qualifyPackage(modulePath, s.Package),
+				name:   fmt.Sprintf("shellSlot%d", counter),
+				symbol: s.Renderer,
+			})
 			counter++
+			bySlot[key] = append(bySlot[key], s.ID)
+			owners[s.ID] = m.ID
+			values[s.ID] = nonSecret
 		}
 	}
 	if len(renderers) > 0 {
 		b.WriteString("import (\n")
 		for _, item := range renderers {
+			if !validIdentifier(item.name) {
+				return nil, fmt.Errorf("shell slot renderer package alias %q is invalid", item.name)
+			}
 			fmt.Fprintf(&b, "\t%s %q\n", item.name, item.pkg)
 		}
 		b.WriteString(")\n\n")
 	}
 	b.WriteString("var ShellSlotsRegistry = map[string][]string{\n")
-	bySlot := make(map[string][]string)
-	owners := make(map[string]string)
-	for _, m := range orderedModules(lock, graph) {
-		for _, s := range m.Runtime.Slots {
-			key := string(s.Slot)
-			bySlot[key] = append(bySlot[key], s.ID)
-			owners[s.ID] = m.ID
-		}
-	}
-	slots := make([]string, 0, len(bySlot))
-	for slot := range bySlot {
-		slots = append(slots, slot)
-	}
-	sort.Strings(slots)
-	for _, slot := range slots {
+	for _, slot := range sortedKeys(bySlot) {
 		fmt.Fprintf(&b, "\t%s: []string{\n", goString(slot))
 		for _, id := range bySlot[slot] {
 			fmt.Fprintf(&b, "\t\t%s,\n", goString(id))
 		}
 		b.WriteString("\t},\n")
 	}
-	b.WriteString("}\n\nvar ShellSlotRenderers = map[string]any{\n")
+	b.WriteString("}\n\nvar ShellSlotRenderers = map[string]ShellSlotRenderer{\n")
 	for _, item := range renderers {
-		if !validIdentifier(item.name) {
-			return nil, fmt.Errorf("shell slot renderer package alias %q is invalid", item.name)
+		fmt.Fprintf(&b, "\t%s: %s.%s,\n", goString(item.id), item.name, item.symbol)
+	}
+	b.WriteString("}\n\nvar ShellSlotValueKeys = map[string][]string{\n")
+	for _, id := range sortedKeys(values) {
+		if len(values[id]) == 0 {
+			continue
 		}
-		for _, m := range orderedModules(lock, graph) {
-			for _, s := range m.Runtime.Slots {
-				if s.ID == item.id {
-					if !validIdentifier(s.Renderer) {
-						return nil, fmt.Errorf("shell slot %s renderer %q is invalid", s.ID, s.Renderer)
-					}
-					fmt.Fprintf(&b, "\t%s: %s.%s,\n", goString(s.ID), item.name, s.Renderer)
-				}
-			}
+		fmt.Fprintf(&b, "\t%s: []string{\n", goString(id))
+		for _, key := range values[id] {
+			fmt.Fprintf(&b, "\t\t%s,\n", goString(key))
 		}
+		b.WriteString("\t},\n")
 	}
 	b.WriteString("}\n\nvar ShellSlotActive = map[string]func(string) bool{\n")
 	for _, id := range sortedKeys(owners) {
@@ -2317,6 +2352,14 @@ func jsString(value string) string {
 // generated per-module registry, so it can never be one of its entries.
 const tailwindEntry = "input.css"
 
+// stylesRegistryDir is the directory the generated registry is written to.
+// Its imports are RELATIVE to it: Tailwind resolves a nested @import against
+// the importing file, so a project-root path here resolved to
+// internal/web/styles/internal/web/styles/… and failed the build outright.
+// Nothing had ever owned a style fragment, so the registry was always empty
+// and the mechanism had never once been executed.
+const stylesRegistryDir = "internal/web/styles"
+
 func emitStylesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	var b strings.Builder
 	b.WriteString("/* Code generated by ggg sync; DO NOT EDIT. */\n")
@@ -2327,12 +2370,29 @@ func emitStylesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 			// imports this registry - listing it here would import the entry
 			// into itself.
 			if f.Class == FileClassStyle && f.Target != tailwindEntry {
-				fmt.Fprintf(&b, "@import \"%s\";\n", f.Target)
+				fmt.Fprintf(&b, "@import %q;\n", relativeStyleImport(f.Target))
 			}
 		}
 	}
 	_ = ctx
-	return &GeneratedFile{Path: "internal/web/styles/modules_registry_gen.css", Content: b.String()}, nil
+	return &GeneratedFile{Path: stylesRegistryDir + "/modules_registry_gen.css", Content: b.String()}, nil
+}
+
+// relativeStyleImport rewrites a project-relative style target into a path the
+// generated registry can import, with an explicit "./" so a same-directory
+// fragment is never mistaken for a package specifier.
+func relativeStyleImport(target string) string {
+	segments := strings.Split(stylesRegistryDir, "/")
+	parts := strings.Split(target, "/")
+	shared := 0
+	for shared < len(segments) && shared < len(parts)-1 && segments[shared] == parts[shared] {
+		shared++
+	}
+	prefix := strings.Repeat("../", len(segments)-shared)
+	if prefix == "" {
+		prefix = "./"
+	}
+	return prefix + strings.Join(parts[shared:], "/")
 }
 
 // emitUIComponentRegistry renders installed UI component metadata. The gallery

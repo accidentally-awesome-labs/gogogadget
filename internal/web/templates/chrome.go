@@ -41,13 +41,68 @@ func ActiveShellSlots(slot, env string) []string {
 func ShellSlotIDs(ctx context.Context, slot string) []string {
 	return ActiveShellSlots(slot, environmentFrom(ctx))
 }
-func renderShellSlot(id string) templ.Component {
-	raw, ok := ShellSlotRenderers[id]
-	renderer, ok := raw.(func() templ.Component)
+
+// ShellSlotFilled reports whether anything will render into an exclusive mount
+// slot. The shell renders its own neutral container when nothing does; when
+// something does, the contribution owns the whole element and the shell must
+// render no container at all, because two elements with one id is not a
+// fallback, it is a duplicate.
+func ShellSlotFilled(ctx context.Context, slot string) bool {
+	return len(ShellSlotIDs(ctx, slot)) > 0
+}
+
+// ShellSlotRenderer is the contract a module's shell contribution satisfies.
+//
+// values are the CONTRIBUTING module's own declared non-secret configuration,
+// resolved per request from the generated key list — never the page. That is
+// what keeps Page provider-free: a renderer that needs a publishable key
+// twice, and its non-emptiness as the render condition, reads its own module's
+// key and decides for itself. A renderer returns templ.NopComponent to render
+// nothing.
+type ShellSlotRenderer func(ctx context.Context, values map[string]string) templ.Component
+
+// ConfigLookup reads one configuration value by key. The shell holds the
+// parsed configuration and no provider field, so this is how a contribution
+// reaches its own declared keys: by name, resolving to the empty string when
+// the module that declares the key is not installed.
+type ConfigLookup func(key string) string
+
+type configLookupKey struct{}
+
+// WithConfigLookup binds the request's configuration reader for shell slots.
+func WithConfigLookup(ctx context.Context, lookup ConfigLookup) context.Context {
+	return context.WithValue(ctx, configLookupKey{}, lookup)
+}
+
+// shellSlotValues resolves the declared non-secret keys for one contribution.
+// An unset lookup yields empty values rather than a panic: a renderer's own
+// emptiness check is then the same code path as an unconfigured provider.
+func shellSlotValues(ctx context.Context, id string) map[string]string {
+	keys := ShellSlotValueKeys[id]
+	if len(keys) == 0 {
+		return nil
+	}
+	lookup, _ := ctx.Value(configLookupKey{}).(ConfigLookup)
+	values := make(map[string]string, len(keys))
+	for _, key := range keys {
+		if lookup != nil {
+			values[key] = lookup(key)
+		} else {
+			values[key] = ""
+		}
+	}
+	return values
+}
+
+func renderShellSlot(ctx context.Context, id string) templ.Component {
+	renderer, ok := ShellSlotRenderers[id]
 	if !ok || renderer == nil {
 		return templ.NopComponent
 	}
-	return renderer()
+	if component := renderer(ctx, shellSlotValues(ctx, id)); component != nil {
+		return component
+	}
+	return templ.NopComponent
 }
 
 type NavSnapshot struct {

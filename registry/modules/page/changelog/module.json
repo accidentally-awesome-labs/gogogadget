@@ -33,7 +33,7 @@
         "changelog.title": "Changelog"
       },
       "es": {
-        "changelog.intro": "Todo lo que se ha lanzado, lo m\u00e1s reciente primero. Cada versi\u00f3n enlaza a s\u00ed misma, para que puedas se\u00f1alar exactamente cu\u00e1l.",
+        "changelog.intro": "Todo lo que se ha lanzado, lo más reciente primero. Cada versión enlaza a sí misma, para que puedas señalar exactamente cuál.",
         "changelog.title": "Novedades"
       }
     },
@@ -64,7 +64,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

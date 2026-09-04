@@ -8,8 +8,9 @@ import (
 )
 
 // SelectOrg is rendered when the user has memberships but no active org in
-// their session claims. DevMode buttons use the dev cookie switcher; production
-// buttons call Clerk.setActive via clerk-js.
+// their session claims. DevMode buttons use the dev cookie switcher; every
+// other button hands the choice to the selectOrg Alpine component, which
+// asks the identity provider's own client to make the org active.
 templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 	<section class="max-w-md mx-auto px-4 py-24">
 		<h1 class="page-title text-center">{ i18n.T(ctx, "settings.select_org_title") }</h1>
@@ -53,7 +54,7 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 			{Term: i18n.T(ctx, "settings.account_member_since"), Value: user.CreatedAt.Time.Format("January 2, 2006")},
 		}})
 		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-6"}}) {
-			{ i18n.T(ctx, "settings.account_clerk_managed") }
+			{ i18n.T(ctx, "settings.account_identity_managed") }
 			if accountPortalURL != "" {
 				@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "settings.account_manage_link"), Href: accountPortalURL})
 			}
@@ -156,7 +157,7 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			{Term: i18n.T(ctx, "settings.org_slug"), Value: org.Slug},
 		}})
 		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-6"}}) {
-			{ i18n.T(ctx, "settings.org_clerk_managed") }
+			{ i18n.T(ctx, "settings.org_identity_managed") }
 			if organizationPortalURL != "" {
 				@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "settings.org_manage_link"), Href: organizationPortalURL})
 			}

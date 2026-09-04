@@ -18,9 +18,11 @@ test('impersonate, banner, exit', async ({ browser }) => {
   await page.getByTestId('impersonate-start').click();
 
   // Landed in the app as the target, banner visible, target org in shell
-  // (no clerk-js in test env → the org switcher shows the data placeholder).
+  // (the test environment selects the zero-account identity adapter, which
+  // contributes no org-switcher widget, so the shell renders its own neutral
+  // mount container and names the org it stands in for).
   await expect(page.getByTestId('impersonation-banner')).toBeVisible();
-  await expect(page.locator('#org-switcher')).toHaveAttribute('data-clerk-placeholder', 'Pro Org');
+  await expect(page.locator('#org-switcher')).toHaveAttribute('data-shell-placeholder', 'Pro Org');
 
   // /admin is correctly forbidden mid-impersonation.
   const resp = await page.request.get('/admin');

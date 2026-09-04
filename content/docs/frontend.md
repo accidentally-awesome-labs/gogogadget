@@ -298,7 +298,10 @@ in `static/ui/*.js`, and registers on `alpine:init`: `uiDialog`, `uiMenu`,
 fragment that ran after Alpine booted would register a component nothing can
 see, and under CSP an unregistered `x-data` name is silently inert rather
 than an error — which is why `ui-components.js` publishes the expected names
-for a dev check to compare against.
+for a dev check to compare against. `documentHead` renders the `head` shell
+slot after `headScripts`, so a provider adapter's own `<meta>` and deferred
+`<script>` arrive last in `<head>` — after `app.js`, which is what reads
+those meta tags once Alpine boots.
 
 `x-cloak` hides pre-boot markup (a CSS rule in `input.css`). New client
 behavior means a new `Alpine.data` registration in the owning module's

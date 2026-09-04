@@ -42,12 +42,12 @@
     "kind": "page",
     "locales": {
       "en": {
-        "docs.edit_page": "Edit this page \u2192",
+        "docs.edit_page": "Edit this page →",
         "docs.pager_aria": "Previous and next page"
       },
       "es": {
-        "docs.edit_page": "Editar esta p\u00e1gina \u2192",
-        "docs.pager_aria": "P\u00e1gina anterior y siguiente"
+        "docs.edit_page": "Editar esta página →",
+        "docs.pager_aria": "Página anterior y siguiente"
       }
     },
     "migrations": [],
@@ -70,7 +70,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

@@ -26,9 +26,10 @@ const (
 // helper (web.ContentTarget / web.NavSwap alias these).
 //
 // NavTarget is the only element a navigation may swap: the shell around it
-// hosts clerk-js's mounted widgets and their body-level dropdown portals, which
-// do not survive being replaced. Every page reachable by a boosted link must
-// therefore render identical chrome around it — see publicShell.
+// hosts the mount slots an identity provider's script fills, and the
+// body-level portals such widgets append next to them, none of which survive
+// being replaced. Every page reachable by a boosted link must therefore render
+// identical chrome around it — see publicShell.
 //
 // NavSwap replaces that box, lets the browser's View Transitions API cross-fade
 // the change, and brings the top of the new content into view the way a real
@@ -68,10 +69,6 @@ type Page struct {
 	// setting, and light is the stylesheet's default.
 	Theme  string
 	AppURL string
-
-	PostHogKey          string
-	ClerkPublishableKey string
-	ClerkFrontendAPIURL string
 
 	// Identity/billing context (populated by the render path from ctx).
 	User *sqlc.User
@@ -123,14 +120,17 @@ func WebhooksEnabled(ctx context.Context) bool {
 	return !ok || on
 }
 
-func clerkOrgPlaceholder(org *sqlc.Org) string {
+// orgPlaceholder and userPlaceholder name what a mount slot's neutral
+// container stands in for. They read the request's resolved rows, so the
+// shell's fallback and an adapter's live element describe the same viewer.
+func orgPlaceholder(org *sqlc.Org) string {
 	if org == nil {
 		return "Organization"
 	}
 	return org.Name
 }
 
-func clerkUserPlaceholder(user *sqlc.User) string {
+func userPlaceholder(user *sqlc.User) string {
 	if user == nil {
 		return "?"
 	}

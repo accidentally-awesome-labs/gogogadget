@@ -4,8 +4,8 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 3,
-    "contract": 1,
+    "revision": 4,
+    "contract": 2,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
     "requires": [
@@ -192,7 +192,7 @@
         "source": "internal/web/htmx.go",
         "target": "internal/web/htmx.go",
         "class": "go",
-        "sha256": "05cc7b582f03f4e69fc7aac93c2361db45acc0da5335e5e0acc0ffa01c2154c8",
+        "sha256": "e2cadaff4652d6091e645be2229976f0895d57913823f38ee047d2fe8d36dd70",
         "rewrite_module": true,
         "contract": true
       },
@@ -288,7 +288,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "ee1600cf352c1ed23d3a2f972870fbcf468e201f58ab24af5f9bba00d769cde2",
+        "sha256": "ef807a152ca0b0bf4e3fcbf30ba08023d0e47e0d0282253f34e98fc57e0adfd6",
         "rewrite_module": true,
         "contract": true
       },
@@ -296,7 +296,7 @@
         "source": "internal/web/templates/chrome.go",
         "target": "internal/web/templates/chrome.go",
         "class": "go",
-        "sha256": "2c218c60ffc778f1588c861311a70cb3158252a363670e7d46d476740bb486de",
+        "sha256": "37430095aa02ff6ca349e63064b572751dbcd19cbc1854c6e4ba6b6e3adc997f",
         "rewrite_module": true,
         "contract": false
       },
@@ -304,7 +304,7 @@
         "source": "internal/web/templates/chrome_test.go",
         "target": "internal/web/templates/chrome_test.go",
         "class": "test",
-        "sha256": "574ece9963662937b5bbfe55a6a5399f83992bfd2ff28e2dfe880cc5597a7bf9",
+        "sha256": "2b76ad7d5a390a9d923d359bd38e3946d36f4200684639205ef985c8217ca489",
         "rewrite_module": true,
         "contract": false
       },
@@ -344,7 +344,7 @@
         "source": "internal/web/templates/layouts.templ",
         "target": "internal/web/templates/layouts.templ",
         "class": "templ",
-        "sha256": "ed7232f59d6f41fa2dc2eb8448e086e77310865590b634978b0c7ba5570c3ae3",
+        "sha256": "613037bf1074166a1100ca68cabf4a88239a2c051933a3775004f13dfa1f021e",
         "rewrite_module": true,
         "contract": false
       },
@@ -352,7 +352,7 @@
         "source": "internal/web/templates/nav.templ",
         "target": "internal/web/templates/nav.templ",
         "class": "templ",
-        "sha256": "400bf7e0679062c4151b6d2795e4d56d570e02d7737715c2190e140add3f077d",
+        "sha256": "b1f4e420c44e63ea2abf8cedd72ca3fa0b147b80325fef266ed1035000014ecc",
         "rewrite_module": true,
         "contract": false
       },
@@ -360,7 +360,7 @@
         "source": "internal/web/templates/page.go",
         "target": "internal/web/templates/page.go",
         "class": "go",
-        "sha256": "d5954a163ce60cc8559dab4c20050c6a847c9d5f74220cc6fe06fa99857262b9",
+        "sha256": "7611d2a2d759d37d9ca19322ee205be01bdc0766dffd9e386849a3af92d8f922",
         "rewrite_module": true,
         "contract": false
       },
@@ -368,7 +368,7 @@
         "source": "internal/web/templates/sidebar.templ",
         "target": "internal/web/templates/sidebar.templ",
         "class": "templ",
-        "sha256": "b91607288b7965694ab343fde356af48b1962f5016cde3335a7c099bc415ea47",
+        "sha256": "eccc7785077e292120ab05fb069edf16b3f8df13b61629f836ae7680c675904e",
         "rewrite_module": true,
         "contract": false
       },
@@ -773,7 +773,6 @@
     ],
     "locales": {
       "en": {
-        "a11y.analytics_consent": "Analytics consent",
         "a11y.documentation": "Documentation",
         "a11y.menu": "Open menu",
         "a11y.theme": "Toggle dark mode",
@@ -805,9 +804,6 @@
         "footer.rss": "RSS",
         "footer.terms": "Terms",
         "i18n.language": "Language",
-        "layout.analytics_accept": "Accept",
-        "layout.analytics_consent_body": "We use privacy-respecting product analytics (self-proxied PostHog) to improve GoGoGadget.",
-        "layout.analytics_decline": "Decline",
         "layout.banner_ending_link": "manage billing",
         "layout.banner_ending_prefix": "Your plan ends on",
         "layout.banner_past_due_link": "update your card",
@@ -846,7 +842,6 @@
         "sidebar.settings": "Settings"
       },
       "es": {
-        "a11y.analytics_consent": "Consentimiento de analítica",
         "a11y.documentation": "Documentación",
         "a11y.menu": "Abrir menú",
         "a11y.theme": "Cambiar a modo oscuro",
@@ -878,9 +873,6 @@
         "footer.rss": "RSS",
         "footer.terms": "Términos",
         "i18n.language": "Idioma",
-        "layout.analytics_accept": "Aceptar",
-        "layout.analytics_consent_body": "Usamos analítica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
-        "layout.analytics_decline": "Rechazar",
         "layout.banner_ending_link": "gestionar la facturación",
         "layout.banner_ending_prefix": "Tu plan termina el",
         "layout.banner_past_due_link": "actualiza tu tarjeta",

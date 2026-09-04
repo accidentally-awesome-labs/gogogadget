@@ -1974,7 +1974,8 @@ func validShellSlot(value ShellSlot) bool {
 	switch value {
 	case ShellSlotHead, ShellSlotAppBanner, ShellSlotSidebar, ShellSlotTopbar,
 		ShellSlotPersistentBody, ShellSlotDashboardWidget, ShellSlotSettingsSection,
-		ShellSlotAdminRowAction, ShellSlotBillingUsage, ShellSlotContentEditor:
+		ShellSlotAdminRowAction, ShellSlotBillingUsage, ShellSlotContentEditor,
+		ShellSlotOrgSwitcher, ShellSlotUserButton:
 		return true
 	default:
 		return false

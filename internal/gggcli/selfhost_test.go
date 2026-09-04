@@ -148,3 +148,67 @@ func TestExternalTemplateVerificationCommandsAreRunnable(t *testing.T) {
 	require.NotEmpty(t, commands)
 	assert.Contains(t, commands[0], "go test -count=1 ./internal/gadgetworks/ledger")
 }
+
+// A generated module declares a contract RANGE, and the range has to include
+// the contract the core registry publishes right now: a module created against
+// this catalog must resolve against it. coreContractMaxima is a constant, so
+// without this gate a core contract bump would leave `ggg create resource`
+// emitting [1,1] and every generated slice refusing at the next sync.
+func TestGeneratedRequirementsCoverCoreContracts(t *testing.T) {
+	root := repositoryRoot(t)
+	for id, declared := range coreContractMaxima {
+		name := id[strings.LastIndex(id, "/")+1:]
+		kind := strings.Split(id, "/")[1]
+		path := filepath.Join(root, "registry", "modules", kind, name, "module.json")
+		raw, err := os.ReadFile(path)
+		require.NoErrorf(t, err, "coreContractMaxima names %s, which has no manifest", id)
+		var document struct {
+			Module struct {
+				Contract int `json:"contract"`
+			} `json:"module"`
+		}
+		require.NoError(t, json.Unmarshal(raw, &document))
+		assert.Equalf(t, document.Module.Contract, declared,
+			"%s publishes contract %d but the resource generator declares a maximum of %d",
+			id, document.Module.Contract, declared)
+	}
+
+	// The other direction: a core module past contract 1 with no entry here
+	// would be required as [1,1] by every generated module.
+	for _, kind := range []string{"system", "workflow", "page", "component", "element"} {
+		entries, err := os.ReadDir(filepath.Join(root, "registry", "modules", kind))
+		if os.IsNotExist(err) {
+			continue
+		}
+		require.NoError(t, err)
+		for _, entry := range entries {
+			raw, readErr := os.ReadFile(filepath.Join(root, "registry", "modules", kind, entry.Name(), "module.json"))
+			if readErr != nil {
+				continue
+			}
+			var document struct {
+				Module struct {
+					ID       string `json:"id"`
+					Contract int    `json:"contract"`
+				} `json:"module"`
+			}
+			require.NoError(t, json.Unmarshal(raw, &document))
+			if document.Module.Contract <= 1 {
+				continue
+			}
+			if !generatedRequirementIDs[document.Module.ID] {
+				continue
+			}
+			assert.Containsf(t, coreContractMaxima, document.Module.ID,
+				"%s publishes contract %d and is required by generated modules, so it needs a coreContractMaxima entry",
+				document.Module.ID, document.Module.Contract)
+		}
+	}
+}
+
+// generatedRequirementIDs is every module id `ggg create resource` can name.
+var generatedRequirementIDs = map[string]bool{
+	"ggg/system/database": true, "ggg/system/security": true, "ggg/system/server": true,
+	"ggg/system/identity": true, "ggg/system/i18n": true, "ggg/system/organizations": true,
+	"ggg/system/api": true, "ggg/system/search": true, "ggg/workflow/openapi-contract": true,
+}

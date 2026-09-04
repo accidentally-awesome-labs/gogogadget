@@ -102,9 +102,6 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.CSRFToken = nosurf.Token(r)
 	page.Path = r.URL.Path
 	page.AppURL = s.cfg.AppURL
-	page.PostHogKey = s.cfg.Value("POSTHOG_API_KEY")
-	page.ClerkPublishableKey = s.cfg.Value("CLERK_PUBLISHABLE_KEY")
-	page.ClerkFrontendAPIURL = s.cfg.Value("CLERK_FRONTEND_API_URL")
 	// Active platform banner for the authed shells (nil-safe elsewhere).
 	if page.Layout == templates.LayoutApp || page.Layout == templates.LayoutAdmin {
 		page.Announcement = s.currentAnnouncement(r.Context())

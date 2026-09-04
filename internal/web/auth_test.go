@@ -57,8 +57,15 @@ func TestRequireAuthAcceptsValidSession(t *testing.T) {
 	assert.Contains(t, body, "a1@example.com")
 }
 
-func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
+// The shell's own mounts are neutral: an identity adapter that ships widgets
+// contributes the live elements from its own slot renderers (asserted against
+// the rendered document in internal/identity/clerk/shell), and this project's
+// test environment selects the zero-account adapter, which ships none. So the
+// shell must render its stable containers and name no provider.
+func TestAppShellRendersNeutralMountsAndContentScopedNav(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
+		// Set even though nothing should read it: a configured key must not
+		// resurrect a mount the selected adapter does not provide.
 		d.Config.Values["CLERK_PUBLISHABLE_KEY"] = "pk_test_fixture"
 	})
 	seedMembership(t, s, "user_shell", "org_shell", "org:admin")
@@ -66,15 +73,25 @@ func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
 
 	code, _, body := serve(t, s, "GET", "/app", nil, nil, cookie)
 	require.Equal(t, http.StatusOK, code)
-	assert.Contains(t, body, `id="org-switcher" class="clerk-org-slot min-h-8"`)
-	assert.Contains(t, body, `data-clerk-placeholder="org_shell Org"`)
-	assert.Contains(t, body, `id="user-button" class="clerk-user-slot min-h-8 min-w-8"`)
-	assert.Contains(t, body, `data-clerk-placeholder="U"`)
-	assert.NotContains(t, body, " else data-clerk-placeholder")
-	// Nav swaps ONLY #content. clerk-js renders its dropdown menus as portals
-	// appended directly to <body>, so any swap/morph of <body> deletes them and
-	// the dropdowns die; Alpine bindings in the shell break the same way. The
-	// shell must therefore never be a swap target.
+	assert.Contains(t, body, `id="org-switcher" class="min-h-8"`)
+	assert.Contains(t, body, `data-shell-placeholder="org_shell Org"`)
+	assert.Contains(t, body, `id="user-button" class="min-h-8 min-w-8"`)
+	assert.Contains(t, body, `data-shell-placeholder="U"`)
+	// The shell's own bytes name no provider. Scoped to the markers the seam
+	// used to emit rather than the whole document: page copy is application
+	// content a project edits, and the dashboard checklist still points at a
+	// real provider feature by name.
+	for _, absent := range []string{
+		"clerk-org-slot", "clerk-user-slot", "clerk-publishable-key",
+		"clerk.browser.js", "ph-key",
+	} {
+		assert.NotContains(t, body, absent)
+	}
+	// Nav swaps ONLY #content. An identity provider's widgets render their
+	// dropdown menus as portals appended directly to <body>, so any
+	// swap/morph of <body> deletes them and the dropdowns die; Alpine
+	// bindings in the shell break the same way. The shell must therefore
+	// never be a swap target.
 	assert.Contains(t, body, `hx-boost="true"`)
 	assert.Contains(t, body, `hx-target="#content"`)
 	assert.Contains(t, body, `hx-select="#content"`)
@@ -83,20 +100,12 @@ func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
 	assert.NotContains(t, body, `hx-target="body"`)
 	assert.NotContains(t, body, "hx-morph-skip")
 	// hx-preserve quarantines the element (stash + restore), which is what
-	// detached clerk's listeners originally.
+	// detached the mounted widgets' listeners originally.
 	assert.NotContains(t, body, "hx-preserve")
 	// hx-history was removed in htmx 4; hx-history-elt keeps a Back-navigation
 	// re-fetch scoped to #content instead of <body>.
 	assert.NotContains(t, body, `hx-history="`)
 	assert.Contains(t, body, `<main id="content" hx-history-elt="true"`)
-
-	s.cfg.Values["CLERK_PUBLISHABLE_KEY"] = ""
-	code, _, body = serve(t, s, "GET", "/app", nil, nil, cookie)
-	require.Equal(t, http.StatusOK, code)
-	assert.Contains(t, body, `id="org-switcher" class="min-h-8"`)
-	assert.Contains(t, body, `id="user-button" class="min-h-8 min-w-8"`)
-	assert.NotContains(t, body, "clerk-org-slot")
-	assert.NotContains(t, body, "clerk-user-slot")
 }
 
 func TestSettingsUseCurrentClerkAccountPortalLinks(t *testing.T) {

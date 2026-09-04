@@ -336,6 +336,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := ValidateConfigFieldOwnership(graph.modules, payloadsAsFiles(payloads)); err != nil {
 		return Plan{}, err
 	}
+	if err := ValidateShellProviderNeutrality(graph.modules, payloadsAsFiles(payloads)); err != nil {
+		return Plan{}, err
+	}
 	if err := ValidateDerivationPackages(graph.modules, payloadsAsFiles(payloads), modulePath); err != nil {
 		return Plan{}, err
 	}

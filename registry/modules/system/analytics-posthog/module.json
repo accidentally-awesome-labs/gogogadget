@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",
@@ -20,8 +20,16 @@
     "dependencies": {
       "go": [
         {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
           "module": "github.com/posthog/posthog-go",
           "version": "v1.22.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
       "tools": [],
@@ -43,11 +51,44 @@
         "sha256": "850cf35a5450079d960c7fd9a679c76073170742e8e396176aa9c019f39d8d62",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/analytics/posthog/shell/shell.go",
+        "target": "internal/analytics/posthog/shell/shell.go",
+        "class": "go",
+        "sha256": "f72a15e65476e04570c05cdf91328d2d92c919ad4d4d8749d0acc8bc4424f32a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/analytics/posthog/shell/shell.templ",
+        "target": "internal/analytics/posthog/shell/shell.templ",
+        "class": "templ",
+        "sha256": "16c75f619aa12683c240886008210456507399bed3ea89145afb57487544bc9b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/analytics/posthog/shell/shell_test.go",
+        "target": "internal/analytics/posthog/shell/shell_test.go",
+        "class": "test",
+        "sha256": "438a8dd363d31fcb0f5602fcd700909d0e4bb86d5085166e00e26d7b04069ebe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/styles/analytics-posthog.css",
+        "target": "internal/web/styles/analytics-posthog.css",
+        "class": "style",
+        "sha256": "415a528e0037b7ad75043351280c1c527c785d6e5d73aa082e2dab0b84c5cce4",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {
       "packages": [
-        "internal/analytics/posthog"
+        "internal/analytics/posthog",
+        "internal/analytics/posthog/shell"
       ]
     },
     "runtime": {
@@ -84,7 +125,21 @@
             }
           ]
         }
-      }
+      },
+      "slots": [
+        {
+          "id": "analytics-posthog-consent",
+          "slot": "persistent-body",
+          "package": "internal/analytics/posthog/shell",
+          "renderer": "Consent"
+        },
+        {
+          "id": "analytics-posthog-head",
+          "slot": "head",
+          "package": "internal/analytics/posthog/shell",
+          "renderer": "Head"
+        }
+      ]
     },
     "migrations": [],
     "environment": [
@@ -93,7 +148,6 @@
         "field": "PostHogAPIKey",
         "type": "string",
         "description": "Posthog Api Key",
-        "secret": true,
         "targets": [
           "ggg/system/analytics-posthog@posthog"
         ]
@@ -108,10 +162,25 @@
         ]
       }
     ],
+    "locales": {
+      "en": {
+        "a11y.analytics_consent": "Analytics consent",
+        "layout.analytics_accept": "Accept",
+        "layout.analytics_consent_body": "We use privacy-respecting product analytics (self-proxied PostHog) to improve GoGoGadget.",
+        "layout.analytics_decline": "Decline"
+      },
+      "es": {
+        "a11y.analytics_consent": "Consentimiento de analítica",
+        "layout.analytics_accept": "Aceptar",
+        "layout.analytics_consent_body": "Usamos analítica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
+        "layout.analytics_decline": "Rechazar"
+      }
+    },
     "docs": [],
     "tests": {
       "go_packages": [
-        "internal/analytics/posthog"
+        "internal/analytics/posthog",
+        "internal/analytics/posthog/shell"
       ]
     },
     "data": [],

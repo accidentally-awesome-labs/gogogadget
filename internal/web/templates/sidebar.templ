@@ -54,17 +54,14 @@ templ appNavSections(page Page, scope string) {
 	}
 }
 
-// Sidebar is the app-shell navigation. The Clerk OrganizationSwitcher mounts
-// at #org-switcher when clerk-js is configured (identity step). Site admins
-// also get the admin section.
+// Sidebar is the app-shell navigation. The org-switcher mount is a slot: an
+// identity adapter that ships a switcher widget contributes the live element,
+// and the shell renders the empty box below when none does. Site admins also
+// get the admin section.
 templ Sidebar(page Page) {
 	<aside class="hidden md:flex w-sidebar shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
 		@logo()
-		<div
-			id="org-switcher"
-			class={ templ.KV("clerk-org-slot", page.ClerkPublishableKey != ""), "min-h-8" }
-			data-clerk-placeholder={ clerkOrgPlaceholder(page.Org) }
-		></div>
+		@shellMount("org-switcher", orgSwitcherPlaceholder(page))
 		// The SSE connection lives in the shell on purpose: boosted navigation
 		// swaps only #content, so the stream survives page changes. app.js
 		// opens it with a native EventSource and fires a "notifications"
@@ -90,7 +87,25 @@ templ Sidebar(page Page) {
 	</aside>
 }
 
-// Topbar carries the mobile nav + Clerk UserButton mount point. The hamburger
+// orgSwitcherPlaceholder and userButtonPlaceholder are the shell's neutral
+// mount containers: the ids a provider's script looks for, sized so the chrome
+// does not jump, and empty. They render only when no adapter fills the slot,
+// so a project with no organization widget gets a stable box instead of a
+// dead one carrying somebody's class names.
+//
+// data-shell-placeholder carries the name the box stands in for. Nothing in
+// the shell styles it — the fallback is deliberately blank — but it is what a
+// test can assert the shell resolved the active org and viewer, and what an
+// adapter's own stylesheet can surface if it wants to.
+templ orgSwitcherPlaceholder(page Page) {
+	<div id="org-switcher" class="min-h-8" data-shell-placeholder={ orgPlaceholder(page.Org) }></div>
+}
+
+templ userButtonPlaceholder(page Page) {
+	<div id="user-button" class="min-h-8 min-w-8" data-shell-placeholder={ userPlaceholder(page.User) }></div>
+}
+
+// Topbar carries the mobile nav + the user-button mount slot. The hamburger
 // and drawer are md:hidden; the drawer reuses appNavSections so mobile and
 // desktop navigation never drift.
 templ Topbar(page Page) {
@@ -106,11 +121,7 @@ templ Topbar(page Page) {
 		</header>
 		<div class="ml-auto flex items-center gap-3">
 			@themeToggle()
-			<div
-				id="user-button"
-				class={ templ.KV("clerk-user-slot", page.ClerkPublishableKey != ""), "min-h-8 min-w-8" }
-				data-clerk-placeholder={ clerkUserPlaceholder(page.User) }
-			></div>
+			@shellMount("user-button", userButtonPlaceholder(page))
 		</div>
 		<div x-show="open" x-cloak @click.outside="close" @click="close" class="absolute top-topbar left-0 right-0 z-(--z-nav) bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
 			@appNavSections(page, "drawer")

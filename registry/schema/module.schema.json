@@ -1591,7 +1591,9 @@
             "settings-section",
             "admin-row-action",
             "billing-usage",
-            "content-editor"
+            "content-editor",
+            "org-switcher",
+            "user-button"
           ]
         },
         "package": {

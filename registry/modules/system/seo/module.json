@@ -29,7 +29,7 @@
     "requires": [
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

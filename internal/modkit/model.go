@@ -198,6 +198,13 @@ const (
 )
 
 // ShellSlot is the closed set of generated shell extension points.
+//
+// Most slots are ADDITIVE: the shell renders every active contribution at the
+// marker and nothing when there is none. The two mount slots are EXCLUSIVE:
+// the shell renders its own neutral container when no contribution is active
+// and steps aside entirely when one is, because the contributing adapter owns
+// the whole element — its id, its classes, its data attributes. A mount cannot
+// be additive: two elements with the same id is not a shell, it is a bug.
 type ShellSlot string
 
 const (
@@ -211,7 +218,17 @@ const (
 	ShellSlotAdminRowAction  ShellSlot = "admin-row-action"
 	ShellSlotBillingUsage    ShellSlot = "billing-usage"
 	ShellSlotContentEditor   ShellSlot = "content-editor"
+	// The exclusive mount slots. Named after the place in the shell, never
+	// after what fills it: an identity provider's org switcher and account
+	// widget are the only things that have ever wanted them, but the shell
+	// only knows it has a box for one of each.
+	ShellSlotOrgSwitcher ShellSlot = "org-switcher"
+	ShellSlotUserButton  ShellSlot = "user-button"
 )
+
+// ExclusiveShellSlots are the mount slots: at most one active contribution,
+// and the shell's own container is the fallback rather than a wrapper.
+var ExclusiveShellSlots = []ShellSlot{ShellSlotOrgSwitcher, ShellSlotUserButton}
 
 // GalleryFamily is the closed component-reference family set.
 type GalleryFamily string

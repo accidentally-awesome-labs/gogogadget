@@ -71,23 +71,18 @@ templ headScripts(page Page) {
 	<script defer src="/static/ui-engines.js"></script>
 	<script defer src="/static/ui-components.js"></script>
 	<script defer src="/static/vendor/alpine-csp.min.js"></script>
-	if page.ClerkPublishableKey != "" {
-		// Load-bearing: clerk-js owns the ~60s __session JWT refresh cycle.
-		// Removing it expires auth ~60s after login. See /docs/authentication.
-		<meta name="clerk-publishable-key" content={ page.ClerkPublishableKey }/>
-		<script defer src="/static/vendor/clerk.browser.js" data-clerk-publishable-key={ page.ClerkPublishableKey }></script>
-	}
-	if page.PostHogKey != "" {
-		// PostHog loads through the /ingest proxy so CSP stays script-src 'self'.
-		<meta name="ph-key" content={ page.PostHogKey }/>
-		<script defer src="/ingest/static/array.js"></script>
-		<script defer src="/static/analytics.js"></script>
-	}
 }
 
 // documentHead is the ONE <head> both shells render. It exists because the two
 // copies it replaces had already drifted — the web-app manifest link was in
 // the public shell only.
+//
+// The head slot renders last, after the shell's own scripts. A provider's
+// loader belongs here — a <meta> its script reads at init, and a deferred
+// <script> for an asset that provider's own module installs — and it has to
+// come after app.js, which reads those meta tags when Alpine boots. Until this
+// site existed the head slot was declared, generated and rendered from inside
+// <nav>, so nothing could ever have used it.
 templ documentHead(page Page) {
 	<head>
 		<meta charset="utf-8"/>
@@ -97,6 +92,7 @@ templ documentHead(page Page) {
 		<link rel="manifest" href="/static/site.webmanifest"/>
 		<link rel="stylesheet" href="/static/app.css"/>
 		@headScripts(page)
+		@shellSlotMarkers("head")
 	</head>
 }
 
@@ -127,18 +123,13 @@ templ toastRoot() {
 	@ui.ToastRegion(ui.ToastRegionOpts{})
 }
 
-// phConsent is the analytics consent banner (rendered only when PostHog is
-// configured). posthog.init runs only after acceptance — see static/analytics.js.
-templ phConsent(page Page) {
-	if page.PostHogKey != "" {
-		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-(--z-overlay) card max-w-sm text-sm" role="dialog" aria-label={ i18n.T(ctx, "a11y.analytics_consent") }>
-			<p>{ i18n.T(ctx, "layout.analytics_consent_body") }</p>
-			<div class="flex gap-2 mt-3">
-				<button type="button" @click="accept" class="btn btn-primary btn-xs">{ i18n.T(ctx, "layout.analytics_accept") }</button>
-				<button type="button" @click="decline" class="btn btn-ghost btn-xs">{ i18n.T(ctx, "layout.analytics_decline") }</button>
-			</div>
-		</div>
-	}
+// persistentBody is the shell's body-level extension point: an element that
+// must outlive a boosted navigation, because navigation swaps only #content
+// and anything with client state (a consent dialog, a provider's portal root)
+// has to sit outside it. It replaced a hardcoded analytics consent banner,
+// which the shell rendered off a provider-named page field.
+templ persistentBody() {
+	@shellSlotMarkers("persistent-body")
 }
 
 // publicShell is the chrome shared by every unauthenticated page. Public and
@@ -157,7 +148,7 @@ templ publicShell(page Page, content templ.Component) {
 			@contentBox("", content)
 			@Footer(page)
 			@toastRoot()
-			@phConsent(page)
+			@persistentBody()
 		</body>
 	</html>
 }
@@ -194,7 +185,7 @@ templ AppLayout(page Page, content templ.Component) {
 				</div>
 			</div>
 			@toastRoot()
-			@phConsent(page)
+			@persistentBody()
 		</body>
 	</html>
 }

@@ -23,18 +23,18 @@
         "docs.search_aria": "Search the docs",
         "docs.search_clear": "Clear the search",
         "docs.search_no_results": "No pages matched your search.",
-        "docs.search_placeholder": "Search the docs\u2026",
+        "docs.search_placeholder": "Search the docs…",
         "docs.search_prompt": "Type a term to search the documentation.",
-        "docs.search_results_for": "Results for \u201c%s\u201d",
+        "docs.search_results_for": "Results for “%s”",
         "docs.search_title": "Search"
       },
       "es": {
         "docs.search_aria": "Buscar en los docs",
-        "docs.search_clear": "Borrar la b\u00fasqueda",
-        "docs.search_no_results": "Ninguna p\u00e1gina coincide con tu b\u00fasqueda.",
-        "docs.search_placeholder": "Buscar en los docs\u2026",
-        "docs.search_prompt": "Escribe un t\u00e9rmino para buscar en la documentaci\u00f3n.",
-        "docs.search_results_for": "Resultados para \u00ab%s\u00bb",
+        "docs.search_clear": "Borrar la búsqueda",
+        "docs.search_no_results": "Ninguna página coincide con tu búsqueda.",
+        "docs.search_placeholder": "Buscar en los docs…",
+        "docs.search_prompt": "Escribe un término para buscar en la documentación.",
+        "docs.search_results_for": "Resultados para «%s»",
         "docs.search_title": "Buscar"
       }
     },
@@ -58,7 +58,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

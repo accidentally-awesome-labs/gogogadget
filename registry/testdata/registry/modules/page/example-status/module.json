@@ -42,7 +42,7 @@
         "example.status.title": "Example status"
       },
       "es": {
-        "example.status.body": "No hay ning\u00fan problema. Esta p\u00e1gina existe para que el instalador demuestre que un m\u00f3dulo de p\u00e1gina llega a una URL real.",
+        "example.status.body": "No hay ningún problema. Esta página existe para que el instalador demuestre que un módulo de página llega a una URL real.",
         "example.status.nav": "Estado de ejemplo",
         "example.status.title": "Estado de ejemplo"
       }
@@ -67,7 +67,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

@@ -42,9 +42,9 @@
         "legal.privacy.title": "Privacy Policy"
       },
       "es": {
-        "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las anal\u00edticas, si est\u00e1n activadas, en PostHog tras un consentimiento expl\u00edcito.",
-        "legal.privacy.placeholder": "Pol\u00edtica de privacidad provisional. Sustit\u00fayela por un texto revisado por un abogado antes del lanzamiento.",
-        "legal.privacy.title": "Pol\u00edtica de privacidad"
+        "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las analíticas, si están activadas, en PostHog tras un consentimiento explícito.",
+        "legal.privacy.placeholder": "Política de privacidad provisional. Sustitúyela por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.privacy.title": "Política de privacidad"
       }
     },
     "migrations": [],
@@ -60,7 +60,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

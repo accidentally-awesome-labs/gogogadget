@@ -42,9 +42,9 @@
         "legal.terms.title": "Terms of Service"
       },
       "es": {
-        "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garant\u00eda de ning\u00fan tipo. Al usar el servicio aceptas usarlo de manera l\u00edcita y no abusar de la plataforma.",
-        "legal.terms.placeholder": "T\u00e9rminos provisionales. Sustit\u00fayelos por un texto revisado por un abogado antes del lanzamiento.",
-        "legal.terms.title": "T\u00e9rminos del servicio"
+        "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garantía de ningún tipo. Al usar el servicio aceptas usarlo de manera lícita y no abusar de la plataforma.",
+        "legal.terms.placeholder": "Términos provisionales. Sustitúyelos por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.terms.title": "Términos del servicio"
       }
     },
     "migrations": [],
@@ -60,7 +60,7 @@
       },
       {
         "contract": {
-          "max": 1,
+          "max": 2,
           "min": 1
         },
         "id": "ggg/system/server"

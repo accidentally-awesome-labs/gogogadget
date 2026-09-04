@@ -46,14 +46,23 @@ Clerk's `__session` cookie is a **JWT that expires in ~60 seconds**. The
 server never refreshes it. The vendored `static/vendor/clerk.browser.js`,
 initialized in `static/app.js`, keeps it fresh:
 
-1. The layout emits `<meta name="clerk-publishable-key" content="…">` when
-   `CLERK_PUBLISHABLE_KEY` is set.
+1. `ggg/system/identity-clerk` contributes a `head` shell slot that emits
+   `<meta name="clerk-publishable-key" content="…">` and the deferred
+   `clerk.browser.js` tag when `CLERK_PUBLISHABLE_KEY` is set. The shell owns
+   no part of this: a slot renderer receives its own module's declared
+   non-secret configuration, so the loader lives with the adapter that also
+   installs the script, and it renders only in the environments whose
+   `ggg/identity` selection is this adapter.
 2. On `DOMContentLoaded`, `static/app.js` reads the meta tag, calls
    `window.Clerk.load()` once, and clerk-js begins refreshing the JWT against
    the Clerk Frontend API in the background (that origin is in the CSP
    `connect-src` — see [Security](/docs/security)).
 3. The bootstrap mounts the prebuilt `UserButton` at `#user-button` and the
-   `OrganizationSwitcher` at `#org-switcher` — **once per page load**.
+   `OrganizationSwitcher` at `#org-switcher` — **once per page load**. Both
+   elements are contributed by this adapter too, through the `user-button` and
+   `org-switcher` shell slots, including their `clerk-*-slot` classes and
+   placeholder attributes. Deselect the adapter and the shell renders its own
+   empty containers instead, carrying no provider classes at all.
 4. **App navigation swaps only `#content`.** clerk-js mounts React components
    into those two roots *and* renders their dropdown menus as **portals
    appended directly to `<body>`** — siblings of the mount roots, not children.

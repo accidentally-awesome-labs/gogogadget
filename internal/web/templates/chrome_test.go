@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"context"
 	"strings"
 	"sync"
 	"testing"
@@ -84,14 +85,18 @@ func TestShellRendersChromeConfig(t *testing.T) {
 }
 func TestNavRendersOnlyActiveShellSlotsForEnvironment(t *testing.T) {
 	originalRegistry, originalActive, originalRenderers := ShellSlotsRegistry, ShellSlotActive, ShellSlotRenderers
-	ShellSlotsRegistry = map[string][]string{"head": {"inactive", "active"}}
+	ShellSlotsRegistry = map[string][]string{"topbar": {"inactive", "active"}}
 	ShellSlotActive = map[string]func(string) bool{
 		"inactive": func(string) bool { return false },
 		"active":   func(env string) bool { return env == "production" },
 	}
-	ShellSlotRenderers = map[string]any{
-		"inactive": func() templ.Component { return templ.Raw(`<template data-shell-slot="inactive"></template>`) },
-		"active":   func() templ.Component { return templ.Raw(`<template data-shell-slot="active"></template>`) },
+	ShellSlotRenderers = map[string]ShellSlotRenderer{
+		"inactive": func(context.Context, map[string]string) templ.Component {
+			return templ.Raw(`<template data-shell-slot="inactive"></template>`)
+		},
+		"active": func(context.Context, map[string]string) templ.Component {
+			return templ.Raw(`<template data-shell-slot="active"></template>`)
+		},
 	}
 	t.Cleanup(func() {
 		ShellSlotsRegistry, ShellSlotActive, ShellSlotRenderers = originalRegistry, originalActive, originalRenderers
@@ -101,6 +106,50 @@ func TestNavRendersOnlyActiveShellSlotsForEnvironment(t *testing.T) {
 	require.NoError(t, Nav(Page{Path: "/"}).Render(ctx, &output))
 	assert.NotContains(t, output.String(), `data-shell-slot="inactive"`)
 	assert.Contains(t, output.String(), `data-shell-slot="active"`)
+}
+
+// A renderer receives its own module's declared non-secret configuration, and
+// nothing else: that is what lets templates.Page carry no provider field. The
+// value keys are generated per contribution, so a slot cannot read a key its
+// module never declared even when the shell can resolve it.
+func TestShellSlotRendererReceivesOnlyItsDeclaredValues(t *testing.T) {
+	originalRegistry, originalActive := ShellSlotsRegistry, ShellSlotActive
+	originalRenderers, originalKeys := ShellSlotRenderers, ShellSlotValueKeys
+	ShellSlotsRegistry = map[string][]string{"topbar": {"widget"}}
+	ShellSlotActive = map[string]func(string) bool{}
+	ShellSlotValueKeys = map[string][]string{"widget": {"WIDGET_PUBLIC_KEY"}}
+	var seen map[string]string
+	ShellSlotRenderers = map[string]ShellSlotRenderer{
+		"widget": func(_ context.Context, values map[string]string) templ.Component {
+			seen = values
+			return templ.NopComponent
+		},
+	}
+	t.Cleanup(func() {
+		ShellSlotsRegistry, ShellSlotActive = originalRegistry, originalActive
+		ShellSlotRenderers, ShellSlotValueKeys = originalRenderers, originalKeys
+	})
+
+	ctx := WithConfigLookup(t.Context(), func(key string) string {
+		return map[string]string{
+			"WIDGET_PUBLIC_KEY": "pub_1",
+			"WIDGET_SECRET":     "sk_never",
+		}[key]
+	})
+	var rendered strings.Builder
+	require.NoError(t, Nav(Page{Path: "/"}).Render(ctx, &rendered))
+	assert.Equal(t, map[string]string{"WIDGET_PUBLIC_KEY": "pub_1"}, seen)
+}
+
+// An unbound lookup must not panic: a renderer's own emptiness check is then
+// the same code path as an unconfigured provider.
+func TestShellSlotValuesWithoutLookupAreEmpty(t *testing.T) {
+	original := ShellSlotValueKeys
+	ShellSlotValueKeys = map[string][]string{"widget": {"WIDGET_PUBLIC_KEY"}}
+	t.Cleanup(func() { ShellSlotValueKeys = original })
+
+	assert.Equal(t, map[string]string{"WIDGET_PUBLIC_KEY": ""}, shellSlotValues(t.Context(), "widget"))
+	assert.Nil(t, shellSlotValues(t.Context(), "unknown"))
 }
 
 func TestShellSlotEnvironmentIsRequestScopedConcurrently(t *testing.T) {

@@ -260,8 +260,13 @@ func (s *Server) Handler() http.Handler {
 	h = s.recover(h)        // panic → 500 page + reporter capture
 	nextHandler := telemetry.HTTP(h, s.telemetry, "web")
 	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next := r.WithContext(templates.WithProviderEnvironment(r.Context(), s.cfg.Env))
-		nextHandler.ServeHTTP(w, next)
+		// The two things a shell contribution may read: which environment is
+		// running, so only the selected adapters render, and its own module's
+		// declared configuration by key. Neither is a provider field on the
+		// page, which is why templates.Page carries none.
+		ctx := templates.WithProviderEnvironment(r.Context(), s.cfg.Env)
+		ctx = templates.WithConfigLookup(ctx, s.cfg.Value)
+		nextHandler.ServeHTTP(w, r.WithContext(ctx))
 	})
 	return maxBytes(h, globalMaxBodyBytes) // global request cap on every route
 }

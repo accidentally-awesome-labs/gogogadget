@@ -20,7 +20,7 @@
         "id": "ggg/system/server",
         "contract": {
           "min": 1,
-          "max": 1
+          "max": 2
         }
       }
     ],
@@ -86,7 +86,7 @@
     "environment": [],
     "openapi": {
       "info": {
-        "description": "The second transport. Every rule the HTML app enforces (plan limits,\nvalidation, org scoping) applies identically here \u2014 the handlers share\nthe same query layer and plan logic, they only differ in how they answer.\n\nAuthentication is a Bearer token minted at `/app/settings/api`\n(`ggg_\u2026`, SHA-256 hashed at rest, shown once). Tokens carry a scope:\n`read` satisfies read operations, `write` satisfies both.\n\nThe token determines the organization \u2014 there is no org parameter, and a\ntoken can never read another org's rows.\n",
+        "description": "The second transport. Every rule the HTML app enforces (plan limits,\nvalidation, org scoping) applies identically here — the handlers share\nthe same query layer and plan logic, they only differ in how they answer.\n\nAuthentication is a Bearer token minted at `/app/settings/api`\n(`ggg_…`, SHA-256 hashed at rest, shown once). Tokens carry a scope:\n`read` satisfies read operations, `write` satisfies both.\n\nThe token determines the organization — there is no org parameter, and a\ntoken can never read another org's rows.\n",
         "license": {
           "name": "MIT"
         },

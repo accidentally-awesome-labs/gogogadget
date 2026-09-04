@@ -55,16 +55,33 @@ templ navLinks(page Page) {
 	}
 }
 
+// shellSlotMarkers renders every active contribution to an additive slot, in
+// installed-module order. Nothing renders when nothing is installed.
 templ shellSlotMarkers(slot string) {
 	for _, id := range ShellSlotIDs(ctx, slot) {
-		@renderShellSlot(id)
+		@renderShellSlot(ctx, id)
+	}
+}
+
+// shellMount renders an exclusive slot: the contribution's own element when an
+// adapter fills it, the shell's neutral container otherwise. The two are
+// alternatives rather than nested, because the contribution carries the same
+// id the shell's fallback does — the element a provider's script mounts into.
+templ shellMount(slot string, fallback templ.Component) {
+	if ShellSlotFilled(ctx, slot) {
+		@shellSlotMarkers(slot)
+	} else {
+		@fallback
 	}
 }
 
 templ Nav(page Page) {
 	<header class="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-(--z-nav)">
 		<nav class="max-w-page mx-auto flex items-center justify-between px-4 h-navbar" x-data="mobileNav" aria-label="Main">
-			@shellSlotMarkers("head")
+			// The public shell's top bar. The head slot used to render here,
+			// which put a provider's <meta> and <script> inside <nav>; it now
+			// renders from documentHead, where those elements belong.
+			@shellSlotMarkers("topbar")
 			@logo()
 			<div class="hidden md:flex items-center gap-6">
 				@navLinks(page)

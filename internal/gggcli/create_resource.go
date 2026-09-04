@@ -341,6 +341,19 @@ func (r resourceSpec) diagnostics() []modkit.Diagnostic {
 	return out
 }
 
+// coreContractMaxima is the highest contract of a core module that this
+// generator's emitted source is known to work with. Everything it emits
+// predates every core contract bump so far, so the ranges start at 1 and
+// stretch to whatever is published now; a module generated here must resolve
+// against the catalog it was generated from, and a range of exactly [1,1]
+// refused the moment ggg/system/server moved to 2.
+//
+// TestGeneratedRequirementsCoverCoreContracts holds this against the core
+// registry, so a future bump fails here rather than in a generated project.
+var coreContractMaxima = map[string]int{
+	"ggg/system/server": 2,
+}
+
 // requirements names every module the emitted source actually imports or
 // depends on. A resource that reaches identity, i18n and the ui package but
 // declares only the database is a module that compiles on the machine that
@@ -373,7 +386,11 @@ func (r resourceSpec) requirements() []modkit.Requirement {
 			continue
 		}
 		seen[id] = struct{}{}
-		out = append(out, modkit.Requirement{ID: id, Contract: modkit.ContractBounds{Min: 1, Max: 1}})
+		bounds := modkit.ContractBounds{Min: 1, Max: 1}
+		if published, ok := coreContractMaxima[id]; ok && published > bounds.Max {
+			bounds.Max = published
+		}
+		out = append(out, modkit.Requirement{ID: id, Contract: bounds})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out

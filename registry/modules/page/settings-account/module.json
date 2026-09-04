@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-account",
     "kind": "page",
     "name": "settings-account",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Account settings",
     "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
@@ -34,7 +34,7 @@
         "id": "ggg/system/server",
         "contract": {
           "min": 1,
-          "max": 1
+          "max": 2
         }
       },
       {
@@ -63,7 +63,7 @@
         "source": "internal/web/templates/settings.templ",
         "target": "internal/web/templates/settings.templ",
         "class": "templ",
-        "sha256": "d7734d08ab15bc68d44688805266e2fe54f4b1e51c6371a9aba00b5249b620f6",
+        "sha256": "784dbb1ef48a3bb272320875d851550a92aaef1f3eed7df3ecb48766716c0256",
         "rewrite_module": true,
         "contract": false
       }
@@ -116,9 +116,9 @@
     "environment": [],
     "locales": {
       "en": {
-        "settings.account_clerk_managed": "Profile, password, social connections, and two-factor authentication are managed by Clerk.",
         "settings.account_deleted": "Your account has been deleted. Goodbye!",
         "settings.account_email": "Email",
+        "settings.account_identity_managed": "Profile, password, social connections, and two-factor authentication are managed by your identity provider.",
         "settings.account_manage_link": "Manage your account →",
         "settings.account_member_since": "Member since",
         "settings.account_name": "Name",
@@ -137,7 +137,7 @@
         "settings.danger_title": "Danger zone",
         "settings.data_body": "Download everything we hold about your account as JSON — profile, memberships, notifications, and audit trail.",
         "settings.data_export": "Export my data (JSON)",
-        "settings.data_title": "Data & privacy",
+        "settings.data_title": "Data \u0026 privacy",
         "settings.language_auto": "Browser default",
         "settings.language_label": "Language",
         "settings.theme_dark": "Dark",
@@ -146,9 +146,9 @@
         "settings.theme_system": "System"
       },
       "es": {
-        "settings.account_clerk_managed": "El perfil, la contraseña, las conexiones sociales y la autenticación de dos factores se gestionan en Clerk.",
         "settings.account_deleted": "Tu cuenta ha sido eliminada. ¡Hasta pronto!",
         "settings.account_email": "Correo electrónico",
+        "settings.account_identity_managed": "El perfil, la contraseña, las conexiones sociales y la autenticación de dos factores se gestionan en tu proveedor de identidad.",
         "settings.account_manage_link": "Gestionar tu cuenta →",
         "settings.account_member_since": "Miembro desde",
         "settings.account_name": "Nombre",

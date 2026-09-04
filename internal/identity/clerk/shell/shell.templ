@@ -1,0 +1,34 @@
+package shell
+
+// head is the clerk-js loader.
+//
+// Load-bearing: clerk-js owns the ~60s __session JWT refresh cycle. Removing
+// it, or loading it without the publishable key, expires auth ~60s after
+// login. See /docs/authentication. The meta tag is what static/app.js reads to
+// decide whether to boot Clerk at all, and the data attribute is what
+// clerk.browser.js reads for itself — both carry the same key, which is why
+// this renderer needs the value twice.
+//
+// The script is self-hosted from static/vendor/, an asset THIS module owns and
+// checksums, so the CSP stays script-src 'self' and nothing is inline.
+templ head(publishableKey string) {
+	<meta name="clerk-publishable-key" content={ publishableKey }/>
+	<script defer src="/static/vendor/clerk.browser.js" data-clerk-publishable-key={ publishableKey }></script>
+}
+
+// orgSwitcher and userButton are the mount roots clerk-js renders its
+// OrganizationSwitcher and UserButton into (by id, from static/app.js). The
+// element is ours end to end — id, classes, placeholder attribute — because
+// the shell cannot know that a class named clerk-org-slot exists, and the
+// stylesheet that keeps the box stable while clerk-js loads ships with this
+// module too.
+//
+// data-clerk-placeholder is rendered by .clerk-org-slot:empty::before and
+// vanishes the moment clerk-js mounts its own children.
+templ orgSwitcher(placeholder string) {
+	<div id="org-switcher" class="clerk-org-slot min-h-8" data-clerk-placeholder={ placeholder }></div>
+}
+
+templ userButton(placeholder string) {
+	<div id="user-button" class="clerk-user-slot min-h-8 min-w-8" data-clerk-placeholder={ placeholder }></div>
+}
