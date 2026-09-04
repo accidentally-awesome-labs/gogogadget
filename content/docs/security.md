@@ -86,8 +86,11 @@ every nested form would post without the token.
   default, so `SetIsTLSFunc` decides per request: direct TLS, or
   `X-Forwarded-Proto: https` from the edge.
 - **Exempt paths:** `/webhooks/*` (signature-verified), `/api/*` (cookieless
-  Bearer — no cookie, nothing to forge), `/ingest/*`, `/static/*`,
-  `/healthz`, `/readyz`.
+  Bearer — no cookie, nothing to forge), `/static/*`, `/healthz`, `/readyz`,
+  and any route declaring `csrf_exempt` with a `csrf_reason` — the analytics
+  ingest proxy is the one an adapter contributes. Only `/api/*` is exempt
+  structurally now; everything else is a declared policy the matcher reads,
+  so an exemption cannot outlive the route that needed it.
 
 ## Identity ids are provider-neutral
 
@@ -161,7 +164,8 @@ Upstash) where more than one process serves traffic. The limiter **fails
 closed**: an adapter error, or a missing limiter capability, is a 503 with the
 diagnostic `rate_limit_unavailable` (JSON under `/api/`), never an open door.
 Over-limit requests get 429 with `Retry-After: 1`. Routes may declare
-`RateExempt` in their policy, and `/ingest/*` is exempt by name.
+`RateExempt` in their policy; the analytics ingest proxy is one of them, and
+it declares that policy rather than being exempt by name in the middleware.
 
 Authenticated API traffic gets a **second, independent** budget keyed on the
 API token row id (`API_RATE_LIMIT_RPM`, default 60/min, burst 2×), enforced in

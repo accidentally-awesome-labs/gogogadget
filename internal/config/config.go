@@ -27,13 +27,6 @@ import (
 // without touching the process.
 func LoadFrom(lookup func(string) string) (Config, error) {
 	cfg, errs := parseDeclared(lookup)
-	// Provider adapters own these keys, but the shared Config carries their
-	// values so selected adapters can consume one parsed snapshot. Keep this
-	// lookup isolated from generated fields; unselected adapters remain absent
-	// from the typed struct while Value stays available to their constructors.
-	for _, key := range []string{"POSTHOG_API_KEY", "POSTHOG_HOST", "SENTRY_DSN", "LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL"} {
-		cfg.Values[key] = lookup(key)
-	}
 
 	// Cross-field behaviour, which is not expressible as a per-key declaration.
 
@@ -201,14 +194,13 @@ func (c Config) IntValue(key string) (int, error) {
 // reads false.
 func (c Config) BoolValue(key string) bool { return parseBool(c.Value(key)) }
 func (c Config) Test() bool                { return c.Env == "test" }
-func (c Config) PostHogEnabled() bool      { return c.Value("POSTHOG_API_KEY") != "" }
-func (c Config) SentryEnabled() bool       { return c.Value("SENTRY_DSN") != "" }
 
-// LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
-// the AI route renders a 503 not-configured (same degrade as billing).
-func (c Config) LLMConfigured() bool {
-	return c.Value("LLM_API_KEY") != "" && c.Value("LLM_MODEL") != ""
-}
+// There is deliberately no XConfigured/XEnabled predicate here. A
+// credential-presence test is not a selection: an adapter is chosen per
+// environment in gogogadget.json, its required keys are a boot refusal when
+// absent, and its constructor refuses an empty credential of its own accord —
+// so a presence test can only ever disagree with the thing it is standing in
+// for. modkit.ValidateNoCredentialPresenceSelectors refuses a new one.
 
 // Now returns the render clock: frozen at TEST_NOW under APP_ENV=test,
 // wall-clock otherwise. All rendered dates/times derive from this so visual

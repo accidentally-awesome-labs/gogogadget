@@ -183,11 +183,15 @@ func TestCSRFForbidden(t *testing.T) {
 func TestCSRFExemptRoutes(t *testing.T) {
 	s := testServer(t, nil)
 
+	// The surfaces the SEAM declares. The analytics ingest proxy is exempt
+	// too, but it is an adapter's route now: it exists only in environments
+	// that select the adapter, so its exemption is asserted through the real
+	// chain in TestPostHogIngestProxiesThroughTheFullChain rather than here,
+	// where the route does not exist at all.
 	exempt := []struct{ method, path string }{
 		{"POST", "/webhooks/clerk"},  // svix signature
 		{"POST", "/webhooks/polar"},  // standard webhooks signature
 		{"POST", "/api/v1/projects"}, // cookieless bearer transport
-		{"POST", "/ingest/e/"},       // same-origin analytics proxy
 		{"GET", "/healthz"},          // probe, no session
 		{"GET", "/readyz"},           // probe, no session
 	}

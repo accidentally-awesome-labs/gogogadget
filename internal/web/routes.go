@@ -3,7 +3,6 @@ package web
 import (
 	"net/http"
 
-	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/api"
 )
 
@@ -11,8 +10,14 @@ import (
 // every one comes from RouteRegistry, generated from the selected modules'
 // manifests, and is registered below. What stays is the scaffolding a generated
 // record cannot describe - the scope group muxes and their middleware chains,
-// the one handler whose registration depends on configuration, and the
-// catch-alls.
+// and the catch-alls.
+//
+// There is no longer an exception. The analytics ingest proxy used to be
+// registered here behind a credential-presence test, which made "routes are
+// declared, not registered" a half-truth and put its CSRF and rate-limit
+// exemptions in a comment instead of the RoutePolicy the middleware reads. It
+// is now two declared routes owned by the selected analytics adapter, gated by
+// adapter selection like every other adapter-contributed route.
 func (s *Server) routes() error {
 	// Guarded app group: RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan.
 	appMux := http.NewServeMux()
@@ -30,16 +35,6 @@ func (s *Server) routes() error {
 	s.mux.Handle("/api/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusNotFound, "not_found", "Unknown API route.")
 	}))
-
-	// PostHog reverse proxy (registered only when configured; CSRF- and
-	// rate-limit-exempt in the chain).
-	if s.cfg.PostHogEnabled() {
-		if proxy, err := analytics.IngestProxy(s.cfg.Value("POSTHOG_HOST")); err == nil {
-			s.mux.Handle("/ingest/", proxy)
-		} else {
-			s.log.Error("posthog proxy", "error", err)
-		}
-	}
 
 	// Each generated record's scope picks the mux carrying that scope's guards,
 	// so this runs after the group muxes exist. ServeMux panics on a duplicate

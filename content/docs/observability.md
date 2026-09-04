@@ -54,10 +54,12 @@ reporting goes through the `observability.Reporter` seam
 
 Queued events flush for 2s on shutdown. Without the DSN both paths no-op.
 
-## PostHog (env-gated)
+## PostHog (selected per environment)
 
-Set `POSTHOG_API_KEY` (and optionally `POSTHOG_HOST`, default
-`https://us.i.posthog.com`) to enable product analytics.
+Select `analytics-posthog` for the environment and set `POSTHOG_API_KEY`
+(`POSTHOG_HOST` defaults to `https://us.i.posthog.com`). Selection is the
+gate, not the credential: with the adapter selected the key is required, so
+its absence is a boot refusal rather than analytics silently doing nothing.
 
 ### Server-side events
 
@@ -81,8 +83,12 @@ Browser-side PostHog loads through the app, not a third-party origin:
 `/ingest/*` reverse-proxies to `POSTHOG_HOST` (prefix stripped, `Host`
 rewritten). That keeps CSP at `script-src 'self'` (see
 [Security](/docs/security)) and makes ad-blockers irrelevant. The route is
-registered only when the key is set, and it is exempt from CSRF and the rate
-limiter.
+declared by `ggg/system/analytics-posthog` — two `runtime.routes` entries,
+GET and POST, with `csrf_exempt` (the browser SDK holds no session and sends
+no CSRF token), `rate_exempt` and a 1 MiB body cap in the declared
+`RoutePolicy` the middleware actually reads. It exists only in the
+environments that select the adapter, and deselecting it removes the route,
+the policy and the exemptions together.
 
 ### The consent gate
 

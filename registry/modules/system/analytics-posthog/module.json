@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 3,
+    "revision": 5,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",
@@ -53,6 +53,22 @@
         "contract": false
       },
       {
+        "source": "internal/web/ingest_posthog.go",
+        "target": "internal/web/ingest_posthog.go",
+        "class": "go",
+        "sha256": "b05587b3d275e8df90414764a962aece575c38b2ac25087da60e1ae04c256ecc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/ingest_posthog_test.go",
+        "target": "internal/web/ingest_posthog_test.go",
+        "class": "test",
+        "sha256": "a1eef78dbbbe33b2e13e79dad21f7ec5122add5d1014a0ea1f51d3118c462ffc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/slots/posthog.go",
         "target": "internal/web/templates/slots/posthog.go",
         "class": "go",
@@ -80,6 +96,10 @@
     "claims": {
       "packages": [
         "internal/analytics/posthog"
+      ],
+      "routes": [
+        "analytics.posthog.ingest.get",
+        "analytics.posthog.ingest.post"
       ]
     },
     "runtime": {
@@ -117,6 +137,42 @@
           ]
         }
       },
+      "routes": [
+        {
+          "id": "analytics.posthog.ingest.get",
+          "method": "GET",
+          "pattern": "/ingest/",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "same-origin telemetry proxy; the browser SDK holds no session and sends no CSRF token",
+            "rate_exempt": true,
+            "maintenance_exempt": false,
+            "max_body_bytes": 1048576,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePostHogIngest"
+        },
+        {
+          "id": "analytics.posthog.ingest.post",
+          "method": "POST",
+          "pattern": "/ingest/",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "same-origin telemetry proxy; the browser SDK holds no session and sends no CSRF token",
+            "rate_exempt": true,
+            "maintenance_exempt": false,
+            "max_body_bytes": 1048576,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePostHogIngest"
+        }
+      ],
       "slots": [
         {
           "id": "analytics-posthog-consent",
@@ -148,6 +204,7 @@
         "field": "PostHogHost",
         "type": "string",
         "description": "Posthog Host",
+        "default": "https://us.i.posthog.com",
         "targets": [
           "ggg/system/analytics-posthog@posthog"
         ]
@@ -171,6 +228,7 @@
     "tests": {
       "go_packages": [
         "internal/analytics/posthog",
+        "internal/web",
         "internal/web/templates/slots"
       ]
     },

@@ -13,6 +13,7 @@ content.post.index /blog
 content.release.index /changelog
 docs.index /docs
 docs.search /docs/search
+analytics.posthog.ingest.get /ingest/
 auth.login /login
 auth.logout /logout
 pricing.show /pricing

@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "303567fe1b5516df41a098b39f728752a637fd1554f73bcc20c3baadf8d4272c"
+      "sha256": "2485977119b1304bf3a8291cab27874b8811b81a8f20a1377ba57f76c4cb5a0d"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "51d4af3e27fe897bfe784e254c0875c7839322a613c0e11484c39ce272d8857c"
+      "sha256": "395d5c2eeccd955c82fc2f7dd4480421fbe68e8f8ad1c4b0fda3bcfe37925773"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "70040190e8ec654411175b73ee4fc589ffed414d94ffdbb5f2008d5655bdaa98"
+      "sha256": "39e9d87289978d6063b949e996d2e21b70607f38fced1406da31ddfc93dfdce9"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "491f06717056e4abb919c8e1d6acb34863370b1a61b0860fba477a4fa42fccac"
+      "sha256": "7a3dffa053109ea3407b0ddb3629756006cbac5fa2e2198e7a933103b0f80926"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1024,7 +1024,7 @@
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "b957f6295946fd417561a02154ffd1a0470c2ecc03fd66b1c4df09b7d34060b0"
+      "sha256": "d0059dfe763d76d21e9939ff52eb0b648ccd9cd15e1e1ca48348bf98ca8817c9"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "b9ca3d8031a36ff1a961cc15d62a028fbf6a385668e7c361e4e302c1de662fd0"
+      "sha256": "aa7a76c21659f4d0a06530a089285cdddb6ea7ecfadb7f25e55daacc817952e0"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "0f2e9ffa40868dbc5fb1a52c81ce3ed4fd472128c434749a7f05b03eea34aaed"
+      "sha256": "1f70bdfe36f5c4b0bb6c7832f2c9c2f7670e34209b869f9fe14f3ff6163d6bc2"
     },
     {
       "path": "registry/modules/system/static/module.json",

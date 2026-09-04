@@ -4,7 +4,7 @@
     "id": "ggg/system/config",
     "kind": "system",
     "name": "config",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Configuration",
     "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",
@@ -32,7 +32,7 @@
         "source": "internal/config/config.go",
         "target": "internal/config/config.go",
         "class": "go",
-        "sha256": "d5463122633dc8946ea0adf966a70062594c42766f6859556846fafed8868919",
+        "sha256": "43704c57b457f69c9b542576780893caf6233fd48eac29e3d960d6f4db100a8a",
         "rewrite_module": true,
         "contract": true
       },
@@ -40,7 +40,7 @@
         "source": "internal/config/config_test.go",
         "target": "internal/config/config_test.go",
         "class": "test",
-        "sha256": "05d5f6221f40964fc601ab4bfe9da1a8f5831c23a2bf438f5d119969357212c6",
+        "sha256": "0778eb50d689f3e0801e645cfb52d6b0de48744f2220fecfb1707a814f291f6c",
         "rewrite_module": true,
         "contract": false
       },

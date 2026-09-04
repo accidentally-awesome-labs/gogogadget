@@ -258,3 +258,68 @@ func TestShellSlotRenderersRefuseAWrongSignature(t *testing.T) {
 		"func Mount(ctx context.Context, values map[string]string) templ.Component {\n\t_, _ = ctx, values\n\treturn templ.NopComponent\n}\n"+
 			"func Mount2(ctx context.Context, values map[string]string) templ.Component { return templ.NopComponent }\n")))
 }
+
+func presenceAdapter() Manifest {
+	m := vendorAdapterManifest("ggg/system/analytics-posthog", "analytics-posthog", "ggg/analytics", "posthog", "managed")
+	m.Environment = []EnvironmentVariable{{Key: "POSTHOG_API_KEY"}, {Key: "POSTHOG_HOST"}}
+	return m
+}
+
+func presenceReader(class FileClass) Manifest {
+	return Manifest{ID: "ggg/system/config", Kind: ModuleSystem, Name: "config",
+		Files: []ManifestFile{{Source: "internal/config/config.go", Target: "internal/config/config.go", Class: class}}}
+}
+
+// The selector this task deleted, and the reason it cannot come back: it gated
+// a route on whether a credential happened to be set, in a project where the
+// adapter's selection already decides and its absence is a boot refusal.
+func TestNoCredentialPresenceSelectorsRefusesTheDeletedShape(t *testing.T) {
+	source := func(body string) map[string][]byte {
+		return map[string][]byte{"internal/config/config.go": []byte("package config\n\n" + body)}
+	}
+	modules := func(class FileClass) []Manifest {
+		return []Manifest{presenceAdapter(), presenceReader(class)}
+	}
+
+	err := ValidateNoCredentialPresenceSelectors(modules(FileClassGo), source(
+		"func (c Config) PostHogEnabled() bool { return c.Value(\"POSTHOG_API_KEY\") != \"\" }\n"))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "PostHogEnabled")
+	assert.Contains(t, err.Error(), "POSTHOG_API_KEY")
+	assert.Contains(t, err.Error(), "credential-presence selector")
+
+	// The two-key form (LLMConfigured) and the inverted comparison.
+	require.ErrorContains(t, ValidateNoCredentialPresenceSelectors(modules(FileClassGo), source(
+		"func (c Config) LLMConfigured() bool {\n\treturn c.Value(\"POSTHOG_API_KEY\") != \"\" && c.Value(\"POSTHOG_HOST\") != \"\"\n}\n")),
+		"credential-presence selector")
+	require.ErrorContains(t, ValidateNoCredentialPresenceSelectors(modules(FileClassGo), source(
+		"func (c Config) Missing() bool { return \"\" == c.Value(\"POSTHOG_HOST\") }\n")),
+		"credential-presence selector")
+
+	// A test may name a provider's key deliberately: proving the boot matrix
+	// reacts to a credential is not branching on one in product code.
+	require.NoError(t, ValidateNoCredentialPresenceSelectors(modules(FileClassTest), source(
+		"func TestX() bool { return c.Value(\"POSTHOG_API_KEY\") != \"\" }\n")))
+}
+
+// The sanctioned by-key read must stay legal: it is what
+// ValidateConfigFieldOwnership tells a module that does not declare a key to
+// use, and the value being empty is a normal rendering decision.
+func TestNoCredentialPresenceSelectorsAllowsOrdinaryReads(t *testing.T) {
+	modules := []Manifest{presenceAdapter(),
+		Manifest{ID: "ggg/page/settings-account", Kind: ModulePage,
+			Files: []ManifestFile{{Source: "internal/web/page.go", Target: "internal/web/page.go", Class: FileClassGo}}}}
+	for _, body := range []string{
+		// A handler reading a key and branching inline.
+		"func (s *Server) handle() {\n\tif host := s.cfg.Value(\"POSTHOG_HOST\"); host != \"\" {\n\t\tuse(host)\n\t}\n}\n",
+		// A predicate over a key this adapter does not own.
+		"func (c Config) DevBypass() bool { return c.Value(\"DEV_AUTH_BYPASS\") != \"\" }\n",
+		// A bool that is not a presence test.
+		"func (c Config) Production() bool { return c.Env == \"production\" }\n",
+		// More than one statement: not a named stand-in for selection.
+		"func (c Config) Ready() bool {\n\tlog()\n\treturn c.Value(\"POSTHOG_HOST\") != \"\"\n}\n",
+	} {
+		require.NoErrorf(t, ValidateNoCredentialPresenceSelectors(modules,
+			map[string][]byte{"internal/web/page.go": []byte("package web\n\n" + body)}), "body: %s", body)
+	}
+}

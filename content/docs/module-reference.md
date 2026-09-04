@@ -685,7 +685,7 @@ declared contracts a module's own suite covers.
 | `ggg/page/terms` | `go test -count=1 ./internal/web` | — |
 | `ggg/system/analytics` | `go test -count=1 ./internal/analytics` | — |
 | `ggg/system/analytics-noop` | `go test -count=1 ./internal/analytics/noop` | — |
-| `ggg/system/analytics-posthog` | `go test -count=1 ./internal/analytics/posthog ./internal/web/templates/slots` | — |
+| `ggg/system/analytics-posthog` | `go test -count=1 ./internal/analytics/posthog ./internal/web ./internal/web/templates/slots` | — |
 | `ggg/system/api` | `go test -count=1 ./internal/api` | — |
 | `ggg/system/apphost` | `go test -count=1 ./internal/apphost` | — |
 | `ggg/system/audit` | `go test -count=1 ./internal/audit` | — |

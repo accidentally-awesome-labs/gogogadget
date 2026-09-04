@@ -225,29 +225,32 @@ func TestRateLimitRPMParsing(t *testing.T) {
 	}
 }
 
-func TestConfiguredPredicates(t *testing.T) {
+// Adapter-declared keys reach a consumer through Values, whether or not the
+// consumer declares them. What is deliberately NOT here any more is a
+// predicate over their presence: PostHogEnabled, SentryEnabled and
+// LLMConfigured all reported "is this vendor configured", which selection
+// already decides and a boot refusal already enforces.
+// modkit.ValidateNoCredentialPresenceSelectors refuses a new one.
+func TestAdapterKeysResolveByKey(t *testing.T) {
 	baseEnv(t)
 	cfg, err := Load()
 	require.NoError(t, err)
-	assert.False(t, cfg.PostHogEnabled())
-	assert.False(t, cfg.SentryEnabled())
-	assert.False(t, cfg.LLMConfigured(), "needs key AND model")
+	assert.Empty(t, cfg.Value("POSTHOG_API_KEY"))
+	assert.Empty(t, cfg.Value("SENTRY_DSN"))
+	// The declared default is the documented one, and it exists now: the
+	// constructor refuses an empty host, so POSTHOG_API_KEY alone used to fail
+	// boot while the docs promised a default.
+	assert.Equal(t, "https://us.i.posthog.com", cfg.Value("POSTHOG_HOST"))
 
-	t.Setenv("CLERK_SECRET_KEY", "sk_1")
-	t.Setenv("POLAR_ACCESS_TOKEN", "pol_1")
 	t.Setenv("POSTHOG_API_KEY", "phc_1")
 	t.Setenv("SENTRY_DSN", "http://k@h/1")
-	t.Setenv("STORAGE_R2_ACCOUNT_ID", "a")
-	t.Setenv("STORAGE_R2_ACCESS_KEY_ID", "b")
-	t.Setenv("STORAGE_R2_SECRET_ACCESS_KEY", "c")
-	t.Setenv("STORAGE_R2_BUCKET", "d")
 	t.Setenv("LLM_API_KEY", "k")
 	t.Setenv("LLM_MODEL", "m")
 	cfg, err = Load()
 	require.NoError(t, err)
-	assert.True(t, cfg.PostHogEnabled())
-	assert.True(t, cfg.SentryEnabled())
-	assert.True(t, cfg.LLMConfigured())
+	assert.Equal(t, "phc_1", cfg.Value("POSTHOG_API_KEY"))
+	assert.Equal(t, "http://k@h/1", cfg.Value("SENTRY_DSN"))
+	assert.Equal(t, "m", cfg.Value("LLM_MODEL"))
 }
 
 func TestLoadDotEnv(t *testing.T) {

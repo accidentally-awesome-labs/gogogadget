@@ -156,7 +156,7 @@ func (w *statusWriter) Flush() {
 func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
 // rateLimit sheds load per client IP: RATE_LIMIT_RPM req/min (default 100),
-// burst 2×, on everything except /static/*, /healthz, /ingest/*.
+// burst 2×, on everything whose declared RoutePolicy does not exempt it.
 //
 // NOTE: single-node only, by design. The limiter is in-process; when scaling
 // horizontally (fly scale count > 1), swap this for a shared store
@@ -167,12 +167,7 @@ func (s *Server) rateLimit(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		// The analytics proxy is registered method-less, outside the route table
-		// (see structurallyCSRFExempt), so its exemption is named here too.
-		if strings.HasPrefix(r.URL.Path, "/ingest/") {
-			next.ServeHTTP(w, r)
-			return
-		}
+
 		var decision ratelimit.Decision
 		var err error
 		if s.limiter != nil {
@@ -315,17 +310,16 @@ func csrfCookieName(production bool) string {
 	return "csrf_token"
 }
 
-// structurallyCSRFExempt covers the two surfaces registered outside the
+// structurallyCSRFExempt covers the one surface registered outside the
 // generated route table, because the Route contract (one method, one pattern)
-// cannot express either of them. Both are named here with a reason rather than
-// hidden in a regex list, and both are transports that carry no browser session:
+// cannot express it: /api/ is the JSON catch-all for unknown API paths. It
+// answers 404 in JSON; without this an unknown API POST would get an HTML 403
+// from CSRF instead of the API error shape its client can parse.
 //
-//   - /api/ is the JSON catch-all for unknown API paths. It answers 404 in JSON;
-//     without this an unknown API POST would get an HTML 403 from CSRF instead
-//     of the API error shape its client can parse.
-//   - /ingest/ is the same-origin analytics proxy, registered method-less and
-//     only when a provider is configured. The browser SDK sends no CSRF token.
+// The analytics proxy used to be the second entry. It is now two declared
+// routes owned by the analytics adapter, so its exemption is a csrf_exempt
+// with a csrf_reason in the manifest that the policy matcher reads — the same
+// place every other exemption lives, and one that leaves with the adapter.
 func (s *Server) structurallyCSRFExempt(r *http.Request) bool {
-	path := r.URL.Path
-	return strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/ingest/")
+	return strings.HasPrefix(r.URL.Path, "/api/")
 }

@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"sync"
 	"testing"
@@ -43,25 +42,4 @@ func TestProjectCreatedCaptured(t *testing.T) {
 	code, _, _ := postForm(t, s, "/app/projects", url.Values{"name": {"Tracked"}}, sessionCookie("user_ph", "org_ph", "org:admin"))
 	require.Equal(t, http.StatusOK, code)
 	assert.True(t, fake.contains("user_ph:project_created"), "project_created must be captured, got %v", fake.events)
-}
-
-func TestIngestProxiedThroughFullStack(t *testing.T) {
-	var upstreamHits int
-	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		upstreamHits++
-		assert.Equal(t, "/e/", r.URL.Path)
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer upstream.Close()
-
-	s := integrationServer(t, func(d *Deps) {
-		d.Config.Values = map[string]string{"POSTHOG_API_KEY": "phc_test", "POSTHOG_HOST": upstream.URL}
-	})
-
-	// Through the FULL middleware stack: not 403 (nosurf exempt), not 429
-	// (rate-limit exempt).
-	code, _, body := serve(t, s, "POST", "/ingest/e/", []byte(`{"event":"test"}`), nil)
-	assert.Equal(t, http.StatusOK, code)
-	assert.Equal(t, 1, upstreamHits)
-	assert.NotContains(t, body, "Forbidden")
 }

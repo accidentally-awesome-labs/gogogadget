@@ -258,3 +258,168 @@ func providerVendorTokens(modules []Manifest) map[string]string {
 	}
 	return tokens
 }
+
+// ValidateNoCredentialPresenceSelectors refuses a function whose whole body is
+// a test for whether a provider's credential happens to be set.
+//
+// The plan ordered this class deleted by name — "Remove credential-presence
+// selectors such as ResendConfigured/StorageConfigured: explicit managed
+// selection with missing keys returns one joined boot error and never falls
+// back locally" — and one survived to gate a route:
+// `if s.cfg.PostHogEnabled()` around a hand-registered /ingest/ proxy, with
+// `PostHogEnabled` reading `Value("POSTHOG_API_KEY") != ""`.
+//
+// The predicate is unsound wherever it appears. An adapter is selected per
+// environment in gogogadget.json; its declared keys are required, so their
+// absence is a boot refusal; and its constructor refuses an empty credential
+// anyway. So a presence test can only ever disagree with the thing it stands
+// in for — it says "not configured" where selection says "required", and it
+// silently degrades instead of refusing.
+//
+// The rule is narrow on purpose, and the alternatives were measured rather
+// than guessed. A lexical rule over seam-owned Go — the shape that works for
+// template bytes, where nearly everything is output — matches 125 sites in
+// this tree, almost all of them prose that legitimately records which vendor a
+// seam was designed against ("handlers never import the Polar SDK directly").
+// A rule over configuration-key literals matches 21, and most are the
+// SANCTIONED by-key read that ValidateConfigFieldOwnership itself recommends
+// for a key the reader does not declare. Neither is the defect. The defect is
+// executable: a bool that means "is this vendor configured".
+func ValidateNoCredentialPresenceSelectors(modules []Manifest, files map[string][]byte) error {
+	keys := adapterDeclaredKeys(modules)
+	if len(keys) == 0 {
+		return nil
+	}
+	for _, module := range modules {
+		targets := make([]string, 0, len(module.Files))
+		for _, file := range module.Files {
+			// A test may name a provider and its keys deliberately: proving
+			// the boot matrix reacts to a credential is not the same as
+			// branching on one in product code.
+			if file.Class == FileClassTest || !strings.HasSuffix(file.Target, ".go") {
+				continue
+			}
+			targets = append(targets, file.Target)
+		}
+		sort.Strings(targets)
+		for _, target := range targets {
+			content, ok := files[target]
+			if !ok {
+				continue
+			}
+			fset := token.NewFileSet()
+			parsed, err := parser.ParseFile(fset, target, content, parser.SkipObjectResolution)
+			if err != nil {
+				return fmt.Errorf("scan %s: %w", target, err)
+			}
+			for _, decl := range parsed.Decls {
+				fn, ok := decl.(*ast.FuncDecl)
+				if !ok || fn.Body == nil {
+					continue
+				}
+				key, found := credentialPresenceKey(fn, keys)
+				if !found {
+					continue
+				}
+				return fmt.Errorf(
+					"%s:%d in %s: %s reports whether %s is set, which is a credential-presence selector; selection is the gate — an adapter chosen for the environment has its keys required at boot and its constructor refuses an empty one, so this can only disagree with both. Gate on the adapter's selection instead (a declared contribution is gated by providerActive) or let the boot refusal speak",
+					target, fset.Position(fn.Pos()).Line, module.ID, fn.Name.Name, key)
+			}
+		}
+	}
+	return nil
+}
+
+// adapterDeclaredKeys is every environment key a provider adapter owns. Only
+// adapter keys qualify: a seam's own key cannot disappear, and a presence test
+// on one is a plain option check rather than a stand-in for selection.
+func adapterDeclaredKeys(modules []Manifest) map[string]string {
+	keys := make(map[string]string)
+	for _, module := range modules {
+		if !isProviderAdapter(module) {
+			continue
+		}
+		for _, item := range module.Environment {
+			keys[item.Key] = module.ID
+		}
+	}
+	return keys
+}
+
+// credentialPresenceKey reports the adapter key a function's return value is a
+// presence test for. It requires a single bool result and a body that is one
+// return statement of comparisons against "", so an ordinary handler that
+// happens to read a key by name is untouched: the defect is a named predicate
+// standing in for selection, not a read.
+func credentialPresenceKey(fn *ast.FuncDecl, keys map[string]string) (string, bool) {
+	if fn.Type.Results == nil || len(fn.Type.Results.List) != 1 {
+		return "", false
+	}
+	result, ok := fn.Type.Results.List[0].Type.(*ast.Ident)
+	if !ok || result.Name != "bool" || len(fn.Body.List) != 1 {
+		return "", false
+	}
+	ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
+	if !ok || len(ret.Results) != 1 {
+		return "", false
+	}
+	return emptinessComparisonKey(ret.Results[0], keys)
+}
+
+// emptinessComparisonKey walks a boolean expression built only from
+// `<config read of KEY> != ""` comparisons joined by && or ||.
+func emptinessComparisonKey(expr ast.Expr, keys map[string]string) (string, bool) {
+	switch node := expr.(type) {
+	case *ast.ParenExpr:
+		return emptinessComparisonKey(node.X, keys)
+	case *ast.BinaryExpr:
+		switch node.Op {
+		case token.LAND, token.LOR:
+			if key, ok := emptinessComparisonKey(node.X, keys); ok {
+				return key, true
+			}
+			return emptinessComparisonKey(node.Y, keys)
+		case token.NEQ, token.EQL:
+			if !isEmptyString(node.X) && !isEmptyString(node.Y) {
+				return "", false
+			}
+			for _, side := range []ast.Expr{node.X, node.Y} {
+				if key, ok := configReadKey(side, keys); ok {
+					return key, true
+				}
+			}
+		}
+	}
+	return "", false
+}
+
+func isEmptyString(expr ast.Expr) bool {
+	literal, ok := expr.(*ast.BasicLit)
+	return ok && literal.Kind == token.STRING && (literal.Value == `""` || literal.Value == "``")
+}
+
+// configReadKey extracts the adapter key from a by-key configuration read.
+func configReadKey(expr ast.Expr, keys map[string]string) (string, bool) {
+	call, ok := expr.(*ast.CallExpr)
+	if !ok || len(call.Args) != 1 {
+		return "", false
+	}
+	selector, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return "", false
+	}
+	switch selector.Sel.Name {
+	case "Value", "BoolValue", "IntValue":
+	default:
+		return "", false
+	}
+	literal, ok := call.Args[0].(*ast.BasicLit)
+	if !ok || literal.Kind != token.STRING {
+		return "", false
+	}
+	key := strings.Trim(literal.Value, "\"`")
+	if _, owned := keys[key]; !owned {
+		return "", false
+	}
+	return key, true
+}

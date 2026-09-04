@@ -4,7 +4,7 @@
     "id": "ggg/system/observability",
     "kind": "system",
     "name": "observability",
-    "revision": 1,
+    "revision": 3,
     "contract": 1,
     "title": "Error reporting",
     "description": "Reporter port with a Sentry adapter and a no-op default so call sites never nil-check.",
@@ -67,7 +67,7 @@
         "source": "internal/web/observability_test.go",
         "target": "internal/web/observability_test.go",
         "class": "test",
-        "sha256": "d85444515ef61736bf6bc66c181a9599a7684317d98a0bdcf73f02305706f46b",
+        "sha256": "348735e70adcc593494b4b31d6023af5b926790561de54456c39d1cb1b5e22e1",
         "rewrite_module": true,
         "contract": false
       }

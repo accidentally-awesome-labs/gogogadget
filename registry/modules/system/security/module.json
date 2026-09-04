@@ -4,7 +4,7 @@
     "id": "ggg/system/security",
     "kind": "system",
     "name": "security",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Middleware and request security",
     "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards. The CSRF step publishes the token twice: as the inherited request header htmx reads, and into the request context that ui.Form draws its hidden field from, so a form submitted with no JavaScript is accepted.",
@@ -85,7 +85,7 @@
         "source": "internal/web/middleware.go",
         "target": "internal/web/middleware.go",
         "class": "go",
-        "sha256": "6db7f232d9c616cdceb2576c159c4fa6b63dbe43183fb71096fdc6712e07c8b3",
+        "sha256": "817deb0190c9876460567b2eecc22f516114b92d2e13ba3e8cf9d10c786bc571",
         "rewrite_module": true,
         "contract": true
       }
