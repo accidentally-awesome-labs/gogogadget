@@ -333,6 +333,12 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := ValidateCoreCLIPackages(graph.modules, payloadsAsFiles(payloads)); err != nil {
 		return Plan{}, err
 	}
+	if err := ValidateConfigFieldOwnership(graph.modules, payloadsAsFiles(payloads)); err != nil {
+		return Plan{}, err
+	}
+	if err := ValidateDerivationPackages(graph.modules, payloadsAsFiles(payloads), modulePath); err != nil {
+		return Plan{}, err
+	}
 	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
 	if op.Kind == OpInit || (op.Kind == OpSync && hasLock) {
 		if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {

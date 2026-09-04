@@ -53,7 +53,7 @@ func TestLoadMinimalValidEnv(t *testing.T) {
 	assert.Equal(t, 8080, cfg.Port)
 	assert.Equal(t, "info", cfg.LogLevel, "non-development defaults to info")
 	assert.False(t, cfg.MaintenanceMode)
-	assert.False(t, cfg.DevAuthBypass)
+	assert.False(t, cfg.BoolValue("DEV_AUTH_BYPASS"))
 }
 
 func TestLoadInvalidAppEnv(t *testing.T) {
@@ -389,7 +389,7 @@ func TestEnvExampleIsAWorkingZeroAccountSetup(t *testing.T) {
 	cfg, err := LoadFrom(func(k string) string { return values[k] })
 	require.NoError(t, err, ".env.example must itself be a valid configuration")
 
-	assert.True(t, cfg.DevAuthBypass,
+	assert.True(t, cfg.BoolValue("DEV_AUTH_BYPASS"),
 		"DEV_AUTH_BYPASS must ship on, or /dev/login cannot sign anyone in on a fresh clone")
 	assert.Contains(t, cfg.DatabaseURL, "localhost",
 		"DATABASE_URL must ship pointing at the compose database")

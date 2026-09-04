@@ -229,17 +229,39 @@ func TestBootstrapBranchesByEnvironmentAndGatesAdapters(t *testing.T) {
 			t.Fatalf("bootstrap missing %q:\\n%s", want, out.Content)
 		}
 	}
-	// Two calls per adapter now: one in the environment's boot branch, one in
-	// the per-slot accessor a CLI command uses instead of importing the
-	// adapter. Development and test both select local, production selects
-	// remote, and no branch or accessor arm constructs the other.
-	if strings.Count(out.Content, "local.New(ctx") != 4 || strings.Count(out.Content, "remote.New(ctx") != 2 {
+	// One call per adapter: development and test both select local,
+	// production selects remote, and no branch constructs the other. This
+	// slot gets no accessor at all, because local declares start/stop and an
+	// accessor has no way to run a lifecycle.
+	if strings.Count(out.Content, "local.New(ctx") != 2 || strings.Count(out.Content, "remote.New(ctx") != 1 {
 		t.Fatalf("adapter constructors should be selected per environment: len=%d", len(out.Content))
 	}
+	if strings.Contains(out.Content, "func MailSlotFor(") {
+		t.Fatalf("a slot whose adapter has a lifecycle must not get an accessor:\n%s", out.Content)
+	}
+	// The exclusion says which adapter and which condition, because the three
+	// reasons a slot can be excluded are three different next steps.
+	if !strings.Contains(out.Content, "ggg/mail: ggg/system/local has a lifecycle an accessor cannot run") {
+		t.Fatalf("bootstrap does not name why ggg/mail is excluded:\n%s", out.Content)
+	}
+
+	// Drop the lifecycle and the same slot becomes accessible: one extra
+	// constructor call per environment arm, and the typed accessor appears.
+	quiet := local
+	quietSystem := *local.Runtime.System
+	quietSystem.Start, quietSystem.Stop = false, false
+	quiet.Runtime.System = &quietSystem
+	accessible, err := emitBootstrapRegistry(context.Background(), "example.com/app", lock, []Manifest{config, quiet, remote})
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, want := range []string{"type MailSlot struct", "func MailSlotFor(ctx context.Context, h apphost.Host, cfg "} {
-		if !strings.Contains(out.Content, want) {
-			t.Fatalf("bootstrap missing the per-slot accessor %q:\n%s", want, out.Content)
+		if !strings.Contains(accessible.Content, want) {
+			t.Fatalf("bootstrap missing the per-slot accessor %q:\n%s", want, accessible.Content)
 		}
+	}
+	if strings.Count(accessible.Content, "local.New(ctx") != 4 || strings.Count(accessible.Content, "remote.New(ctx") != 2 {
+		t.Fatalf("accessor arms should construct exactly the selected adapter: len=%d", len(accessible.Content))
 	}
 	if !strings.Contains(out.Content, `Target: "managed"`) {
 		t.Fatalf("production health registration did not persist selected target: %s", out.Content)

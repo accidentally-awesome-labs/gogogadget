@@ -20,7 +20,7 @@ import (
 // bypass branch of its own: it asks the selected adapter and reports what it
 // says.
 func TestIdentityWebhookAcceptsUnsignedDevDelivery(t *testing.T) {
-	s := integrationServer(t, func(d *Deps) { d.Config.ClerkWebhookSecret = "" })
+	s := integrationServer(t, func(d *Deps) { d.Config.Values["CLERK_WEBHOOK_SECRET"] = "" })
 	ctx := t.Context()
 
 	payload := userCreatedPayload("user_ns1", "ns1@example.com", "No Secret")

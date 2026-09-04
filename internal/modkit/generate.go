@@ -634,24 +634,48 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			}
 			return true
 		}
-		accessible, excluded := make([]string, 0, len(slotEnvAdapters)), make([]string, 0, len(slotEnvAdapters))
+		// An accessor hands back a bare capability with no way to run the
+		// adapter's lifecycle, so a slot whose selected adapter starts or stops
+		// is excluded: handing a caller a buffering client it cannot flush is
+		// worse than making it use Boot. Reasons are per slot, because the
+		// three exclusion conditions are three different answers to "why not"
+		// and one shared sentence sends the next caller looking in the wrong
+		// place.
+		accessible := make([]string, 0, len(slotEnvAdapters))
+		excluded := map[string]string{}
 		for slot, envAdapters := range slotEnvAdapters {
-			eligible := len(envAdapters) == 3 && validIdentifier(providerSlotIdent(slot))
-			for _, module := range envAdapters {
-				if !configOnly(module) {
-					eligible = false
+			var reason string
+			switch {
+			case len(envAdapters) != 3:
+				reason = "no adapter is selected for every environment"
+			case !validIdentifier(providerSlotIdent(slot)):
+				reason = "its id has no Go identifier"
+			}
+			for _, env := range []string{"development", "test", "production"} {
+				module, selected := envAdapters[env]
+				if !selected || reason != "" {
+					continue
+				}
+				switch {
+				case !configOnly(module):
+					reason = module.ID + " needs more than configuration, so only Boot can construct it"
+				case module.Runtime.System.Start || module.Runtime.System.Stop:
+					reason = module.ID + " has a lifecycle an accessor cannot run"
 				}
 			}
-			if eligible {
+			if reason == "" {
 				accessible = append(accessible, slot)
 			} else {
-				excluded = append(excluded, slot)
+				excluded[slot] = reason
 			}
 		}
 		sort.Strings(accessible)
-		sort.Strings(excluded)
 		if len(excluded) > 0 {
-			fmt.Fprintf(&b, "// These provider slots have no accessor because their selected adapters\n// need more than configuration, so they can only be constructed by Boot:\n// %s.\n// Import one of their adapter packages from internal/gggcli and\n// ValidateCoreCLIPackages refuses the plan before any write.\n\n", strings.Join(excluded, ", "))
+			b.WriteString("// These provider slots have no accessor. Import one of their adapter\n// packages from internal/gggcli and ValidateCoreCLIPackages refuses the plan\n// before any write; use Boot instead.\n")
+			for _, slot := range sortedKeys(excluded) {
+				fmt.Fprintf(&b, "//   %s: %s\n", slot, excluded[slot])
+			}
+			b.WriteString("\n")
 		}
 		for _, slot := range accessible {
 			envAdapters := slotEnvAdapters[slot]

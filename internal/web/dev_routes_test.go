@@ -166,7 +166,7 @@ func productionServer(t *testing.T) *Server {
 	cfg, err := config.LoadFrom(func(k string) string { return env[k] })
 	require.NoError(t, err, "fixture must be a configuration production accepts")
 	require.True(t, cfg.Production(), "fixture must resolve to APP_ENV=production")
-	require.False(t, cfg.DevAuthBypass, "fixture must not carry the dev bypass")
+	require.False(t, cfg.BoolValue("DEV_AUTH_BYPASS"), "fixture must not carry the dev bypass")
 
 	ident, err := identityclerk.NewModule(
 		context.Background(),

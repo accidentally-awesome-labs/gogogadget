@@ -57,7 +57,7 @@ func TestLogoutDevBranchClearsCookie(t *testing.T) {
 
 func TestBillingPortalRedirectsWithMock(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.PolarAccessToken = "pol_test"
+		d.Config.Values["POLAR_ACCESS_TOKEN"] = "pol_test"
 		d.Billing = &billing.MockClient{PortalURL: "https://portal.example.test/session"}
 	})
 	seedMembership(t, s, "user_bp", "org_bp", "org:admin")

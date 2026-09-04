@@ -108,22 +108,35 @@ func matchBannedImport(raw string, seams map[string]string) (string, string) {
 // name an adapter package.
 const coreCLIPackagePrefix = "internal/gggcli/"
 
-// ValidateCoreCLIPackages refuses an adapter-package import anywhere under
-// internal/gggcli. The CLI reaches a selected adapter only through the
+// ValidateCoreCLIPackages refuses an adapter-owned package import anywhere
+// under internal/gggcli. The CLI reaches a selected adapter only through the
 // generated per-slot accessors in internal/modules, which are the sole thing
 // that names an adapter package; a direct import pins an unselected adapter
 // into every build, which is exactly what made a project that does not select
 // ggg/system/identity-clerk impossible to compile. The scan is
 // direct-import-only, which is the right shape here: the defect prevented IS a
 // direct import, and the generated accessor is the sanctioned indirection.
+//
+// Every package an adapter CLAIMS is banned, not only its constructor package.
+// An adapter's claims are exclusive and leave with it, so importing any of them
+// pins the adapter just as hard — internal/identity/clerkurl, the leaf the
+// generated config loader calls, is exactly such a package and would otherwise
+// have passed.
 func ValidateCoreCLIPackages(modules []Manifest, files map[string][]byte) error {
 	adapters := map[string]string{}
 	for _, module := range modules {
 		sys := module.Runtime.System
-		if sys == nil || sys.Adapter == nil || sys.Package == "" {
+		if sys == nil || sys.Adapter == nil {
 			continue
 		}
-		adapters[strings.Trim(sys.Package, "/")] = module.ID
+		if sys.Package != "" {
+			adapters[strings.Trim(sys.Package, "/")] = module.ID
+		}
+		for _, claimed := range module.Claims.Packages {
+			if trimmed := strings.Trim(claimed, "/"); trimmed != "" {
+				adapters[trimmed] = module.ID
+			}
+		}
 	}
 	if len(adapters) == 0 {
 		return nil

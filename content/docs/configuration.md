@@ -120,7 +120,12 @@ module that owns the key, and the parse is generated from those declarations:
 A module that does not declare a key reads it with `cfg.Value("KEY")` /
 `cfg.BoolValue("KEY")` rather than the typed field: the field belongs to the
 declaring module and leaves with it, while the key-shaped read still compiles
-and resolves to the empty value.
+and resolves to the empty value. That is a gate, not advice — the planner runs
+`ValidateConfigFieldOwnership` over the payload bytes before any write and
+refuses a typed read (or a `config.Config{…}` literal) from a module that
+neither declares the key nor requires the module that does. A reader that
+genuinely cannot work without the key should require the declaring module
+instead.
 
 ## Degradation, not crashes
 

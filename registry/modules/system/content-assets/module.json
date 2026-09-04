@@ -187,7 +187,7 @@
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
-        "sha256": "2abec1304ff1b4d7113c7af86627b013ebe274c3a712e6668b56f4af69e4ec10",
+        "sha256": "0c6fdf71d6873199a2da16bd6318d7feeda35377909532d260abc1d805f862f5",
         "rewrite_module": false,
         "contract": false
       },
@@ -227,7 +227,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "b0f4bc422f8cf7d82cf0ad98e39b9d371d0de20cbeb4e93f58b955d99970e192",
+        "sha256": "dd63d10cc6e4ee83fd6b8c2c5893bc0f76dc8545756c07ad306fafadd5934621",
         "rewrite_module": false,
         "contract": false
       },

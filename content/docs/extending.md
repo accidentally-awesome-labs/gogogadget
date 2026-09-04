@@ -334,7 +334,9 @@ The fields that carry weight:
   is generated from its own manifest and leaves when the adapter does, instead
   of being hand-written in `internal/config` where it would outlive removal.
   A module reading a key it does **not** declare must use `cfg.Value("KEY")` or
-  `cfg.BoolValue("KEY")`, never the typed field.
+  `cfg.BoolValue("KEY")`, never the typed field — `ValidateConfigFieldOwnership`
+  refuses the plan otherwise, and `ValidateDerivationPackages` refuses a
+  derivation whose package can reach `internal/config`.
 - **`locales`** — `{"en": {...}, "es": {...}}`, inline in the manifest. Every
   key must exist in every declared locale with matching format placeholders,
   and two modules may not own the same key. Generation refuses otherwise.

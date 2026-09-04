@@ -736,7 +736,7 @@
     },
     {
       "path": "registry/modules/page/dev-gallery/module.json",
-      "sha256": "ea7778b6a8458cdf45cb31b1b13322489bb8344e10e7890440de2f29bb9759d2"
+      "sha256": "2d8d1beb80022649ae7d7b5371d1b04de36fb6b770d8001acd59ae01070b2d22"
     },
     {
       "path": "registry/modules/page/docs-index/module.json",
@@ -792,7 +792,7 @@
     },
     {
       "path": "registry/modules/page/settings-billing/module.json",
-      "sha256": "8c74d3eee3189aa80b6d688090b9d939f4ceac35c9e24c4294fb485b32498176"
+      "sha256": "f0dfddc4e82d0730678855f33cdb308eef4fc646b8264749b19d5efb008fec8a"
     },
     {
       "path": "registry/modules/page/settings-notifications/module.json",
@@ -860,7 +860,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "72834f2c303519ab7f8dd4c3071b8df6d089ec25882213657083315de64c4601"
+      "sha256": "6768342fe2ad7b91e44dc3f4713b4f9ad977afc52987463058b78574cd094412"
     },
     {
       "path": "registry/modules/system/cache-memory/module.json",
@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "49e5a060325d39ef38d845429c8ac3619abc87bb474c520809bdfe3abe7b1c8f"
+      "sha256": "7f2ab68b6a58027f30e3266451e2b98122119b9f6367ebe0178fc963da4afc20"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "4d72a301dd8adeba1c6bff2ffd7fb98009f65401e89ba1587cbe6e6b79c51968"
+      "sha256": "98990a67754d0b04246211fe98cd272091f84a0b055a44de7172e87686de0c2c"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -948,7 +948,7 @@
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
-      "sha256": "54bed5108c656f97ed471933d8c571499d13cb523e5a83f3b444781b3fa35741"
+      "sha256": "b56fbdbd7c1c480db8ce0c8f6e6f898fd4072aaa1e7785fb1e2968756670929f"
     },
     {
       "path": "registry/modules/system/identity-session/module.json",
@@ -956,7 +956,7 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "1df0f1f62b8621afc4780fdab2c2f8cde67e6594c860bd8847441c6d2bf795cd"
+      "sha256": "5c0b58fcb0216cd9bd1ab88412a7a80f6c101925014713019d245b79fce06da7"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "6787ac846808e82c9d3f82263ed4063d52e535fb3fb95fc9b8cd41ce7811691a"
+      "sha256": "d2a68e9e087b6148c0c1f896252725b1488cb0587a6ddb75f48e6beedf2d243a"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "41166f63f19dacaa7e9ec7a2daf5d2f6505151cc41e4a901cd9864541ee8b15a"
+      "sha256": "da7178cb8d410759c84b2797d1ff97d61ffbfd83fb2eb7db19e8048f443e98dc"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "fc574910f7ed82e9db78aaa3fdefe0b56526f366400932f019ccd5a9208e06fd"
+      "sha256": "37de14ee72eb5daf90f39241609cf113ec59f42b619be3525fc376c12babd399"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1208,7 +1208,7 @@
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "54a0a3281350b273ac5f8ce5fcd0b5fc9f4064df9778cfa64f6902b7e3ffd803"
+      "sha256": "ed2d2da7fa4d8ca4971e22aaf14682bcf0a1930d8b3c40b6ef94dd8a09c0f415"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
@@ -1220,7 +1220,7 @@
     },
     {
       "path": "registry/modules/workflow/dev-session/module.json",
-      "sha256": "108a68e8fd2a3e19848f08f500d5505852560a09039fcb59b819104e841d5272"
+      "sha256": "97d0a3cfdfb7067f4b753a26eda20cc5cc16d7d3393a79213d729959185e089e"
     },
     {
       "path": "registry/modules/workflow/files/module.json",
@@ -1228,7 +1228,7 @@
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
-      "sha256": "9f5b445e8d579297d97d0c55a97c5be28a9d8b6a78accb76762ce1c3343ddabe"
+      "sha256": "635901de3e26512796a0a944dafb2b0b06e4031ba30a8fcd9314724ec07e17c5"
     },
     {
       "path": "registry/modules/workflow/impersonation/module.json",

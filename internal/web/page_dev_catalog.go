@@ -92,7 +92,9 @@ func (s *Server) handleDevScenario(w http.ResponseWriter, r *http.Request) {
 	layout := scenario.Layout
 	if scenarioNeedsSession(scenario) && identity.ClaimsFrom(r.Context()) == nil {
 		if r.URL.Query().Get("session") != "retried" {
-			s.setDevSessionCookie(w, "user_demo", "org_demo", "org:admin")
+			if !s.setDevSessionCookie(w, r, "user_demo", "org_demo", "org:admin") {
+				return
+			}
 			http.Redirect(w, r, scenarioRetryURL(r), http.StatusSeeOther)
 			return
 		}

@@ -82,21 +82,25 @@ type Processor struct {
 }
 
 // ProcessSubscription handles one verified subscription.* event.
-// Returning nil → 200; error → 500 so Polar retries. Unknown products are
-// logged and ACKed (200) so a stale product never wedges the endpoint.
+// Returning nil → 200; error → 500 so the provider retries. Unknown products
+// are logged and ACKed (200) so a stale product never wedges the endpoint.
+//
+// Provider is required rather than defaulted: it is written to
+// billing_accounts.provider, and a seam that guesses one adapter's name
+// attributes another adapter's rows to it.
 func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, sub SubscriptionPayload) error {
 	orgID := sub.OrgID()
 	provider := p.Provider
 	if provider == "" {
-		provider = "polar"
+		return fmt.Errorf("billing: subscription event carries no provider")
 	}
 	if orgID == "" {
-		p.Log.Warn("polar webhook: no org reference", "type", eventType, "sub", sub.ID)
+		p.Log.Warn("billing webhook: no org reference", "type", eventType, "sub", sub.ID)
 		return nil
 	}
 	productKey, ok := p.ProductPlans[sub.ProductID]
 	if !ok {
-		p.Log.Warn("polar webhook: unknown product id (ignored)", "product", sub.ProductID, "type", eventType)
+		p.Log.Warn("billing webhook: unknown product id (ignored)", "product", sub.ProductID, "type", eventType)
 		return nil
 	}
 
@@ -153,7 +157,7 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 
 	ownerEmail, err := p.ownerEmail(ctx, orgID)
 	if err != nil {
-		p.Log.Warn("polar webhook: owner lookup failed (emails skipped)", "org", orgID, "error", err)
+		p.Log.Warn("billing webhook: owner lookup failed (emails skipped)", "org", orgID, "error", err)
 		ownerEmail = ""
 	}
 
@@ -222,7 +226,7 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 		audit.Log(ctx, p.Q, orgID, "", "subscription.reactivated", map[string]any{"plan": productKey})
 
 	default:
-		p.Log.Info("polar webhook: unhandled event (ignored)", "type", eventType)
+		p.Log.Info("billing webhook: unhandled event (ignored)", "type", eventType)
 	}
 	return nil
 }

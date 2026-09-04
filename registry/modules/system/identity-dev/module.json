@@ -62,7 +62,7 @@
         "source": "internal/identity/devadapter/module.go",
         "target": "internal/identity/devadapter/module.go",
         "class": "go",
-        "sha256": "d30c944f4c110a3cd7aadaefe5f52243e7fba3c60abb2979ae132c139901b893",
+        "sha256": "7a0dfc999017e8e148e2982d15672c3c443b3dddb4bb547a87f85d13338f951e",
         "rewrite_module": true,
         "contract": true
       }

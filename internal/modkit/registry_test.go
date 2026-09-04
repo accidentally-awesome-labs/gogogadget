@@ -551,3 +551,99 @@ func TestValidateManifestEnforcesRefusalAndDerivationSemantics(t *testing.T) {
 		})
 	}
 }
+
+// scanManifest is an adapter or reader with exactly the fields the two config
+// scans look at.
+func scanManifest(id string, requires []string, adapter bool, env []EnvironmentVariable, targets ...string) Manifest {
+	m := Manifest{
+		ID: id, Kind: ModuleSystem, Environment: env,
+		Requires: make([]Requirement, 0, len(requires)),
+		Files:    make([]ManifestFile, 0, len(targets)),
+	}
+	for _, r := range requires {
+		m.Requires = append(m.Requires, Requirement{ID: r, Contract: ContractBounds{Min: 1, Max: 1}})
+	}
+	for _, t := range targets {
+		m.Files = append(m.Files, ManifestFile{Source: t, Target: t, Class: FileClassGo})
+	}
+	if adapter {
+		m.Runtime.System = &SystemContribution{Package: "internal/adapter", Adapter: &AdapterContribution{Slot: "ggg/slot"}}
+	}
+	return m
+}
+
+// The typed Config field belongs to the module that declares the key and
+// vanishes with it, so a reader that cannot guarantee the module is installed
+// must read by key. Without this scan the rule is prose: it was stated in the
+// docs and violated in the same range that stated it.
+func TestValidateConfigFieldOwnership(t *testing.T) {
+	adapter := scanManifest("ggg/system/hatch", nil, true,
+		[]EnvironmentVariable{{Key: "HATCH_BYPASS", Field: "HatchBypass", Type: EnvBool, Description: "d"}},
+		"internal/hatch/adapter.go")
+	read := []byte("package x\n\nfunc f(cfg C) bool { return cfg.HatchBypass }\n")
+	literal := []byte("package x\n\nimport \"c\"\n\nvar v = c.Config{HatchBypass: true}\n")
+	byKey := []byte("package x\n\nfunc f(cfg C) bool { return cfg.BoolValue(\"HATCH_BYPASS\") }\n")
+	other := []byte("package x\n\nfunc f(page P) bool { return page.HatchBypass }\n")
+
+	for name, tc := range map[string]struct {
+		reader  Manifest
+		content []byte
+		refuse  bool
+	}{
+		"a stranger reading the field":      {scanManifest("ggg/page/other", nil, false, nil, "internal/other/x.go"), read, true},
+		"a stranger naming it in a literal": {scanManifest("ggg/page/other", nil, false, nil, "internal/other/x.go"), literal, true},
+		"the same stranger reading by key":  {scanManifest("ggg/page/other", nil, false, nil, "internal/other/x.go"), byKey, false},
+		"a non-config receiver":             {scanManifest("ggg/page/other", nil, false, nil, "internal/other/x.go"), other, false},
+		"a module that requires the declarer": {
+			scanManifest("ggg/page/other", []string{"ggg/system/hatch"}, false, nil, "internal/other/x.go"), read, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			files := map[string][]byte{"internal/other/x.go": tc.content}
+			err := ValidateConfigFieldOwnership([]Manifest{adapter, tc.reader}, files)
+			if tc.refuse && err == nil {
+				t.Fatal("ValidateConfigFieldOwnership accepted a read that removal would break")
+			}
+			if !tc.refuse && err != nil {
+				t.Fatalf("ValidateConfigFieldOwnership refused a sound read: %v", err)
+			}
+		})
+	}
+
+	// The declaring module reads its own field freely; that is the whole point
+	// of owning it.
+	own := map[string][]byte{"internal/hatch/adapter.go": read}
+	if err := ValidateConfigFieldOwnership([]Manifest{adapter}, own); err != nil {
+		t.Fatalf("the declaring module was refused its own field: %v", err)
+	}
+}
+
+// A derivation runs inside the generated config loader, so its package must
+// not reach back. EnvironmentDerivation documents that; this is what makes it
+// true, and turns an import cycle in generated code into a manifest error.
+func TestValidateDerivationPackagesRefusesAReachBackToConfig(t *testing.T) {
+	declarer := scanManifest("ggg/system/hatch", nil, true,
+		[]EnvironmentVariable{{Key: "HATCH_ORIGIN", Field: "HatchOrigin", Type: EnvString, Description: "d",
+			Derivation: &EnvironmentDerivation{Package: "internal/hatch/origin", Function: "Origin", Inputs: []string{"APP_URL"}}}},
+		"internal/hatch/origin/origin.go")
+	modules := []Manifest{declarer}
+
+	leaf := map[string][]byte{"internal/hatch/origin/origin.go": []byte("package origin\n\nimport \"strings\"\n\nvar _ = strings.TrimSpace\n")}
+	if err := ValidateDerivationPackages(modules, leaf, "example.com/app"); err != nil {
+		t.Fatalf("a genuine leaf was refused: %v", err)
+	}
+
+	direct := map[string][]byte{"internal/hatch/origin/origin.go": []byte("package origin\n\nimport \"example.com/app/internal/config\"\n\nvar _ = config.Config{}\n")}
+	if err := ValidateDerivationPackages(modules, direct, "example.com/app"); err == nil {
+		t.Fatal("a derivation package importing internal/config was accepted")
+	}
+
+	// Transitive too: one hop is the shape a leaf actually acquires, by
+	// reaching for a helper that happens to read configuration.
+	indirect := map[string][]byte{
+		"internal/hatch/origin/origin.go": []byte("package origin\n\nimport \"example.com/app/internal/hatch/util\"\n\nvar _ = util.X\n"),
+		"internal/hatch/util/util.go":     []byte("package util\n\nimport \"example.com/app/internal/config\"\n\nvar X = config.Config{}\n"),
+	}
+	if err := ValidateDerivationPackages(modules, indirect, "example.com/app"); err == nil {
+		t.Fatal("a derivation package reaching internal/config through one hop was accepted")
+	}
+}

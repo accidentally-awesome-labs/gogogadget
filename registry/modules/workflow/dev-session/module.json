@@ -53,7 +53,7 @@
         "source": "internal/web/workflow_dev_session.go",
         "target": "internal/web/workflow_dev_session.go",
         "class": "go",
-        "sha256": "e06866b09b40709f11f9266ec527708fbedb7a5c83d19bf684443a7ce94fdee3",
+        "sha256": "8aaa0f8f80955801a08bc6f70b7eaf61419356c19027278b1146e63a398e3814",
         "rewrite_module": true,
         "contract": true
       },
@@ -61,7 +61,7 @@
         "source": "internal/web/workflow_dev_session_test.go",
         "target": "internal/web/workflow_dev_session_test.go",
         "class": "test",
-        "sha256": "51224a2081956ad73bff0c4ce3903e95a5213372a87fafd4f02e726f237e5912",
+        "sha256": "2934c8b00cb45abe85210c6783832bcd27dfde7e7c3c32d35c913867ef88388e",
         "rewrite_module": true,
         "contract": false
       }

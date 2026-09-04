@@ -232,7 +232,7 @@
         "source": "internal/web/public_routes_test.go",
         "target": "internal/web/public_routes_test.go",
         "class": "test",
-        "sha256": "9a00d8d61801b95b966494101e30961e29773993107aa7cc2f8a1a878061aa92",
+        "sha256": "1ad50fe696e8e0e7dec235da6bf5339857c131534782b183b15f182d3c942d92",
         "rewrite_module": true,
         "contract": false
       },
@@ -408,7 +408,7 @@
         "source": "internal/web/testhelpers_test.go",
         "target": "internal/web/testhelpers_test.go",
         "class": "test",
-        "sha256": "6d0f7bce159d5cfecc03ec419b507dc0bff18da709ea57d310320531b195dfe0",
+        "sha256": "583cbb48f24ba24a058a98fd5edb214956ed16499c418145b599c301f51650d2",
         "rewrite_module": true,
         "contract": false
       },

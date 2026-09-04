@@ -1232,6 +1232,12 @@ func validateEnvironmentDerivation(item EnvironmentVariable) error {
 	if item.Type != EnvString {
 		return fmt.Errorf("derivation requires a string declaration")
 	}
+	// A declared default already fills the key, so the generated `if x == ""`
+	// could never fire and the derivation would be dead data that reads as
+	// live behaviour.
+	if item.Default != "" {
+		return fmt.Errorf("derivation cannot coexist with a declared default")
+	}
 	if err := validateSafePath(d.Package); err != nil {
 		return fmt.Errorf("derivation package: %w", err)
 	}

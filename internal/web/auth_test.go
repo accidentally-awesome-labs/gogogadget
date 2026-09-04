@@ -134,7 +134,7 @@ func TestSettingsHideClerkLinksWhenAccountPortalIsUnconfigured(t *testing.T) {
 func TestRequireAuthWhenNoProviderIsSelected(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
-		d.Config.ClerkSecretKey = ""
+		d.Config.Values["CLERK_SECRET_KEY"] = ""
 	})
 	code, hdr, _ := serve(t, s, "GET", "/app/settings/account", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
@@ -279,7 +279,7 @@ func TestLoginRedirectRoutes(t *testing.T) {
 	nav := identitydev.Navigator{BaseURL: "https://accounts.example.test"}
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
-		d.Config.ClerkSecretKey = "sk_test_x"
+		d.Config.Values["CLERK_SECRET_KEY"] = "sk_test_x"
 		d.IdentityNavigator = nav
 	})
 	code, hdr, _ := serve(t, s, "GET", "/login", nil, nil)

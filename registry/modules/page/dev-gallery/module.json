@@ -72,7 +72,7 @@
         "source": "internal/web/dev_routes_test.go",
         "target": "internal/web/dev_routes_test.go",
         "class": "test",
-        "sha256": "f7c89c263d0df277922f0c63b50d227aecca5facedc4787e654cd3c97873896b",
+        "sha256": "52c3d6054cc2ccdef8d51b26bf5fec406d012b03588c917b758b6430aacd5611",
         "rewrite_module": true,
         "contract": false
       },
@@ -88,7 +88,7 @@
         "source": "internal/web/page_dev_catalog.go",
         "target": "internal/web/page_dev_catalog.go",
         "class": "go",
-        "sha256": "39e2e256dd4efa1622b306dfd50b8392611a3825308722b927dbc222833f80f1",
+        "sha256": "1026be7dbc29842d883e89fd7c3faf03b46a1e8e823ee279196c1abe4e2e746c",
         "rewrite_module": true,
         "contract": false
       },

@@ -53,9 +53,9 @@ func subPayload(eventType, subID, orgID, productID, status string, periodEnd tim
 func polarServer(t *testing.T, mutate func(*Deps)) *Server {
 	t.Helper()
 	return integrationServer(t, func(d *Deps) {
-		d.Config.PolarAccessToken = "polar_test"
-		d.Config.PolarWebhookSecret = testPolarWebhookSecret
-		d.Config.PolarServer = "sandbox"
+		d.Config.Values["POLAR_ACCESS_TOKEN"] = "polar_test"
+		d.Config.Values["POLAR_WEBHOOK_SECRET"] = testPolarWebhookSecret
+		d.Config.Values["POLAR_SERVER"] = "sandbox"
 		plans := billing.DefaultPlanCatalog().All()
 		plans[1].ProviderProductID, plans[2].ProviderProductID = "prod_pro", "prod_team"
 		d.BillingCatalog, _ = billing.NewPlanCatalog(plans)

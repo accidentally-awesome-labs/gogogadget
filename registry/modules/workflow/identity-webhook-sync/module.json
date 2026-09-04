@@ -66,7 +66,7 @@
         "source": "internal/web/webhook_bypass_test.go",
         "target": "internal/web/webhook_bypass_test.go",
         "class": "test",
-        "sha256": "abc28953d6dd7524e8c26e6cab33b192deb0902359d9653465c46314ab0151de",
+        "sha256": "070b356d35fa2f73390e263c1d08906ba01ff165f61a4d8742a226c12dab5b66",
         "rewrite_module": true,
         "contract": false
       }

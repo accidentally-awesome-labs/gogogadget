@@ -20,6 +20,18 @@ type OrganizationSubjectVerifier interface {
 	VerifyOrganizationSubject(context.Context, string) (*ProviderClaims, error)
 }
 
+// SyntheticSessionMinter is implemented by an identity adapter that can mint
+// a session token for a subject with no upstream account. It is deliberately
+// optional and deliberately not a slot capability: a slot's adapters must
+// provide exactly the slot's capability set, and whether synthetic sessions
+// exist is a property of the adapter selected for one environment, not of the
+// seam. A zero-account dev surface asks the selected verifier for one through
+// this interface instead of hardcoding a provider's token shape, and refuses
+// loudly when the selected adapter does not offer it.
+type SyntheticSessionMinter interface {
+	MintSession(userSubject, orgSubject, role string) (string, error)
+}
+
 type Navigator interface {
 	LoginURL(returnTo string) string
 	SignupURL(returnTo string) string

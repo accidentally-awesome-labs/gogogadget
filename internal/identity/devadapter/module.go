@@ -59,6 +59,20 @@ func (Verifier) Verify(_ context.Context, token string) (*identity.ProviderClaim
 	return &identity.ProviderClaims{Provider: Provider, UserSubject: parts[1], OrgSubject: parts[2], OrgRole: parts[3], OrgSlug: parts[2]}, nil
 }
 
+// MintSession is the inverse of Verify: it is the only place the synthetic
+// token's shape is written, so the dev login never spells `e2e:` itself.
+func (Verifier) MintSession(userSubject, orgSubject, role string) (string, error) {
+	if userSubject == "" {
+		return "", fmt.Errorf("%w: a synthetic session needs a user subject", identity.ErrInvalidToken)
+	}
+	// Verify splits on the first three colons, so the role is the remainder
+	// and may legitimately contain one ("org:admin"); the two subjects may not.
+	if strings.ContainsAny(userSubject+orgSubject, ":") {
+		return "", fmt.Errorf("%w: a synthetic session subject may not contain ':'", identity.ErrInvalidToken)
+	}
+	return "e2e:" + userSubject + ":" + orgSubject + ":" + role, nil
+}
+
 func (Verifier) VerifySubject(_ context.Context, subject string) (*identity.ProviderClaims, error) {
 	if subject == "" {
 		return nil, identity.ErrInvalidToken

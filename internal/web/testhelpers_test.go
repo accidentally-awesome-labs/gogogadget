@@ -59,8 +59,8 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 			"CLERK_PORTAL_URL":       "https://accounts.example.test",
 			"CLERK_FRONTEND_API_URL": "https://*.clerk.accounts.dev",
 			"DEV_AUTH_BYPASS":        "true",
+			"CLERK_WEBHOOK_SECRET":   testWebhookSecret,
 		},
-		ClerkWebhookSecret: testWebhookSecret,
 	}
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",

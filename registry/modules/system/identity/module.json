@@ -48,7 +48,7 @@
         "source": "internal/identity/contracts.go",
         "target": "internal/identity/contracts.go",
         "class": "go",
-        "sha256": "bcf1e6b21c9f82bb0a97c9a86c0221db8967b0792cc656c80e51f44c1c97a2d8",
+        "sha256": "911a3ea78fb79f2718f78db694ad03725eeb074b34bd1ec1ebc67a6c9c5e1684",
         "rewrite_module": true,
         "contract": true
       },
