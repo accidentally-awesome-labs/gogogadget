@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "e9fb11195d44bbc86556a4a1e88fbfedb6ec76ec7c3d4008f56cf8c5257e0a80"
+      "sha256": "96478eefef63d938b0f543a58c747fde330cb7a7646023e1321cd7d91fda0cae"
     },
     {
       "path": "registry/modules/system/analytics/module.json",

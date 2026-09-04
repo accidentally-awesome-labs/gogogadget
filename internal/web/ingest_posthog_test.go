@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -129,10 +130,22 @@ func TestPostHogIngestUnparseableEndpointAnswers503(t *testing.T) {
 // tighter-than-status-quo cap would have introduced for session recordings,
 // which is why the declared value is the prior ceiling.
 func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
-	var upstreamBytes int
+	// The upstream handler runs on the server's goroutine while the test reads
+	// the count on its own, and for an over-cap request the proxy gives up
+	// before that handler returns — so the count must be synchronized or the
+	// read is a data race that only -race reports.
+	var mu sync.Mutex
+	upstreamBytes := 0
+	received := func() int {
+		mu.Lock()
+		defer mu.Unlock()
+		return upstreamBytes
+	}
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		n, _ := io.Copy(io.Discard, r.Body)
+		mu.Lock()
 		upstreamBytes = int(n)
+		mu.Unlock()
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer upstream.Close()
@@ -142,13 +155,14 @@ func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
 	oversized := bytes.Repeat([]byte("x"), int(globalMaxBodyBytes)+1024)
 	code, _, _ := serve(t, s, "POST", "/ingest/e/", oversized, nil)
 	assert.NotEqual(t, http.StatusOK, code, "a body over the cap must not proxy successfully")
-	assert.Less(t, upstreamBytes, len(oversized),
+	assert.Less(t, received(), len(oversized),
 		"the upstream must never receive more than the cap allows")
 
 	// And a body under the cap still goes through untouched, so the cap is a
-	// ceiling rather than a throttle.
+	// ceiling rather than a throttle. The proxy returns only after the upstream
+	// handler has responded, so this read observes that handler's write.
 	sized := bytes.Repeat([]byte("y"), 512<<10)
 	code, _, _ = serve(t, s, "POST", "/ingest/e/", sized, nil)
 	assert.Equal(t, http.StatusOK, code)
-	assert.Equal(t, len(sized), upstreamBytes)
+	assert.Equal(t, len(sized), received())
 }
