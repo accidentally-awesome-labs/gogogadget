@@ -12,6 +12,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -169,9 +170,9 @@ func TestInvalidTypeDeclarationIsRefused(t *testing.T) {
 		Config: &config.Config{Env: "test", AppURL: "http://localhost:18080"},
 		Log:    testLogger(), Docs: &content.Docs{},
 		ContentTypes: []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}},
-		Verifier:     identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
-		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
-		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		Verifier:     identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
+		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
+		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
 		SessionLoader: testSessionLoader{},
 	})

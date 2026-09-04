@@ -32,16 +32,61 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/clerk/clerk-sdk-go/v2",
+          "version": "v2.7.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "github.com/svix/svix-webhooks",
+          "version": "v1.99.1"
+        }
+      ],
       "tools": [],
       "containers": []
     },
     "files": [
       {
+        "source": "internal/identity/clerk/clerk.go",
+        "target": "internal/identity/clerk/clerk.go",
+        "class": "go",
+        "sha256": "20681c191ecc6fc92d136f2e7fef2f9c13c1dcca533435c54b0980b16888a836",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/clerk/contract_test.go",
+        "target": "internal/identity/clerk/contract_test.go",
+        "class": "test",
+        "sha256": "9dd09f9be408fd2932a20e9718c6255e1d76ac159e0985b65344f4fdcee71e48",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/identity/clerk/event.go",
+        "target": "internal/identity/clerk/event.go",
+        "class": "go",
+        "sha256": "d6d5fddf51b4dff5bc63d714be5defa61836e78d5077af3819a1f60f6276c10f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/identity/clerk/module.go",
         "target": "internal/identity/clerk/module.go",
         "class": "go",
-        "sha256": "95541e42215db1a76705f02ebe285786b3ed6e2b457604955b87a825a87b386a",
+        "sha256": "70a8671e5d10190e8314df30517d9ae61ca777438738c23f9aad8e93b034763f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/clerk/webhook.go",
+        "target": "internal/identity/clerk/webhook.go",
+        "class": "go",
+        "sha256": "cb46a2cb1367c78e2c8a872aa22666d0fafacf754c81f851c0730c95cf027dbf",
         "rewrite_module": true,
         "contract": true
       }

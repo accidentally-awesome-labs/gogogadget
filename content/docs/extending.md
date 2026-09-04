@@ -710,15 +710,21 @@ is a boot error naming the collision, not a plan that silently shadows another.
 
 Unknown events are already ACKed (200 + log), so this is purely additive.
 
-- **Clerk** — a parser for the payload shape in `internal/identity/sync.go`,
-  then a `case` in `processClerkEvent`
+- **Identity** — a parser for the provider's payload shape in the adapter that
+  owns it (`internal/identity/clerk/event.go` for Clerk,
+  `internal/identity/devadapter/module.go` for the local envelope), mapping it
+  onto `identity.Event`; then a `case` in `processIdentityEvent`
   (`internal/web/handlers_webhooks.go`, owned by
-  `ggg/workflow/identity-webhook-sync`). Test with the `signSvix` fixture, which
-  emits real `svix-*` headers.
-- **Polar** — a `case` in `Processor.ProcessSubscription`
+  `ggg/workflow/identity-webhook-sync`). The receiver is provider-neutral, so
+  test the mapping in the adapter's own suite — the Clerk suite's `signSvix`
+  fixture emits real `svix-*` headers — and the receiver itself with the local
+  envelope.
+- **Billing** — a `case` in `Processor.ProcessSubscription`
   (`internal/billing/webhook.go`), reached from
-  `internal/web/workflow_billing_webhook.go`. Test with `signStandard`, which
-  emits real `webhook-*` headers.
+  `internal/web/workflow_billing_webhook.go`. Provider signature verification
+  and payload shape live in the adapter
+  (`internal/billing/polar/webhook.go`); test it with that suite's
+  `signStandard`, which emits real `webhook-*` headers.
 
 Idempotency (`webhook_events`) and the 400/500 retry semantics apply
 automatically. Signature verification is not optional; the two header families

@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -20,7 +19,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	"github.com/gogogadget/gogogadget/internal/identity"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
@@ -28,7 +27,6 @@ import (
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	svix "github.com/svix/svix-webhooks/go"
 )
 
 // testWebhookSecret is the fixture secret for webhook test suites.
@@ -60,19 +58,16 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	}
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
-		Docs: &content.Docs{}, Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
-		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{BaseURL: cfg.AppURL},
-		IdentityWebhook: identity.DevWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
+		Docs: &content.Docs{}, Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
+		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{BaseURL: cfg.AppURL},
+		IdentityWebhook: identitydev.Webhook{}, BillingWebhook: billinglocal.LocalWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
 		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},
 		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
-		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}, AdminEmail: cfg.AdminEmail}),
+		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identitydev.Verifier{}, Fetch: identitydev.UserFetcher{}, AdminEmail: cfg.AdminEmail}),
 	}
 	if mutate != nil {
 		mutate(&deps)
-	}
-	if !deps.Config.DevAuthBypass {
-		deps.IdentityNavigator = identity.PortalNavigator{BaseURL: deps.Config.ClerkPortalURL}
 	}
 	if loader, ok := deps.SessionLoader.(*identitysession.SessionLoader); ok {
 		loader.AdminEmail = deps.Config.AdminEmail
@@ -114,21 +109,13 @@ func publishedAt(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 
-// signSvix emits the exact headers a Clerk (Svix) delivery carries.
-func signSvix(t *testing.T, secret, msgID string, payload []byte) http.Header {
-	t.Helper()
-	wh, err := svix.NewWebhook(secret)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sig, err := wh.Sign(msgID, time.Now(), payload)
-	if err != nil {
-		t.Fatal(err)
-	}
+// identityDelivery is the header set the selected identity adapter's webhook
+// reads for its delivery id. The receiver is provider-neutral, so its
+// fixtures come from the adapter the test harness selects — the dev adapter's
+// unsigned envelope — never from a hosted provider's signature scheme.
+func identityDelivery(msgID string) http.Header {
 	h := http.Header{}
-	h.Set("svix-id", msgID)
-	h.Set("svix-timestamp", fmt.Sprint(time.Now().Unix()))
-	h.Set("svix-signature", sig)
+	h.Set("id", msgID)
 	return h
 }
 

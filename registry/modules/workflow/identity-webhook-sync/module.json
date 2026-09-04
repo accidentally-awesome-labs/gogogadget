@@ -40,10 +40,6 @@
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
-        },
-        {
-          "module": "github.com/svix/svix-webhooks",
-          "version": "v1.99.1"
         }
       ],
       "tools": [],
@@ -51,18 +47,18 @@
     },
     "files": [
       {
-        "source": "internal/web/clerk_webhook_test.go",
-        "target": "internal/web/clerk_webhook_test.go",
-        "class": "test",
-        "sha256": "3a88012a115f5a21c318c9e481baf34bb5452a82e30c8e22589ed8aa35f83001",
+        "source": "internal/web/handlers_webhooks.go",
+        "target": "internal/web/handlers_webhooks.go",
+        "class": "go",
+        "sha256": "df9d5bd0e87604109070c26fa9a2c101d9826c32d48eb9dd7bb0692587897fce",
         "rewrite_module": true,
         "contract": false
       },
       {
-        "source": "internal/web/handlers_webhooks.go",
-        "target": "internal/web/handlers_webhooks.go",
-        "class": "go",
-        "sha256": "c9545302ea572595a3dc3d6dc81e09b189416b51f245a2babca28381a004dc30",
+        "source": "internal/web/identity_webhook_test.go",
+        "target": "internal/web/identity_webhook_test.go",
+        "class": "test",
+        "sha256": "1630614a0b85890bb2e25fc01cd1c90907732cc609996c5235c82a89858c23f2",
         "rewrite_module": true,
         "contract": false
       },
@@ -70,7 +66,7 @@
         "source": "internal/web/webhook_bypass_test.go",
         "target": "internal/web/webhook_bypass_test.go",
         "class": "test",
-        "sha256": "e2c4dfc75f1a68f524252fd6ee5f595c50c2f1dfaf75b3b26b604f33a695d40a",
+        "sha256": "abc28953d6dd7524e8c26e6cab33b192deb0902359d9653465c46314ab0151de",
         "rewrite_module": true,
         "contract": false
       }

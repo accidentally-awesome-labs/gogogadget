@@ -26,6 +26,9 @@ type Navigator interface {
 	AccountURL() string
 }
 
+// Webhook is the whole provider-facing webhook contract: an adapter owns its
+// signature header family and payload shape, and hands back one neutral
+// event. No generic handler ever sees a provider header or payload field.
 type Webhook interface {
 	Verify(context.Context, []byte, http.Header) (Event, error)
 }
@@ -39,14 +42,3 @@ type Event struct {
 type UserEvent struct{ Subject, Email, Name, AvatarURL string }
 type OrganizationEvent struct{ Subject, Name, Slug, ImageURL string }
 type MembershipEvent struct{ OrganizationSubject, UserSubject, Role string }
-
-// LocalNavigator is useful for development and deterministic tests.
-type LocalNavigator struct{ BaseURL string }
-
-func (n LocalNavigator) LoginURL(returnTo string) string {
-	return n.BaseURL + "/login?return_to=" + returnTo
-}
-func (n LocalNavigator) SignupURL(returnTo string) string {
-	return n.BaseURL + "/signup?return_to=" + returnTo
-}
-func (n LocalNavigator) AccountURL() string { return n.BaseURL + "/account" }

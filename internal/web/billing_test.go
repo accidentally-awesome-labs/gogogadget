@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
+	billingpolar "github.com/gogogadget/gogogadget/internal/billing/polar"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
 	standardwebhooks "github.com/standard-webhooks/standard-webhooks/libraries/go"
@@ -58,7 +59,7 @@ func polarServer(t *testing.T, mutate func(*Deps)) *Server {
 		plans := billing.DefaultPlanCatalog().All()
 		plans[1].ProviderProductID, plans[2].ProviderProductID = "prod_pro", "prod_team"
 		d.BillingCatalog, _ = billing.NewPlanCatalog(plans)
-		d.BillingWebhook = billing.PolarWebhook{Secret: testPolarWebhookSecret}
+		d.BillingWebhook = billingpolar.Webhook{Secret: testPolarWebhookSecret}
 		if mutate != nil {
 			mutate(d)
 		}

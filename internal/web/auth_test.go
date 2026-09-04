@@ -9,6 +9,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -263,27 +264,33 @@ func TestLazyOrgSync(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
 	// A later organization.created webhook corrects the placeholder name.
-	payload := []byte(`{"type": "organization.created", "data": {"id": "org_lazy", "name": "Real Name", "slug": "org_lazy"}}`)
-	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, "msg_lazy1", payload))
+	payload := orgPayload("organization.created", "org_lazy", "Real Name", "org_lazy")
+	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, identityDelivery("msg_lazy1"))
 	require.Equal(t, http.StatusOK, code)
 	org, _ = s.q.GetOrgByID(t.Context(), mapping.OrgID)
 	assert.Equal(t, "Real Name", org.Name)
 }
 
+// With the dev bypass off, /login, /signup and /logout hand off to whatever
+// the selected identity adapter's Navigator returns. The handler's job is the
+// hand-off; each provider's URL shape is pinned by its own adapter suite
+// (identity/clerk's TestNavigatorContract and the shared Navigator contract).
 func TestLoginRedirectRoutes(t *testing.T) {
+	nav := identitydev.Navigator{BaseURL: "https://accounts.example.test"}
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.DevAuthBypass = false
 		d.Config.ClerkSecretKey = "sk_test_x"
+		d.IdentityNavigator = nav
 	})
 	code, hdr, _ := serve(t, s, "GET", "/login", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "https://accounts.example.test/sign-in?redirect_url=http://localhost:18080/?after-auth=1", hdr.Get("Location"))
+	assert.Equal(t, nav.LoginURL("http://localhost:18080/?after-auth=1"), hdr.Get("Location"))
 
 	code, hdr, _ = serve(t, s, "GET", "/signup", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Contains(t, hdr.Get("Location"), "/sign-up")
+	assert.Equal(t, nav.SignupURL(""), hdr.Get("Location"))
 
 	code, hdr, _ = serve(t, s, "GET", "/logout", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Contains(t, hdr.Get("Location"), "/sign-out")
+	assert.Equal(t, nav.AccountURL(), hdr.Get("Location"))
 }

@@ -24,10 +24,6 @@
           "version": "v5.10.0"
         },
         {
-          "module": "github.com/standard-webhooks/standard-webhooks/libraries",
-          "version": "v0.0.1"
-        },
-        {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
@@ -61,10 +57,18 @@
         "contract": true
       },
       {
+        "source": "internal/billing/contract/contract.go",
+        "target": "internal/billing/contract/contract.go",
+        "class": "go",
+        "sha256": "38018190e7607007dc3a174e56187e73076a40a16d09c0c6c1d6edfb7d265522",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/billing/contract_test.go",
         "target": "internal/billing/contract_test.go",
         "class": "test",
-        "sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+        "sha256": "2d19fbcdd113a97c54e4ed0189a07c9ad25345bc6fef6d3deca35c1ea022b562",
         "rewrite_module": true,
         "contract": false
       },
@@ -129,30 +133,6 @@
         "target": "internal/billing/plans.go",
         "class": "go",
         "sha256": "573bebebf008382692b6e47c0bd19095038514aebba0c88b4f6737f21e247532",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/billing/polar.go",
-        "target": "internal/billing/polar.go",
-        "class": "go",
-        "sha256": "b72db1d7642ffbe15341bc6bb31e35217b5dfd743904413ff78638715e6660c4",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/billing/polar_test.go",
-        "target": "internal/billing/polar_test.go",
-        "class": "test",
-        "sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/billing/polar_webhook.go",
-        "target": "internal/billing/polar_webhook.go",
-        "class": "go",
-        "sha256": "640807b02a2989dc9da4f2f77e3ad4456b88fa1b751c97859e1c2741a57ae92f",
         "rewrite_module": true,
         "contract": true
       },

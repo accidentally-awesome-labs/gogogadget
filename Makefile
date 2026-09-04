@@ -73,7 +73,7 @@ services-down: $(GGG)
 # Every trust-boundary fuzz target runs in this one gate: a target no gate
 # invokes is an unfuzzed parser.
 fuzz:
-	go test -run=^$$ -fuzz=FuzzFakeVerifier -fuzztime=$(FUZZTIME) ./internal/identity/
+	go test -run=^$$ -fuzz=FuzzVerifier -fuzztime=$(FUZZTIME) ./internal/identity/devadapter/
 	go test -run=^$$ -fuzz=FuzzSanitizeFilename -fuzztime=$(FUZZTIME) ./internal/mail/dev/
 
 e2e-ui:

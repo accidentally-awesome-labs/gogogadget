@@ -32,16 +32,57 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/standard-webhooks/standard-webhooks/libraries",
+          "version": "v0.0.1"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": [],
       "containers": []
     },
     "files": [
       {
+        "source": "internal/billing/polar/client.go",
+        "target": "internal/billing/polar/client.go",
+        "class": "go",
+        "sha256": "0b034556e12789bfc4d2f0602fc29e9070591203e9109550ae2a6fee7f1fd4b5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/polar/client_test.go",
+        "target": "internal/billing/polar/client_test.go",
+        "class": "test",
+        "sha256": "c007bfea01cb97a6f8ab7ba5dcd5a81a233eeb6b237838d8be5834904f205d17",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/polar/contract_test.go",
+        "target": "internal/billing/polar/contract_test.go",
+        "class": "test",
+        "sha256": "a690455181dc8ca5f3ed77335cd99c8dcc15c94a0d2b01b4a6132874aba469be",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/billing/polar/module.go",
         "target": "internal/billing/polar/module.go",
         "class": "go",
-        "sha256": "b25324eeeda42a1c65e56e8749b243a3e6c126b5beed661741b335a7bb8871ab",
+        "sha256": "6f939a2f7839c649046c730e95164a60cfa1798d0e38e93e4bac414cccd3a044",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/polar/webhook.go",
+        "target": "internal/billing/polar/webhook.go",
+        "class": "go",
+        "sha256": "92be9bfeff5bca537876884788b8a7300511a3f45e0bb94b1a7819a1808b0650",
         "rewrite_module": true,
         "contract": true
       }

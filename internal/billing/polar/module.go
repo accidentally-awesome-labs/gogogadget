@@ -1,4 +1,6 @@
-// Package polar implements the hosted Polar billing adapter boundary.
+// Package polar implements the hosted Polar billing adapter. It is the only
+// package in the tree that speaks the Polar REST API or the Standard Webhooks
+// verification library; the billing seam holds contracts alone.
 package polar
 
 import (
@@ -44,5 +46,9 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Module{Client: billing.NewPolarClient(d.Config.PolarAccessToken, d.Config.PolarServer), Catalog: catalog, Webhook: billing.PolarWebhook{Secret: d.Config.PolarWebhookSecret}}, nil
+	return &Module{
+		Client:  NewClient(d.Config.PolarAccessToken, d.Config.PolarServer),
+		Catalog: catalog,
+		Webhook: Webhook{Secret: d.Config.PolarWebhookSecret},
+	}, nil
 }

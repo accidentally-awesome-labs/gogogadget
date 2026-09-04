@@ -20,38 +20,14 @@
     "dependencies": {
       "go": [
         {
-          "module": "github.com/clerk/clerk-sdk-go/v2",
-          "version": "v2.7.0"
-        },
-        {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
-        },
-        {
-          "module": "github.com/svix/svix-webhooks",
-          "version": "v1.99.1"
         }
       ],
       "tools": [],
       "containers": []
     },
     "files": [
-      {
-        "source": "internal/identity/clerk_event.go",
-        "target": "internal/identity/clerk_event.go",
-        "class": "go",
-        "sha256": "87b529837378cfee970f59ca45c4995d3c295268b34ef18774513b47eef6045e",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/clerk_webhook.go",
-        "target": "internal/identity/clerk_webhook.go",
-        "class": "go",
-        "sha256": "a2c6d546348da060c42b9673df41d44e5ca194e0d1371a266f45c4d2b5647794",
-        "rewrite_module": true,
-        "contract": true
-      },
       {
         "source": "internal/identity/context.go",
         "target": "internal/identity/context.go",
@@ -61,10 +37,10 @@
         "contract": true
       },
       {
-        "source": "internal/identity/contract_test.go",
-        "target": "internal/identity/contract_test.go",
-        "class": "test",
-        "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+        "source": "internal/identity/contract/contract.go",
+        "target": "internal/identity/contract/contract.go",
+        "class": "go",
+        "sha256": "641e9e586f17f3a1d88f6de5cb2160ddcd54e6d1c8c34ba675f0b6527a456fd3",
         "rewrite_module": true,
         "contract": false
       },
@@ -72,7 +48,7 @@
         "source": "internal/identity/contracts.go",
         "target": "internal/identity/contracts.go",
         "class": "go",
-        "sha256": "68c3c2c5c7596242b5cac27aecac19fdbd325fd105f8d3a190e8c8c23cc16785",
+        "sha256": "bcf1e6b21c9f82bb0a97c9a86c0221db8967b0792cc656c80e51f44c1c97a2d8",
         "rewrite_module": true,
         "contract": true
       },
@@ -80,7 +56,7 @@
         "source": "internal/identity/deleter.go",
         "target": "internal/identity/deleter.go",
         "class": "go",
-        "sha256": "7a28751c90509f5df219a2e4dab73cc6c3461b4d4b61468221c16b832c7fd32e",
+        "sha256": "ec9227fe453c66197b12df799d830692d198f2ba51f1d022d79b59d43599314e",
         "rewrite_module": true,
         "contract": true
       },
@@ -88,17 +64,9 @@
         "source": "internal/identity/fetcher.go",
         "target": "internal/identity/fetcher.go",
         "class": "go",
-        "sha256": "deb5144f2c826a52a81cbfbd927c1a8820ab1b3ce9671382eb18ec8edb86d09d",
+        "sha256": "4bda1d2a1a9f6824631d69b01e3eb79fd948d5740f706ecb343ff8be4ea8f781",
         "rewrite_module": true,
         "contract": true
-      },
-      {
-        "source": "internal/identity/fuzz_test.go",
-        "target": "internal/identity/fuzz_test.go",
-        "class": "test",
-        "sha256": "a3d527e3c4904abd6132e9a064f85dafab7848bdf6dcfdcd83b5c00a98153b34",
-        "rewrite_module": true,
-        "contract": false
       },
       {
         "source": "internal/identity/module.go",
@@ -112,23 +80,7 @@
         "source": "internal/identity/module_test.go",
         "target": "internal/identity/module_test.go",
         "class": "test",
-        "sha256": "a3c6a8bf4bcc4167154a308f2df06c16f5cfd20b0ef6af81ac455770747c6f45",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/navigator.go",
-        "target": "internal/identity/navigator.go",
-        "class": "go",
-        "sha256": "193a322a44bf91c459a63a601f339a07a76aae112bfc6934815a8ddecff14c63",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/sync.go",
-        "target": "internal/identity/sync.go",
-        "class": "go",
-        "sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+        "sha256": "d26afced63c3d21ec6c08952c41c2672970df5082aa0c10913291f50276c287c",
         "rewrite_module": true,
         "contract": false
       },
@@ -136,17 +88,9 @@
         "source": "internal/identity/verifier.go",
         "target": "internal/identity/verifier.go",
         "class": "go",
-        "sha256": "3746e42a62499f263f7a407e0122669a09f9ffa216e8c38f74a32069c0c21977",
+        "sha256": "57dcaeca3794913496031c718805c1f4c20ebf058c1b26f326a6206a544b8b09",
         "rewrite_module": true,
         "contract": true
-      },
-      {
-        "source": "internal/identity/verifier_test.go",
-        "target": "internal/identity/verifier_test.go",
-        "class": "test",
-        "sha256": "a1241a38100f350de765ea05532bd46b32648acf971d0be9e9e5a7cbf47f0fd7",
-        "rewrite_module": true,
-        "contract": false
       },
       {
         "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",

@@ -17,7 +17,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	"github.com/gogogadget/gogogadget/internal/identity"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
@@ -49,9 +49,9 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 		Config: &cfg, Log: log, Version: "test",
 		Docs: &content.Docs{}, Storage: storagefs.NewDevStore(t.TempDir()),
 		Flags: flags.NewDBEvaluator(nil, 30*time.Second), Reporter: observability.NoopReporter{},
-		Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
-		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
-		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
+		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
+		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
 		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
 		SessionLoader: testSessionLoader{},

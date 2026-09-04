@@ -1,18 +1,19 @@
-package identity
+package identitydev
 
 import (
 	"context"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/stretchr/testify/assert"
 )
 
-// FuzzFakeVerifier exercises the e2e token parser with arbitrary input.
+// FuzzVerifier exercises the e2e token parser with arbitrary input.
 // Invariants: Verify never panics; failures are always ErrInvalidToken; on
 // success the returned claims round-trip exactly the token parts (and OrgSlug
-// mirrors OrgID, per the FakeVerifier contract).
-func FuzzFakeVerifier(f *testing.F) {
-	// Seeds from TestFakeVerifierParsesE2ETokens (valid + rejection cases).
+// mirrors the org subject, per the dev adapter contract).
+func FuzzVerifier(f *testing.F) {
+	// Seeds from TestVerifierParsesE2ETokens (valid + rejection cases).
 	for _, tok := range []string{
 		"e2e:user_free:org_free:org:member",
 		"e2e:user_noorg::",
@@ -30,12 +31,12 @@ func FuzzFakeVerifier(f *testing.F) {
 		f.Add(tok)
 	}
 
-	v := FakeVerifier{}
+	v := Verifier{}
 	ctx := context.Background()
 	f.Fuzz(func(t *testing.T, token string) {
 		claims, err := v.Verify(ctx, token)
 		if err != nil {
-			assert.ErrorIs(t, err, ErrInvalidToken, "token %q", token)
+			assert.ErrorIs(t, err, identity.ErrInvalidToken, "token %q", token)
 			return
 		}
 		// Success: claims must round-trip the token parts exactly.

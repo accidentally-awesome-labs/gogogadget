@@ -5,22 +5,26 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// In bypass mode with no webhook secret configured, unsigned fixtures are
-// trusted (the fresh-clone zero-account path). Never possible in production —
-// DEV_AUTH_BYPASS is boot-refused there.
-func TestClerkWebhookBypassWithoutSecret(t *testing.T) {
+// With the dev adapter selected, unsigned fixtures are trusted (the
+// fresh-clone zero-account path) and no provider secret is consulted at all.
+// Never possible in production: the dev adapter is a development/test target
+// and DEV_AUTH_BYPASS is boot-refused there.
+//
+// The mirror-image case — a hosted adapter with no webhook secret refusing
+// the same delivery — belongs to the adapter, and is pinned by
+// identity/clerk's TestWebhookRefusesWithoutSecret. This receiver has no
+// bypass branch of its own: it asks the selected adapter and reports what it
+// says.
+func TestIdentityWebhookAcceptsUnsignedDevDelivery(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) { d.Config.ClerkWebhookSecret = "" })
 	ctx := t.Context()
 
-	payload := userCreatedPayload("user_ns1", "em_1", "ns1@example.com", "No", "Secret")
-	h := http.Header{}
-	h.Set("svix-id", "msg_ns1")
-	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)
+	payload := userCreatedPayload("user_ns1", "ns1@example.com", "No Secret")
+	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, identityDelivery("msg_ns1"))
 	require.Equal(t, http.StatusOK, code)
 
 	mapping, err := s.q.GetIdentitySubject(ctx, sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_ns1"})
@@ -33,20 +37,4 @@ func TestClerkWebhookBypassWithoutSecret(t *testing.T) {
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM jobs WHERE kind='email.welcome'`).Scan(&n))
 	_ = s.q.DeleteUser(ctx, mapping.UserID)
-
-}
-
-// Without bypass and without a secret, the endpoint refuses.
-func TestClerkWebhookUnconfiguredRefuses(t *testing.T) {
-	s := integrationServer(t, func(d *Deps) {
-		d.Config.ClerkWebhookSecret = ""
-		d.Config.DevAuthBypass = false
-		d.Config.ClerkSecretKey = "sk_test_x"
-		d.IdentityWebhook = identity.ClerkWebhook{}
-	})
-	payload := userCreatedPayload("user_ns2", "em_1", "ns2@example.com", "No", "Secret")
-	h := http.Header{}
-	h.Set("svix-id", "msg_ns2")
-	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)
-	assert.Equal(t, http.StatusBadRequest, code)
 }

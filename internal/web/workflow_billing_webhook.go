@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
-// POST /webhooks/polar. Signature parsing belongs to the selected billing
-// adapter; this handler only records idempotency and dispatches neutral events.
+// POST /webhooks/polar — the billing provider's receiver. Signature
+// verification, header family and payload shape belong to the selected
+// billing adapter; this handler only records idempotency on the adapter's
+// delivery id and dispatches neutral events.
 func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -27,14 +29,11 @@ func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "local billing events require authenticated confirmation", http.StatusForbidden)
 		return
 	}
-	msgID := evt.ID
-	if msgID == "" {
-		msgID = r.Header.Get("webhook-id")
-	}
-	if msgID == "" {
+	if evt.ID == "" {
 		http.Error(w, "missing webhook id", http.StatusBadRequest)
 		return
 	}
+	msgID := evt.ID
 	ctx := r.Context()
 	if _, err = s.q.InsertWebhookEvent(ctx, sqlc.InsertWebhookEventParams{ID: msgID, Provider: evt.Provider, EventType: evt.Type}); errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(http.StatusOK)

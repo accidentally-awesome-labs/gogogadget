@@ -32,16 +32,37 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": [],
       "containers": []
     },
     "files": [
       {
+        "source": "internal/identity/devadapter/contract_test.go",
+        "target": "internal/identity/devadapter/contract_test.go",
+        "class": "test",
+        "sha256": "58935a4457b6adc489af3b44c93d5291fa512204fabced197483de21fee1ed2a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/identity/devadapter/fuzz_test.go",
+        "target": "internal/identity/devadapter/fuzz_test.go",
+        "class": "test",
+        "sha256": "cc95e141a20584e7583133f59284b629b96e38b8d67bef5a7975ee14e6024145",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/identity/devadapter/module.go",
         "target": "internal/identity/devadapter/module.go",
         "class": "go",
-        "sha256": "7ceb1cc49c1895ed8522875900db9888d742f5884517260c79369b5eabe4dd48",
+        "sha256": "d30c944f4c110a3cd7aadaefe5f52243e7fba3c60abb2979ae132c139901b893",
         "rewrite_module": true,
         "contract": true
       }

@@ -1,4 +1,6 @@
-// Package clerk implements the hosted Clerk identity adapter.
+// Package clerk implements the hosted Clerk identity adapter. It is the only
+// package in the tree that imports the Clerk SDK or the svix verification
+// library; the identity seam holds contracts alone.
 package clerk
 
 import (
@@ -10,17 +12,22 @@ import (
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
 
+// Provider is the value stamped on every claim and event this adapter
+// produces. It is the provider key the identity mapping tables store.
+const Provider = "clerk"
+
 type Deps struct{ Config *config.Config }
 
-type navigator struct{ BaseURL string }
+// Navigator builds Clerk Account Portal URLs.
+type Navigator struct{ BaseURL string }
 
-func (n navigator) LoginURL(returnTo string) string {
+func (n Navigator) LoginURL(returnTo string) string {
 	return n.BaseURL + "/sign-in?redirect_url=" + returnTo
 }
-func (n navigator) SignupURL(returnTo string) string {
+func (n Navigator) SignupURL(returnTo string) string {
 	return n.BaseURL + "/sign-up?redirect_url=" + returnTo
 }
-func (n navigator) AccountURL() string { return n.BaseURL }
+func (n Navigator) AccountURL() string { return n.BaseURL }
 
 type Module struct {
 	Verifier  identity.Verifier
@@ -41,12 +48,17 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 		return nil, err
 	}
 	return &Module{
-		Verifier:  identity.NewClerkVerifier(d.Config.ClerkSecretKey),
-		Fetcher:   identity.NewClerkUserFetcher(d.Config.ClerkSecretKey),
-		Deleter:   identity.NewClerkDeleter(d.Config.ClerkSecretKey),
-		Navigator: navigator{BaseURL: d.Config.ClerkPortalURL},
-		Webhook:   identity.ClerkWebhook{Secret: d.Config.ClerkWebhookSecret},
+		Verifier:  NewVerifier(d.Config.ClerkSecretKey),
+		Fetcher:   NewUserFetcher(d.Config.ClerkSecretKey),
+		Deleter:   NewDeleter(d.Config.ClerkSecretKey),
+		Navigator: Navigator{BaseURL: d.Config.ClerkPortalURL},
+		Webhook:   Webhook{Secret: d.Config.ClerkWebhookSecret},
 	}, nil
 }
 
-var _ identity.SubjectVerifier = (*identity.ClerkVerifier)(nil)
+var (
+	_ identity.SubjectVerifier             = (*Verifier)(nil)
+	_ identity.OrganizationSubjectVerifier = (*Verifier)(nil)
+	_ identity.UserFetcher                 = (*UserFetcher)(nil)
+	_ identity.Navigator                   = Navigator{}
+)

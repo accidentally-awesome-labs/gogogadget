@@ -82,27 +82,41 @@ and e2e environments leave `CLERK_PUBLISHABLE_KEY` empty; the bootstrap finds
 no meta tag and skips clerk-js entirely, because the bypass verifier owns auth
 there.
 
-Server-side, `ClerkVerifier` verifies the JWT against Clerk's JWKS with a
-10-second leeway. An invalid or expired token is treated as *unauthenticated*
-— the request continues without identity and `RequireAuth` redirects.
+Server-side, the Clerk adapter's `Verifier` verifies the JWT against Clerk's
+JWKS with a 10-second leeway. An invalid or expired token is treated as
+*unauthenticated* — the request continues without identity and `RequireAuth`
+redirects.
 
 ## The Verifier seam
 
-`internal/identity/verifier.go` is the only file that imports the Clerk SDK:
+`internal/identity` imports no provider SDK at all. It holds the ports and the
+neutral types; `internal/identity/clerk` is the only package in the tree that
+imports the Clerk SDK, and `internal/identity/devadapter` the only one that
+mints the synthetic `e2e:` tokens:
 
 ```go
 type Verifier interface {
-	Verify(ctx context.Context, token string) (*Claims, error)
+	Verify(ctx context.Context, token string) (*ProviderClaims, error)
 }
 
+// ProviderClaims is the provider-facing identity an adapter returns.
+type ProviderClaims struct {
+	Provider, UserSubject, OrgSubject, OrgRole, OrgSlug string
+}
+
+// Claims is the internal identity. IDs are opaque domain identifiers, never
+// provider subjects.
 type Claims struct {
 	UserID, OrgID, OrgRole, OrgSlug string
 }
 ```
 
-`ClerkVerifier` implements it against JWKS; `FakeVerifier` implements it for
-tests. Handlers and middleware only ever see `Claims` — swapping auth
-providers means replacing one file.
+`clerk.Verifier` implements the port against JWKS; `identitydev.Verifier`
+implements it for the zero-account path. `internal/identity/session` maps a
+verified `ProviderClaims` onto internal `Claims`, so handlers and middleware
+only ever see `Claims` — swapping auth providers means replacing one adapter
+package, and a project that never selects Clerk never compiles its SDK.
+Both adapters are held to one table, `internal/identity/contract`.
 
 ## sessionLoad: cookie to context
 
@@ -145,7 +159,8 @@ When neither Clerk nor the bypass is configured, `/app` routes render a 503
 
 ## Dev bypass and e2e tokens
 
-`DEV_AUTH_BYPASS=true` wires `FakeVerifier` in place of `ClerkVerifier`. The
+Selecting `ggg/system/identity-dev` (with `DEV_AUTH_BYPASS=true`) wires
+`identitydev.Verifier` in place of the Clerk adapter's. The
 config loader **hard-errors at boot if this is combined with
 `APP_ENV=production`**. Synthetic tokens have the exact shape:
 
@@ -155,7 +170,7 @@ __session=e2e:<userID>:<orgID>:<role>
 
 An empty `orgID` means "no active org" — which is how tests exercise the
 SelectOrg and create-organization branches. Every guard and middleware still
-executes; only the token check is synthetic. `DevUserFetcher` synthesizes
+executes; only the token check is synthetic. `identitydev.UserFetcher` synthesizes
 profiles (`<userID>@gogogadget.dev`) so the lazy upsert works with no Clerk
 account. `GET /dev/login` sets the demo cookie
 (`e2e:user_demo:org_demo:org:admin`) and lands in `/app`. See

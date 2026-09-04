@@ -17,10 +17,10 @@ import (
 	"time"
 )
 
-// POST /webhooks/clerk — Clerk delivers via Svix, so deliveries carry
-// svix-id/svix-timestamp/svix-signature headers. (Polar carries webhook-*
-// headers instead — the two header families are why one verification lib
-// cannot cover both providers.)
+// POST /webhooks/clerk — the identity provider's receiver. Verification,
+// signature header family and payload shape all belong to the selected
+// identity adapter; this handler only records idempotency on the adapter's
+// delivery id and mirrors one neutral event into local rows.
 func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
 
 	msgID := evt.ID
 	if msgID == "" {
-		http.Error(w, "missing svix-id", http.StatusBadRequest)
+		http.Error(w, "missing webhook id", http.StatusBadRequest)
 		return
 	}
 	ctx := r.Context()
@@ -50,8 +50,8 @@ func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.processIdentityEvent(ctx, evt); err != nil {
-		s.log.Error("clerk webhook process", "type", evt.Type, "error", err)
-		http.Error(w, "processing failed", http.StatusInternalServerError) // 5xx → Clerk retries
+		s.log.Error("identity webhook process", "type", evt.Type, "error", err)
+		http.Error(w, "processing failed", http.StatusInternalServerError) // 5xx → the provider retries
 		return
 	}
 	w.WriteHeader(http.StatusOK)

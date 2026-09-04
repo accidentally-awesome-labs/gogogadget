@@ -1,4 +1,4 @@
-package billing
+package polar
 
 import (
 	"bytes"
@@ -9,40 +9,46 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gogogadget/gogogadget/internal/billing"
 )
 
-// polarServers maps the POLAR_SERVER config value to a base URL. Values pinned
+// Provider is the value stamped on every event this adapter produces. It is
+// the provider key the billing_accounts and subscriptions tables store.
+const Provider = "polar"
+
+// servers maps the POLAR_SERVER config value to a base URL. Values pinned
 // from the Polar API (2026-04) OpenAPI servers block; docs win over guesses.
-var polarServers = map[string]string{
+var servers = map[string]string{
 	"production": "https://api.polar.sh",
 	"sandbox":    "https://sandbox-api.polar.sh",
 }
 
-const polarAPIVersion = "2026-04"
+const apiVersion = "2026-04"
 
-// PolarClient implements Client over the Polar REST API with plain net/http
-// (the former polarsource/polar-go SDK is archived upstream; raw HTTP is the
-// recommended migration). Every request/response shape stays confined to this
-// file.
-type PolarClient struct {
+// Client implements billing.Client over the Polar REST API with plain
+// net/http (the former polarsource/polar-go SDK is archived upstream; raw
+// HTTP is the recommended migration). Every request/response shape stays
+// confined to this package.
+type Client struct {
 	baseURL string
 	token   string
 	http    *http.Client
 }
 
-func NewPolarClient(accessToken, server string) *PolarClient {
-	base, ok := polarServers[server]
+func NewClient(accessToken, server string) *Client {
+	base, ok := servers[server]
 	if !ok {
-		base = polarServers["sandbox"]
+		base = servers["sandbox"]
 	}
-	return &PolarClient{
+	return &Client{
 		baseURL: base,
 		token:   accessToken,
 		http:    &http.Client{Timeout: 20 * time.Second},
 	}
 }
 
-func (c *PolarClient) do(ctx context.Context, method, path string, body any, out any) error {
+func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
 	var rd io.Reader
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -56,7 +62,7 @@ func (c *PolarClient) do(ctx context.Context, method, path string, body any, out
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+c.token)
-	req.Header.Set("Polar-Version", polarAPIVersion)
+	req.Header.Set("Polar-Version", apiVersion)
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -75,7 +81,7 @@ func (c *PolarClient) do(ctx context.Context, method, path string, body any, out
 	return nil
 }
 
-func (c *PolarClient) CreateCheckout(ctx context.Context, p CheckoutParams) (string, error) {
+func (c *Client) CreateCheckout(ctx context.Context, p billing.CheckoutParams) (string, error) {
 	body := map[string]any{
 		"products": []string{p.ProductID},
 	}
@@ -100,7 +106,7 @@ func (c *PolarClient) CreateCheckout(ctx context.Context, p CheckoutParams) (str
 	return out.URL, nil
 }
 
-func (c *PolarClient) CreatePortalSession(ctx context.Context, customerExternalID string) (string, error) {
+func (c *Client) CreatePortalSession(ctx context.Context, customerExternalID string) (string, error) {
 	body := map[string]any{"external_customer_id": customerExternalID}
 	var out struct {
 		CustomerPortalURL string `json:"customer_portal_url"`
@@ -114,12 +120,12 @@ func (c *PolarClient) CreatePortalSession(ctx context.Context, customerExternalI
 	return out.CustomerPortalURL, nil
 }
 
-func (c *PolarClient) RevokeSubscription(ctx context.Context, providerSubscriptionID string) error {
+func (c *Client) RevokeSubscription(ctx context.Context, providerSubscriptionID string) error {
 	// Polar 2026-04: revoke is DELETE /v1/subscriptions/{id}.
 	return c.do(ctx, http.MethodDelete, "/v1/subscriptions/"+providerSubscriptionID, nil, nil)
 }
 
-func (c *PolarClient) IngestUsage(ctx context.Context, customerExternalID string, events []UsageEvent) error {
+func (c *Client) IngestUsage(ctx context.Context, customerExternalID string, events []billing.UsageEvent) error {
 	if len(events) == 0 {
 		return nil
 	}
@@ -144,3 +150,5 @@ func (c *PolarClient) IngestUsage(ctx context.Context, customerExternalID string
 	}
 	return c.do(ctx, http.MethodPost, "/v1/events/ingest", map[string]any{"events": items}, nil)
 }
+
+var _ billing.Client = (*Client)(nil)

@@ -21,6 +21,7 @@ at; everything under **Delegated** is a decision not to build something.
 | Generated boot graph | One `Runtime` field per capability, one boot function per environment, `providerActive` gating on every executable contribution an adapter owns, compile-time health assertions |
 | Health | `apphost.AggregateHealth` — concurrent, 2s per check, panic-safe, 10s cache; only `ggg/database`, `ggg/identity`, `ggg/billing` are `critical`. `GET /readyz` consumes the report through the `runtime.health` capability: an unhealthy critical slot is a 503 naming it, an unhealthy non-critical slot is a 200 reporting it degraded |
 | Provider-neutral identity and billing | Opaque `usr_…`/`org_…` ids with `identity_subjects`, `identity_organizations`, `billing_accounts` mapping tables; `identity.ErrLinkRequired` instead of auto-merge; audited `ggg identity link` |
+| Vendor-free seams | No seam imports a provider SDK. `internal/identity` and `internal/billing` hold ports and neutral types only; `identity/clerk` owns clerk-sdk-go and `svix`, `billing/polar` the Polar REST client and `standard-webhooks`, and each manifest declares exactly the Go modules its own files import, so a slot's SDK enters and leaves `go.mod` with its adapter. Both seams publish one contract table (`identity/contract`, `billing/contract`) that every adapter runs |
 | Signed external registries | Ed25519 snapshot signing, pinned public keys and fingerprints, per-module snapshot provenance in the lock, offline resolution from the verified cache, two-signature key rotation with `not_before` |
 | Typed CLI platform | One command table driving dispatch, help, completions and reserved names; sealed request/mutation types; the fixed envelope and exit codes `0`–`5` unchanged |
 | Interactive console | `ggg ui` (contributed by `ggg/system/cli-ui`) with Home, Catalog, Providers, Plan, Conflicts, Tasks, Diagnostics and Help screens; `--accessible` / `GGG_ACCESSIBLE=1` switches guided forms to linear prompts; a non-TTY `ui` is the declared `interactive_terminal_required` usage failure |
@@ -37,9 +38,7 @@ Recorded, reproducible, and not yet fixed.
 
 | Gap | Evidence | Consequence |
 |---|---|---|
-| Two seams still carry vendor SDKs | `internal/identity` imports the Clerk SDK and `svix`; `internal/billing` imports `standard-webhooks` — the webhook parsers have not moved into `identity-clerk` / `billing-polar` | Selecting a non-Clerk identity adapter still compiles the Clerk SDK into the binary |
 | `ggg doctor --fix` covers one finding | `doctorRemediation` maps only `env_file_missing` | Every other finding reports advice and expects a human |
-| Seam manifests declare the vendor Go dependencies | `ggg/system/identity` and `ggg/system/billing` declare the Clerk, svix and standard-webhooks module requirements their adapters should own | Removing the Clerk adapter does not drop the SDK from `go.mod` |
 | Per-category audit retention | `AUDIT_RETENTION_DAYS` is one global window (0 = forever) | Retention cannot differ per action category |
 
 ## Delegated

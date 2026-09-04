@@ -409,7 +409,7 @@ checklist and a console URL rather than executing anything.
 | `ggg/usage` | `ggg/system/usage-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/webhooks` | `ggg/system/webhooks-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 
-## Dependencies (143)
+## Dependencies (146)
 
 Declared, not discovered: an authored import the owning manifest does not
 declare is refused before `go.mod` is touched, and the last owner's removal
@@ -494,8 +494,9 @@ drops the requirement again unless the project already had it.
 | `ggg/system/analytics-posthog` | `github.com/posthog/posthog-go v1.22.0` | — | — |
 | `ggg/system/api` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/audit` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/system/billing` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/billing` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/billing-local` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/billing-polar` | `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/cli-ui` | `charm.land/bubbletea/v2 v2.0.0` `charm.land/bubbles/v2 v2.0.0` `charm.land/huh/v2 v2.0.0` `charm.land/lipgloss/v2 v2.0.0` | — | — |
 | `ggg/system/config` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/content` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `github.com/yuin/goldmark v1.8.5` `gopkg.in/yaml.v3 v3.0.1` | — | — |
@@ -505,7 +506,9 @@ drops the requirement again unless the project already had it.
 | `ggg/system/feature-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/feature-flags-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/i18n` | `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
-| `ggg/system/identity` | `github.com/clerk/clerk-sdk-go/v2 v2.7.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` | — | — |
+| `ggg/system/identity` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/identity-clerk` | `github.com/clerk/clerk-sdk-go/v2 v2.7.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` | — | — |
+| `ggg/system/identity-dev` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/identity-session` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/impersonation` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/jobs` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
@@ -527,7 +530,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/search-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/security` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/seed` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
-| `ggg/system/server` | `github.com/a-h/templ v0.3.1020` `github.com/go-playground/form/v4 v4.3.0` `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` `golang.org/x/text v0.40.0` | — | — |
+| `ggg/system/server` | `github.com/a-h/templ v0.3.1020` `github.com/go-playground/form/v4 v4.3.0` `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
 | `ggg/system/static` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/storage` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/storage-filesystem` | `github.com/stretchr/testify v1.11.1` | — | — |
@@ -552,7 +555,7 @@ drops the requirement again unless the project already had it.
 | `ggg/workflow/billing-checkout` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/billing-webhook` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` | — | — |
 | `ggg/workflow/dev-session` | `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/workflow/identity-webhook-sync` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` | — | — |
+| `ggg/workflow/identity-webhook-sync` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/impersonation` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/openapi-contract` | `github.com/stretchr/testify v1.11.1` `gopkg.in/yaml.v3 v3.0.1` | — | — |
 | `ggg/workflow/organization-export` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |

@@ -62,8 +62,8 @@ stages the upstream candidate under `tmp/ggg/conflicts/` and exits 4 for
 - `internal/config` — generic env/dotenv reading; the typed struct and its validation are generated from manifest `environment` records.
 - `internal/db` — pgx pool, embedded goose migrations (`migrations/`, immutable and forward-only), sqlc queries (`queries/` → `sqlc/`), `testdata/seed/{dev,e2e}/` module-owned fixtures, `testdb/` per-package test DBs (`TEST_DB_SUFFIX` for concurrent workers).
 - `internal/web` — HTTP surface: middleware chain, HTMX helpers, handlers, templ templates (`templates/`).
-- `internal/identity` — `Verifier` seam (Clerk is the ONLY SDK file), context keys, guards data, Clerk webhook sync parsers, `UserFetcher`.
-- `internal/billing` — plan truth (`plans.go`), `Client` seam, Polar client (raw net/http — the archived SDK is gone), webhook state machine, `Entitled`/`CurrentPlan`.
+- `internal/identity` — the provider-neutral seam: ports, `Claims`/`ProviderClaims`, `Event`, context keys, guards data. It imports NO SDK. `identity/clerk` is the only clerk-sdk-go + svix importer (session verify, user fetch, delete, portal URLs, `svix-*` verification, Clerk payload parsing); `identity/devadapter` is the zero-account adapter (`e2e:` tokens, derived profiles, unsigned envelope); `identity/session` maps verified subjects onto opaque ids; `identity/contract` is the one table both adapters run.
+- `internal/billing` — plan truth (`plans.go`), `Client`/`PlanCatalog`/`BillingWebhook` seams, webhook state machine, `Entitled`/`CurrentPlan`, and `billing/contract` (the shared table). It imports no provider library: `billing/polar` owns the raw net/http Polar client and `standard-webhooks` verification, `internal/billinglocal` the zero-account one.
 - `internal/jobs` — Postgres worker (SKIP LOCKED, 5-min visibility timeout, 2^n backoff, dead-letter) + the scheduler pass (recurring `schedules`) + webhook delivery + usage flush + CSV export.
 - `internal/mail` — `Sender` seam (Resend / DevSender→tmp/emails), templ email renderers.
 - `internal/audit` — fire-and-forget audit log.

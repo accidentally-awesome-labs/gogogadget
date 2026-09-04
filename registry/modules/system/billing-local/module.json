@@ -59,6 +59,14 @@
         "contract": true
       },
       {
+        "source": "internal/billinglocal/contract_test.go",
+        "target": "internal/billinglocal/contract_test.go",
+        "class": "test",
+        "sha256": "ffacb6bf04563356964745ab53361a6da33b45498bf4923a84b195687eafefcc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",

@@ -16,7 +16,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	"github.com/gogogadget/gogogadget/internal/identity"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	llmfake "github.com/gogogadget/gogogadget/internal/llm/fake"
 	"github.com/gogogadget/gogogadget/internal/observability"
@@ -37,12 +37,12 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 		Config: &config.Config{Env: "test", AppURL: "http://localhost:8080"},
 		DB:     pool, Queries: queries, Storage: storagefs.NewDevStore(t.TempDir()),
 		Flags: flags.NewDBEvaluator(queries, 30*time.Second), Reporter: observability.NoopReporter{},
-		Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
-		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
-		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
+		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
+		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
 		Analytics: analytics.NoopCapturer{}, LLM: llmfake.Completer{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
-		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}},
+		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identitydev.Verifier{}, Fetch: identitydev.UserFetcher{}},
 		Health: func(context.Context) apphost.HealthReport {
 			return apphost.HealthReport{Ready: true}
 		},

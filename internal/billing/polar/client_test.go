@@ -1,4 +1,4 @@
-package billing
+package polar
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +16,7 @@ import (
 // newPolarFake spins an httptest server that records the last request and
 // replies with the given status/body. base is rewritten to the fake so no
 // real traffic happens.
-func newPolarFake(t *testing.T, status int, body string, capture *capturedRequest) *PolarClient {
+func newPolarFake(t *testing.T, status int, body string, capture *capturedRequest) *Client {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, _ := io.ReadAll(r.Body)
@@ -30,7 +31,7 @@ func newPolarFake(t *testing.T, status int, body string, capture *capturedReques
 		_, _ = w.Write([]byte(body))
 	}))
 	t.Cleanup(srv.Close)
-	c := NewPolarClient("tok_test", "sandbox")
+	c := NewClient("tok_test", "sandbox")
 	c.baseURL = srv.URL
 	return c
 }
@@ -43,7 +44,7 @@ type capturedRequest struct {
 func TestPolarCreateCheckout(t *testing.T) {
 	var cap capturedRequest
 	c := newPolarFake(t, 200, `{"url":"https://checkout.polar.sh/c/abc"}`, &cap)
-	url, err := c.CreateCheckout(context.Background(), CheckoutParams{
+	url, err := c.CreateCheckout(context.Background(), billing.CheckoutParams{
 		ProductID: "prod_123", SuccessURL: "https://app.test/billing/return",
 		CustomerExternalID: "org_1", Metadata: map[string]string{"org_id": "org_1"},
 	})
@@ -98,7 +99,7 @@ func TestPolarRevokeSubscriptionAlreadyRevoked(t *testing.T) {
 func TestPolarIngestUsage(t *testing.T) {
 	var cap capturedRequest
 	c := newPolarFake(t, 200, `{"inserted":2,"duplicates":0}`, &cap)
-	err := c.IngestUsage(context.Background(), "org_1", []UsageEvent{
+	err := c.IngestUsage(context.Background(), "org_1", []billing.UsageEvent{
 		{Name: "ai_tokens", ExternalID: "ue-1", Value: 150, Metadata: map[string]any{"model": "gpt"}},
 		{Name: "ai_tokens", Value: 1},
 	})
@@ -145,7 +146,7 @@ func TestPolarServerErrorIncludesBody(t *testing.T) {
 }
 
 func TestNewPolarClientServerFallback(t *testing.T) {
-	assert.Equal(t, "https://api.polar.sh", NewPolarClient("t", "production").baseURL)
-	assert.Equal(t, "https://sandbox-api.polar.sh", NewPolarClient("t", "sandbox").baseURL)
-	assert.Equal(t, "https://sandbox-api.polar.sh", NewPolarClient("t", "nonsense").baseURL, "unknown server falls back to sandbox")
+	assert.Equal(t, "https://api.polar.sh", NewClient("t", "production").baseURL)
+	assert.Equal(t, "https://sandbox-api.polar.sh", NewClient("t", "sandbox").baseURL)
+	assert.Equal(t, "https://sandbox-api.polar.sh", NewClient("t", "nonsense").baseURL, "unknown server falls back to sandbox")
 }

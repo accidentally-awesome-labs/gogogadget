@@ -8,7 +8,6 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
-	"github.com/gogogadget/gogogadget/internal/identity"
 	identityclerk "github.com/gogogadget/gogogadget/internal/identity/clerk"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
@@ -175,7 +174,7 @@ func productionServer(t *testing.T) *Server {
 		identityclerk.Deps{Config: &cfg},
 	)
 	require.NoError(t, err)
-	require.IsType(t, &identity.ClerkVerifier{}, ident.Verifier,
+	require.IsType(t, &identityclerk.Verifier{}, ident.Verifier,
 		"a production identity closure verifies against Clerk, not the fake")
 
 	s := integrationServer(t, func(d *Deps) {

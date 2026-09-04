@@ -124,10 +124,6 @@
           "version": "v1.11.1"
         },
         {
-          "module": "github.com/svix/svix-webhooks",
-          "version": "v1.99.1"
-        },
-        {
           "module": "golang.org/x/text",
           "version": "v0.40.0"
         }
@@ -220,7 +216,7 @@
         "source": "internal/web/module_test.go",
         "target": "internal/web/module_test.go",
         "class": "test",
-        "sha256": "387d206904ab3bfea9f0e5b8bea5970ad41f1e07df3d067270a0f6d622e89cee",
+        "sha256": "958d1bb0c44caad1f424889f2954f9e567d5ab189806def4b7fd2904b0bcdf64",
         "rewrite_module": true,
         "contract": false
       },
@@ -412,7 +408,7 @@
         "source": "internal/web/testhelpers_test.go",
         "target": "internal/web/testhelpers_test.go",
         "class": "test",
-        "sha256": "accd236bf13a208be4ef20fe6b9c4e38989f21684506ec6d9e547f1615a463ef",
+        "sha256": "6c940f8e42fd721f8e7dc011cc58fc03152ddf181f9bcbeb094bb430d039583d",
         "rewrite_module": true,
         "contract": false
       },
@@ -428,7 +424,7 @@
         "source": "internal/web/web_test.go",
         "target": "internal/web/web_test.go",
         "class": "test",
-        "sha256": "6b7c5446684b46ed1b5c12be42f29c5ae1bdad2a23fd578bc5a30750015c87e9",
+        "sha256": "c132da12471ecc0ed5b4c5510a882d065b3b5acc4cf1d42b9af4b9acd7d3cd2c",
         "rewrite_module": true,
         "contract": false
       }

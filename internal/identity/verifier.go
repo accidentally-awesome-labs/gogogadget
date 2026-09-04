@@ -1,20 +1,12 @@
 // Package identity defines provider-neutral identity ports. Provider adapters
-// (Clerk, the development verifier, and future implementations) are the only
-// code that knows how a subject is encoded by an upstream identity service.
+// (Clerk, the development adapter, and future implementations) are the only
+// code that knows how a subject is encoded by an upstream identity service,
+// how its webhook deliveries are signed, or how its payloads are shaped.
 package identity
 
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
-	"time"
-
-	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/clerk/clerk-sdk-go/v2/jwks"
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
-	"github.com/clerk/clerk-sdk-go/v2/organization"
-	"github.com/clerk/clerk-sdk-go/v2/user"
 )
 
 // Claims is the internal, provider-neutral session identity. IDs are opaque
@@ -29,73 +21,7 @@ type ProviderClaims struct {
 type Verifier interface {
 	Verify(context.Context, string) (*ProviderClaims, error)
 }
-type ClerkVerifier struct {
-	jwksClient *jwks.Client
-	userClient *user.Client
-	orgClient  *organization.Client
-}
 
-func NewClerkVerifier(secretKey string) *ClerkVerifier {
-	cfg := &clerk.ClientConfig{BackendConfig: clerk.BackendConfig{Key: &secretKey}}
-	return &ClerkVerifier{jwksClient: jwks.NewClient(cfg), userClient: user.NewClient(cfg), orgClient: organization.NewClient(cfg)}
-}
-func (v *ClerkVerifier) Verify(ctx context.Context, token string) (*ProviderClaims, error) {
-	claims, err := jwt.Verify(ctx, &jwt.VerifyParams{Token: token, JWKSClient: v.jwksClient, Leeway: 10 * time.Second})
-	if err != nil {
-		return nil, err
-	}
-	return &ProviderClaims{Provider: "clerk", UserSubject: claims.Subject, OrgSubject: claims.ActiveOrganizationID, OrgRole: claims.ActiveOrganizationRole, OrgSlug: claims.ActiveOrganizationSlug}, nil
-}
-
-type FakeVerifier struct{}
-
+// ErrInvalidToken is the shared refusal every adapter returns for a session
+// token or subject it cannot verify.
 var ErrInvalidToken = errors.New("invalid session token")
-
-func (FakeVerifier) Verify(_ context.Context, token string) (*ProviderClaims, error) {
-	parts := strings.SplitN(token, ":", 4)
-	if len(parts) != 4 || parts[0] != "e2e" || parts[1] == "" {
-		return nil, fmt.Errorf("%w: want e2e:<userID>:<orgID>:<role>", ErrInvalidToken)
-	}
-	return &ProviderClaims{Provider: "dev", UserSubject: parts[1], OrgSubject: parts[2], OrgRole: parts[3], OrgSlug: parts[2]}, nil
-}
-
-func (FakeVerifier) VerifySubject(_ context.Context, subject string) (*ProviderClaims, error) {
-	if subject == "" {
-		return nil, ErrInvalidToken
-	}
-	return &ProviderClaims{Provider: "dev", UserSubject: subject}, nil
-}
-
-func (FakeVerifier) VerifyOrganizationSubject(_ context.Context, subject string) (*ProviderClaims, error) {
-	if subject == "" {
-		return nil, ErrInvalidToken
-	}
-	return &ProviderClaims{Provider: "dev", OrgSubject: subject}, nil
-}
-func (v *ClerkVerifier) VerifySubject(ctx context.Context, subject string) (*ProviderClaims, error) {
-	if subject == "" || v == nil || v.userClient == nil {
-		return nil, ErrInvalidToken
-	}
-	u, err := v.userClient.Get(ctx, subject)
-	if err != nil {
-		return nil, err
-	}
-	if u.ID != subject {
-		return nil, fmt.Errorf("identity: verified subject mismatch")
-	}
-	return &ProviderClaims{Provider: "clerk", UserSubject: subject}, nil
-}
-
-func (v *ClerkVerifier) VerifyOrganizationSubject(ctx context.Context, subject string) (*ProviderClaims, error) {
-	if subject == "" || v == nil || v.orgClient == nil {
-		return nil, ErrInvalidToken
-	}
-	org, err := v.orgClient.Get(ctx, subject)
-	if err != nil {
-		return nil, err
-	}
-	if org.ID != subject {
-		return nil, fmt.Errorf("identity: verified organization subject mismatch")
-	}
-	return &ProviderClaims{Provider: "clerk", OrgSubject: subject, OrgSlug: org.Slug}, nil
-}

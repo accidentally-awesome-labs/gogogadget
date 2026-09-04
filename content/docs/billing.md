@@ -10,12 +10,16 @@ VAT are Polar's problem, not yours), a single Go file as the plan truth, and
 a webhook-driven subscription mirror. The freemium model has **no route-level
 paywall**: enforcement is per-action limits plus persistent banners.
 
-`PolarClient` (`internal/billing/polar.go`) talks to the Polar REST API
-(version `2026-04`) with raw `net/http` behind the `billing.Client` seam —
+`polar.Client` (`internal/billing/polar/client.go`) talks to the Polar REST
+API (version `2026-04`) with raw `net/http` behind the `billing.Client` seam —
 the former `polarsource/polar-go` SDK is archived upstream. Besides checkout,
 portal, and revoke, the seam exposes `IngestUsage`, which pushes metered
 usage events to Polar (`POST /v1/events/ingest`) — see
-[Background jobs](/docs/background-jobs) for the flush schedule.
+[Background jobs](/docs/background-jobs) for the flush schedule. The seam
+itself (`internal/billing`) imports no provider library: `ggg/system/billing-polar`
+owns the REST client and the `standard-webhooks` verification, and
+`ggg/system/billing-local` owns the zero-account confirm screen, so a project
+that never selects Polar never compiles either.
 
 ## plans.go is the single source of truth
 

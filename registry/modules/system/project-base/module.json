@@ -35,7 +35,7 @@
         "source": "Makefile",
         "target": "Makefile",
         "class": "asset",
-        "sha256": "31c3d542f54b50ecb5c15cd2fc3a3c1dffe54da0dc3338dc65f51077b14db1a3",
+        "sha256": "610bd5b60ffc0a1f9c0cb5335ea88bef63cb4319cab09b981487f015712c4e6d",
         "rewrite_module": false,
         "contract": false
       }
