@@ -474,3 +474,78 @@ func TestLoadReadsTheCLIManagedEnvironmentFile(t *testing.T) {
 		assert.NotEqual(t, "http://legacy.invalid", cfg.AppURL, "test must not read the legacy .env")
 	})
 }
+
+// The generated parser used to return a bare string, so nothing downstream
+// could tell an address this project publishes from DATABASE_URL's declared
+// default — which is a live local address. `go run ./cmd/seed` therefore
+// migrated and seeded whatever answered on localhost:5432 and exited 0.
+// Provenance is what lets cmd/seed refuse that while still accepting the
+// zero-account path.
+//
+// Mutation: collapse resolve's three layers into pick's two (lookup, default)
+// and every value reports the same source, so the refusal either blocks the
+// documented development path or blocks nothing.
+func TestResolvedValuesCarryTheirProvenance(t *testing.T) {
+	t.Run("the lookup wins and is attributed to the environment", func(t *testing.T) {
+		baseEnv(t)
+		cfg, err := LoadFrom(os.Getenv)
+		require.NoError(t, err)
+		assert.Equal(t, "postgres://test", cfg.DatabaseURL)
+		assert.Equal(t, SourceEnvironment, cfg.Source("DATABASE_URL"))
+	})
+
+	t.Run("this project's derived address outranks the declared default", func(t *testing.T) {
+		derived, ok := DerivedValue("test", "DATABASE_URL")
+		require.True(t, ok, "this project's test environment must publish a local Postgres to derive from")
+		clearDeclaredEnvironment(t)
+		t.Setenv("APP_ENV", "test")
+		cfg, err := LoadFrom(os.Getenv)
+		require.NoError(t, err)
+		assert.Equal(t, derived, cfg.DatabaseURL)
+		assert.Equal(t, SourceDerived, cfg.Source("DATABASE_URL"))
+		// The whole point: the test stack publishes a different port from the
+		// development stack the declared default names.
+		assert.NotEqual(t, derivedFor(t, "development"), cfg.DatabaseURL)
+	})
+
+	t.Run("development derives the development stack", func(t *testing.T) {
+		derived, ok := DerivedValue("development", "DATABASE_URL")
+		require.True(t, ok)
+		clearDeclaredEnvironment(t)
+		t.Setenv("APP_ENV", "development")
+		cfg, err := LoadFrom(os.Getenv)
+		require.NoError(t, err)
+		assert.Equal(t, derived, cfg.DatabaseURL)
+		assert.Equal(t, SourceDerived, cfg.Source("DATABASE_URL"))
+	})
+
+	t.Run("production derives nothing and falls to the declared default", func(t *testing.T) {
+		_, ok := DerivedValue("production", "DATABASE_URL")
+		assert.False(t, ok, "production publishes no local service, so it must derive no host address")
+		clearDeclaredEnvironment(t)
+		t.Setenv("APP_ENV", "production")
+		cfg, _ := LoadFrom(os.Getenv)
+		assert.Equal(t, SourceDeclaredDefault, cfg.Source("DATABASE_URL"))
+	})
+
+	t.Run("a key with no value anywhere is unset, not defaulted", func(t *testing.T) {
+		baseEnv(t)
+		cfg, err := LoadFrom(os.Getenv)
+		require.NoError(t, err)
+		assert.Equal(t, SourceUnset, cfg.Source("SENTRY_DSN"))
+	})
+
+	t.Run("a hand-assembled Config reports nothing", func(t *testing.T) {
+		assert.Equal(t, SourceUnset, Config{}.Source("DATABASE_URL"))
+	})
+}
+
+// derivedFor is the derived address for one environment, failing the test
+// rather than returning a zero value: an assertion against "" would pass for
+// the wrong reason.
+func derivedFor(t *testing.T, environment string) string {
+	t.Helper()
+	value, ok := DerivedValue(environment, "DATABASE_URL")
+	require.True(t, ok, "%s must derive a database address", environment)
+	return value
+}

@@ -3,6 +3,7 @@ package modkit
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -380,6 +381,45 @@ const testPortOffset = 10000
 // maxHostPort is the last valid TCP port.
 const maxHostPort = 65535
 
+// databaseSlot is the provider slot whose selected adapter supplies the
+// project's Postgres. It is the one slot a connection string is derived from.
+const databaseSlot = "ggg/database"
+
+// selectedDatabaseService is the local Postgres service one environment
+// selected, when the selected target declares one at all. A managed target
+// (Neon) declares none, and then nothing local can be derived.
+func selectedDatabaseService(selected []selectedService) (selectedService, bool) {
+	for _, item := range selected {
+		if item.slot == databaseSlot {
+			return item, true
+		}
+	}
+	return selectedService{}, false
+}
+
+// postgresDSN renders one connection string from a local service's declared
+// credentials and one address.
+//
+// The two derivations — the in-network one the compose app reads and the host
+// one every host-side consumer reads — differ in nothing but that address, so
+// they share this. Credentials come from the service's own declaration rather
+// than from a literal, which is what keeps a changed POSTGRES_PASSWORD from
+// splitting the two apart.
+func postgresDSN(service LocalService, host string, port int) string {
+	user, password, name := "postgres", "postgres", "gogogadget"
+	for _, variable := range service.Environment {
+		switch variable.Key {
+		case "POSTGRES_USER":
+			user = variable.Value
+		case "POSTGRES_PASSWORD":
+			password = variable.Value
+		case "POSTGRES_DB":
+			name = variable.Value
+		}
+	}
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, name)
+}
+
 // databaseURL derives the in-network DATABASE_URL from the selected database
 // adapter's local service declaration, so the compose app reaches the same
 // Postgres the environment selected without hardcoded credentials.
@@ -387,29 +427,65 @@ const maxHostPort = 65535
 // It addresses the service by name and container port, so it is unaffected by
 // which host port that service is published on — including none.
 func databaseURL(selected []selectedService) string {
-	for _, item := range selected {
-		if item.slot != "ggg/database" {
-			continue
-		}
-		user, password, name := "postgres", "postgres", "gogogadget"
-		port := 5432
-		for _, variable := range item.service.Environment {
-			switch variable.Key {
-			case "POSTGRES_USER":
-				user = variable.Value
-			case "POSTGRES_PASSWORD":
-				password = variable.Value
-			case "POSTGRES_DB":
-				name = variable.Value
-			}
-		}
-		if len(item.service.Ports) > 0 {
-			port = item.service.Ports[0].Container
-		}
-		return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-			user, password, item.name, port, name)
+	item, ok := selectedDatabaseService(selected)
+	if !ok {
+		return ""
 	}
-	return ""
+	port := 5432
+	if len(item.service.Ports) > 0 {
+		port = item.service.Ports[0].Container
+	}
+	return postgresDSN(item.service, item.name, port)
+}
+
+// hostDatabaseURL is databaseURL's sibling for a process running on the host
+// rather than inside the Compose network: goose under `ggg db`, `cmd/seed`,
+// `internal/db/testdb`, the Playwright harness, and the visual server. It
+// addresses the same service through the host port this environment publishes
+// it on, which is the number effectiveHostPort resolved — so the test stack
+// derives 15432 without a second set of hand-maintained numbers.
+//
+// A service published on no host port yields nothing rather than a guess: the
+// address would not exist.
+func hostDatabaseURL(selected []selectedService) string {
+	item, ok := selectedDatabaseService(selected)
+	if !ok || len(item.published) == 0 {
+		return ""
+	}
+	return postgresDSN(item.service, "localhost", item.published[0].host)
+}
+
+// DerivedEnvironmentValues is what this project's own provider selection and
+// published host ports resolve to for one environment. It is THE derivation:
+// `ggg db`, the generated configuration parser, `internal/db/testdb` and the
+// Playwright harness all read it, so no consumer keeps a default of its own.
+//
+// A derived value differs from a manifest's declared default in the way that
+// matters to anything destructive: the default is a documented guess at a live
+// local address, while this reflects the adapter THIS project selected and the
+// port THIS project publishes. That is why mutating commands refuse the former
+// and accept the latter.
+//
+// Production derives nothing. It has no generated Compose file and therefore
+// no local service, so there is no host address to name — a production
+// connection string comes from the deployment environment or not at all.
+func DerivedEnvironmentValues(lock Lock, graph []Manifest, environment string) (map[string]string, error) {
+	values := map[string]string{}
+	if !slices.Contains(composeEnvironments, environment) {
+		return values, nil
+	}
+	byID := make(map[string]Manifest, len(graph))
+	for _, module := range graph {
+		byID[module.ID] = module
+	}
+	plan, err := planCompose(environment, lock, byID)
+	if err != nil {
+		return nil, err
+	}
+	if dsn := hostDatabaseURL(plan.selected); dsn != "" {
+		values["DATABASE_URL"] = dsn
+	}
+	return values, nil
 }
 
 // sortedInts orders the keys of a port-indexed map, so every refusal reports

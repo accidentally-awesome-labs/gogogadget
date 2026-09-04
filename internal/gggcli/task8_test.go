@@ -191,6 +191,92 @@ func TestComposePortOverrideMovesThePublishedPortAndAppURL(t *testing.T) {
 	}
 }
 
+// The derivation every host-side consumer reads. Four consumers used to
+// hardcode a connection string of their own — the generated config parser,
+// internal/db/testdb, the Playwright harness, and `ggg db` (which had none and
+// so refused) — and they agreed only by luck while already disagreeing with
+// the test stack.
+//
+// Mutation: return the container port instead of the published host port, and
+// the test environment derives 5432 instead of 15432 — every host-side
+// consumer aims at the development stack, or at whatever else answers there.
+func TestDerivedDatabaseURLFollowsTheSelectionAndThePublishedPorts(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/db", "ggg/database", "postgres", "postgres@sha256:"+strings.Repeat("a", 64), 5432),
+	}
+	both := modkit.ProviderSelections{
+		Development: modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+		Test:        modkit.ProviderSelection{Adapter: "ggg/system/db", Target: "postgres"},
+	}
+	lock := modkit.Lock{Providers: map[string]modkit.ProviderSelections{"ggg/database": both}}
+	for environment, want := range map[string]string{
+		"development": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
+		"test":        "postgres://postgres:postgres@localhost:15432/gogogadget?sslmode=disable",
+	} {
+		values, err := modkit.DerivedEnvironmentValues(lock, graph, environment)
+		if err != nil {
+			t.Fatalf("derive %s: %v", environment, err)
+		}
+		if values["DATABASE_URL"] != want {
+			t.Fatalf("%s derived %q, want %q", environment, values["DATABASE_URL"], want)
+		}
+	}
+
+	// Production has no generated Compose file and therefore no local service,
+	// so there is no host address to name. Mutation: derive one anyway, and a
+	// production process silently connects to a local database.
+	production, err := modkit.DerivedEnvironmentValues(lock, graph, "production")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(production) != 0 {
+		t.Fatalf("production derived %#v, want nothing", production)
+	}
+
+	// A declared override moves the derived address with it, which is the
+	// whole point of deriving rather than defaulting. Mutation: read the
+	// declared default_host instead of the effective one, and the value stops
+	// matching the port the stack actually publishes.
+	lock.Ports = map[string]modkit.PortOverrides{"ggg/system/db@postgres/service": {Development: 5442}}
+	moved, err := modkit.DerivedEnvironmentValues(lock, graph, "development")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if moved["DATABASE_URL"] != "postgres://postgres:postgres@localhost:5442/gogogadget?sslmode=disable" {
+		t.Fatalf("override did not move the derived address: %q", moved["DATABASE_URL"])
+	}
+
+	// Credentials come from the service's own declaration, so the derived
+	// address and the in-network one the compose app reads cannot drift apart.
+	service := graph[0].Runtime.System.Adapter.Targets[0].LocalService
+	service.Environment = []modkit.LocalServiceEnv{
+		{Key: "POSTGRES_USER", Value: "app"},
+		{Key: "POSTGRES_PASSWORD", Value: "secret"},
+		{Key: "POSTGRES_DB", Value: "shop"},
+	}
+	lock.Ports = nil
+	declared, err := modkit.DerivedEnvironmentValues(lock, graph, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if declared["DATABASE_URL"] != "postgres://app:secret@localhost:15432/shop?sslmode=disable" {
+		t.Fatalf("derived address ignored the declared credentials: %q", declared["DATABASE_URL"])
+	}
+
+	// A managed target publishes no local service, so nothing is derived and
+	// the consumer must be configured. Mutation: fall back to a literal, and a
+	// project whose test database is hosted gets pointed at localhost.
+	graph[0].Runtime.System.Adapter.Targets[0].LocalService = nil
+	graph[0].Runtime.System.Adapter.Targets[0].Mode = "managed"
+	managed, err := modkit.DerivedEnvironmentValues(lock, graph, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(managed) != 0 {
+		t.Fatalf("a managed target derived %#v, want nothing", managed)
+	}
+}
+
 // An override that names nothing is a committed decision the generator would
 // otherwise drop on the floor, leaving the service on the port the operator
 // moved it off.

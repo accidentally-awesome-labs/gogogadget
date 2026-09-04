@@ -53,11 +53,19 @@ if [[ "${PLATFORM}" != */"${HOST_ARCH}" ]]; then
   WORKERS="--workers=1"
 fi
 
-DB_PORT_NUM="${DB_PORT:-5432}"
-HOST_DB="postgres://postgres:postgres@localhost:${DB_PORT_NUM}/gogogadget_e2e?sslmode=disable"
-
-echo "==> Reseeding e2e database (localhost:${DB_PORT_NUM})"
-DATABASE_URL="${HOST_DB}" go run ./cmd/seed -reset -registry e2e
+# This harness names no database. Both children below run with APP_ENV=test and
+# resolve DATABASE_URL through the project's own precedence: an exported value
+# wins (CI supplies its service container that way), and with nothing exported
+# they derive the address the test stack publishes — the selected database
+# adapter's local service on the test environment's effective host port, 5432
+# shifted to 15432.
+#
+# It used to build the DSN here from DB_PORT with a localhost:5432 default,
+# which is the DEVELOPMENT port. On a machine running its own Postgres there,
+# this harness reset, migrated and served a database the project had nothing to
+# do with.
+echo "==> Reseeding e2e database (APP_ENV=test)"
+APP_ENV=test go run ./cmd/seed -reset -registry e2e
 
 echo "==> Building test server"
 # Remove the target first. `go build -o` refuses to overwrite a path that is not
@@ -73,7 +81,7 @@ echo "==> Starting test server on :18080"
 # mounts a user button and a portal that CI, having no `.env`, never renders.
 # Baselines recorded here would then differ from CI's by real pixels, and the
 # person who regenerated them would have no idea why.
-APP_ENV=test PORT=18080 DATABASE_URL="${HOST_DB}" \
+APP_ENV=test PORT=18080 \
   DEV_AUTH_BYPASS=true CLERK_PORTAL_URL=https://accounts.example.test \
   CLERK_PUBLISHABLE_KEY= CLERK_SECRET_KEY= \
   TEST_NOW=2026-01-15T00:00:00Z RATE_LIMIT_RPM=100000 \

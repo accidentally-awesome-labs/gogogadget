@@ -1,53 +1,61 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "cmd/seed"
-      ]
-    },
+    "id": "ggg/system/seed",
+    "kind": "system",
+    "name": "seed",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Fixture loader",
+    "description": "Loads a SQL fixture into the database, with an optional reset that drops and recreates the schema first.",
+    "requires": [
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
           "version": "v5.10.0"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Loads a SQL fixture into the database, with an optional reset that drops and recreates the schema first.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "9f5f361dd2b63dcd1bfb0b16165b6847d35091d638c27377962037ec86c82111",
         "source": "cmd/seed/main.go",
-        "target": "cmd/seed/main.go"
-      }
-    ],
-    "id": "ggg/system/seed",
-    "kind": "system",
-    "migrations": [],
-    "name": "seed",
-    "removal_policy": "free",
-    "requires": [
+        "target": "cmd/seed/main.go",
+        "class": "go",
+        "sha256": "4cd90e080d5ab8fc9dea7a58329bab2a4e57741fc51773bae6c766276c963997",
+        "rewrite_module": true,
+        "contract": true
+      },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
+        "source": "cmd/seed/main_test.go",
+        "target": "cmd/seed/main_test.go",
+        "class": "test",
+        "sha256": "8d8f3d83e4b78bec3ca5182bcf5bc6632890f2a818d83ee8b6b4d27feea5d5f3",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {
+      "packages": [
+        "cmd/seed"
+      ]
+    },
     "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "Fixture loader"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

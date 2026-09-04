@@ -64,6 +64,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if err := refuseUnnamedDatabase(cfg); err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	if reset {
@@ -102,6 +105,31 @@ func run() error {
 	}
 	fmt.Printf("imported %d posts, %d releases\n", posts, releases)
 	return nil
+}
+
+// refuseUnnamedDatabase refuses to mutate a database nobody named.
+//
+// Seeding migrates and writes, and -reset drops the database outright. None of
+// that may ride on DATABASE_URL's declared default, which is a documented
+// guess at a live local address
+// (postgres://postgres:postgres@localhost:5432/gogogadget) rather than
+// something this project chose. Run outside the CLI in a project with nothing
+// configured, this program resolved that default, migrated and seeded whatever
+// answered there, and exited 0 — on a release host, the operator's own
+// Postgres.
+//
+// A derived value is accepted. It reflects the database adapter this project
+// selected and the host port this environment publishes, so it names the
+// project's own server; the zero-account path depends on that, which is why
+// the answer is provenance rather than removing the default.
+func refuseUnnamedDatabase(cfg config.Config) error {
+	if cfg.Source("DATABASE_URL") != config.SourceDeclaredDefault {
+		return nil
+	}
+	return fmt.Errorf(
+		"refusing to migrate and seed a database nobody named: DATABASE_URL is only supplied by its declared default (%s) for the %s environment; "+
+			"export it, or run `ggg db seed`, which resolves the address this project's own selection publishes",
+		cfg.DatabaseURL, cfg.Env)
 }
 
 // resetDatabase drops and recreates the database named in rawURL by connecting

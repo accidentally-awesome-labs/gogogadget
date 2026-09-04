@@ -187,7 +187,7 @@
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
-        "sha256": "3801e3ea7727eba3f36cbb5ef5b1585b655f028b0261ea13173e755c36fcc88b",
+        "sha256": "8f8afec64d955fc1db4e55b5812671c198f66e3881d13e7b3a6d19c1e10e30d3",
         "rewrite_module": false,
         "contract": false
       },
@@ -203,7 +203,7 @@
         "source": "content/docs/database.md",
         "target": "content/docs/database.md",
         "class": "content",
-        "sha256": "b6c66bdfea7ebd155a76cedd4ebf39dd6e7e55ab48eff7d3c33899dc4e399a9d",
+        "sha256": "dc63874bb808e1067a22b1561edf6d2eee2cf3cd214f06d2e6cdab4bb790163d",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "3aad946c5afc796680a39ad07240cbdf9e55f9b5c193001ecbdd4ff45eb07a8b",
+        "sha256": "30cac5fdcb73e7dfa63ac650b06a4249494a75ee2cc6b8cf7b1615b6a8bdde79",
         "rewrite_module": false,
         "contract": false
       },
@@ -363,7 +363,7 @@
         "source": "content/docs/troubleshooting.md",
         "target": "content/docs/troubleshooting.md",
         "class": "content",
-        "sha256": "5c2796679ce8d40188297c090744609dd142a5eeca9bb0e8e20c67cc16b00fab",
+        "sha256": "36a9cca47cd02eb92edef6723034428b4d8fd90a6526c0d144a5b3f35d7c2814",
         "rewrite_module": false,
         "contract": false
       },

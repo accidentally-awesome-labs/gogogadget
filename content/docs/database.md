@@ -122,12 +122,19 @@ swapping later means replacing one query file, not a pipeline.
 ## Test databases
 
 Integration tests use `internal/db/testdb`, which gives **every package its
-own database** named `gogogadget_test_<name>` on the server from
-`TEST_DATABASE_URL` (default `postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable`).
+own database** named `gogogadget_test_<name>`. The *server* is not written down
+anywhere: `testdb.BaseDSN` resolves the address this project's test environment
+publishes — the selected database adapter's local service on its effective host
+port, `localhost:15432` out of the box — through the same derivation `ggg db`
+and the generated configuration parser read. Export `TEST_DATABASE_URL` to
+point the suite somewhere else; CI does exactly that to name its own service
+container.
+
 The database is dropped, recreated, and migrated at `testdb.Open`, so runs
 always start clean and `go test ./...` packages can run in parallel without
 one package's teardown nuking another's fixtures. Tests self-skip when the
-server is unreachable — CI provides it.
+server is unreachable, so bring the test stack up first
+(`ggg services up --environment test`).
 
 ## The job queue, briefly
 

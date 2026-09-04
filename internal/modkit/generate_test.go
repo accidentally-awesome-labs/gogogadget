@@ -1156,8 +1156,14 @@ func TestConfigRegistryEmitsTypedParse(t *testing.T) {
 		// Typed/default adapter access uses the same normalized values as fields.
 		`cfg.Values["PORT"] = strconv.Itoa(cfg.Port)`,
 		`cfg.Values["APP_URL"] = cfg.AppURL`,
-		// Trailing slashes are stripped where declared.
-		`strings.TrimRight(pick(lookup, "APP_URL", "http://localhost:8080"), "/")`,
+		// Trailing slashes are stripped where declared, around the resolver
+		// that applies the derived layer and records provenance.
+		`strings.TrimRight(cfg.resolve(lookup, environment, "APP_URL", "http://localhost:8080"), "/")`,
+		// The environment is resolved once, up front, so the derived layer
+		// cannot depend on where APP_ENV lands in declaration order.
+		`environment := pick(lookup, "APP_ENV", "development")`,
+		// The derived table is always emitted, even when it is empty.
+		`var derivedValues = map[string]map[string]string{`,
 		// Production requirements are declared data, not an authored list.
 		`SECRET_KEY is required when APP_ENV=production`,
 	} {

@@ -1,12 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
+import { databaseURLs } from './generated/database';
 
 // Port 18080 is e2e-only — never the dev port 8080, so Playwright cannot
 // attach to a stray dev server. The e2e database is disposable and reseeded
-// by globalSetup on every run. E2E_DATABASE_URL overrides for machines where
-// 5432 is taken (CI uses the default).
-const databaseURL =
-  process.env.E2E_DATABASE_URL ??
-  'postgres://postgres:postgres@localhost:5432/gogogadget_e2e?sslmode=disable';
+// by globalSetup on every run.
+//
+// Its address is derived, not written here: generated/database.ts is rendered
+// by `ggg sync` from the selected database adapter and the test environment's
+// effective host port (5432 shifted to 15432), which is the stack
+// `ggg test e2e` brings up. It used to be a literal localhost:5432 — the
+// DEVELOPMENT port — so the suite started the test stack and then drove
+// whatever answered on the other one, which on a machine running its own
+// Postgres there is not this project's database at all.
+//
+// E2E_DATABASE_URL still wins: that is how CI points the suite at its own
+// service container.
+const databaseURL = process.env.E2E_DATABASE_URL ?? databaseURLs.test;
+if (!databaseURL) {
+  throw new Error(
+    "no e2e database address: this project's test environment publishes no local Postgres, so set E2E_DATABASE_URL",
+  );
+}
 
 // The server builds absolute redirect and link targets from APP_URL, so the
 // app has to agree with the origin Playwright drives. Left at its default

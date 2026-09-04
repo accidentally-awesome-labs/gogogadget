@@ -109,6 +109,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"data-lifecycle", one(emitDataLifecycleRegistry)},
 		{"seeds", one(emitSeedRegistry)},
 		{"playwright-inventory", one(emitPlaywrightInventory)},
+		{"e2e-database", one(emitE2EDatabase)},
 		{"personas", one(emitPersonasRegistry)},
 		{"scenarios", one(emitScenarioRegistry)},
 		{"surfaces", one(emitVisualSurfaces)},
@@ -2549,6 +2550,30 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	}
 	b.WriteString("}\n\n")
 
+	// The derived layer is generated data, never an authored literal: it is
+	// modkit's one derivation, rendered for the runtime to read. Its whole
+	// point is that a program run on the host resolves the address this
+	// project's own selection and published ports name, instead of falling
+	// through to a declared default that happens to be a live local server.
+	derived, err := derivedEnvironmentTable(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+	b.WriteString("// derivedValues is what this project's provider selection and published host\n")
+	b.WriteString("// ports resolve to, per environment. Rendered from modkit's derivation, so\n")
+	b.WriteString("// the runtime, the CLI and the test harnesses cannot disagree about which\n")
+	b.WriteString("// server they reach. Production is absent by construction: it publishes no\n")
+	b.WriteString("// local service, so there is no host address to name.\n")
+	b.WriteString("var derivedValues = map[string]map[string]string{\n")
+	for _, environment := range sortedKeys(derived) {
+		fmt.Fprintf(&b, "\t%s: {\n", goString(environment))
+		for _, key := range sortedKeys(derived[environment]) {
+			fmt.Fprintf(&b, "\t\t%s: %s,\n", goString(key), goString(derived[environment][key]))
+		}
+		b.WriteString("\t},\n")
+	}
+	b.WriteString("}\n\n")
+
 	// The struct is generated so a key and its Go field have exactly one owner:
 	// a module cannot add a setting without also declaring where it lands.
 	b.WriteString("// Config is the parsed environment. Every field is declared by the module\n")
@@ -2556,6 +2581,9 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("type Config struct {\n")
 	b.WriteString("\t// Values retains adapter-owned inputs for unselected adapters that share this binary.\n")
 	b.WriteString("\tValues map[string]string\n")
+	b.WriteString("\t// Sources records where each value came from, so a caller about to mutate\n")
+	b.WriteString("\t// can tell an address this project named from a documented guess.\n")
+	b.WriteString("\tSources map[string]ValueSource\n")
 	for _, e := range declarations {
 		fmt.Fprintf(&b, "\t// %s: %s\n", e.Key, e.Description)
 		fmt.Fprintf(&b, "\t%s %s\n", e.Field, goEnvType(e.Type))
@@ -2566,7 +2594,15 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("// in declaration order. It never returns early: an operator fixing one bad\n")
 	b.WriteString("// value should not have to re-run to discover the next.\n")
 	b.WriteString("func parseDeclared(lookup func(string) string) (Config, []error) {\n")
-	b.WriteString("\tcfg := Config{Values: map[string]string{}}\n\tvar errs []error\n")
+	b.WriteString("\tcfg := Config{Values: map[string]string{}, Sources: map[string]ValueSource{}}\n\tvar errs []error\n")
+	if len(declarations) > 0 {
+		// Resolved once, up front, rather than read out of cfg.Env: the
+		// derived layer is per environment and APP_ENV is just another
+		// declaration, so depending on where it lands in declaration order
+		// would make the layer silently environment-blind for anything
+		// parsed before it.
+		b.WriteString("\tenvironment := pick(lookup, \"APP_ENV\", \"development\")\n")
+	}
 	for _, e := range declarations {
 		if err := writeEnvParse(&b, e, requiredExpression(e, lock)); err != nil {
 			return nil, err
@@ -2636,6 +2672,28 @@ func declaredEnvironment(lock Lock, graph []Manifest) ([]EnvironmentVariable, er
 	return out, nil
 }
 
+// derivedEnvironmentTable is the derived value set for every environment a
+// project can boot into, keyed by environment. Environments that derive
+// nothing are omitted, so an absent key means "this project publishes nothing
+// local here" rather than "the generator forgot to ask".
+//
+// All three are asked, including production: the rule that production derives
+// no host address belongs to the derivation, not to a loop that quietly skips
+// it.
+func derivedEnvironmentTable(lock Lock, graph []Manifest) (map[string]map[string]string, error) {
+	table := make(map[string]map[string]string, 2)
+	for _, environment := range []string{"development", "test", "production"} {
+		values, err := DerivedEnvironmentValues(lock, graph, environment)
+		if err != nil {
+			return nil, err
+		}
+		if len(values) > 0 {
+			table[environment] = values
+		}
+	}
+	return table, nil
+}
+
 func goEnvType(t EnvType) string {
 	switch t {
 	case EnvInt:
@@ -2684,11 +2742,20 @@ func requiredExpression(e EnvironmentVariable, lock Lock) string {
 
 // writeEnvParse emits the parse for one declaration. Each parse appends to errs
 // and leaves the field at its default on failure, so a later key is still read.
+//
+// Every read goes through cfg.resolve rather than pick: resolve applies the
+// derived layer between the lookup and the declared default, and records where
+// the value came from. Both matter to the same hazard — a destructive command
+// must be able to tell an address this project publishes from a documented
+// guess at a live local server.
 func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr string) error {
 	key := goString(e.Key)
+	resolve := func(def string) string {
+		return fmt.Sprintf("cfg.resolve(lookup, environment, %s, %s)", key, goString(def))
+	}
 	switch e.Type {
 	case EnvString:
-		read := fmt.Sprintf("pick(lookup, %s, %s)", key, goString(e.Default))
+		read := resolve(e.Default)
 		if e.TrimSlash {
 			read = fmt.Sprintf("strings.TrimRight(%s, \"/\")", read)
 		}
@@ -2715,7 +2782,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 			fmt.Fprintf(b, "\t\terrs = append(errs, errors.New(%s))\n\t}\n", goString(e.Key+" is required"))
 		}
 	case EnvBool:
-		fmt.Fprintf(b, "\tcfg.%s = parseBool(pick(lookup, %s, %s))\n", e.Field, key, goString(e.Default))
+		fmt.Fprintf(b, "\tcfg.%s = parseBool(%s)\n", e.Field, resolve(e.Default))
 		fmt.Fprintf(b, "\tcfg.Values[%s] = strconv.FormatBool(cfg.%s)\n", key, e.Field)
 	case EnvInt:
 		if e.Default != "" {
@@ -2725,7 +2792,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 			fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, e.Default)
 		}
 		fmt.Fprintf(b, "\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
-		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
+		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(""))
 		b.WriteString("\t\tvalue, err := strconv.Atoi(raw)\n")
 		condition, explanation := intBound(e)
 		fmt.Fprintf(b, "\t\tif err != nil%s {\n", condition)
@@ -2735,7 +2802,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 		fmt.Fprintf(b, "\t\t\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
 		b.WriteString("\t\t}\n\t}\n")
 	case EnvTime:
-		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
+		fmt.Fprintf(b, "\tif raw := %s; raw != \"\" {\n", resolve(""))
 		b.WriteString("\t\tvalue, err := time.Parse(time.RFC3339, raw)\n\t\tif err != nil {\n")
 		fmt.Fprintf(b, "\t\terrs = append(errs, fmt.Errorf(\"%s: %%v\", err))\n\t\t} else {\n", e.Key)
 		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)

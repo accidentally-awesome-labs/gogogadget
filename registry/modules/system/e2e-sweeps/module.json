@@ -1791,7 +1791,7 @@
         "source": "scripts/visual-run.sh",
         "target": "scripts/visual-run.sh",
         "class": "script",
-        "sha256": "0eefd8cc2650e750270e3eb4a1e452c6b40e8064993d117f6adf39228a0e8b70",
+        "sha256": "3cb85e980b5d6121f22b29c0074081d3e268b81530850340cda4ac7f578a3ae9",
         "rewrite_module": false,
         "contract": false
       },

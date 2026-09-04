@@ -111,6 +111,92 @@ func (c Config) Value(key string) string {
 	return c.Values[key]
 }
 
+// ValueSource records where one resolved value came from. The distinction is
+// load-bearing for anything that MUTATES: DATABASE_URL's declared default is
+// postgres://postgres:postgres@localhost:5432/gogogadget, which is a live
+// address on any machine that has ever run Postgres locally, so a program
+// about to migrate and seed must be able to tell "this project publishes that
+// address" from "nobody told me anything and this is the documented guess".
+type ValueSource int
+
+const (
+	// SourceUnset: nothing supplied it and no default is declared.
+	SourceUnset ValueSource = iota
+	// SourceEnvironment: the lookup supplied it. Load merges the CLI-managed
+	// .ggg/env/<environment>.env and, in development, the legacy .env into the
+	// process environment first, so this is one layer here: the operator, or
+	// the deployment, said so.
+	SourceEnvironment
+	// SourceDerived: this project's own provider selection and published host
+	// ports resolve to it. Nobody typed it, but the project named it — which
+	// is exactly the property a declared default lacks — so destructive work
+	// may ride on it.
+	SourceDerived
+	// SourceDeclaredDefault: nobody supplied it, nothing derives it, and the
+	// owning manifest declares a fallback. Fine to read; refused by anything
+	// that mutates a database.
+	SourceDeclaredDefault
+)
+
+func (s ValueSource) String() string {
+	switch s {
+	case SourceEnvironment:
+		return "environment"
+	case SourceDerived:
+		return "derived"
+	case SourceDeclaredDefault:
+		return "declared default"
+	default:
+		return "unset"
+	}
+}
+
+// resolve reads one declared key through the documented precedence and records
+// where the value came from. The lookup wins (Load has already layered the
+// files into it), then what this project derives for this environment, then
+// the owning manifest's declared default.
+//
+// Empty and unset are the same thing at every layer, matching pick: an
+// exported-but-blank variable is not a configuration choice, and treating it
+// as one only means falling through to a default connection string — which is
+// how a program reaches the wrong server.
+func (c *Config) resolve(lookup func(string) string, environment, key, def string) string {
+	if value := lookup(key); value != "" {
+		c.Sources[key] = SourceEnvironment
+		return value
+	}
+	if value := derivedValues[environment][key]; value != "" {
+		c.Sources[key] = SourceDerived
+		return value
+	}
+	if def != "" {
+		c.Sources[key] = SourceDeclaredDefault
+		return def
+	}
+	c.Sources[key] = SourceUnset
+	return ""
+}
+
+// Source reports where the parsed value for key came from. A Config assembled
+// by hand in a unit test reports SourceUnset for everything, which is honest:
+// nothing resolved it.
+func (c Config) Source(key string) ValueSource {
+	if c.Sources == nil {
+		return SourceUnset
+	}
+	return c.Sources[key]
+}
+
+// DerivedValue is what this project's provider selection and published host
+// ports resolve to for one key in one environment, regardless of which
+// environment this process runs in. Test harnesses need exactly that: an
+// integration package's database lives on the test stack whatever APP_ENV
+// says. Absent means the environment publishes nothing local to address.
+func DerivedValue(environment, key string) (string, bool) {
+	value, ok := derivedValues[environment][key]
+	return value, ok
+}
+
 // IntValue returns a generated integer declaration without making adapters
 // parse their own environment values. Config.LoadFrom validates declared
 // bounds; this fallback only supports manually assembled Config values in

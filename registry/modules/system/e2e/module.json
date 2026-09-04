@@ -59,7 +59,7 @@
         "source": "e2e/playwright.config.ts",
         "target": "e2e/playwright.config.ts",
         "class": "asset",
-        "sha256": "9c0d7c4ccf52f4ee3b7d3f3d94a38031620f04975c32e06c4451c1b379797bf7",
+        "sha256": "6000099a05563169e2ab790a4e0b9dce52d3e990b513603801f13aba67664849",
         "rewrite_module": false,
         "contract": false
       }

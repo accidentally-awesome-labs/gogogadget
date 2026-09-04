@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/jackc/pgx/v5"
@@ -39,7 +40,7 @@ const (
 )
 
 // Open drops, recreates, and migrates gogogadget_test_<name> on the server
-// from TEST_DATABASE_URL (default postgres://postgres:postgres@localhost:5432).
+// BaseDSN resolves.
 func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 	t.Helper()
 	dsn := DSN(t, name)
@@ -59,6 +60,40 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 	return pool, sqlc.New(pool)
 }
 
+// BaseDSN is the server per-package test databases are created on.
+//
+// TEST_DATABASE_URL wins, which is how CI points the suite at its own service
+// container. With nothing exported it resolves the address THIS project's test
+// environment publishes — the selected database adapter's local service on its
+// effective host port, which the test stack shifts to 15432 — through the same
+// derivation `ggg db`, the generated configuration parser and the Playwright
+// harness read.
+//
+// It used to fall back to a literal localhost:5432, which agreed with the
+// other three hardcoded copies only by luck and disagreed with the test stack
+// outright: on a machine running its own Postgres there, `go test ./...`
+// created and dropped databases on a server the project had nothing to do
+// with.
+//
+// Only the server is derived. The database NAME stays this package's own
+// (gogogadget_test_<name>), because a per-package disposable database is the
+// scope this helper owns, not something the project declares.
+func BaseDSN(t *testing.T) string {
+	t.Helper()
+	if base := os.Getenv("TEST_DATABASE_URL"); base != "" {
+		return base
+	}
+	base, ok := config.DerivedValue("test", "DATABASE_URL")
+	if !ok {
+		// No override and nothing to derive: the test environment selected a
+		// managed database, so there is no local server to name. Refusing is
+		// the same rule `ggg db` applies — an unresolved connection string is
+		// not an empty one, it is a command with no destination.
+		t.Fatalf("no test database server: TEST_DATABASE_URL is unset and this project's test environment publishes no local Postgres to derive one from; export TEST_DATABASE_URL")
+	}
+	return base
+}
+
 // DSN drops and recreates gogogadget_test_<name> and returns its DSN, without
 // migrating. Callers that own their own migration run — a runtime booting the
 // database module, for instance — need an empty database, not a prepared one.
@@ -75,13 +110,10 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 // databases are recycled rather than accumulating.
 func DSN(t *testing.T, name string) string {
 	t.Helper()
-	base := os.Getenv("TEST_DATABASE_URL")
-	if base == "" {
-		base = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
-	}
+	base := BaseDSN(t)
 	u, err := url.Parse(base)
 	if err != nil {
-		t.Fatalf("TEST_DATABASE_URL: %v", err)
+		t.Fatalf("test database server %q: %v", base, err)
 	}
 	dbName := "gogogadget_test_" + name + os.Getenv("TEST_DB_SUFFIX")
 

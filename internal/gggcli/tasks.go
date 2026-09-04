@@ -69,11 +69,23 @@ func (r osTaskRunner) Run(ctx context.Context, root string, argv []string, env m
 	return command.Run()
 }
 
+// runner executes trusted tasks. Subprocess output goes to stderr, never
+// stdout — the same rule genesisRunner has always had, for the same reason:
+// stdout carries the envelope and nothing else, so `--json` stays exactly one
+// parseable document. Every trusted task shells out (setup, generate, check,
+// test, db, services, build), and handing the child os.Stdout interleaved
+// tool chatter with the envelope and broke the CLI's machine contract.
+//
+// The human path moved too. It renders to stdout through App.Out, so a split
+// would mean the same bytes reaching different streams depending on a flag,
+// and a human at a terminal sees stderr identically. Nothing in this
+// repository — no script, no Make target, no documented workflow — consumes a
+// trusted task's tool output from stdout.
 func (c *Controller) runner() TaskRunner {
 	if c.taskRunner != nil {
 		return c.taskRunner
 	}
-	return osTaskRunner{out: os.Stdout, err: os.Stderr}
+	return osTaskRunner{out: os.Stderr, err: os.Stderr}
 }
 
 func (c *Controller) previewTrustedTask(mutation TaskMutation) error {
@@ -123,17 +135,24 @@ const (
 	// envConfigured: the operator supplied it — process environment, the
 	// CLI-managed .ggg/env/<environment>.env, or the legacy .env.
 	envConfigured envProvenance = iota
-	// envDeclaredDefault: nobody supplied it and the owning manifest declares
-	// a fallback. Fine to read, refused for anything that mutates.
+	// envDerived: nobody supplied it, and this project's own provider
+	// selection and published host ports resolve to it. Trustworthy for a
+	// mutation: unlike a declared default it names THIS project's server.
+	envDerived
+	// envDeclaredDefault: nobody supplied it, nothing derives it, and the
+	// owning manifest declares a fallback. Fine to read, refused for anything
+	// that mutates.
 	envDeclaredDefault
 )
 
 // taskEnvValue resolves one value a host-side task needs through the
 // documented precedence: the process environment wins, then the CLI-managed
-// .ggg/env/<environment>.env, then the legacy .env in development only, and
-// never a file in production. remote.LookupEnv already implements exactly
-// that order and is what `ggg provider` and `ggg deploy` resolve through, so
-// this is one contract with one implementation.
+// .ggg/env/<environment>.env, then the legacy .env in development only, then
+// what this project derives for that environment, and only then the owning
+// manifest's declared default. No file is ever read in production, and
+// production derives nothing. remote.LookupEnv already implements the first
+// three and is what `ggg provider` and `ggg deploy` resolve through, so that
+// part is one contract with one implementation.
 //
 // It refuses an unresolved value rather than returning empty, and that is the
 // point. An empty connection string is not an error to libpq — it falls back
@@ -141,16 +160,24 @@ const (
 // how a command reaches the wrong server. The refusal names the key, the
 // environment, and the file the CLI writes.
 //
-// The declared default is returned as a distinct provenance rather than
-// silently blended in. DATABASE_URL's default is
+// The last two layers are kept apart rather than blended, because they are
+// different claims. DATABASE_URL's declared default is
 // postgres://postgres:postgres@localhost:5432/gogogadget, which is a live
-// address on any machine that has ever run Postgres locally — so a caller
-// that is about to mutate a database must be able to tell "the operator told
-// me this" from "nobody told me anything and this is the documented guess".
+// address on any machine that has ever run Postgres locally, and nobody
+// pointed the tool at it. The derived value is the address the project's own
+// selection publishes — so a mutating command accepts it and refuses the
+// default.
 func (c *Controller) taskEnvValue(environment, key string) (string, envProvenance, error) {
 	root := c.rootDir()
 	if value, ok := remote.LookupEnv(root, environment)(key); ok {
 		return value, envConfigured, nil
+	}
+	value, derived, err := c.derivedEnvValue(environment, key)
+	if err != nil {
+		return "", envConfigured, err
+	}
+	if derived {
+		return value, envDerived, nil
 	}
 	if value, ok := c.declaredEnvDefault(key); ok {
 		return value, envDeclaredDefault, nil
@@ -158,6 +185,36 @@ func (c *Controller) taskEnvValue(environment, key string) (string, envProvenanc
 	return "", envConfigured, refusalError(fmt.Errorf(
 		"%s is not set for the %s environment; export it, or run `ggg provider configure` to write it to %s",
 		key, environment, remote.EnvironmentEnvFile(environment)))
+}
+
+// derivedEnvValue is what this project's provider selection and published host
+// ports resolve to for one key in one environment. It reads the lock's
+// embedded manifests, exactly like declaredEnvDefault, so the CLI and the
+// generated configuration parser derive from the same records through the same
+// function — the whole point being that no consumer keeps a default of its
+// own.
+//
+// A derivation that fails is an error, never a silent miss: falling through to
+// the declared default there would turn a broken provider selection into a
+// command aimed at localhost:5432.
+func (c *Controller) derivedEnvValue(environment, key string) (string, bool, error) {
+	lock, ok, err := readProjectLock(c.rootDir())
+	if err != nil {
+		return "", false, runtimeError(err)
+	}
+	if !ok {
+		return "", false, nil
+	}
+	graph := make([]modkit.Manifest, 0, len(lock.Modules))
+	for _, locked := range lock.Modules {
+		graph = append(graph, locked.Manifest)
+	}
+	values, err := modkit.DerivedEnvironmentValues(lock, graph, environment)
+	if err != nil {
+		return "", false, runtimeError(err)
+	}
+	value, exists := values[key]
+	return value, exists, nil
 }
 
 // declaredEnvDefault reports the default the owning manifest declares for one
@@ -183,7 +240,7 @@ func (c *Controller) declaredEnvDefault(key string) (string, bool) {
 // value available is the manifest's declared default. `go run ./cmd/seed`
 // outside the CLI resolves that default and would migrate and seed whatever
 // answers at that address; a ggg command that mutates must be told which
-// database it is mutating.
+// database it is mutating, or derive it from the project's own selection.
 func refuseDeclaredDefault(action, environment, key, value string) error {
 	return refusalError(fmt.Errorf(
 		"db %s refuses to mutate a database it was not told about: %s is only supplied by its declared default (%s) for the %s environment; "+
@@ -274,7 +331,9 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 			err = run(root, "docker", "compose", "-f", "compose.yaml", "up", "-d", "--wait")
 		}
 		if err == nil {
-			err = superviseDev(ctx, root, os.Stdout, os.Stderr)
+			// Same rule as runner(): supervised child output is progress, and
+			// stdout belongs to the envelope.
+			err = superviseDev(ctx, root, os.Stderr, os.Stderr)
 		}
 	case "db":
 		// Every db form needs the connection string, and it is resolved once,

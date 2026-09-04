@@ -149,9 +149,16 @@ dev port 8080, so the suite cannot attach to a stray dev server. The
 `TEST_NOW=2026-01-15T00:00:00Z`, and blank `CLERK_PUBLISHABLE_KEY` /
 `CLERK_SECRET_KEY` — the server auto-loads `.env` in development, and a real
 dev key would boot clerk-js and contradict the suite's own "no third-party
-request" assertions. `globalSetup` reseeds the disposable `gogogadget_e2e`
-database on every run via `go run ./cmd/seed -reset -registry e2e`, which
-loads the module-owned fixtures under `internal/db/testdata/seed/e2e/`.
+request" assertions. `globalSetup` reseeds the disposable test database on
+every run via `go run ./cmd/seed -reset -registry e2e`, which loads the
+module-owned fixtures under `internal/db/testdata/seed/e2e/`.
+
+That database is **derived, not written down**: `e2e/generated/database.ts` is
+rendered by `ggg sync` from the test environment's selected database adapter
+and its effective host port, so the suite reaches the stack `ggg test e2e`
+brings up (`localhost:15432`) rather than a literal that drifts from it.
+Export `E2E_DATABASE_URL` to override, which is how CI names its own service
+container.
 
 Login is a cookie, not a hosted page:
 
@@ -264,7 +271,9 @@ make visual-update   # the only thing allowed to overwrite a committed screensho
 ```
 
 Both go through `scripts/visual-run.sh`, which extracts the
-`@playwright/test` version from `e2e/package.json`, resets `gogogadget_e2e`,
+`@playwright/test` version from `e2e/package.json`, resets the derived test
+database (it names none itself — the seed and the server resolve
+`DATABASE_URL` through the project's own precedence),
 starts the host server on `:18080` with `APP_ENV=test`, `DEV_AUTH_BYPASS=true`,
 `TEST_NOW=2026-01-15T00:00:00Z` and blank `CLERK_*`, then runs
 `mcr.microsoft.com/playwright:v<version>-jammy` with

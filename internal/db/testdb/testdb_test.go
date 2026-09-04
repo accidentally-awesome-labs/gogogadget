@@ -8,8 +8,38 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 )
+
+// The fallback used to be a literal localhost:5432 — the DEVELOPMENT port,
+// which agreed with the other three hardcoded copies only by luck and
+// disagreed with the test stack outright. On a machine running its own
+// Postgres there, `go test ./...` created, migrated and dropped databases on a
+// server the project had nothing to do with.
+//
+// Mutation: return a literal instead of config.DerivedValue("test", …), and
+// the integration layer stops following the port this project's test stack
+// publishes.
+func TestBaseDSNDerivesTheTestStackAndHonoursTheOverride(t *testing.T) {
+	derived, ok := config.DerivedValue("test", "DATABASE_URL")
+	if !ok {
+		t.Fatal("this project's test environment must publish a local Postgres to derive from")
+	}
+
+	t.Setenv("TEST_DATABASE_URL", "")
+	if got := testdb.BaseDSN(t); got != derived {
+		t.Fatalf("BaseDSN = %q, want the derived test address %q", got, derived)
+	}
+
+	// CI points the suite at its own service container this way, so the
+	// override has to outrank the derivation.
+	const override = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
+	t.Setenv("TEST_DATABASE_URL", override)
+	if got := testdb.BaseDSN(t); got != override {
+		t.Fatalf("BaseDSN = %q, want the exported override %q", got, override)
+	}
+}
 
 // A per-package database that is created and never dropped accumulates one row
 // in pg_database per package, forever. At ~40 packages that is ~40 idle
@@ -68,13 +98,9 @@ func TestSuffixSeparatesConcurrentWorkers(t *testing.T) {
 
 func adminConn(t *testing.T) *pgx.Conn {
 	t.Helper()
-	base := os.Getenv("TEST_DATABASE_URL")
-	if base == "" {
-		base = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
-	}
-	u, err := url.Parse(base)
+	u, err := url.Parse(testdb.BaseDSN(t))
 	if err != nil {
-		t.Fatalf("TEST_DATABASE_URL: %v", err)
+		t.Fatalf("test database server: %v", err)
 	}
 	u.Path = "/postgres"
 	conn, err := pgx.Connect(context.Background(), u.String())

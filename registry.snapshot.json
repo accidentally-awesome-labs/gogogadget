@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "934f38bd6fd318b8334b2a017f3182f618aee357c5701623650fffd454453d4c"
+      "sha256": "931763f8b7d9fcec05a19d11d9fd6808bdc7e57c2b28e9ffc49c36454f45877d"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "97a80719df5827b11c0a7591c1d5e570b9ca605d843176c84bf585efcc561f83"
+      "sha256": "78fec73665999efd1cca677a02ab3d8c640ab64e898983474bf8fb0944c2aaf3"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "befb0ee6b3f2c003420cd1168512f299e7374e21a75649121be0c8a39b41a763"
+      "sha256": "e5c5b3c89e0d7b908e753899821afd0843d5291da63a446de5845bb9d9f74be2"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -920,11 +920,11 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "3ed7715ecf3d44ee5531fbc2ee923ec399bf6ecd14a36263785b406fe7b184e0"
+      "sha256": "874648ea6ba17b174470eeb8582676614c5e979c057165cce53a6fe47f3e5915"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
-      "sha256": "d300c671fed5bc79bbefb6841d68398fa8f6e9cede692cf997cae528546c866f"
+      "sha256": "1f2983077d0920da5a9322be01d327752ff91a318a6da8138482e0810ec6340d"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "49e9ad079593f6472079c0ddf089874ea2b5518c46f8d987d9cdf3d9e3999761"
+      "sha256": "c12e6c24582117b1cfb0413d2a556149fd820e6c33b4c41c6f007ce06bbdc933"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1088,7 +1088,7 @@
     },
     {
       "path": "registry/modules/system/seed/module.json",
-      "sha256": "6ec062084efc8f91fcac8e1993d2d21e434325398b20e530ef12f60c201f5fd5"
+      "sha256": "e14ccab45079d2f0888665264462b2a18cf43fb16d998594211ce6e6a22961a3"
     },
     {
       "path": "registry/modules/system/seo/module.json",
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "registry/modules/system/testdb/module.json",
-      "sha256": "2bbfc6676e718267356c134d26fe73312bbf1df40d81b87e749375f3a9f5b2a4"
+      "sha256": "5bbf0a83f0b92ee96118a4e1d5c3e10a63331cd8cc5c4dfc4c6ef2db87a597c5"
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",

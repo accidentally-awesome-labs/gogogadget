@@ -289,7 +289,7 @@ func IsRegistryOwnedOutputPath(path string) bool {
 	case "compose.yaml", "compose.test.yaml",
 		"static/ui-components.js", "static/ui-engines.js",
 		".env.example", "content/docs/configuration-reference.md", "content/docs/module-reference.md", "content/docs/component-reference.md",
-		"e2e/generated/inventory.ts", "e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
+		"e2e/generated/database.ts", "e2e/generated/inventory.ts", "e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
 		"internal/web/templates/scenarios_gen.go",
 		"internal/web/templates/ui/reference_gen.go":
 		return true

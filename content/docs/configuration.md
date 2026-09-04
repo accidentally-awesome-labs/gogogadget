@@ -29,11 +29,20 @@ Resolution order is fixed, and every layer below the first is a file:
 3. **`.env`** — the legacy file, **development only**. `.env.example` is
    generated and ships a working zero-account setup; copy it here if you
    prefer a single file.
+4. **The derived value** — what *this project* resolves for that environment
+   from its own selection: the selected database adapter's local service on the
+   host port that environment publishes. `DATABASE_URL` is the one derived key
+   today, and it is `localhost:5432` for development and `localhost:15432` for
+   test out of the box, following any `ports` override in `gogogadget.json`.
+5. **The owning module's declared default** — a documented guess, and the last
+   resort. See below.
 
 A key that is present but empty counts as unset, so the next layer supplies
 it. **Production reads no file at all** — not `.env`, and not
 `.ggg/env/production.env` even if one exists; production configuration comes
-from the deployment environment.
+from the deployment environment. Production also **derives nothing**: it has no
+generated Compose file and therefore no local service, so there is no host
+address to name.
 
 `ggg db migrate|status|seed|reset` resolve through exactly this order and
 **refuse** when the value is missing rather than passing an empty one to the
@@ -47,14 +56,20 @@ process list is public and a DSN carries a password.
 
 A **declared default is not a configured value**. `DATABASE_URL`'s default,
 `postgres://postgres:postgres@localhost:5432/gogogadget`, matches the host port
-the development stack publishes (`ggg services up` — the test stack derives
-`15432`, see [Deployment](/docs/deployment)) and the zero-account path depends
-on it — but it is also a live address on any machine that has ever run
-Postgres locally, and on such a machine loopback reaches that server rather
-than the container. So `ggg db status` reads through it, and `ggg db migrate`,
-`seed` and `reset` **refuse** it, naming what to configure: a command that
-mutates has to be told which database it is mutating. Supplying the same value
-through the environment or the CLI-managed file is what makes it trusted.
+the development stack publishes and the zero-account path depends on it — but
+it is also a live address on any machine that has ever run Postgres locally,
+and on such a machine loopback reaches that server rather than the container.
+So `ggg db status` reads through it, and `ggg db migrate`, `seed` and `reset`
+**refuse** it, naming what to configure: a command that mutates has to be told
+which database it is mutating. `go run ./cmd/seed` refuses it for the same
+reason — the generated parser records where each value came from, and seeding
+migrates and writes.
+
+A **derived value is trusted**, and that is the difference. It is not a guess:
+it reflects the adapter this project selected and the port this project
+publishes, so `ggg db migrate --environment test` reaches `15432` with nothing
+configured at all. Supplying a value through the environment or the
+CLI-managed file overrides it.
 
 ## The full table
 
@@ -63,12 +78,18 @@ every key, its owning module, whether production requires it, its default, and
 its notes. It is rendered from the same records the parser is, so it cannot
 drift from what the code actually reads.
 
-Two more variables matter but are **not** read by `config.Load()`:
+Two more variables matter but are **not** read by `config.Load()`. Both are
+overrides: with neither exported, each consumer resolves the address the
+project's own test stack publishes, through the same derivation `ggg db` uses.
 
 | Key | Read by | Default | Notes |
 |---|---|---|---|
-| `DB_PORT` | `compose.yaml` | `5432` | Host port for the local Postgres. Set it (and match the port in `DATABASE_URL`) when 5432 is taken |
-| `TEST_DATABASE_URL` | `internal/db/testdb` | `postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable` | Server used by integration tests; each package gets its own database. See [Database](/docs/database) |
+| `TEST_DATABASE_URL` | `internal/db/testdb` | the derived test address (`localhost:15432` out of the box) | Server integration tests create their per-package databases on. See [Database](/docs/database) |
+| `E2E_DATABASE_URL` | `e2e/playwright.config.ts` | the derived test address | Database the Playwright suite reseeds and drives. CI exports it to name its own service container |
+
+`DB_PORT` is gone. Host ports are a project decision now: declare them under
+`ports` in `gogogadget.json` and both the generated Compose files and every
+derived address follow. See [Deployment](/docs/deployment).
 
 ## Production validation rules
 
@@ -102,11 +123,12 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disa
 **Local development with real Clerk:** add the four `CLERK_*` keys. When Clerk
 is configured, `/login` goes to the hosted portal instead of `/dev/login`.
 
-**Tests** (what `e2e/playwright.config.ts` uses):
+**Tests** (what `e2e/playwright.config.ts` uses). It sets no database at all —
+the address comes from `e2e/generated/database.ts`, rendered by `ggg sync` from
+the test environment's selected adapter and published port:
 
 ```sh
 APP_ENV=test PORT=18080 DEV_AUTH_BYPASS=true \
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/gogogadget_e2e \
 TEST_NOW=2026-01-15T00:00:00Z
 ```
 
