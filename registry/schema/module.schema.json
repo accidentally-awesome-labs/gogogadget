@@ -1418,6 +1418,12 @@
             "$ref": "#/$defs/ScenarioContribution"
           }
         },
+        "csp": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CSPContribution"
+          }
+        },
         "slots": {
           "type": "array",
           "items": {
@@ -1569,6 +1575,47 @@
         "layout",
         "surfaces",
         "states"
+      ]
+    },
+    "CSPContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "directives": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "style-src",
+              "img-src",
+              "font-src",
+              "connect-src",
+              "worker-src",
+              "media-src",
+              "frame-src"
+            ]
+          }
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "sources": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        }
+      },
+      "required": [
+        "id",
+        "directives",
+        "package",
+        "sources"
       ]
     },
     "SlotContribution": {

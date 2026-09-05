@@ -784,7 +784,7 @@
     },
     {
       "path": "registry/modules/page/settings-account/module.json",
-      "sha256": "7348a0431fc28ee3c772513ca2ef5ce8333e5a81116bb457a41ae58a96181197"
+      "sha256": "ef8c6e9ca6f2ed3bd0503ee4d3e7573445e6aeb0defad40d39dc88efcbfbdbed"
     },
     {
       "path": "registry/modules/page/settings-api-tokens/module.json",
@@ -800,7 +800,7 @@
     },
     {
       "path": "registry/modules/page/settings-organization/module.json",
-      "sha256": "528b7c79b61b1f6532c4fb7c600a0e27899baf1dfad5e6bcda53e807f7bf1b70"
+      "sha256": "ae470860bd9475b744ebe53e34d2d6f3b1e75d9504319925b21e585781236077"
     },
     {
       "path": "registry/modules/page/settings-webhooks/module.json",
@@ -944,7 +944,7 @@
     },
     {
       "path": "registry/modules/system/identity-clerk/module.json",
-      "sha256": "55ed5b5066e4cd4c20aed4679e3be5893624883a0aaf9e47ebc02abb0d4f6197"
+      "sha256": "bbf3add9e5cd6268f01354db1b5585f8be5773dc501303ef5924154efa08a6cf"
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "a659b8619c84c3d889c8d6cf6f23f5fb88de4667272b99e581fdbe0d22232c6e"
+      "sha256": "360c9afacc4db0f77d551cd760f255ada4279d11b1b31eceda83de53def7b036"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "a09bc01d15f46504912d620fa7717f142f346893fd1a7a28d6acfb58039208b6"
+      "sha256": "6077579bc810360997653a574c23099e3652fc5e9561a16d60d456021001c1b5"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "97e04f5601950b1cd4a90a73252bc0d855f2015bfd1757ea181777ef4309f511"
+      "sha256": "7dd092a5fb16108ce19ed63a5f48e996c1d49a665ec4efcbe462c25dd26e5688"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1208,7 +1208,7 @@
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "c4e21223e0170b805d06a681f1259039b9da4a6bfbe7a528d49733e65c76efd6"
+      "sha256": "9925f820e8995b6d2e3c3f62e3f3e684a363b0ece8fa61739052de3f7a6f9e5e"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
@@ -1300,7 +1300,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "422588e38cc2247937669648d75ee9aac28b4032d055f529fc2c0b7c53217b19"
+      "sha256": "e67d2d7039162e4d02f78c6751ecb647cba7cd2588a56b36a9c24f39b3bc8bce"
     },
     {
       "path": "registry/schema/project.schema.json",

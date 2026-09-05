@@ -87,6 +87,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"chrome", one(emitChromeRegistry)},
 		{"settings_nav", one(emitSettingsNavigationRegistry)},
 		{"shell_slots", one(emitShellSlotsRegistry)},
+		{"csp", one(emitCSPRegistry)},
 		{"locales", one(emitLocalesRegistry)},
 		{"catalogs", emitCatalogRegistries},
 		{"compose", emitComposeRegistry},

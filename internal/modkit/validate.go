@@ -574,6 +574,9 @@ func validateRuntime(runtime RuntimeContributions, canonical bool) error {
 	if err := validateSlots(runtime.Slots, canonical); err != nil {
 		return err
 	}
+	if err := validateCSPContributions(runtime.CSP, canonical); err != nil {
+		return err
+	}
 	if err := validateUI(runtime.UI, canonical); err != nil {
 		return err
 	}

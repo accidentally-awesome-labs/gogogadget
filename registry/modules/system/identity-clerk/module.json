@@ -4,7 +4,7 @@
     "id": "ggg/system/identity-clerk",
     "kind": "system",
     "name": "identity-clerk",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Clerk identity",
     "description": "Hosted Clerk identity provider",
@@ -67,6 +67,22 @@
         "target": "internal/identity/clerk/contract_test.go",
         "class": "test",
         "sha256": "526b14752abb8d8adf8723617ba55f656db7e23835953348ae3483743e8d6b84",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/identity/clerk/csp/csp.go",
+        "target": "internal/identity/clerk/csp/csp.go",
+        "class": "go",
+        "sha256": "1711959acd7d098f862c3374a53cfde5437b74b78f6b94059b8b24018adf7526",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/clerk/csp/csp_test.go",
+        "target": "internal/identity/clerk/csp/csp_test.go",
+        "class": "test",
+        "sha256": "112c5256725678182a399b4a167ea985d4becad242be1fcdebae98fa515eb2e7",
         "rewrite_module": true,
         "contract": false
       },
@@ -586,6 +602,7 @@
     "claims": {
       "packages": [
         "internal/identity/clerk",
+        "internal/identity/clerk/csp",
         "internal/identity/clerkurl"
       ]
     },
@@ -685,6 +702,18 @@
           "slot": "user-button",
           "package": "internal/web/templates/slots",
           "renderer": "ClerkUserButton"
+        }
+      ],
+      "csp": [
+        {
+          "id": "identity-clerk-csp",
+          "directives": [
+            "connect-src",
+            "img-src",
+            "worker-src"
+          ],
+          "package": "internal/identity/clerk/csp",
+          "sources": "Sources"
         }
       ]
     },
@@ -1261,7 +1290,7 @@
         "key": "CLERK_FRONTEND_API_URL",
         "field": "ClerkFrontendAPIURL",
         "type": "string",
-        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise",
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.\u003chost\u003e` in production, the Clerk dev wildcard otherwise",
         "derivation": {
           "package": "internal/identity/clerkurl",
           "function": "FrontendAPIURL",
@@ -1307,6 +1336,7 @@
     "tests": {
       "go_packages": [
         "internal/identity/clerk",
+        "internal/identity/clerk/csp",
         "internal/identity/clerkurl",
         "internal/web/templates/slots"
       ]

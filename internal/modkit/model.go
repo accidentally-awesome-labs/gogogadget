@@ -415,6 +415,7 @@ type RuntimeContributions struct {
 	ContentTypes  []ContentTypeContribution  `json:"content_types,omitempty"`
 	Navigation    []NavigationContribution   `json:"navigation,omitempty"`
 	Slots         []SlotContribution         `json:"slots,omitempty"`
+	CSP           []CSPContribution          `json:"csp,omitempty"`
 	UI            []UIContribution           `json:"ui,omitempty"`
 	Assets        []AssetContribution        `json:"assets,omitempty"`
 	Scenarios     []ScenarioContribution     `json:"scenarios,omitempty"`
@@ -724,6 +725,62 @@ type SlotContribution struct {
 	Renderer string    `json:"renderer"`
 	Before   []string  `json:"before,omitempty"`
 	After    []string  `json:"after,omitempty"`
+}
+
+// CSPDirective is the closed set of Content-Security-Policy directives an
+// installed module may add sources to.
+//
+// The set is deliberately not "every directive in the policy". Three of the
+// policy's ten are the framework's posture rather than a list anybody extends:
+//
+//   - script-src is 'self' and nothing else, which is what makes the vendored
+//     files the only script that can run. Every third-party byte this product
+//     ships is committed and self-served; an adapter that wants a CDN wants
+//     the vendoring rule repealed, and that is not a contribution.
+//   - default-src is the fallback the others narrow. Widening it widens
+//     everything that has no directive of its own.
+//   - base-uri, form-action and frame-ancestors are navigation and embedding
+//     controls. Adding a source there changes where the document can be framed
+//     or where its forms can post, which no browser SDK needs and which is the
+//     shape of a real attack.
+//
+// What remains is the set a hosted widget legitimately needs: somewhere to
+// call, somewhere to load an avatar from, and — for one vendor's session
+// handshake — a blob: worker.
+type CSPDirective string
+
+const (
+	CSPConnectSrc CSPDirective = "connect-src"
+	CSPImgSrc     CSPDirective = "img-src"
+	CSPWorkerSrc  CSPDirective = "worker-src"
+	CSPFontSrc    CSPDirective = "font-src"
+	CSPStyleSrc   CSPDirective = "style-src"
+	CSPMediaSrc   CSPDirective = "media-src"
+	CSPFrameSrc   CSPDirective = "frame-src"
+)
+
+// ContributableCSPDirectives is that set, in the order the header renders them.
+var ContributableCSPDirectives = []CSPDirective{
+	CSPStyleSrc, CSPImgSrc, CSPFontSrc, CSPConnectSrc, CSPWorkerSrc,
+	CSPMediaSrc, CSPFrameSrc,
+}
+
+// CSPContribution declares a function that returns Content-Security-Policy
+// sources for the directives the module names.
+//
+// It is shaped like SlotContribution on purpose: a package, a symbol, and the
+// contributing module's own non-secret configuration as the only input. CSP is
+// a per-deployment decision rather than a per-request one, so the function
+// takes no context and the composed header is computed once.
+//
+// Directives is the grant. A source returned for a directive the manifest does
+// not name is a refusal, so reading the manifest tells you the whole blast
+// radius of the contribution without reading its code.
+type CSPContribution struct {
+	ID         string         `json:"id"`
+	Directives []CSPDirective `json:"directives"`
+	Package    string         `json:"package"`
+	Sources    string         `json:"sources"`
 }
 
 // UIContribution is the generated component metadata supplied by a UI item.

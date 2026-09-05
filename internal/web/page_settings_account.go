@@ -10,7 +10,7 @@ import (
 // GET /app/settings/account
 func (s *Server) handleSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	user := identity.UserFrom(r.Context())
-	accountURL := clerkAccountPortalLink(
+	accountURL := accountPortalLink(
 		s.cfg.Value("CLERK_PORTAL_URL"),
 		"/user",
 		s.cfg.AppURL+r.URL.Path,

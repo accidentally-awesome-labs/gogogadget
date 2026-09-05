@@ -439,3 +439,102 @@ func configReadKey(expr ast.Expr, keys map[string]string) (string, bool) {
 	}
 	return key, true
 }
+
+// ValidateSeamVendorHosts refuses a provider's hostname in seam-owned Go.
+//
+// `img-src 'self' data: https://img.clerk.com` sat in ggg/system/security's
+// header assembly: not a by-key read that degrades to 'self' when the adapter
+// is deselected, but a vendor's hostname compiled into the seam. A project on
+// another identity provider shipped a policy naming a vendor it did not use,
+// and one whose avatars live elsewhere had them silently blocked. Neither
+// existing scan could see it — the neutrality one covers template bytes, the
+// selector one looks for a bool testing a key — and a hostname in a CSP
+// directive is not even a whole string literal, so a "quoted URL" rule misses
+// it too.
+//
+// The token set is the SAME derivation ValidateShellProviderNeutrality uses:
+// an adapter that offers a managed service target names somebody's product.
+// That is what makes this precise where a URL-literal rule is not. Measured
+// over seam-owned non-test Go before it was written: 13 host-bearing URLs, of
+// which img.clerk.com is the only vendor. The other twelve are six
+// RFC 2606 example/test hosts in contract fixtures and the billing mock, three
+// schema.org namespace identifiers that are never fetched, GitHub's API and
+// codeload hosts (the registry engine's own source), and this project's own
+// repository in the docs edit link. A rule about "URLs" would have to exempt
+// all of them by hand; a rule about vendors exempts them by construction.
+//
+// Hostname labels are compared exactly, so `clerk` matches `img.clerk.com` and
+// `*.clerk.accounts.dev` without `clerkurl` or `clerks.example.com` matching
+// anything.
+func ValidateSeamVendorHosts(modules []Manifest, files map[string][]byte) error {
+	tokens := providerVendorTokens(modules)
+	if len(tokens) == 0 {
+		return nil
+	}
+	for _, module := range modules {
+		if module.Kind != ModuleSystem || isProviderAdapter(module) {
+			continue
+		}
+		targets := make([]string, 0, len(module.Files))
+		for _, file := range module.Files {
+			if file.Class == FileClassTest || strings.HasSuffix(file.Target, "_test.go") {
+				continue
+			}
+			if strings.HasSuffix(file.Target, ".go") {
+				targets = append(targets, file.Target)
+			}
+		}
+		sort.Strings(targets)
+		for _, target := range targets {
+			content, ok := files[target]
+			if !ok {
+				continue
+			}
+			fset := token.NewFileSet()
+			parsed, err := parser.ParseFile(fset, target, content, parser.SkipObjectResolution)
+			if err != nil {
+				return fmt.Errorf("scan %s: %w", target, err)
+			}
+			var failure error
+			ast.Inspect(parsed, func(node ast.Node) bool {
+				if failure != nil {
+					return false
+				}
+				literal, ok := node.(*ast.BasicLit)
+				if !ok || literal.Kind != token.STRING {
+					return true
+				}
+				for _, host := range vendorHostsIn(literal.Value) {
+					for _, label := range strings.Split(host, ".") {
+						owner, vendor := tokens[strings.ToLower(label)]
+						if !vendor {
+							continue
+						}
+						failure = fmt.Errorf(
+							"%s:%d in %s names provider host %s (%s); a seam may not carry a vendor's hostname — contribute it from %s as a runtime.csp source, which is granted per directive and leaves with the adapter",
+							target, fset.Position(literal.Pos()).Line, module.ID, host, owner, owner)
+						return false
+					}
+				}
+				return true
+			})
+			if failure != nil {
+				return failure
+			}
+		}
+	}
+	return nil
+}
+
+// vendorHostURL finds the host of every http(s) URL inside a string, including
+// one embedded in a longer value such as a whole CSP directive.
+var vendorHostURL = regexp.MustCompile(`https?://([A-Za-z0-9*][A-Za-z0-9.\-*]*\.[A-Za-z]{2,})`)
+
+func vendorHostsIn(literal string) []string {
+	matches := vendorHostURL.FindAllStringSubmatch(literal, -1)
+	hosts := make([]string, 0, len(matches))
+	for _, match := range matches {
+		hosts = append(hosts, match[1])
+	}
+	return hosts
+}

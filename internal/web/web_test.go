@@ -152,8 +152,15 @@ func TestSecureHeadersCSP(t *testing.T) {
 	require.NotEmpty(t, csp)
 	assert.Contains(t, csp, "default-src 'self'")
 	assert.Contains(t, csp, "script-src 'self'")
-	assert.Contains(t, csp, "connect-src 'self' https://clerk.example.com")
 	assert.Contains(t, csp, "frame-ancestors 'none'")
+	// The seam's own policy names no provider. This fixture runs in
+	// development, where the identity slot selects the zero-account adapter,
+	// so connect-src stands alone — the Clerk-selected header is asserted
+	// byte for byte in csp_test.go, and the sources themselves in
+	// internal/identity/clerk/csp.
+	assert.Contains(t, csp, "connect-src 'self';")
+	assert.NotContains(t, csp, "blob:")
+	assert.NotContains(t, strings.ToLower(csp), "clerk")
 	assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
 	assert.Equal(t, "DENY", rec.Header().Get("X-Frame-Options"))
 	// HSTS is production-only.

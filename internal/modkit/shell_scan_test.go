@@ -339,3 +339,72 @@ func TestNoCredentialPresenceSelectorsAllowsOrdinaryReads(t *testing.T) {
 			map[string][]byte{"internal/web/page.go": []byte("package web\n\n" + body)}), "body: %s", body)
 	}
 }
+
+// The CSP leak the vendor-host rule exists for: not a by-key read that
+// degrades, but a vendor's hostname compiled into a seam's header assembly,
+// embedded in a longer literal where a "quoted URL" rule cannot see it.
+func TestSeamVendorHostsRefuseAVendorHostname(t *testing.T) {
+	modules := []Manifest{
+		vendorAdapterManifest("ggg/system/identity-clerk", "identity-clerk", "ggg/identity", "clerk", "managed"),
+		systemTemplateManifest("ggg/system/security", "internal/web/middleware.go"),
+	}
+	modules[1].Files[0].Class = FileClassGo
+	files := map[string][]byte{
+		"internal/web/middleware.go": []byte(
+			"package web\n\nfunc policy() string {\n\treturn \"img-src 'self' data: https://img.clerk.com\"\n}\n"),
+	}
+
+	err := ValidateSeamVendorHosts(modules, files)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "img.clerk.com")
+	assert.Contains(t, err.Error(), "ggg/system/security")
+	assert.Contains(t, err.Error(), "ggg/system/identity-clerk")
+	assert.Contains(t, err.Error(), "middleware.go:4")
+	assert.Contains(t, err.Error(), "runtime.csp")
+}
+
+// Everything the measurement found beside it. A rule about URLs would have to
+// exempt each of these by hand; a rule about vendors exempts them by
+// construction.
+func TestSeamVendorHostsAllowNonVendorHosts(t *testing.T) {
+	modules := []Manifest{
+		vendorAdapterManifest("ggg/system/identity-clerk", "identity-clerk", "ggg/identity", "clerk", "managed"),
+		vendorAdapterManifest("ggg/system/analytics-posthog", "analytics-posthog", "ggg/analytics", "posthog", "managed"),
+		systemTemplateManifest("ggg/system/seam", "internal/seam/seam.go"),
+	}
+	modules[2].Files[0].Class = FileClassGo
+	for _, body := range []string{
+		`const ns = "https://schema.org"`,                          // never fetched
+		`const avatar = "https://img.example.com/a.png"`,           // RFC 2606
+		`const ret = "https://app.test/billing/return"`,            // reserved TLD
+		`const api = "https://api.github.com"`,                     // the engine's own source
+		`const edit = "https://github.com/gogogadget/gogogadget/"`, // this repository
+		`const dev = "http://localhost:8080"`,                      // no host labels
+		`const leaf = "internal/identity/clerkurl"`,                // a package, not a host
+		`const near = "https://clerks.example.com"`,                // label is not the token
+	} {
+		files := map[string][]byte{"internal/seam/seam.go": []byte("package seam\n\n" + body + "\n")}
+		require.NoErrorf(t, ValidateSeamVendorHosts(modules, files), "body: %s", body)
+	}
+}
+
+// An adapter's own payload is where its hostname belongs, and a comment is
+// documentation rather than a policy.
+func TestSeamVendorHostsAllowAdapterOwnedAndComments(t *testing.T) {
+	adapter := vendorAdapterManifest("ggg/system/identity-clerk", "identity-clerk", "ggg/identity", "clerk", "managed")
+	adapter.Files = []ManifestFile{{Source: "internal/identity/clerk/csp/csp.go",
+		Target: "internal/identity/clerk/csp/csp.go", Class: FileClassGo}}
+	files := map[string][]byte{
+		"internal/identity/clerk/csp/csp.go": []byte(
+			"package csp\n\nfunc Sources() []string { return []string{\"https://img.clerk.com\"} }\n"),
+	}
+	require.NoError(t, ValidateSeamVendorHosts([]Manifest{adapter}, files))
+
+	seam := systemTemplateManifest("ggg/system/security", "internal/web/middleware.go")
+	seam.Files[0].Class = FileClassGo
+	comment := map[string][]byte{
+		"internal/web/middleware.go": []byte(
+			"package web\n\n// img-src used to name https://img.clerk.com here.\nfunc policy() {}\n"),
+	}
+	require.NoError(t, ValidateSeamVendorHosts([]Manifest{adapter, seam}, comment))
+}

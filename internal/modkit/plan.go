@@ -339,6 +339,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := ValidateShellProviderNeutrality(graph.modules, payloadsAsFiles(payloads)); err != nil {
 		return Plan{}, err
 	}
+	if err := ValidateSeamVendorHosts(graph.modules, payloadsAsFiles(payloads)); err != nil {
+		return Plan{}, err
+	}
 	if err := ValidateShellSlotRenderers(graph.modules, payloadsAsFiles(payloads)); err != nil {
 		return Plan{}, err
 	}
@@ -346,6 +349,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, err
 	}
 	if err := ValidateAssetReferences(graph.modules, payloadsAsFiles(payloads)); err != nil {
+		return Plan{}, err
+	}
+	if err := ValidateCSPContributionSources(graph.modules, payloadsAsFiles(payloads)); err != nil {
 		return Plan{}, err
 	}
 	if err := ValidateDerivationPackages(graph.modules, payloadsAsFiles(payloads), modulePath); err != nil {

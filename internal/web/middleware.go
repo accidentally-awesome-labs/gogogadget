@@ -213,27 +213,14 @@ func clientIP(r *http.Request) string {
 	return host
 }
 
-// secureHeaders sets the strict header set. CSP is assembled from config so
-// the Clerk Frontend API origin lands in connect-src (vendored clerk-js calls
-// it to keep the ~60s __session JWT fresh). The origin is read by key, not by
-// field: ggg/system/identity-clerk declares it and derives it at config load,
-// and deselecting that adapter must leave this directive as plain 'self'
-// rather than breaking the build of a module that never chose Clerk.
+// secureHeaders sets the strict header set. The Content-Security-Policy is
+// composed once from the base policy plus the sources installed modules
+// contribute — see csp.go. No vendor appears here: a provider that needs its
+// frontend API in connect-src, its avatar host in img-src, or a blob: worker
+// declares that in its own manifest and returns it from its own function, and
+// deselecting the adapter takes the source with it.
 func (s *Server) secureHeaders(next http.Handler) http.Handler {
-	csp := strings.Join([]string{
-		"default-src 'self'",
-		"script-src 'self'",
-		// clerk-js v5 runs its session handshake inside blob: Web Workers —
-		// without this, auth loops forever (reported by clerk-js at integration).
-		"worker-src 'self' blob:",
-		"style-src 'self' 'unsafe-inline'",
-		"img-src 'self' data: https://img.clerk.com",
-		"font-src 'self'",
-		"connect-src 'self' " + s.cfg.Value("CLERK_FRONTEND_API_URL"),
-		"frame-ancestors 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-	}, "; ")
+	csp := s.contentSecurityPolicy()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
 		h.Set("Content-Security-Policy", csp)

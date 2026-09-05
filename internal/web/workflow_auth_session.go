@@ -55,7 +55,16 @@ func (s *Server) clearSessionCookie(w http.ResponseWriter) {
 	})
 }
 
-func clerkAccountPortalLink(baseURL, page, redirectURL string) string {
+// accountPortalLink builds a hosted account-portal URL from the base the
+// selected identity adapter declares. Named for what it does rather than for
+// who currently provides it: the base arrives as a by-key configuration read,
+// so an adapter that publishes no portal yields the empty string and the
+// caller renders no link.
+//
+// It duplicates identity.Navigator.AccountURL's job from the wrong side of the
+// seam — the port exists and the adapter implements it. Recorded in
+// task-t-report.md as the next coupling rather than re-plumbed here.
+func accountPortalLink(baseURL, page, redirectURL string) string {
 	if baseURL == "" {
 		return ""
 	}

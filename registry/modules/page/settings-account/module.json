@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-account",
     "kind": "page",
     "name": "settings-account",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Account settings",
     "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
@@ -55,7 +55,7 @@
         "source": "internal/web/page_settings_account.go",
         "target": "internal/web/page_settings_account.go",
         "class": "go",
-        "sha256": "9f5523d311aaf67c358d107c6afb145a1ee41d745e6036c7ac8ba5af1f473b86",
+        "sha256": "88d6acce43bf21b98065674a1ef22b268912596493f9a8c633395fee8f0c79ab",
         "rewrite_module": true,
         "contract": false
       },

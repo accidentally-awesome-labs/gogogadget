@@ -706,7 +706,7 @@ declared contracts a module's own suite covers.
 | `ggg/system/feature-flags-postgres` | `go test -count=1 ./internal/flags/postgres` | — |
 | `ggg/system/i18n` | `go test -count=1 ./internal/i18n` | — |
 | `ggg/system/identity` | `go test -count=1 ./internal/identity` | — |
-| `ggg/system/identity-clerk` | `go test -count=1 ./internal/identity/clerk ./internal/identity/clerkurl ./internal/web/templates/slots` | — |
+| `ggg/system/identity-clerk` | `go test -count=1 ./internal/identity/clerk ./internal/identity/clerk/csp ./internal/identity/clerkurl ./internal/web/templates/slots` | — |
 | `ggg/system/identity-dev` | `go test -count=1 ./internal/identity/devadapter` | — |
 | `ggg/system/identity-session` | `go test -count=1 ./internal/identity/session` | — |
 | `ggg/system/jobs` | `go test -count=1 ./internal/jobs` | — |
