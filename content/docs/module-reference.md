@@ -321,7 +321,7 @@ itself.
 | `ggg/system/search-postgres` | `ggg` | 1 | Search Postgres | `ggg/system/database` [1,1] `ggg/system/search` [1,1] | `free` |
 | `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
-| `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] | `free` |
+| `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] `ggg/system/static` [1,1] | `free` |
 | `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/system/analytics` [1,1] `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/llm` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `replacement-required` |
 | `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `retain-data` |

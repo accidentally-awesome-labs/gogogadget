@@ -1092,7 +1092,7 @@
     },
     {
       "path": "registry/modules/system/seo/module.json",
-      "sha256": "af924e221f82d36426640f8d5f22cf1bcdf72cf3b440dd2fbe0768b9cfc76fd9"
+      "sha256": "09dea5ca0d7a6f8b5e1124766d58fb60e82d8e3cd728b810b9e731d079306887"
     },
     {
       "path": "registry/modules/system/server/module.json",
