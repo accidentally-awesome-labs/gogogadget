@@ -74,6 +74,20 @@ background job to configure, monitor, or dead-letter. A **future**
 expired state. Both transitions happen because `now()` moved, and reach the
 site within one cache TTL.
 
+`now()` there is the **database** clock, so the instant that decides
+visibility is written by the same clock: publishing an entry with no date
+stamps `published_at` from `now()` inside the update itself
+(`PublishEntry`), never from the application clock. That is not a
+refinement — a `published_at` taken from the app server and compared against
+the database's `now()` is invisible until the database clock catches up, so a
+database whose clock trails the app's by more than one request hides a
+just-published entry and the promise below ("publish, reload, it is there")
+silently becomes "publish, reload, wait". The trail on this project's own test
+stack measures 0.7 ms idle and up to 5.0 ms under load, against a request
+that closes the gap in 2.4 ms at best, and it cost two intermittent test
+failures before it was named. A date the editor supplied is kept as written:
+that is what makes a future one scheduled.
+
 `/admin/content` shows the four states as a **computed** badge — draft,
 scheduled, expired, live — never a stored one, so it cannot drift from what
 the public site does. An expired entry stays listed and editable for staff

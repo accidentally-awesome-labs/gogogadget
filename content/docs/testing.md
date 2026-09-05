@@ -140,6 +140,25 @@ Webhook fixtures mirror the two real header families exactly:
 Production verification rejects the wrong family outright; the fixtures exist
 so tests can't drift from that reality.
 
+**A test never observes a server goroutine's state unsynchronised.** Two
+intermittent failures in one day were the same shape: the test read something
+the handler's goroutine was still writing — `httptest.ResponseRecorder.Body`
+in one, a plain `int` counter in the other. Both passed locally and failed
+under `-race`, which is why `-race` is the gate. The recorder case is refused
+statically rather than left to luck: `modkit.ValidateNoRecorderGoroutineHandoff`
+scans every `_test.go` payload on every plan and refuses a
+`httptest.ResponseRecorder` that crosses a `go` statement, because that type
+has no synchronisation of any kind and a streaming handler never stops writing
+it. A test that genuinely needs a recorder on another goroutine passes one
+whose `Write` and reader take the same mutex — `flushRecorder` is the shape.
+The rule is the handoff, not the read, because proving a happens-before edge
+to every write is exactly the reasoning that was got wrong. The broad version
+of the same idea — any local written inside a goroutine or handler closure and
+read outside it — was measured before it was rejected: it matches 30 sites in
+this tree and 28 of them are the ordinary `httptest.NewServer` fixture that
+`-race` proves clean on every run, so it would refuse correct code 93% of the
+time and re-implement the race detector badly.
+
 ## End-to-end
 
 Playwright (Chromium) drives the real server on **port 18080** — never the

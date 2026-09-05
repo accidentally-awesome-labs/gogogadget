@@ -4,7 +4,7 @@
     "id": "ggg/system/content",
     "kind": "system",
     "name": "content",
-    "revision": 1,
+    "revision": 3,
     "contract": 1,
     "title": "Content and CMS",
     "description": "Embedded markdown corpus, goldmark rendering, RSS, search, and the database-backed CMS for administrator-authored entries, revisions, and media.",
@@ -75,7 +75,7 @@
         "source": "internal/content/cms_test.go",
         "target": "internal/content/cms_test.go",
         "class": "go",
-        "sha256": "91a36b0861ec7f74447cf4af5e24ad8381174bf0bf955b9cc7d2149ccd2f0543",
+        "sha256": "ebddca0e96a0adf662b1bc8438110dffdae5564c8ad742b7e58d1e8d2c1414e9",
         "rewrite_module": true,
         "contract": false
       },
@@ -155,7 +155,7 @@
         "source": "internal/db/queries/content_entries.sql",
         "target": "internal/db/queries/content_entries.sql",
         "class": "query",
-        "sha256": "961a545d520d93c78501959caf0c4101091d6f71634e7717269c5f0c7a76c036",
+        "sha256": "05228c7c23a935677318140c04ff1ea6fa543d989bb8b7be430a364aeb092f54",
         "rewrite_module": false,
         "contract": false
       },
@@ -287,6 +287,10 @@
         {
           "name": "ListRevisionsByEntry",
           "table": "content_revisions"
+        },
+        {
+          "name": "PublishEntry",
+          "table": "content_entries"
         },
         {
           "name": "SetEntryStatus",

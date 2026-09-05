@@ -165,6 +165,11 @@ func (s *Server) handleAdminContentPreview(w http.ResponseWriter, r *http.Reques
 
 // POST /admin/content/{id}/publish — an already-set future published_at stays,
 // which is exactly what makes the entry scheduled rather than live.
+//
+// The instant is stamped by PublishEntry, in the database, for the reason
+// spelled out on that query: the visibility predicate is `published_at <=
+// now()` on the database clock, so an instant taken from the application
+// clock is invisible until the database clock catches up.
 func (s *Server) handleAdminContentPublish(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	actor := identity.UserFrom(ctx)
@@ -172,13 +177,7 @@ func (s *Server) handleAdminContentPublish(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		return
 	}
-	publishedAt := existing.PublishedAt
-	if !publishedAt.Valid {
-		publishedAt = pgtype.Timestamptz{Time: s.cfg.Now(), Valid: true}
-	}
-	entry, err := s.q.SetEntryStatus(ctx, sqlc.SetEntryStatusParams{
-		ID: existing.ID, Status: "published", PublishedAt: publishedAt,
-	})
+	entry, err := s.q.PublishEntry(ctx, existing.ID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

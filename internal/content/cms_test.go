@@ -190,3 +190,60 @@ func TestImportIsIdempotentAndNeverClobbers(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "Edited by an operator", stored.Title, "re-seeding must never clobber an edit")
 }
+
+// The publish instant belongs to the DATABASE clock, and this pins it
+// deterministically rather than hoping two clocks agree.
+//
+// now() is transaction_timestamp(), constant for the life of one transaction.
+// So if PublishEntry stamps published_at from the database, the value it
+// returns is byte-identical to that transaction's now(); if it were stamped
+// from the application clock — as it was — equality is impossible, because the
+// two readings come from different sources at microsecond resolution.
+//
+// The defect this defends against had teeth: visibility is decided by
+// `published_at <= now()`, so an instant taken from the app clock is invisible
+// until the database clock catches up, and a database whose clock trails the
+// app's by more than one request hides a just-published entry — contradicting
+// the promise that publishing shows on the next request, not the next TTL.
+// Measured on the project's own test stack the trail was 0.7 ms idle and up to
+// 5.0 ms under load, against a request that closes the gap in 2.4 ms at best.
+func TestPublishStampsTheDatabaseClock(t *testing.T) {
+	pool, _, _ := cmsFixture(t)
+	ctx := t.Context()
+
+	tx, err := pool.Begin(ctx)
+	require.NoError(t, err)
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := sqlc.New(tx)
+
+	draft, err := q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "clock-owner", Locale: "", Title: "Clock owner",
+		BodyMd: "x", BodyHtml: "<p>x</p>", Meta: []byte("{}"), Status: "draft",
+	})
+	require.NoError(t, err)
+	require.False(t, draft.PublishedAt.Valid, "a draft carries no instant to keep")
+
+	published, err := q.PublishEntry(ctx, draft.ID)
+	require.NoError(t, err)
+	require.Equal(t, "published", published.Status)
+
+	var transactionNow time.Time
+	require.NoError(t, tx.QueryRow(ctx, "select now()").Scan(&transactionNow))
+	assert.True(t, published.PublishedAt.Valid, "publishing stamps an instant")
+	assert.True(t, published.PublishedAt.Time.Equal(transactionNow),
+		"published_at = %s, want this transaction's now() %s: the instant must come from the clock the visibility predicate reads",
+		published.PublishedAt.Time, transactionNow)
+
+	// And a date already on the row is kept, which is what makes a future one
+	// scheduled rather than live.
+	scheduled, err := q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "clock-keeper", Locale: "", Title: "Clock keeper",
+		BodyMd: "x", BodyHtml: "<p>x</p>", Meta: []byte("{}"), Status: "draft",
+		PublishedAt: pgtype.Timestamptz{Time: transactionNow.Add(time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+	kept, err := q.PublishEntry(ctx, scheduled.ID)
+	require.NoError(t, err)
+	assert.True(t, kept.PublishedAt.Time.Equal(scheduled.PublishedAt.Time),
+		"a declared date survives publishing")
+}

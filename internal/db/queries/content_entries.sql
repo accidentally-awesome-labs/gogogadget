@@ -83,5 +83,20 @@ UPDATE content_entries SET status = sqlc.arg(status), published_at = sqlc.arg(pu
 WHERE id = sqlc.arg(id)
 RETURNING *;
 
+-- name: PublishEntry :one
+-- The publish instant is stamped by the DATABASE clock, in the same statement
+-- that sets the status, because visibility is decided by `published_at <=
+-- now()` on that same clock (ListLiveEntries, GetLiveEntry, LatestLiveEntry
+-- above). An instant stamped from the APPLICATION clock is only live once the
+-- database clock catches up, so any database whose clock trails the app's
+-- hides a just-published entry for the length of the skew — which contradicts
+-- the promise that publishing shows on the next request, not the next TTL.
+-- COALESCE keeps an already-set date, which is what makes a future one
+-- scheduled rather than live.
+UPDATE content_entries
+SET status = 'published', published_at = COALESCE(published_at, now()), updated_at = now()
+WHERE id = sqlc.arg(id)
+RETURNING *;
+
 -- name: DeleteEntry :exec
 DELETE FROM content_entries WHERE id = $1;

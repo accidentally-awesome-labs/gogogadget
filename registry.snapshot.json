@@ -888,11 +888,11 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "c630adb56cf7dbe803bcd2b23f7ec7fe62928016f60b112de67cad1e4a5bc7f4"
+      "sha256": "43f45dc5f0292c2b5c5b27e26f3893289d04267dcb65e0c89f25fa2dcb23cb3f"
     },
     {
       "path": "registry/modules/system/content/module.json",
-      "sha256": "a36582eba99484597ed2a0ebba5c3575d882b4a96be7bfa0a79c5f83d02886f4"
+      "sha256": "d5cb41070f2792ceabe9b2d27dc6e458ebb4b60d025cec57a4d685b3b13bd9b3"
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "3da4376a0acd5cbe79604c56b51d3ebb24567bbd37725eac6f55759f4e882d20"
+      "sha256": "e44f0848e3c9fbf33614c145b7cbb3e6f6e2721799352c8d9eaefcaaab620473"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1168,7 +1168,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-content/module.json",
-      "sha256": "0635c1f1ea63b8a2a8d7af14a9e8daa7ab10d3b7084dcd2bdea295104bc7aa47"
+      "sha256": "73eedfa7e407aea455a7613fc4fc97bb4d4208cb6107674d85eda004b3afad46"
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",

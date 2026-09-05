@@ -362,6 +362,46 @@ func (q *Queries) ListLiveEntries(ctx context.Context, arg ListLiveEntriesParams
 	return items, nil
 }
 
+const publishEntry = `-- name: PublishEntry :one
+UPDATE content_entries
+SET status = 'published', published_at = COALESCE(published_at, now()), updated_at = now()
+WHERE id = $1
+RETURNING id, kind, slug, locale, title, summary, body_md, body_html, meta, status, published_at, unpublish_at, created_by, created_at, updated_at, search_tsv
+`
+
+// The publish instant is stamped by the DATABASE clock, in the same statement
+// that sets the status, because visibility is decided by `published_at <=
+// now()` on that same clock (ListLiveEntries, GetLiveEntry, LatestLiveEntry
+// above). An instant stamped from the APPLICATION clock is only live once the
+// database clock catches up, so any database whose clock trails the app's
+// hides a just-published entry for the length of the skew — which contradicts
+// the promise that publishing shows on the next request, not the next TTL.
+// COALESCE keeps an already-set date, which is what makes a future one
+// scheduled rather than live.
+func (q *Queries) PublishEntry(ctx context.Context, id int64) (ContentEntry, error) {
+	row := q.db.QueryRow(ctx, publishEntry, id)
+	var i ContentEntry
+	err := row.Scan(
+		&i.ID,
+		&i.Kind,
+		&i.Slug,
+		&i.Locale,
+		&i.Title,
+		&i.Summary,
+		&i.BodyMd,
+		&i.BodyHtml,
+		&i.Meta,
+		&i.Status,
+		&i.PublishedAt,
+		&i.UnpublishAt,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.SearchTsv,
+	)
+	return i, err
+}
+
 const setEntryStatus = `-- name: SetEntryStatus :one
 UPDATE content_entries SET status = $1, published_at = $2, updated_at = now()
 WHERE id = $3
