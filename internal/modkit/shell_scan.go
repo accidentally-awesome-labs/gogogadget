@@ -295,8 +295,14 @@ func ValidateNoCredentialPresenceSelectors(modules []Manifest, files map[string]
 		for _, file := range module.Files {
 			// A test may name a provider and its keys deliberately: proving
 			// the boot matrix reacts to a credential is not the same as
-			// branching on one in product code.
-			if file.Class == FileClassTest || !strings.HasSuffix(file.Target, ".go") {
+			// branching on one in product code. The _test.go suffix is
+			// checked alongside the declared class because a manifest that
+			// mis-declares a test as class "go" would otherwise put it under
+			// a product-code rule — eight payloads in this tree did exactly
+			// that until the declarations were corrected.
+			if file.Class == FileClassTest ||
+				strings.HasSuffix(file.Target, "_test.go") ||
+				!strings.HasSuffix(file.Target, ".go") {
 				continue
 			}
 			targets = append(targets, file.Target)

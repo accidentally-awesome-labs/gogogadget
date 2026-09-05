@@ -531,3 +531,301 @@ Revisions bumped for every module whose payloads changed:
   up. No volumes created or deleted.
 - The temporary probe test in `internal/web` was deleted; its measurements are
   recorded above.
+
+---
+
+# Fix report — review of `41293fb`
+
+Verdict was spec WARN / quality **FAIL** on one finding, and the finding was
+right: **I fixed the write and left the read.** Everything below is the
+response, in the reviewer's numbering.
+
+## I1 (blocking) — the badge still answered to the application clock
+
+`41293fb` moved the publish instant to the database clock and left
+`/admin/content`'s badge computing liveness from `Config.Now()`. Under
+`APP_ENV=test` that clock is frozen at `TEST_NOW=2026-01-15`, so a
+database-stamped `published_at` is months later and
+`e.PublishedAt.Time.After(now)` was true: a live entry rendered **"Scheduled"**.
+In production it is the app-behind-database direction — the mirror of item 3,
+and the direction the faketime rig had never run.
+
+Fixed the read the way the write was fixed: one clock, and liveness stopped
+being a timestamp comparison in a template.
+
+- `internal/db/queries/content_entries.sql` — `ListEntriesAdmin` returns a
+  `lifecycle` column: `CASE WHEN status <> 'published' THEN 'draft' WHEN
+  unpublish_at IS NOT NULL AND unpublish_at <= now() THEN 'expired' WHEN
+  published_at IS NOT NULL AND published_at > now() THEN 'scheduled' ELSE
+  'live' END`. That is a literal transcription of `contentStatus`'s four
+  branches in their original order, evaluated against the same `now()` as the
+  live predicate.
+- `internal/web/templates/admin_content.templ` — `contentStatus` and
+  `contentNow` are gone, `Items` is `[]sqlc.ListEntriesAdminRow`, the badge
+  renders `e.Lifecycle`, and `ContentListData.Now` is removed because the badge
+  was its only consumer (the date cell formats `e.PublishedAt` directly).
+- `internal/web/page_admin_content.go` — no longer passes `Now: s.cfg.Now`.
+
+**Verified in both directions**, `COUNT=8`, four tests each
+(`tmp/flakehunt/rate.sh`):
+
+| faketime offset | measured db offset | failures |
+|---|---|---|
+| `-1` | db 1.0014 s behind host | 0/8 × 4 |
+| `-0.005` | db 6.41 ms behind host | 0/8 × 4 |
+| `+0.005` | db 4.14 ms **ahead** of host | 0/8 × 4 |
+| `+1` | db 999 ms **ahead** of host | 0/8 × 4 |
+
+And proved the new assertion **discriminates** rather than merely passing. A
+throwaway test against a database 1 s ahead of the host published a dateless
+entry and compared both computations on the same row:
+
+```
+published_at            = 2026-09-05 17:34:47.829609 +0000 UTC
+render clock cfg.Now()  = 2026-09-05 17:34:46.835453 +0000 UTC
+pre-I1 template badge   = scheduled
+SQL lifecycle column    = live
+```
+
+The pre-I1 comparison calls a live entry scheduled; the SQL column calls it
+live. Throwaway deleted.
+
+Both doc sentences the review named are true again:
+
+- `content/docs/content.md` — the "computed badge … cannot drift from what the
+  public site does" paragraph now says *why* it cannot: it is computed by the
+  listing query off the same `now()`, and the frozen-clock failure is named.
+- `content/docs/testing.md` — the `TEST_NOW` determinism paragraph now bounds
+  itself: "That clock **formats**; it never decides state."
+
+**The `mediaNow` sibling, answered.** It is formatting only, and correct as it
+stands. Its single caller is `RelTime(mediaNow(d), m.CreatedAt.Time)` — a
+relative time over `content_media.created_at`. No liveness, schedule or expiry
+is decided from it, so freezing it at `TEST_NOW` is exactly the determinism the
+baselines want. Said so in a comment on the function so the next reader does
+not have to re-derive it.
+
+## I2 — the branch had no gate, and now has two
+
+The only publish in the suite (`e2e/admin-content.spec.ts:50`) fills an
+explicit past date first, with a comment saying it does so to keep the badge
+deterministic. So it takes `PublishEntry`'s keep-the-date branch and never the
+`COALESCE` one. `make e2e` passing 466 was never evidence about `41293fb`, and
+`make visual` proved nothing either.
+
+Added `e2e/admin-content.spec.ts` › *"post: a publish with no date is Live in
+the admin and live on the site"*: no `content-published-at` (asserted empty),
+save, assert Draft, publish, assert the badge is **Live**, then load
+`/blog/<slug>` and assert the heading. It ran and passed in the final gate
+(`admin-content.spec.ts:148`, 3.5 s).
+
+## I3 — a handler-level assertion, plus the caveat stated rather than worked around
+
+`internal/web/content_cms_test.go` › `TestDatelessPublishIsLiveEverywhereItIsReported`
+drives `POST /admin/content` then `POST /admin/content/{id}/publish` with no
+date, and asserts both halves: the entry is live on `/blog` and
+`/blog/<slug>` **and** `/admin/content` renders "Live" and not "Scheduled".
+
+The caveat, stated because it bounds the guarantee: there is no deterministic
+*value*-level discriminator at the handler layer. `integrationServer` builds
+`config.Config` as a literal, so `testNow` is unreachable and `cfg.Now()` is
+plain wall clock — an application stamp and a database stamp are identical on
+any machine whose clocks agree, which is every CI machine. **I did not wire
+`testNow` into the integration server**; the frozen clock's job is visual
+determinism and giving it a second job is how the badge got into this state.
+So this test earns its keep against a clock-offset database, in both
+directions, which is how it was verified;
+`TestPublishStampsTheDatabaseClock` remains the deterministic discriminator via
+`transaction_timestamp()`.
+
+## No scan, and the reason is the interesting part
+
+Considered and rejected on the parent's guidance, recorded because the reason
+generalises: **the defect is already unrepresentable at the site that held it.**
+`PublishEntry(ctx, id)` takes an id and nothing else, so a handler physically
+cannot supply a `published_at` for a publish. Removing the parameter is a
+stronger guard than any scan or test over it, because there is no longer a
+wrong value to pass. That is the strongest form of this move and worth naming
+as a pattern: prefer deleting the parameter to checking what arrives in it.
+The second reason is arithmetic — a scan for `cfg.Now()` flowing into a
+`timestamptz` write would be the same over-broad shape refused at 93% one
+commit ago, and this tree has legitimate application-clock writes.
+
+## M1 — eight mis-declared payloads corrected, and the selector was wrong twice
+
+Reclassified `class: "go"` → `"test"` on the eight `_test.go` payloads that
+were mis-declared: `internal/api/{cursor,tokens}_test.go` and
+`internal/content/{changelog,cms,content,docs_check,search,types}_test.go`.
+`ggg/system/api` was bumped for this even though `registry build` did not
+demand it — no payload bytes changed, only declarations, and a manifest that
+changed at a standing revision is the same lie the revision rule exists to
+prevent.
+
+Confirmed the reclassification does not exempt them from a scan that should see
+them. `ValidateConfigFieldOwnership` iterates payload targets by `.go` suffix,
+not by class, so it is unaffected. `ValidateAssetReferences` already skipped
+both the class and the suffix. `cli_scan` skips only generated files.
+`ValidateNoCredentialPresenceSelectors` **was** scanning those eight as product
+code by accident and now correctly skips them — its own comment says a test may
+name a provider and its keys deliberately. To keep a future mis-declaration
+from putting a test back under a product-code rule, that predicate now checks
+the `_test.go` suffix alongside the class.
+
+Then the selector on the new scan itself, which was wrong in both directions
+before it was right:
+
+- Suffix only (as landed in `41293fb`) missed the eight payloads above.
+- Class only (my first fix) handed the Go parser **235 non-Go payloads** that
+  are legitimately `class: "test"` — 200 committed PNG baselines, 34 `.ts`
+  specs and `internal/gggcli/testdata/new-saas.json`. It broke every plan, and
+  the error's "(and 1 more errors)" made a tree-wide failure read as two files.
+  Caught by `StorageDurability`, who measured the real scope instead of
+  trusting the message.
+- The correct selector is the conjunction: `Class == FileClassTest && strings.HasSuffix(target, ".go")`.
+
+Verified three ways: eight unit cases, a new
+`TestRecorderHandoffIgnoresNonGoTestPayloads` pinning the JSON/spec/PNG skip,
+and a throwaway run over the real lock and the real bytes on disk — 266 Go test
+payloads scanned, 235 non-Go skipped, nothing refused, with an assertion that
+`new-saas.json` was actually in the input set so the skip is not vacuous. And
+live, on every `sync`/`sync --check` in this commit.
+
+## M2 — the doc comment now states its bound
+
+`ValidateNoRecorderGoroutineHandoff`'s comment says what it does **not** see:
+recorders returned by a helper (`internal/web/idempotency_test.go` builds them
+that way), handoffs through `errgroup.Go` or any function that starts a
+goroutine for its caller, and the general class, which remains `-race`'s
+business. "It removes one shape from the space of writable code; it does not
+decide the question."
+
+## M3 — the measured refutation is in the repository, not only in this report
+
+The item-4 numbers now live in `content/docs/testing.md` under **"When a spec
+times out, measure before you cap anything"**: the per-case budget formula,
+32.8% of budget at load average 16, 35.0% at load average 143, the wall clock
+not moving (2m32s against 2m40s), the suite's 3.6-of-10-core draw, and the
+instruction to look at the shared substrate rather than re-run. That paragraph
+is committed in `b87fdcd`.
+
+This matters more than the pointer being tidy. `.superpowers/sdd/.gitignore`
+is `*`; this report is tracked only because it was force-added, and sibling
+reports are not tracked at all. So "it is in the report" is not a durable
+record. Anything a future reader needs about the product belongs in
+`content/docs/`.
+
+## M4 — the R2 locations are enumerated in this report
+
+All 30 hits of the rejected broad rule, with file and line, are listed in the
+item-5 section above, so the 93% claim can be spot-checked from source without
+the rig. The rig itself lives under gitignored `tmp/flakehunt/` and is its own
+Go module so `go test ./...` never sweeps it.
+
+## Visual baselines: four rewritten, and why that is the fix rather than the symptom
+
+`make visual` failed 4 of 200 — `admin-content` × {light,dark} ×
+{mobile,tablet}, 7962 pixels, ratio 0.03 against a 0.01 tolerance. Diagnosed
+before touching anything: queried the fixture's 11 content entries and computed
+both badges side by side in SQL.
+
+| | badge under db `now()` | badge under frozen `TEST_NOW` | rows |
+|---|---|---|---|
+| | `live` | `scheduled` | **10** |
+| | `live` | `live` | 1 |
+
+**The committed baselines encoded I1 in its original direction**: ten of eleven
+rows badged "Scheduled" for blog posts dated 2026-01-22 and 01-29 and eight
+changelog entries dated 2026-08-02 through 08-22 — content `/blog` and
+`/changelog` have been serving the whole time, because the arbitrating clock
+was frozen in January. A baseline is the record of what correct looks like, and
+this one had been recording a wrong state word since the frozen clock was
+introduced. Updated with `make visual-update`, the sanctioned writer, on the
+parent's explicit go-ahead. The four files:
+
+```
+e2e/visual.spec.ts-snapshots/admin-content-dark-desktop-chromium-linux.png
+e2e/visual.spec.ts-snapshots/admin-content-dark-mobile-chromium-linux.png
+e2e/visual.spec.ts-snapshots/admin-content-light-desktop-chromium-linux.png
+e2e/visual.spec.ts-snapshots/admin-content-light-mobile-chromium-linux.png
+```
+
+Rejected alternative: re-date the fixture so the badges match the old
+baselines. That means moving real blog and changelog dates into the future to
+satisfy a screenshot, and it keeps a baseline whose meaning decays with the wall
+clock — the defect class being removed.
+
+**A tolerance lesson worth recording.** The pre-update run failed at *mobile and
+tablet* and passed at *desktop*; the post-update diff is at *desktop and
+mobile* and tablet came out byte-identical. Desktop had changed all along — the
+badge column is a smaller fraction of a wider image, so its diff slipped under
+`maxDiffPixelRatio: 0.01`. A ratio threshold hides a real difference at some
+viewports and not others, so "which breakpoints failed" is not the same
+question as "what changed".
+
+## New fixture: the Scheduled and Expired states, pinned decay-proof
+
+The imported corpus is all past-dated, so it only ever exercises "live" — the
+baseline was getting "Scheduled" by accident from the frozen clock, and after
+the fix would have covered neither Scheduled nor Expired. Added
+`internal/db/testdata/seed/e2e/content.sql` (declared `class: "seed"` on
+`ggg/system/content`) with two rows.
+
+The dates are chosen to be **decay-proof, not merely distant**, because a
+"far future" date that arrives breaks the baseline for no code reason — the same
+defect on a longer fuse:
+
+- Scheduled: `published_at = 9999-12-31`. Wall clocks only move forward, and
+  this is at the far end of the representable calendar, so it can never be
+  reached.
+- Expired: `published_at = 1970-01-01`, `unpublish_at = 1970-01-02`. Already
+  past, and time moving forward can only keep it past — it can never recede
+  into the future. (Ordered to satisfy
+  `content_entries_expiry_after_publish`.)
+
+Neither can flip under any clock, in any timezone, for the life of this
+repository. "Draft" stays covered at the e2e layer, where the new spec asserts
+it on a row it creates before publishing.
+
+## Gates on the combined tree
+
+Run on my slice on top of `b87fdcd`, after the stash handoff (all 12 of my
+files verified restored, independently of the handoff's own checksum report).
+
+| gate | result |
+|---|---|
+| `go test -race` — `internal/{modkit,content,db/...,web/...}` | 8 packages ok |
+| `make check` | **pass** |
+| `bin/ggg registry validate` | **pass**, 12 closures verified |
+| `make e2e` | **469 passed, 202 skipped, 0 failed, `retried passes: none`** — includes the new dateless case |
+| `make visual` | **200 passed** after the 4-baseline update; a confirming re-run is green with exactly those 4 files modified |
+| `bin/ggg sync --check --offline` | clean, inside this commit |
+
+Release order run last so the signed snapshot describes both slices:
+`registry build` → `registry sign` → `sync --offline` → `sync --check --offline`,
+snapshot `ba3a3a91233259f2…`.
+
+Revisions bumped this round, each read fresh from disk immediately before
+writing rather than from a quoted value:
+
+| module | revision | why |
+|---|---|---|
+| `ggg/page/admin-content` | 1 → 2 | the templ badge and the page handler |
+| `ggg/system/content` | 3 → 5 | `ListEntriesAdmin`, `content_cms_test.go`, six reclassifications, then the new seed payload |
+| `ggg/workflow/admin-content` | 4 → 5 | the new e2e case |
+| `ggg/system/api` | 1 → 2 | two reclassifications |
+| `ggg/system/content-assets` | 10 → 11 | `content/docs/content.md` |
+| `ggg/system/modkit` | 32 → 33 | `test_scan.go`, `test_scan_test.go`, `shell_scan.go`, all changed after 32 was released |
+| `ggg/system/e2e-sweeps` | 2 → 3 | owns the four rewritten baselines |
+
+## One line for the parent's own note, because it is the same lesson
+
+The export failure was never a storage defect: `ggg test e2e` brought up the
+compose `app` service, which runs a second jobs worker against the same test
+database, so whichever worker won the SKIP-LOCKED claim wrote the CSV into its
+own container-local object store while Playwright drove the host server. One
+database, two stores. The `Close`-swallowing hypothesis in the brief — and the
+one I repeated in my own first report — was reasoning from the shape of the
+code instead of measuring where the bytes went. That is the same error as
+attributing item 4 to load average without measuring it, and the same error as
+my own first selector fix, which I reasoned about instead of running against
+the real tree. Measure the thing, then deviate.

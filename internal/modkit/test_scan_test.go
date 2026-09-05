@@ -223,3 +223,24 @@ func TestStream(t *testing.T) {
 
 	require.NoError(t, ValidateNoRecorderGoroutineHandoff(other, otherFiles))
 }
+
+// A class-"test" payload that is not Go must never reach the Go parser. The
+// tree has 235 of them — 200 committed PNG baselines, 34 Playwright specs and
+// internal/gggcli/testdata/new-saas.json — so a selector keyed on class alone
+// turns every plan into 235 parse errors. The selector is the conjunction:
+// declared test AND a Go target.
+func TestRecorderHandoffIgnoresNonGoTestPayloads(t *testing.T) {
+	files := map[string][]byte{}
+	var declared []ManifestFile
+	for _, target := range []string{
+		"internal/gggcli/testdata/new-saas.json",
+		"e2e/admin-content.spec.ts",
+		"e2e/visual.spec.ts-snapshots/home-light-desktop-chromium-linux.png",
+	} {
+		declared = append(declared, ManifestFile{Source: target, Target: target, Class: FileClassTest})
+		files[target] = []byte(`{"module":"example","registry":"directory:."}`)
+	}
+	modules := []Manifest{{ID: "ggg/system/e2e-sweeps", Kind: ModuleSystem, Name: "e2e-sweeps", Files: declared}}
+
+	require.NoError(t, ValidateNoRecorderGoroutineHandoff(modules, files))
+}

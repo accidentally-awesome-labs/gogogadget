@@ -4,7 +4,7 @@
     "id": "ggg/system/e2e-sweeps",
     "kind": "system",
     "name": "e2e-sweeps",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "E2E cross-cutting sweeps",
     "description": "The accessibility, keyboard, progressive-enhancement, loading, mobile, CSP, visual and public-site suites that assert shell and platform behaviour rather than one feature.",
@@ -279,7 +279,7 @@
         "source": "e2e/visual.spec.ts-snapshots/admin-content-dark-desktop-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/admin-content-dark-desktop-chromium-linux.png",
         "class": "test",
-        "sha256": "4f831cdfe5bbc9d75355bdd743fea89c157e4806c2ab7ba820d62588c253c906",
+        "sha256": "767df0d14d7cd34fd5eb0e83d46d3cf597384677768a6a75d29ae2f1f147bde3",
         "rewrite_module": false,
         "contract": false
       },
@@ -287,7 +287,7 @@
         "source": "e2e/visual.spec.ts-snapshots/admin-content-dark-mobile-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/admin-content-dark-mobile-chromium-linux.png",
         "class": "test",
-        "sha256": "5d03b397c918775a3b338e70e9815c1631c748f02d59eaf8b7071e7e30b83544",
+        "sha256": "ce6bbe6f8f6314374d7a6895bbf0edbb5c987a9d3802db8498882e70cd297869",
         "rewrite_module": false,
         "contract": false
       },
@@ -303,7 +303,7 @@
         "source": "e2e/visual.spec.ts-snapshots/admin-content-light-desktop-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/admin-content-light-desktop-chromium-linux.png",
         "class": "test",
-        "sha256": "04e477801d4a756f119c4b119ada61d36dd8036ea813839b108ed9258df46d1b",
+        "sha256": "395e66c2ce1da5e24d2cb96cc163d82fe6a47fcacb81f5aa542414286a1f9f76",
         "rewrite_module": false,
         "contract": false
       },
@@ -311,7 +311,7 @@
         "source": "e2e/visual.spec.ts-snapshots/admin-content-light-mobile-chromium-linux.png",
         "target": "e2e/visual.spec.ts-snapshots/admin-content-light-mobile-chromium-linux.png",
         "class": "test",
-        "sha256": "c38cad6d4e82823d23e7c0d06da5470a6aaaba5f4b1697e1d6b8e28a697ccbea",
+        "sha256": "a12f591a743e21f0eca94f91baced878342d42927f6e827045e8c9c3c14c407b",
         "rewrite_module": false,
         "contract": false
       },

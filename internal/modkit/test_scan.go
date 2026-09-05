@@ -38,16 +38,32 @@ const recorderPackage = "net/http/httptest"
 // in this tree, and 28 of them are the ordinary httptest.NewServer fixture
 // whose handler has returned before the client call does, which `go test
 // -race` proves clean on every run. That rule would refuse correct code 93% of
-// the time and re-implement the race detector badly; this one matches 0 sites
-// and refuses only the shape that has no safe reading.
+// the time and re-implement the race detector badly; this one matches 0.
+//
+// What it does NOT see, stated so the guarantee is not overread. It recognises
+// a recorder only where the value is bound in the same top-level function, so
+// one returned by a helper is invisible (internal/web/idempotency_test.go
+// builds recorders that way). It recognises only a `go` statement, so a
+// handoff through errgroup.Go, a worker pool, or any function that starts a
+// goroutine for its caller passes. And it says nothing about the general class
+// — any other unsynchronised type shared with a server goroutine is still
+// `-race`'s business, which is what caught both original defects. This scan
+// removes one shape from the space of writable code; it does not decide the
+// question.
 func ValidateNoRecorderGoroutineHandoff(modules []Manifest, files map[string][]byte) error {
 	for _, module := range modules {
 		targets := make([]string, 0, len(module.Files))
 		for _, file := range module.Files {
-			// The suffix is the selector, not the declared class: eight
-			// _test.go payloads in this tree are declared class "go", and a
-			// class-keyed rule would leave exactly those unscanned.
-			if !strings.HasSuffix(file.Target, "_test.go") {
+			// Both halves are load-bearing, and each was wrong alone. Class
+			// alone hands the Go parser 235 non-Go payloads that are legitimately
+			// declared class "test" — every Playwright spec, every committed
+			// PNG baseline, internal/gggcli/testdata/new-saas.json. The
+			// _test.go suffix alone misses a Go payload declared class "test"
+			// that is not named _test.go, and it also used to be the only
+			// selector, which is how eight mis-declared payloads went
+			// unscanned before their declarations were corrected. The set
+			// wanted is Go source a module declares as test.
+			if file.Class != FileClassTest || !strings.HasSuffix(file.Target, ".go") {
 				continue
 			}
 			targets = append(targets, file.Target)

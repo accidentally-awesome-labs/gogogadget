@@ -40,7 +40,23 @@ SELECT * FROM content_entries WHERE kind = $1 AND slug = $2 AND locale = $3;
 -- name: ListEntriesAdmin :many
 -- FTS (websearch syntax) with an ILIKE fallback so partial tokens still match.
 -- Every locale variant is its own row; the admin table shows a locale column.
-SELECT * FROM content_entries
+--
+-- lifecycle is the editor's badge, decided HERE rather than in the template,
+-- because it is the same question the live predicate above asks and it has to
+-- be asked of the same clock. A template comparing a database-stamped
+-- published_at against the application's render clock disagrees with the
+-- public site by exactly the skew between them — and under APP_ENV=test that
+-- render clock is frozen at TEST_NOW, so the disagreement is eight months
+-- wide and a live entry reads "Scheduled". The branch order is the one the
+-- template used: draft, then expired, then scheduled, then live.
+SELECT *,
+  CASE
+    WHEN status <> 'published' THEN 'draft'
+    WHEN unpublish_at IS NOT NULL AND unpublish_at <= now() THEN 'expired'
+    WHEN published_at IS NOT NULL AND published_at > now() THEN 'scheduled'
+    ELSE 'live'
+  END AS lifecycle
+FROM content_entries
 WHERE (sqlc.arg(kind)::text = '' OR kind = sqlc.arg(kind))
   AND (sqlc.arg(filter)::text = '' OR search_tsv @@ websearch_to_tsquery('simple', sqlc.arg(filter)) OR title ILIKE '%' || sqlc.arg(filter) || '%')
 ORDER BY COALESCE(published_at, created_at) DESC

@@ -1,40 +1,120 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/page/admin-content",
+    "kind": "page",
+    "name": "admin-content",
+    "revision": 2,
+    "contract": 1,
+    "title": "Admin content list",
+    "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
+    "requires": [
+      {
+        "id": "ggg/system/content",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 2
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/page_admin_content.go",
+        "target": "internal/web/page_admin_content.go",
+        "class": "go",
+        "sha256": "2f7121cefe27e7787c7b3297dc93ffbf879c4f15b9e27d52c53d893a15772497",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_content.templ",
+        "target": "internal/web/templates/admin_content.templ",
+        "class": "templ",
+        "sha256": "f03c216b091fefb630ca11243d7d217ba13feced0ce23a4a48476de4a4324a9a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "admin.content.index"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.content.index",
+          "method": "GET",
+          "pattern": "/admin/content",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContent"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.content",
+          "area": "admin",
+          "route_id": "admin.content.index",
+          "label_key": "sidebar.admin_content",
+          "after": [
+            "nav.admin.announcements"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin-content",
+          "path": "/admin/content",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
     },
-    "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
-    "docs": [],
+    "migrations": [],
     "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
-        "source": "internal/web/page_admin_content.go",
-        "target": "internal/web/page_admin_content.go"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "292461de4eab1aa3e57097f9be90055a875a2e8723b05f87406df8493436b250",
-        "source": "internal/web/templates/admin_content.templ",
-        "target": "internal/web/templates/admin_content.templ"
-      }
-    ],
-    "id": "ggg/page/admin-content",
-    "kind": "page",
     "locales": {
       "en": {
         "admin.content.actions_aria": "Content actions",
@@ -173,93 +253,13 @@
         "admin.content.updated": "Entrada actualizada."
       }
     },
-    "migrations": [],
-    "name": "admin-content",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/content"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 2,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.admin.announcements"
-          ],
-          "area": "admin",
-          "id": "nav.admin.content",
-          "label_key": "sidebar.admin_content",
-          "route_id": "admin.content.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleAdminContent",
-          "id": "admin.content.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/admin/content",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "admin"
-        }
-      ],
-      "visual": [
-        {
-          "id": "admin-content",
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/admin/content",
-          "persona": "admin",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin content list"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

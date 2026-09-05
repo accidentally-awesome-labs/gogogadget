@@ -133,4 +133,68 @@ test.describe('content', () => {
 
     await context.close();
   });
+
+  // The case above fills an explicit publish date first, so it exercises the
+  // keep-the-declared-date branch and never the one that stamps a fresh
+  // instant. That left the dateless publish — the ordinary "write it, publish
+  // it" path — with no gate at all, which is how a badge that reads
+  // "Scheduled" for a live entry reached main.
+  //
+  // This case is the one that catches it, and it is only meaningful under the
+  // harness's frozen clock: the suite runs with TEST_NOW=2026-01-15 while the
+  // database stamps real wall time, so a badge computed from the render clock
+  // is months out and says "Scheduled". The badge now comes from the same
+  // now() the public predicate uses, so the two agree by construction.
+  test('post: a publish with no date is Live in the admin and live on the site', async ({
+    browser,
+  }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+
+    const stamp = Date.now();
+    const title = `CMS dateless ${stamp}`;
+    const slug = `cms-dateless-${stamp}`;
+
+    await page.goto('/admin/content');
+    await page.getByTestId('content-new-post').click();
+    await expect(page.getByTestId('content-editor-form')).toBeVisible();
+
+    const titleInput = page.getByTestId('content-title');
+    await expect
+      .poll(async () => {
+        await titleInput.fill(title);
+        return page.getByTestId('content-slug').inputValue();
+      })
+      .toBe(slug);
+    await page.getByTestId('content-body').locator('textarea').fill(`Body for ${title}.`);
+    // Deliberately no content-published-at: this is the branch under test.
+    await expect(page.getByTestId('content-published-at')).toHaveValue('');
+
+    await page.getByTestId('content-save').click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/content$/);
+
+    const row = page.locator('[data-testid^="content-row-"]').filter({ hasText: title }).last();
+    await expect(row).toBeVisible();
+    await expect(row.getByTestId('content-status')).toHaveText('Draft');
+    const rowTestID = (await row.getAttribute('data-testid')) ?? '';
+    const id = rowTestID.replace('content-row-', '');
+    expect(id).toMatch(/^\d+$/);
+
+    await page.getByTestId(`content-publish-${id}`).click();
+    await expect(
+      page.getByTestId(`content-row-${id}`).getByTestId('content-status'),
+    ).toHaveText('Live');
+
+    await page.goto(`/blog/${slug}`);
+    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+
+    // Clean up so a repeat run starts from the same table.
+    await page.goto('/admin/content');
+    await page.locator(`[data-testid="content-row-${id}"]`).getByRole('button', { name: 'Delete' }).click();
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.locator(`[data-testid="content-row-${id}"]`)).toHaveCount(0);
+
+    await context.close();
+  });
 });

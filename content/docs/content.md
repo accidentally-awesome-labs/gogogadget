@@ -89,9 +89,14 @@ failures before it was named. A date the editor supplied is kept as written:
 that is what makes a future one scheduled.
 
 `/admin/content` shows the four states as a **computed** badge — draft,
-scheduled, expired, live — never a stored one, so it cannot drift from what
-the public site does. An expired entry stays listed and editable for staff
-while being absent everywhere else.
+scheduled, expired, live — never a stored one, and it is computed by the same
+query that lists the rows (`ListEntriesAdmin`'s `lifecycle` column) off the
+same `now()` as the live predicate above. That is what makes "it cannot drift
+from what the public site does" a fact rather than a hope: a badge decided in
+the template from the render clock answers to a different clock than the
+predicate, and under `APP_ENV=test` that clock is frozen at `TEST_NOW`, so a
+live entry rendered "Scheduled". An expired entry stays listed and editable
+for staff while being absent everywhere else.
 
 ## Caching
 

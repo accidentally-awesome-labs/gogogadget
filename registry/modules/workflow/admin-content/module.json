@@ -4,7 +4,7 @@
     "id": "ggg/workflow/admin-content",
     "kind": "workflow",
     "name": "admin-content",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Admin content mutations",
     "description": "Creates, updates, publishes, unpublishes, deletes, and restores content entries, owning the editor form contract, validation, revision snapshots, live Markdown preview, and audit effects.",
@@ -88,7 +88,7 @@
         "source": "e2e/admin-content.spec.ts",
         "target": "e2e/admin-content.spec.ts",
         "class": "test",
-        "sha256": "8cf943c9107c2d9f0d471f62311ab6f8652d05171f2fa66512f72d72f76c3c43",
+        "sha256": "f8bee8559e2c438d79ea7d2516ceafc188e29a64064d7750242b50962d1fbb57",
         "rewrite_module": false,
         "contract": false
       },

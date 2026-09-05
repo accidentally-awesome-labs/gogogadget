@@ -44,7 +44,7 @@ func (s *Server) handleAdminContent(w http.ResponseWriter, r *http.Request) {
 	}
 	d := templates.ContentListData{
 		Items: items, Types: s.types.All(), Kind: kind, Query: query,
-		Page: page, TotalPages: totalPages, Now: s.cfg.Now,
+		Page: page, TotalPages: totalPages,
 	}
 	pageData := Page{Title: i18n.T(ctx, "admin.content.title"), Layout: templates.LayoutAdmin}
 	if wantsFragment(r) {

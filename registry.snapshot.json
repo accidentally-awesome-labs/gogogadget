@@ -688,7 +688,7 @@
     },
     {
       "path": "registry/modules/page/admin-content/module.json",
-      "sha256": "11b4f84dee150b775ffd00958bbaf5b005b71db8611b2209a843066fa0d37dbd"
+      "sha256": "10a1854383df4fa7c56704dd9725a20558b644bacfbc032563680f4e30bf6e8c"
     },
     {
       "path": "registry/modules/page/admin-flag-detail/module.json",
@@ -828,7 +828,7 @@
     },
     {
       "path": "registry/modules/system/api/module.json",
-      "sha256": "397953256d900505ebd3aab4242bf193b89e4654b268cd20461181062239329c"
+      "sha256": "d45a61f3d911b8c411a09294578b86ca623bc2193ae1357b11e2931d850e17a5"
     },
     {
       "path": "registry/modules/system/apphost/module.json",
@@ -888,11 +888,11 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "5c3b67ceb410e71dc786c9a105c1b4c0f8323cced0275535cba27b9df6892d68"
+      "sha256": "2166f22d2b09f408262c6128e9508edbb78aba6c3a39d337ec609db6b7bc02a6"
     },
     {
       "path": "registry/modules/system/content/module.json",
-      "sha256": "d5cb41070f2792ceabe9b2d27dc6e458ebb4b60d025cec57a4d685b3b13bd9b3"
+      "sha256": "5212d8e9aeb4ebffc0b0dccc0fc3cab4a94138656b3a306a199786de2f933fb3"
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "823de59364cda0c65bb9769804fed72901f5781b648ebc1de24727c61f59ef5f"
+      "sha256": "160ea99f7ca62b54f194b8b9486572b088664d58fcb7598767e4ad79193d9167"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "d181e0ae27a912fbe35e45d365392a6362d469749d10a2b71fd14355c4ec2f12"
+      "sha256": "c2279155bf35bfadb44ff09a39f855a9151d78792e41a6265a784303fd75e27a"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1168,7 +1168,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-content/module.json",
-      "sha256": "73eedfa7e407aea455a7613fc4fc97bb4d4208cb6107674d85eda004b3afad46"
+      "sha256": "df9369e7b90c7b0271b3b69851c09189fc08de94b7fc1ad1ce271d1209cddd28"
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",

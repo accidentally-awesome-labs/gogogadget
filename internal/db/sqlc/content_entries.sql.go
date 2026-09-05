@@ -246,7 +246,14 @@ func (q *Queries) LatestLiveEntry(ctx context.Context, arg LatestLiveEntryParams
 }
 
 const listEntriesAdmin = `-- name: ListEntriesAdmin :many
-SELECT id, kind, slug, locale, title, summary, body_md, body_html, meta, status, published_at, unpublish_at, created_by, created_at, updated_at, search_tsv FROM content_entries
+SELECT id, kind, slug, locale, title, summary, body_md, body_html, meta, status, published_at, unpublish_at, created_by, created_at, updated_at, search_tsv,
+  CASE
+    WHEN status <> 'published' THEN 'draft'
+    WHEN unpublish_at IS NOT NULL AND unpublish_at <= now() THEN 'expired'
+    WHEN published_at IS NOT NULL AND published_at > now() THEN 'scheduled'
+    ELSE 'live'
+  END AS lifecycle
+FROM content_entries
 WHERE ($1::text = '' OR kind = $1)
   AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR title ILIKE '%' || $2 || '%')
 ORDER BY COALESCE(published_at, created_at) DESC
@@ -260,9 +267,38 @@ type ListEntriesAdminParams struct {
 	Lim    int32  `json:"lim"`
 }
 
+type ListEntriesAdminRow struct {
+	ID          int64              `json:"id"`
+	Kind        string             `json:"kind"`
+	Slug        string             `json:"slug"`
+	Locale      string             `json:"locale"`
+	Title       string             `json:"title"`
+	Summary     string             `json:"summary"`
+	BodyMd      string             `json:"body_md"`
+	BodyHtml    string             `json:"body_html"`
+	Meta        []byte             `json:"meta"`
+	Status      string             `json:"status"`
+	PublishedAt pgtype.Timestamptz `json:"published_at"`
+	UnpublishAt pgtype.Timestamptz `json:"unpublish_at"`
+	CreatedBy   string             `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	SearchTsv   interface{}        `json:"search_tsv"`
+	Lifecycle   string             `json:"lifecycle"`
+}
+
 // FTS (websearch syntax) with an ILIKE fallback so partial tokens still match.
 // Every locale variant is its own row; the admin table shows a locale column.
-func (q *Queries) ListEntriesAdmin(ctx context.Context, arg ListEntriesAdminParams) ([]ContentEntry, error) {
+//
+// lifecycle is the editor's badge, decided HERE rather than in the template,
+// because it is the same question the live predicate above asks and it has to
+// be asked of the same clock. A template comparing a database-stamped
+// published_at against the application's render clock disagrees with the
+// public site by exactly the skew between them — and under APP_ENV=test that
+// render clock is frozen at TEST_NOW, so the disagreement is eight months
+// wide and a live entry reads "Scheduled". The branch order is the one the
+// template used: draft, then expired, then scheduled, then live.
+func (q *Queries) ListEntriesAdmin(ctx context.Context, arg ListEntriesAdminParams) ([]ListEntriesAdminRow, error) {
 	rows, err := q.db.Query(ctx, listEntriesAdmin,
 		arg.Kind,
 		arg.Filter,
@@ -273,9 +309,9 @@ func (q *Queries) ListEntriesAdmin(ctx context.Context, arg ListEntriesAdminPara
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ContentEntry
+	var items []ListEntriesAdminRow
 	for rows.Next() {
-		var i ContentEntry
+		var i ListEntriesAdminRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Kind,
@@ -293,6 +329,7 @@ func (q *Queries) ListEntriesAdmin(ctx context.Context, arg ListEntriesAdminPara
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.SearchTsv,
+			&i.Lifecycle,
 		); err != nil {
 			return nil, err
 		}

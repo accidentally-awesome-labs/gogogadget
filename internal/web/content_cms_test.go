@@ -129,6 +129,56 @@ func TestPublishedBodyEscapesMarkup(t *testing.T) {
 	assert.Contains(t, body, "raw HTML omitted", "goldmark drops raw HTML instead of trusting it")
 }
 
+// A publish with no date, driven over HTTP through the handler that stamps it,
+// is live on the public site AND reads "Live" in the admin table. Both halves
+// are needed and neither substitutes for the other: the public assertion
+// covers the visibility predicate, the badge assertion covers the editor's
+// view of the same fact, and the defect that produced this test moved the
+// stamp to the database clock while leaving the badge on the application's.
+//
+// This is the branch no gate reached. The only publish in the e2e suite fills
+// an explicit past date first, so it takes PublishEntry's keep-the-date branch
+// and never the COALESCE one; every failure this pair defends against was
+// therefore invisible to `make check`, `make e2e` and `make visual` alike.
+//
+// Note what it cannot do: with cfg.Now() reduced to plain wall clock here (the
+// integration server builds config.Config as a literal, so TEST_NOW is not
+// reachable and must not be made so — the frozen clock's job is visual
+// determinism), an application stamp and a database stamp are identical on any
+// machine whose clocks agree. This test earns its keep against a database
+// whose clock is offset in either direction, which is how it was verified;
+// TestPublishStampsTheDatabaseClock is the deterministic discriminator.
+func TestDatelessPublishIsLiveEverywhereItIsReported(t *testing.T) {
+	s, admin := contentAdmin(t, "cms4b")
+	code, _, _ := postForm(t, s, "/admin/content", url.Values{
+		"kind": {"post"}, "title": {"CMS Dateless"}, "slug": {"cms-dateless"},
+		"body_md": {"body"},
+	}, admin)
+	require.Equal(t, http.StatusOK, code)
+
+	entry, err := s.q.GetEntryByKindSlugLocale(t.Context(), sqlc.GetEntryByKindSlugLocaleParams{
+		Kind: "post", Slug: "cms-dateless", Locale: "",
+	})
+	require.NoError(t, err)
+	require.False(t, entry.PublishedAt.Valid, "the form carried no date, so there is nothing to keep")
+
+	code, _, _ = postForm(t, s, fmt.Sprintf("/admin/content/%d/publish", entry.ID), url.Values{}, admin)
+	require.Equal(t, http.StatusOK, code)
+
+	code, _, index := serve(t, s, "GET", "/blog", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, index, "CMS Dateless", "a dateless publish is live on the next request")
+	code, _, _ = serve(t, s, "GET", "/blog/cms-dateless", nil, nil)
+	assert.Equal(t, http.StatusOK, code)
+
+	code, _, adminBody := serve(t, s, "GET", "/admin/content?q=CMS+Dateless", nil, nil, admin)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, adminBody, "Live",
+		"the editor's badge must agree with the public site about the entry it just published")
+	assert.NotContains(t, adminBody, "Scheduled",
+		"a badge computed off a clock the publish instant did not come from reads Scheduled for a live entry")
+}
+
 // The unique index is per locale, so the message has to say so rather than
 // leaking a constraint name through the 500 page.
 func TestDuplicateSlugIsRejectedWithTheForm(t *testing.T) {

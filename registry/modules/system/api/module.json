@@ -4,7 +4,7 @@
     "id": "ggg/system/api",
     "kind": "system",
     "name": "api",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "JSON API",
     "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",

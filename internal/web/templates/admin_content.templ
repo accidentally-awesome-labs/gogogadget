@@ -15,13 +15,12 @@ import (
 // registry, so filters and New buttons appear for a newly declared type
 // without a template edit.
 type ContentListData struct {
-	Items      []sqlc.ContentEntry
+	Items      []sqlc.ListEntriesAdminRow
 	Types      []content.Type // registry order
 	Kind       string         // "" = all
 	Query      string
 	Page       int
 	TotalPages int
-	Now        func() time.Time
 }
 
 // ContentErrors carries field-level validation messages back to the editor.
@@ -60,21 +59,14 @@ type MediaData struct {
 	Now        func() time.Time
 }
 
-// contentStatus is the badge an editor reads. It is COMPUTED from the same
-// facts the public live predicate uses, never stored: a stored badge and a
-// SQL predicate drift, and the badge is the one that lies.
-func contentStatus(e sqlc.ContentEntry, now time.Time) string {
-	if e.Status != "published" {
-		return "draft"
-	}
-	if e.UnpublishAt.Valid && !e.UnpublishAt.Time.After(now) {
-		return "expired"
-	}
-	if e.PublishedAt.Valid && e.PublishedAt.Time.After(now) {
-		return "scheduled"
-	}
-	return "live"
-}
+// The badge an editor reads is decided by the database, in ListEntriesAdmin's
+// lifecycle column, off the same now() the public live predicate uses. It was
+// computed here from a render clock, and that clock is frozen at TEST_NOW
+// under APP_ENV=test — so once the publish instant started coming from the
+// database (which is where it belongs, see PublishEntry) the two clocks were
+// months apart and a live entry rendered "Scheduled". A badge and a SQL
+// predicate that answer to different clocks drift, and the badge is the one
+// that lies.
 
 // contentStatusKind maps the computed status onto the shared semantic axis.
 func contentStatusKind(status string) ui.Kind {
@@ -88,13 +80,11 @@ func contentStatusKind(status string) ui.Kind {
 	}
 }
 
-func contentNow(d ContentListData) time.Time {
-	if d.Now != nil {
-		return d.Now()
-	}
-	return time.Now()
-}
-
+// mediaNow is the render clock, and formatting a fixed timestamp is all it is
+// asked to do: its only caller renders RelTime over content_media.created_at.
+// No liveness, schedule or expiry is decided from it, so freezing it at
+// TEST_NOW is exactly the determinism the visual baselines want and there is
+// nothing here to move into SQL.
 func mediaNow(d MediaData) time.Time {
 	if d.Now != nil {
 		return d.Now()
@@ -239,7 +229,7 @@ templ AdminContentTable(d ContentListData) {
 						}
 					</td>
 					<td>
-						@contentStatusBadge(contentStatus(e, contentNow(d)))
+						@contentStatusBadge(e.Lifecycle)
 					</td>
 					<td class="text-fg-muted text-xs hidden md:table-cell">
 						if e.PublishedAt.Valid {

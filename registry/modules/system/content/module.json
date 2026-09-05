@@ -4,7 +4,7 @@
     "id": "ggg/system/content",
     "kind": "system",
     "name": "content",
-    "revision": 3,
+    "revision": 5,
     "contract": 1,
     "title": "Content and CMS",
     "description": "Embedded markdown corpus, goldmark rendering, RSS, search, and the database-backed CMS for administrator-authored entries, revisions, and media.",
@@ -155,7 +155,7 @@
         "source": "internal/db/queries/content_entries.sql",
         "target": "internal/db/queries/content_entries.sql",
         "class": "query",
-        "sha256": "05228c7c23a935677318140c04ff1ea6fa543d989bb8b7be430a364aeb092f54",
+        "sha256": "92ce7297f5f9c66b7bc7b8f855a297de75dcbcc1bb96ddd601dd4b4e018e550e",
         "rewrite_module": false,
         "contract": false
       },
@@ -176,10 +176,18 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/e2e/content.sql",
+        "target": "internal/db/testdata/seed/e2e/content.sql",
+        "class": "seed",
+        "sha256": "74bf739e8dca55c8e512e9b632bde53078000341283b9132b5cb443d9e393a4d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/content_cms_test.go",
         "target": "internal/web/content_cms_test.go",
         "class": "test",
-        "sha256": "ea05eaa1a1c8d6e1904c9979ecf1e4d732e87f8c3f0ae781e1ac14c3a67cd4c2",
+        "sha256": "9bfad1557aed14ca757a420a4f5e5c2b8fdf0991fb90afa0c05735ab001ae7ca",
         "rewrite_module": true,
         "contract": false
       },
