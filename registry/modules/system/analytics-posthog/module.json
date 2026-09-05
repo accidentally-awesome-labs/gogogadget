@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 7,
+    "revision": 8,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",
@@ -90,6 +90,14 @@
         "class": "test",
         "sha256": "0d198a0438576541cba9cef7cc79e1cb8bae1281be180c63b233a2e4e93f4abd",
         "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/analytics.js",
+        "target": "static/analytics.js",
+        "class": "asset",
+        "sha256": "cf50dd90a1c75c36b0cfae421904342cbc374528a14f3b4c27e7b3fd7be78316",
+        "rewrite_module": false,
         "contract": false
       }
     ],
@@ -218,9 +226,9 @@
         "layout.analytics_decline": "Decline"
       },
       "es": {
-        "a11y.analytics_consent": "Consentimiento de anal\u00edtica",
+        "a11y.analytics_consent": "Consentimiento de analítica",
         "layout.analytics_accept": "Aceptar",
-        "layout.analytics_consent_body": "Usamos anal\u00edtica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
+        "layout.analytics_consent_body": "Usamos analítica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
         "layout.analytics_decline": "Rechazar"
       }
     },
