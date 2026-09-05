@@ -34,7 +34,11 @@ export default defineConfig({
   testDir: '.',
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // The retried-pass reporter runs last so its verdict is the final line the
+  // gate prints. retries:2 makes a flaky test green, and the exit code was
+  // the whole of what the gate reported — so a test failing a third of the
+  // time looked exactly like one that never failed.
+  reporter: [['list'], ['html', { open: 'never' }], ['./retried-pass-reporter.ts']],
   use: {
     baseURL,
     trace: 'retain-on-failure',

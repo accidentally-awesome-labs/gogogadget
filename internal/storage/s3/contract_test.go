@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,6 +24,17 @@ func TestS3StoreContract(t *testing.T) {
 		},
 		InlineStatus: func(t *testing.T, code int) {
 			require.Equal(t, http.StatusSeeOther, code)
+		},
+		// A presigned GET is where the object actually is, so the contract's
+		// byte comparison follows the redirect the client would follow.
+		ReadServed: func(t *testing.T, rec *httptest.ResponseRecorder) []byte {
+			resp, err := http.Get(rec.Header().Get("Location"))
+			require.NoError(t, err)
+			defer resp.Body.Close()
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			return body
 		},
 		AssertMissing: func(t *testing.T, s storage.Store, key string) {
 			rec := httptest.NewRecorder()

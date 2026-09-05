@@ -179,12 +179,23 @@ brings up (`localhost:15432`) rather than a literal that drifts from it.
 Export `E2E_DATABASE_URL` to override, which is how CI names its own service
 container.
 
-It is the same database the test stack's own `app` service runs against, and
-`-reset` drops it (`WITH (FORCE)`, so a stale connection cannot block the
-reset). Nothing drives that container — Playwright runs its own `webServer` on
-`:18080`, and container mode uses `E2E_NO_WEBSERVER` with a host server — so
-one disposable database per server is deliberate rather than a collision. The
-visual harness resets the same one.
+`ggg test e2e` and `ggg test visual` bring that stack up with the app service
+**scaled to zero**, because both own the app process themselves — Playwright's
+`webServer` starts one on `:18080`, and the visual harness builds and runs one
+for container mode. The stack's `app` service points at the same database, and
+it is not idle just because nothing reaches it over HTTP: it runs its own jobs
+worker, scheduler and audit exporter. Two workers claim from one
+`FOR UPDATE SKIP LOCKED` queue while writing to two separate object stores, so
+an export CSV lands in whichever process won the claim and the other answers
+500 for a `files` row both of them can see. That was `export.spec.ts` failing a
+third of its runs, invisible behind `retries:2`. `ggg services up` and
+`ggg db reset` still bring the whole stack up, app service included: standing
+the stack up in docker is the point of the first, and the second restores
+exactly what it tore down.
+
+`-reset` drops that database (`WITH (FORCE)`, so a stale connection cannot
+block the reset). One disposable database per server is deliberate; the visual
+harness resets the same one.
 
 Login is a cookie, not a hosted page:
 
@@ -262,6 +273,27 @@ Assertion discipline, by convention:
 - shell scripts run `set -euo pipefail`, so a failed step inside a pipe fails
   the run.
 
+`retries` is 2 under `CI` and 0 locally, and the run **reports every test that
+passed only on retry** — the name, the location, and which attempt finally
+passed — as the last line the gate prints:
+
+```
+retried passes: 1 test failed at least once and was retried into a green run:
+  [chromium] export produces a downloadable CSV (export.spec.ts:7) — passed on attempt 2 of 3
+```
+
+A clean run says `retried passes: none (retry budget 2)`, and a run with no
+budget says so rather than implying nothing was retried. The reporter is
+`e2e/retried-pass-reporter.ts`, registered last so its verdict is not scrolled
+away.
+
+It does not fail the build. A retried pass is a lead to investigate, and a
+gate that fails on one gets its retries deleted instead of its flake fixed —
+but a green exit code was previously the whole of what the gate said, so a test
+failing a third of the time was indistinguishable from one that never failed.
+That is how `export.spec.ts` hid a storage-topology defect: 33% at
+`--workers=1 --retries=0`, ~3.6% and green with retries applied.
+
 Some specs defend htmx invariants that no unit test can reach, because they only
 exist in a live browser. Each was written by breaking the behaviour first and
 watching the test fail:
@@ -277,6 +309,26 @@ When one of these fails, read it as a design report: the chrome diverged, the
 swap widened, or a link got boosted that shouldn't be.
 
 Run the suite with `make e2e` (interactive mode: `make e2e-ui`).
+
+**When a spec times out, measure before you cap anything.** The suite runs
+`fullyParallel` on Playwright's default `workers` (half the logical cores — 5
+on a 10-core machine) across two projects, and the heaviest specs already
+carry per-case budgets: `a11y-states.spec.ts` sets
+`30_000 × scans + 50_000 when a vendor bundle is awaited`, because a case that
+walks a widget's states needs a budget proportional to its axe passes.
+Measured on a 10-core M1 Max with the whole file running: the tightest
+interaction case used **32.8%** of its budget at load average 16, and **35.0%**
+at load average 143 — sixteen pure-CPU spinners and twenty-six containers, and
+the wall clock did not move (2m32s against 2m40s). The suite itself draws 3.6
+of 10 cores.
+
+So an `a11y-states` timeout is not "the machine was busy": load average moves
+the numbers by single percentage points, and capping workers would cost half
+the wall clock on every good run to recover nothing. Eleven of these specs did
+once time out at 30s, and a run that slow is 3× off a distribution that CPU
+saturation cannot produce — look for the shared substrate instead (the Docker
+VM the server, database and browsers all sit behind), and re-measure rather
+than re-run.
 
 ## Visual
 
@@ -296,9 +348,12 @@ make visual          # compare against the committed baselines — read-only
 make visual-update   # the only thing allowed to overwrite a committed screenshot
 ```
 
-Both need the **test stack** up first (`ggg services up --environment test`),
-because that is the server they connect to: the prerequisite moved off `5432`
-when the harness stopped hardcoding an address. Both go through
+`make visual` goes through `ggg test visual`, which brings the **test stack**
+up itself — dependency services only, app service scaled to zero, because the
+harness runs the server. It used to be a documented prerequisite
+(`ggg services up --environment test`), which brought the app service with it
+and put a second jobs worker beside the one the harness starts. Both go
+through
 `scripts/visual-run.sh`, which extracts the `@playwright/test` version from
 `e2e/package.json`, resets the database `VISUAL_DATABASE_URL` names — empty
 falls through to the project's derived test-stack address, and the value is
@@ -314,6 +369,13 @@ commit locally generated baselines. Determinism comes from `TEST_NOW`: under
 `APP_ENV=test` the render clock freezes (`Config.Now()`), so every rendered
 date and relative time is stable, and the e2e seed uses fixed `2026-01-15`
 timestamps to match.
+
+That clock **formats**; it never decides state. Anything a stored column and a
+SQL predicate already answer — whether a content entry is live, scheduled or
+expired — is computed in the query off the database's `now()`, never compared
+against `Config.Now()` in a template. The two clocks are eight months apart
+under the harness, and a badge that arbitrates with the frozen one calls a
+live entry "Scheduled" while the public page serves it.
 
 The gallery baselines are the highest-leverage ones: a shade, spacing or
 variant regression anywhere in the component layer shows up as one named

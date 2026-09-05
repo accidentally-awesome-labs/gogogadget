@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "43f45dc5f0292c2b5c5b27e26f3893289d04267dcb65e0c89f25fa2dcb23cb3f"
+      "sha256": "5c3b67ceb410e71dc786c9a105c1b4c0f8323cced0275535cba27b9df6892d68"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -924,7 +924,7 @@
     },
     {
       "path": "registry/modules/system/e2e/module.json",
-      "sha256": "1f2983077d0920da5a9322be01d327752ff91a318a6da8138482e0810ec6340d"
+      "sha256": "f26aabff1909a3d9725e244f29015b91fbd7c277b9055c46f166873f14a69dc5"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "e44f0848e3c9fbf33614c145b7cbb3e6f6e2721799352c8d9eaefcaaab620473"
+      "sha256": "d181e0ae27a912fbe35e45d365392a6362d469749d10a2b71fd14355c4ec2f12"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1104,15 +1104,15 @@
     },
     {
       "path": "registry/modules/system/storage-filesystem/module.json",
-      "sha256": "130e94cf4496c3712698303b40fe24d1343acd38d9e961fc61868833b204975e"
+      "sha256": "ecc19a6a2ed885027a45311a20071b912a9a851a656c961f0bc45d265ab76584"
     },
     {
       "path": "registry/modules/system/storage-s3/module.json",
-      "sha256": "69bef1b1c8949022eb4c6743e985b1ee9737b0c719794523f42ddc712c454f7a"
+      "sha256": "330c69f1d55a99886a9f115c43a39b5b7418641db255b01a8dc584805be23ac7"
     },
     {
       "path": "registry/modules/system/storage/module.json",
-      "sha256": "3c101792ed6b9050b2e0fc237f9f2007bc64b7761bf57293c12a88fd650a44e8"
+      "sha256": "818b6367652dde7dcac9a7ec29ac1ac37624f5229cd51affc534f19de858fa53"
     },
     {
       "path": "registry/modules/system/telemetry-noop/module.json",

@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -43,8 +44,24 @@ func (s *DevStore) Put(_ context.Context, key, _ string, r io.Reader) (int64, er
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
-	return io.Copy(f, r)
+	// Close is explicit and its error is returned, and the size is contingent
+	// on it. `defer f.Close(); return io.Copy(f, r)` runs Close AFTER the
+	// return value is computed and discards its error — and Close is exactly
+	// where a delayed write error surfaces, so that shape reports a
+	// successful write, with a byte count, for bytes that never landed. A
+	// caller that gets a size back can rely on Serve reading those bytes
+	// back; that is the contract the seam is held to.
+	//
+	// A failed write takes the object with it. os.Create already truncated
+	// whatever was at the key, so leaving the remains would publish a
+	// partial object at a key Put just reported as failed.
+	n, copyErr := io.Copy(f, r)
+	closeErr := f.Close()
+	if err := errors.Join(copyErr, closeErr); err != nil {
+		_ = os.Remove(p)
+		return 0, err
+	}
+	return n, nil
 }
 
 func (s *DevStore) Serve(_ context.Context, w http.ResponseWriter, key, filename, contentType string) error {

@@ -314,7 +314,10 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		argv := []string{"docker", "compose", "-f", compose}
 		switch mutation.Action {
 		case "up":
-			argv = append(argv, "up", "-d", "--wait")
+			// `ggg services up` exists to stand the whole stack up in
+			// docker, app service included: it owns no app process of its
+			// own, so the stack is where the app belongs.
+			argv = composeUpArgv(environment, appRunsInStack)
 		case "down":
 			argv = append(argv, "down")
 			if mutation.Volumes {
@@ -327,8 +330,11 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		}
 		err = run(root, argv...)
 	case "dev":
+		// `ggg dev` supervises the application itself — templ watch, Tailwind
+		// watch and air, on the port the development stack publishes for its
+		// app service. It therefore takes dependency services only.
 		if err = c.runGenerate(ctx, runner); err == nil {
-			err = run(root, "docker", "compose", "-f", "compose.yaml", "up", "-d", "--wait")
+			err = run(root, composeUpArgv("development", appRunsInTask)...)
 		}
 		if err == nil {
 			// Same rule as runner(): supervised child output is progress, and
@@ -370,8 +376,11 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 		case "seed":
 			err = runEnv(root, seed, "go", "run", "./cmd/seed", "-registry", "dev")
 		case "reset":
+			// Reset destroys the database volume and puts the stack back the
+			// way it found it, app service included: it supervises nothing
+			// of its own, so the stack is where the app belongs.
 			if err = run(root, "docker", "compose", "-f", compose, "down", "--volumes"); err == nil {
-				err = run(root, "docker", "compose", "-f", compose, "up", "-d", "--wait")
+				err = run(root, composeUpArgv(environment, appRunsInStack)...)
 			}
 			if err == nil {
 				err = runEnv(root, seed, "go", "run", "./cmd/seed", "-reset", "-registry", "dev")
@@ -583,7 +592,9 @@ func runTestTask(run func(string, ...string) error, root, mode string) error {
 	case "unit", "integration":
 		return run(root, "go", "test", "./...")
 	case "e2e":
-		if err := run(root, "docker", "compose", "-f", "compose.test.yaml", "up", "-d", "--wait"); err != nil {
+		// The Playwright harness starts its own server on the host, so the
+		// stack supplies dependency services only.
+		if err := run(root, composeUpArgv("test", appRunsInTask)...); err != nil {
 			return err
 		}
 		return run(filepath.Join(root, "e2e"), "npx", "playwright", "test")
@@ -592,6 +603,15 @@ func runTestTask(run func(string, ...string) error, root, mode string) error {
 		// the suite needs a seeded database plus a host server. scripts/visual.sh
 		// owns all three; a bare `npx playwright test` here runs on the host with
 		// no server and no e2e/node_modules.
+		//
+		// It builds and runs the server itself on :18080, so it owns the app
+		// process and the stack it needs is dependency services only. Standing
+		// that up here is also what removes the documented prerequisite —
+		// `ggg services up --environment test`, which brings the app service
+		// with it and put a second worker beside the one the script starts.
+		if err := run(root, composeUpArgv("test", appRunsInTask)...); err != nil {
+			return err
+		}
 		return run(root, filepath.Join("scripts", "visual.sh"))
 	case "smoke":
 		return run(root, filepath.Join("scripts", "smoke.sh"))
@@ -606,6 +626,66 @@ func runTestTask(run func(string, ...string) error, root, mode string) error {
 		return usageError("unknown test mode")
 	}
 }
+
+// appProcessOwner is the one decision that governs every compose `up` this
+// package issues: while the stack is up, who runs the application process?
+//
+// It exists because the combination nothing named was silently racing.
+// `ggg test e2e` brought up the whole test stack, app service included, and
+// then the Playwright harness started its own server on the host — the
+// generated test stack publishes no host port for its app service, so the
+// container was unreachable and looked harmless. It was not: it ran a SECOND
+// jobs worker, scheduler and audit exporter against the SAME test database.
+// Postgres is shared between the two processes and an object store is not, so
+// whichever worker won a SKIP-LOCKED claim wrote the export CSV into its OWN
+// tmp/uploads while both processes saw the files row. When the container won,
+// the host server's download resolved a key that exists only inside the
+// container and answered 500 — export.spec.ts failed 33% of serial runs.
+// `ggg dev` has the same shape and is worse: development PUBLISHES the app
+// port, so the container and the supervised air process collide outright.
+//
+// Two workers claiming from one queue is not something a comment prevents, so
+// the ownership is a required argument of the only function that builds an
+// `up` invocation, and owning the app process makes the app service
+// unrepresentable in the resulting stack.
+type appProcessOwner int
+
+const (
+	// appRunsInStack: the compose stack runs the application. Standing the
+	// whole stack up in docker is `ggg services up`'s entire purpose, and
+	// `ggg db reset` restores exactly the stack it tore down.
+	appRunsInStack appProcessOwner = iota
+	// appRunsInTask: the task serves or supervises the application itself —
+	// `ggg dev` supervises air, `ggg test e2e`'s harness starts its own
+	// server. The stack then supplies DEPENDENCY SERVICES ONLY.
+	appRunsInTask
+)
+
+// composeUpArgv is the only compose `up` this package issues.
+//
+// A task that owns the app process gets the stack with its app service scaled
+// to zero: every dependency service comes up, and the app service both stays
+// uncreated and — this is the part that matters on a machine that has been
+// used — has any container an earlier `ggg services up` left running removed,
+// so a stale second worker cannot survive underneath the task.
+//
+// Scaling is what makes it one decision rather than a service allowlist to
+// keep in step with the generator. Naming the wanted services instead would
+// disable the app service, which makes `--scale app=0` an error ("no such
+// service: app: disabled") and leaves an already-running app container up:
+// the exact state this exists to prevent.
+func composeUpArgv(environment string, owner appProcessOwner) []string {
+	argv := []string{"docker", "compose", "-f", modkit.ComposeFileName(environment), "up", "-d", "--wait"}
+	if owner == appRunsInStack {
+		return argv
+	}
+	return append(argv, "--scale", composeAppService+"=0")
+}
+
+// composeAppService is the generated app service's compose name. The compose
+// emitter names it and no manifest declares it, so the one place that has to
+// exclude it names it too.
+const composeAppService = "app"
 
 func taskActionSuffix(action string) string {
 	if action == "" {

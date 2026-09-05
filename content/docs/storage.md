@@ -22,6 +22,13 @@ type Store interface {
 ```
 
 - `Put` writes the object and returns its size (recorded in the `files` row).
+  A returned size is a **durability claim**: the bytes are readable back
+  through `Serve`. So `Close` is explicit and its error is returned, and a
+  failed write reports the error, no size, and removes the truncated object —
+  `defer f.Close(); return io.Copy(f, r)` runs `Close` after the return value
+  is computed and discards exactly the error a delayed write surfaces in, so
+  it reports a byte count for bytes that may never have landed.
+  `internal/storage/contract` asserts the round trip for every adapter.
 - `Serve` delivers it: **R2 answers 303 to a presigned GET (15 min)** so the
   bytes stream from the provider, never through the app; DevStore streams
   from disk. Both always send `Content-Disposition: attachment` — user

@@ -4,7 +4,7 @@
     "id": "ggg/system/storage-filesystem",
     "kind": "system",
     "name": "storage-filesystem",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Filesystem storage",
     "description": "Deterministic local object storage under tmp/uploads.",
@@ -54,7 +54,7 @@
         "source": "internal/storage/filesystem/dev.go",
         "target": "internal/storage/filesystem/dev.go",
         "class": "go",
-        "sha256": "25f4e560757c4e17508be2ed0ced392700ee2217a243a6a68326b95ce3234b40",
+        "sha256": "893733b108b4d344ce879b77e2c321dee7f217e36cc71957ec81ffbf13040fad",
         "rewrite_module": true,
         "contract": true
       },

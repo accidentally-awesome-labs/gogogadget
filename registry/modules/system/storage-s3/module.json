@@ -4,7 +4,7 @@
     "id": "ggg/system/storage-s3",
     "kind": "system",
     "name": "storage-s3",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "S3-compatible storage",
     "description": "S3-compatible object storage with MinIO self-hosting and Cloudflare R2 managed targets.",
@@ -63,7 +63,7 @@
         "source": "internal/storage/s3/contract_test.go",
         "target": "internal/storage/s3/contract_test.go",
         "class": "test",
-        "sha256": "79c7c8fb4cb251423e6543b452b44ece8daae242c3860292d4ad87d411a34187",
+        "sha256": "47df3e65de428393cd34cd2fe6676e7aa117e1070642ba7b9f8ac5c28fbe539c",
         "rewrite_module": true,
         "contract": false
       },
@@ -169,8 +169,8 @@
                 "health": {
                   "kind": "http",
                   "port": 9000,
-                  "command": "wget -qO- http://127.0.0.1:9000/minio/health/live",
-                  "path": "/minio/health/live"
+                  "path": "/minio/health/live",
+                  "command": "wget -qO- http://127.0.0.1:9000/minio/health/live"
                 }
               }
             },

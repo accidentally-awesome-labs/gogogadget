@@ -4,7 +4,7 @@
     "id": "ggg/system/e2e",
     "kind": "system",
     "name": "e2e",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "E2E harness",
     "description": "Playwright harness: config, global setup, helpers and the pinned node dependencies every declared spec imports.",
@@ -59,7 +59,15 @@
         "source": "e2e/playwright.config.ts",
         "target": "e2e/playwright.config.ts",
         "class": "asset",
-        "sha256": "6000099a05563169e2ab790a4e0b9dce52d3e990b513603801f13aba67664849",
+        "sha256": "26bfcf7c292ed06021bf3fa5526324612fdff1b68883e6ff294d9b8347366702",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "e2e/retried-pass-reporter.ts",
+        "target": "e2e/retried-pass-reporter.ts",
+        "class": "asset",
+        "sha256": "a9083f5a061a60ecaf8f78279849c39391d3ab1afac448acbc88f417d0b2fbd6",
         "rewrite_module": false,
         "contract": false
       }
