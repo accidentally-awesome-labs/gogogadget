@@ -759,10 +759,11 @@ const (
 	CSPFrameSrc   CSPDirective = "frame-src"
 )
 
-// ContributableCSPDirectives is that set, in the order the header renders them.
+// ContributableCSPDirectives is that set, in the order the header renders them
+// (see cspBase in internal/web/csp.go, which keeps v0.7.1's order).
 var ContributableCSPDirectives = []CSPDirective{
-	CSPStyleSrc, CSPImgSrc, CSPFontSrc, CSPConnectSrc, CSPWorkerSrc,
-	CSPMediaSrc, CSPFrameSrc,
+	CSPWorkerSrc, CSPStyleSrc, CSPImgSrc, CSPMediaSrc, CSPFrameSrc,
+	CSPFontSrc, CSPConnectSrc,
 }
 
 // CSPContribution declares a function that returns Content-Security-Policy

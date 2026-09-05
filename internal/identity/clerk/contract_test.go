@@ -23,6 +23,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	identitycontract "github.com/gogogadget/gogogadget/internal/identity/contract"
+	"github.com/gogogadget/gogogadget/internal/modkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -308,6 +309,23 @@ func TestFrontendAPIURLIsDerivedAtConfigLoad(t *testing.T) {
 			want: "https://clerk.app.example.com",
 		},
 		{
+			name: "production normalises a dashboard-copied APP_URL",
+			env: map[string]string{
+				// A trailing slash and mixed case are what an operator
+				// actually pastes. Both used to survive into the CSP source,
+				// where the grammar refuses a path and a host is
+				// case-insensitive anyway — and a refused source is dropped,
+				// which blocks the ~60s __session refresh in production only.
+				"APP_ENV": "production", "APP_URL": "https://App.Example.com/",
+				"DATABASE_URL": "postgres://x", "NEON_API_KEY": "x", "RESEND_API_KEY": "x",
+				"STORAGE_R2_ACCESS_KEY_ID": "x", "STORAGE_R2_ACCOUNT_ID": "x",
+				"STORAGE_R2_BUCKET": "x", "STORAGE_R2_SECRET_ACCESS_KEY": "x",
+				"CLERK_PORTAL_URL": "https://accounts.example.com", "CLERK_PUBLISHABLE_KEY": "pk",
+				"CLERK_SECRET_KEY": "sk", "CLERK_WEBHOOK_SECRET": "whsec",
+			},
+			want: "https://clerk.app.example.com",
+		},
+		{
 			name: "development uses the shared wildcard host",
 			env:  map[string]string{"APP_ENV": "development", "APP_URL": "http://localhost:8080"},
 			want: "https://*.clerk.accounts.dev",
@@ -318,6 +336,12 @@ func TestFrontendAPIURLIsDerivedAtConfigLoad(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, cfg.Value("CLERK_FRONTEND_API_URL"))
 			assert.Equal(t, tc.want, cfg.ClerkFrontendAPIURL)
+			// This value IS a CSP source, so asserting the string is only half
+			// the contract: it has to satisfy the grammar that decides whether
+			// it reaches the header at all. Asserting two happy-path strings
+			// is what let a trailing slash through.
+			assert.NoError(t, modkit.ValidateCSPSource(cfg.Value("CLERK_FRONTEND_API_URL")),
+				"the derived frontend API origin must be a contributable CSP source")
 		})
 	}
 
@@ -330,4 +354,16 @@ func TestFrontendAPIURLIsDerivedAtConfigLoad(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "https://clerk.chosen.test", cfg.Value("CLERK_FRONTEND_API_URL"))
+
+	// An explicit value bypasses the derivation entirely, so the declaration
+	// carries trim_slash for the same reason CLERK_PORTAL_URL does.
+	cfg, err = config.LoadFrom(func(key string) string {
+		return map[string]string{
+			"APP_ENV": "development", "APP_URL": "http://localhost:8080",
+			"CLERK_FRONTEND_API_URL": "https://clerk.chosen.test/",
+		}[key]
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "https://clerk.chosen.test", cfg.Value("CLERK_FRONTEND_API_URL"))
+	assert.NoError(t, modkit.ValidateCSPSource(cfg.Value("CLERK_FRONTEND_API_URL")))
 }

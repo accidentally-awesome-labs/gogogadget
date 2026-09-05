@@ -22,6 +22,17 @@ func FrontendAPIURL(environment, appURL string) string {
 	if environment != "production" {
 		return "https://*.clerk.accounts.dev"
 	}
+	// Normalised here rather than accommodated downstream. This value is a CSP
+	// source, and the grammar that accepts it is deliberately strict: an
+	// origin, lower-case, no path. APP_URL is operator input, so it arrives
+	// with a trailing slash from a dashboard copy and with whatever case
+	// somebody typed — and a source that fails the grammar is dropped, which
+	// blocks the ~60s __session refresh and expires authentication a minute
+	// after login, in production only. Hostnames are case-insensitive, so
+	// lower-casing loses nothing; a path was never part of an origin.
 	host := strings.TrimPrefix(strings.TrimPrefix(appURL, "https://"), "http://")
-	return "https://clerk." + host
+	if slash := strings.IndexAny(host, "/?#"); slash >= 0 {
+		host = host[:slash]
+	}
+	return "https://clerk." + strings.ToLower(host)
 }

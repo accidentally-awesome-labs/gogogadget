@@ -156,12 +156,23 @@ keys precisely so a developer's `.env` cannot change the pixels. See
 background. If auth expires a minute after login, clerk-js isn't running:
 
 1. **Browser console shows a CSP-blocked source** — fix
-   `CLERK_FRONTEND_API_URL` (it feeds `connect-src`); add only the exact
-   reported origin if it's legitimate. See [Security](/docs/security).
-2. **No publishable-key meta tag in the page** — `CLERK_PUBLISHABLE_KEY` is
-   empty, so layouts skip clerk-js entirely.
-3. **Missing vendored file** — re-run `scripts/vendor-frontend.sh` (or
+   `CLERK_FRONTEND_API_URL`, which the identity adapter contributes to
+   `connect-src`. It is derived from `APP_URL` when unset and normalised
+   (trailing slash removed, host lower-cased) because a source that fails the
+   grammar is dropped, not served. See [Security](/docs/security) for what a
+   contribution may add.
+2. **Server log or error reporter shows "csp contribution rejected"** — the
+   origin reached the composer and failed the grammar: it must be an
+   `https://` origin, at most one leading wildcard label, no path. That is the
+   silent version of this failure, which is why the drop is reported rather
+   than only logged.
+3. **No publishable-key meta tag in the page** — `CLERK_PUBLISHABLE_KEY` is
+   empty, so the adapter's head slot renders no loader.
+4. **Missing vendored file** — re-run `scripts/vendor-frontend.sh` (or
    `make setup`) to restore `static/vendor/clerk.browser.js`.
+5. **The identity slot does not select this adapter for the environment** —
+   then none of the above applies: no loader, no mounts, and no Clerk source
+   in the policy. Check `providers` in `gogogadget.json`.
 
 In e2e/dev bypass mode this is expected — `FakeVerifier` tokens don't
 expire, and clerk-js is intentionally absent.

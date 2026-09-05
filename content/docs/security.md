@@ -45,11 +45,12 @@ Every response carries this policy, assembled from config in `secureHeaders`:
 |---|---|---|
 | `default-src` | `'self'` | Nothing loads cross-origin unless explicitly allowed |
 | `script-src` | `'self'` | No third-party JavaScript, ever |
-| `worker-src` | `'self' blob:` | clerk-js runs its session handshake in a blob: Web Worker |
+| `worker-src` | `'self'` | Contributable — the Clerk adapter adds `blob:` for its session handshake |
 | `style-src` | `'self' 'unsafe-inline'` | Tailwind is a built file; inline *styles* (not scripts) are allowed |
-| `img-src` | `'self' data: https://img.clerk.com` | Clerk avatars |
+| `img-src` | `'self' data:` | Contributable — the Clerk adapter adds its avatar host |
+| `media-src`, `frame-src` | *absent* | Contributable; until something contributes, `default-src` governs |
 | `font-src` | `'self'` | Vendored Inter |
-| `connect-src` | `'self' <CLERK_FRONTEND_API_URL>` | clerk-js keeps the short-lived session JWT fresh |
+| `connect-src` | `'self'` | Contributable — the Clerk adapter adds its Frontend API origin |
 | `frame-ancestors` | `'none'` | Clickjacking |
 | `base-uri` | `'self'` | Base-tag injection |
 | `form-action` | `'self'` | Forms can only post back here |
@@ -57,9 +58,24 @@ Every response carries this policy, assembled from config in `secureHeaders`:
 `script-src 'self'` is possible because there is **zero inline JavaScript**:
 Alpine runs the CSP build with every component registered as `Alpine.data`,
 htmx and clerk-js are vendored into `static/vendor/` and sha256-pinned, and
-PostHog loads through the same-origin `/ingest` proxy. When something reports
-a blocked source, add exactly that origin to the matching directive with an
-inline note. Never widen `script-src`.
+PostHog loads through the same-origin `/ingest` proxy.
+
+**Adding a source is a declaration, not an edit.** The table above is the base
+policy in `internal/web/csp.go`; a module that needs an origin declares a
+`runtime.csp` contribution — the directives it may touch, and a function
+returning sources from its own non-secret configuration — and the composed
+header picks it up only in the environments that select it. Editing the base
+policy to add a vendor origin is what `ValidateSeamVendorHosts` refuses.
+
+Three limits hold whatever is installed. A contribution may only ADD, only to
+a directive its manifest granted, and only a source matching the grammar: an
+`https://` origin with at most one leading wildcard label, or `blob:`/`data:`.
+`'unsafe-inline'`, `'unsafe-eval'`, bare `*` and `http://` are refused — at
+plan time over the declared function's literals, and again at runtime over
+whatever it returned, where a bad source is dropped and reported rather than
+served. `script-src`, `default-src`, `base-uri`, `form-action` and
+`frame-ancestors` cannot be contributed to at all: they are the posture, not a
+list to extend.
 
 The rest of the header set on every response:
 `X-Content-Type-Options: nosniff`, `Referrer-Policy:

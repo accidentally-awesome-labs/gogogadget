@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "39e9d87289978d6063b949e996d2e21b70607f38fced1406da31ddfc93dfdce9"
+      "sha256": "c630adb56cf7dbe803bcd2b23f7ec7fe62928016f60b112de67cad1e4a5bc7f4"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -944,7 +944,7 @@
     },
     {
       "path": "registry/modules/system/identity-clerk/module.json",
-      "sha256": "bbf3add9e5cd6268f01354db1b5585f8be5773dc501303ef5924154efa08a6cf"
+      "sha256": "bacef3dbe798ec915031a15b0f2e98d8df202a3dc8cbcd064f8ca4832c423a22"
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "360c9afacc4db0f77d551cd760f255ada4279d11b1b31eceda83de53def7b036"
+      "sha256": "3da4376a0acd5cbe79604c56b51d3ebb24567bbd37725eac6f55759f4e882d20"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "6077579bc810360997653a574c23099e3652fc5e9561a16d60d456021001c1b5"
+      "sha256": "0eb98f8df89ceb82a34d05bd002b69b05eb54d4d4200ae27983bfb80ab8a87f3"
     },
     {
       "path": "registry/modules/system/seed/module.json",

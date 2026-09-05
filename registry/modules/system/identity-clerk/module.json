@@ -4,7 +4,7 @@
     "id": "ggg/system/identity-clerk",
     "kind": "system",
     "name": "identity-clerk",
-    "revision": 5,
+    "revision": 7,
     "contract": 1,
     "title": "Clerk identity",
     "description": "Hosted Clerk identity provider",
@@ -66,7 +66,7 @@
         "source": "internal/identity/clerk/contract_test.go",
         "target": "internal/identity/clerk/contract_test.go",
         "class": "test",
-        "sha256": "526b14752abb8d8adf8723617ba55f656db7e23835953348ae3483743e8d6b84",
+        "sha256": "003150ff7424128926a9a0c6024f439e587fc6fea1b9a434fe42409994b5fabb",
         "rewrite_module": true,
         "contract": false
       },
@@ -114,7 +114,7 @@
         "source": "internal/identity/clerkurl/clerkurl.go",
         "target": "internal/identity/clerkurl/clerkurl.go",
         "class": "go",
-        "sha256": "65c198917fb70591a5c28f0a3769351ef3440486d6814ee806f2061ff274f84c",
+        "sha256": "955ff630d98dc919ca2879dbc93043bac276024aceb27d342f40ff1de6226f14",
         "rewrite_module": true,
         "contract": true
       },
@@ -1290,7 +1290,8 @@
         "key": "CLERK_FRONTEND_API_URL",
         "field": "ClerkFrontendAPIURL",
         "type": "string",
-        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.\u003chost\u003e` in production, the Clerk dev wildcard otherwise",
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise",
+        "trim_slash": true,
         "derivation": {
           "package": "internal/identity/clerkurl",
           "function": "FrontendAPIURL",

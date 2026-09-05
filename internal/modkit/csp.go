@@ -23,7 +23,7 @@ import (
 // No path, no query, no fragment: CSP ignores the path for most directives, so
 // accepting one would let a contribution look narrower than it is.
 var cspHTTPSOrigin = regexp.MustCompile(
-	`^https://(?:\*\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?::[0-9]{1,5})?$`)
+	`^https://(?:\*\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?::(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-9][0-9]{0,3}))?$`)
 
 // cspSchemeSources are the non-origin sources a contribution may return. Both
 // are relaxations and both are here because a real vendor needs one: clerk-js
@@ -225,8 +225,18 @@ func emitCSPRegistry(ctx context.Context, modulePath string, lock Lock, graph []
 // Both are checked statically, over the declared function's own payload bytes,
 // because that is where these values are actually written: a source list is a
 // literal slice in a small function, not something assembled from a database.
-// The runtime composer validates again — config can carry anything — but a
-// refusal before any write is what a module author gets to see.
+//
+// The SHAPE that assumption buys, stated plainly rather than implied: the walk
+// finds string literals inside a composite-literal key/value pair in the named
+// function. A contribution that builds its map imperatively, or returns the
+// result of a helper, is not checked here — the literals are simply not
+// where the walk looks. That is a deliberate limit, not an oversight:
+// broadening it to whole-function constant folding would be a small abstract
+// interpreter, and it would still miss a value that arrives from
+// configuration. The backstop is the runtime composer, which validates every
+// source it is handed, drops what fails, and reports the drop through
+// observability.Reporter — so the constraint holds either way, and what plan
+// time buys is the module author seeing it before anything is written.
 func ValidateCSPContributionSources(modules []Manifest, files map[string][]byte) error {
 	for _, module := range modules {
 		for _, contribution := range module.Runtime.CSP {

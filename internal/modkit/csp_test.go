@@ -38,6 +38,9 @@ func TestValidateCSPSourceAllowlist(t *testing.T) {
 		"javascript:":                "not a contributable source",
 		"":                           "empty source",
 		"https://a.example.com https://b.example.com": "separator",
+		"https://vendor.example.com:99999":            "not a contributable source",
+		"https://*":                                   "not a contributable source",
+		"https://*.com":                               "not a contributable source",
 	} {
 		err := ValidateCSPSource(source)
 		require.Errorf(t, err, "source %q must be refused", source)

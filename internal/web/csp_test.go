@@ -35,11 +35,15 @@ func policyFor(t *testing.T, environment string, values map[string]string) strin
 	return policy
 }
 
-// The header a Clerk-selected project serves, byte for byte, in the order and
-// spelling v0.7.1 sent it. Every one of the ten directives is here on purpose:
-// this is the assertion that a mechanism replacing a hardcoded assembly did
-// not quietly reorder, drop or widen anything.
-func TestClerkSelectedPolicyIsByteIdenticalToTheHardcodedOne(t *testing.T) {
+// The header a Clerk-selected project serves, compared against the exact
+// string v0.7.1's hardcoded assembly produced — directives in that order, with
+// that spelling. The literal below is transcribed from the v0.7.1 source
+// (middleware.go's strings.Join list), so it is a golden rather than a
+// tautology: nothing in this change generated it.
+//
+// media-src and frame-src joined the table and are absent here because they
+// inherit default-src until something contributes to them.
+func TestClerkSelectedPolicyMatchesTheHardcodedHeader(t *testing.T) {
 	policy := policyFor(t, "production", map[string]string{
 		"CLERK_FRONTEND_API_URL": "https://clerk.example.com",
 	})
@@ -47,11 +51,11 @@ func TestClerkSelectedPolicyIsByteIdenticalToTheHardcodedOne(t *testing.T) {
 	assert.Equal(t, strings.Join([]string{
 		"default-src 'self'",
 		"script-src 'self'",
+		"worker-src 'self' blob:",
 		"style-src 'self' 'unsafe-inline'",
 		"img-src 'self' data: https://img.clerk.com",
 		"font-src 'self'",
 		"connect-src 'self' https://clerk.example.com",
-		"worker-src 'self' blob:",
 		"frame-ancestors 'none'",
 		"base-uri 'self'",
 		"form-action 'self'",
@@ -159,4 +163,95 @@ func TestPolicyIsStableAcrossRequests(t *testing.T) {
 		seen[recorder.Header().Get("Content-Security-Policy")] = struct{}{}
 	}
 	assert.Len(t, seen, 1)
+}
+
+// A directive that inherits default-src must restate 'self' the moment it is
+// rendered. CSP's override rule is the whole reason: `frame-src https://vendor`
+// REPLACES default-src for frames, so without this every same-origin iframe in
+// the app breaks the first time a contribution uses one of these grants.
+func TestContributedInheritingDirectivesKeepSelf(t *testing.T) {
+	originalProviders, originalGrants := CSPSourceProviders, CSPDirectiveGrants
+	originalKeys, originalActive := CSPValueKeys, CSPActive
+	CSPSourceProviders = map[string]CSPSourceProvider{
+		"widget": func(map[string]string) map[string][]string {
+			return map[string][]string{
+				"frame-src": {"https://widget.example.com"},
+				"media-src": {"https://media.example.com"},
+			}
+		},
+	}
+	CSPDirectiveGrants = map[string][]string{"widget": {"frame-src", "media-src"}}
+	CSPValueKeys = map[string][]string{}
+	CSPActive = map[string]func(string) bool{}
+	t.Cleanup(func() {
+		CSPSourceProviders, CSPDirectiveGrants = originalProviders, originalGrants
+		CSPValueKeys, CSPActive = originalKeys, originalActive
+	})
+
+	policy := policyFor(t, "test", map[string]string{})
+
+	assert.Contains(t, policy, "media-src 'self' https://media.example.com;")
+	assert.Contains(t, policy, "frame-src 'self' https://widget.example.com;")
+}
+
+// Hostnames are case-insensitive, so an operator-supplied origin that differs
+// only in case must reach the header rather than being dropped — and it must
+// arrive in one canonical spelling, so two cases of one origin cannot both
+// survive dedupe and read as two permissions.
+func TestContributedOriginIsCanonicalisedNotDropped(t *testing.T) {
+	originalProviders, originalGrants := CSPSourceProviders, CSPDirectiveGrants
+	originalKeys, originalActive := CSPValueKeys, CSPActive
+	CSPSourceProviders = map[string]CSPSourceProvider{
+		"mixed": func(map[string]string) map[string][]string {
+			return map[string][]string{"img-src": {
+				"https://IMG.Clerk.com", "https://img.clerk.com",
+				// Still refused: a path was never part of an origin, and
+				// nothing is trimmed into looking narrower than it is.
+				"https://img.clerk.com/avatars/",
+			}}
+		},
+	}
+	CSPDirectiveGrants = map[string][]string{"mixed": {"img-src"}}
+	CSPValueKeys = map[string][]string{}
+	CSPActive = map[string]func(string) bool{}
+	t.Cleanup(func() {
+		CSPSourceProviders, CSPDirectiveGrants = originalProviders, originalGrants
+		CSPValueKeys, CSPActive = originalKeys, originalActive
+	})
+
+	policy := policyFor(t, "test", map[string]string{})
+
+	assert.Contains(t, policy, "img-src 'self' data: https://img.clerk.com;")
+	assert.NotContains(t, policy, "IMG.Clerk.com")
+	assert.NotContains(t, policy, "avatars")
+}
+
+// The grammar exists twice: modkit.ValidateCSPSource refuses at plan time and
+// cspContributableSource enforces at runtime. The runtime copy is the one that
+// actually gates what reaches a browser, and nothing fails if it drifts
+// LOOSER — so this asserts the two agree on every case the plan-time tests
+// cover, in the direction that matters.
+func TestRuntimeGrammarAgreesWithThePlanTimeGrammar(t *testing.T) {
+	accepted := []string{
+		"https://clerk.example.com", "https://img.clerk.com",
+		"https://*.clerk.accounts.dev", "https://vendor.example.com:8443",
+		"blob:", "data:",
+	}
+	refused := []string{
+		"'unsafe-inline'", "'unsafe-eval'", "'self'", "*", "*.example.com",
+		"https://*.*.example.com", "http://plain.example.com",
+		"https://ok.example.com/api", "javascript:", "",
+		"https://a.example.com https://b.example.com",
+		"https://ok.example.com\r\nx-injected: 1",
+		"https://*", "https://*.com",
+		"https://vendor.example.com:99999",
+	}
+	for _, source := range accepted {
+		assert.Truef(t, cspContributableSource.MatchString(source),
+			"the runtime grammar must accept %q, which plan time accepts", source)
+	}
+	for _, source := range refused {
+		assert.Falsef(t, cspContributableSource.MatchString(source),
+			"the runtime grammar must refuse %q, which plan time refuses", source)
+	}
 }
