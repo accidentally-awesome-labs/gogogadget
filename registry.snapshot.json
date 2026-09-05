@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "5739e5174e09cda385bb8a4ed94af30f57ccf0fb76179259979b9e23fb320289"
+      "sha256": "8dac1a92f32c2fb7f1946f035ecb2b623af34377d8f591ec4305e8717d2e0704"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "b7400be38f3af524581742f58c62bb64a038fa10654fd0cf1c5bdaed57218a3c"
+      "sha256": "823de59364cda0c65bb9769804fed72901f5781b648ebc1de24727c61f59ef5f"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "10732a8b8e2eb0ecc7b7ae620ebfc3ad67b849a3dfc7d94e5b8adedd0e7d6e94"
+      "sha256": "b563f7aeb076d3285a4f8c6d30bc7f1bb7f6c96761339d5ec039ec9427edc30b"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

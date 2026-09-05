@@ -97,4 +97,34 @@ test.describe('content security policy', () => {
       expect(offOrigin, `${path} script sources`).toEqual([]);
     }
   });
+  // Plan-time refusal is the stronger gate for this — modkit's
+  // ValidateAssetReferences refuses a reference no installed module declares,
+  // which is what caught the deleted analytics.js — but it reads declarations,
+  // so it cannot see a path assembled at runtime or one that is declared and
+  // still wrong. This is the browser's own answer: nothing the page asks for
+  // from this origin may 404.
+  //
+  // A same-origin 404 is neither an off-origin request nor a CSP violation, so
+  // every other test in this file would watch a dead <script src> load
+  // forever and report success.
+  test('every same-origin asset a page requests resolves', async ({ page, baseURL }) => {
+    const origin = new URL(baseURL!).origin;
+    const missing: string[] = [];
+
+    page.on('response', (response) => {
+      const url = response.url();
+      if (!url.startsWith(origin)) return;
+      if (response.status() !== 404) return;
+      const type = response.request().resourceType();
+      if (type === 'document' || type === 'xhr' || type === 'fetch') return;
+      missing.push(`${response.request().resourceType()} ${url}`);
+    });
+
+    for (const path of surfaces) {
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+    }
+
+    expect(missing, 'assets requested and not served').toEqual([]);
+  });
 });
