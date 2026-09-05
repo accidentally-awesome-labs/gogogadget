@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 9,
+    "revision": 10,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",

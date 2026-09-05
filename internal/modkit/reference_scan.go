@@ -2,17 +2,29 @@ package modkit
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"path"
 	"regexp"
 	"sort"
 	"strings"
 )
 
-// assetReference matches a `/static/...` URL where one actually starts: after a
-// quote, an `=`, or whitespace. Without the boundary, `/ingest/static/array.js`
-// — the analytics proxy path, which is a route and not an asset — matches on
-// its tail and the check invents four failures for itself.
+// assetReference matches a `/static/...` URL in browser sources, where one
+// actually starts: after a quote, an `=`, or whitespace. Without the boundary,
+// `/ingest/static/array.js` — the analytics proxy path, which is a route and
+// not an asset — matches on its tail and the check invents four failures for
+// itself.
 var assetReference = regexp.MustCompile(`(?:^|["'=\s(])(/static/[A-Za-z0-9._\-/]+)`)
+
+// markupAssetReference is the attribute form, which is the only shape a templ
+// payload emits: src= or href= followed by a quoted path. Anything looser
+// reads a comment as a promise — the doc comment in shell_scan.go quotes
+// `<script src="/static/vendor/clerk.browser.js">` to explain the leak it
+// refuses, and the identity permutation fixture removes that adapter, so a
+// prose match turns an explanation into a plan refusal.
+var markupAssetReference = regexp.MustCompile(`(?:src|href)=(?:"|\{ ")(/static/[A-Za-z0-9._\-/]+)`)
 
 // ValidateAssetReferences refuses a reference to an asset no installed module
 // declares.
@@ -62,11 +74,20 @@ func ValidateAssetReferences(modules []Manifest, files map[string][]byte) error 
 			owned[file.Target] = struct{}{}
 		}
 		for _, asset := range module.Runtime.Assets {
-			target := assetTargetPath(asset.Path)
-			if _, ok := owned[target]; !ok {
+			// One spelling, checked rather than accommodated. A declared asset
+			// path IS the repository-relative target, so a bare filename is a
+			// refusal and not something to prefix into agreement: a gate that
+			// strips and adds prefixes until two strings match will match the
+			// next real typo too.
+			if !strings.HasPrefix(asset.Path, "static/") {
+				return fmt.Errorf(
+					"%s declares asset %s with path %q; a declared asset path is its repository-relative target and must begin with %q",
+					module.ID, asset.ID, asset.Path, "static/")
+			}
+			if _, ok := owned[asset.Path]; !ok {
 				return fmt.Errorf(
 					"%s declares asset %s but owns no payload at %s; a declared asset needs the file that backs it",
-					module.ID, asset.ID, target)
+					module.ID, asset.ID, asset.Path)
 			}
 		}
 		for _, vendored := range module.Vendors {
@@ -98,8 +119,13 @@ func ValidateAssetReferences(modules []Manifest, files map[string][]byte) error 
 			if !ok {
 				continue
 			}
-			for _, match := range assetReference.FindAllSubmatchIndex(content, -1) {
+			for _, match := range payloadAssetReferences(target, content) {
 				reference := string(content[match[2]:match[3]])
+				// The ONE normalisation, and it is a mapping rather than a
+				// tolerance: a `/static/x` URL addresses the repository path
+				// `static/x`. Nothing is stripped from the declaration side,
+				// so a declared `analytics.js` does not quietly satisfy a
+				// referenced `/static/analytics.js`.
 				referenced := strings.TrimPrefix(reference, "/")
 				// A path with no extension is a prefix or a directory —
 				// `/static/ui/` in a design-system assertion, `/static/guides`
@@ -131,7 +157,7 @@ func declaredAssetPaths(modules []Manifest) map[string]string {
 			declared[file.Target] = module.ID
 		}
 		for _, asset := range module.Runtime.Assets {
-			declared[assetTargetPath(asset.Path)] = module.ID
+			declared[asset.Path] = module.ID
 		}
 		for _, vendored := range module.Vendors {
 			declared[vendored.Path] = module.ID
@@ -140,17 +166,48 @@ func declaredAssetPaths(modules []Manifest) map[string]string {
 	return declared
 }
 
-// assetTargetPath is the repository-relative payload a declared asset names.
-// runtime.assets paths already carry the static/ prefix in every manifest in
-// the catalog — the generated registry strips it rather than adding it — so
-// prefixing here would look for static/static/ui/engines.js. Both shapes are
-// accepted because the schema does not forbid either.
-func assetTargetPath(declaredPath string) string {
-	trimmed := strings.TrimPrefix(declaredPath, "/")
-	if strings.HasPrefix(trimmed, "static/") {
-		return trimmed
+// payloadAssetReferences finds the asset URLs a payload REFERENCES, which is
+// deliberately not the same as the URLs it mentions.
+//
+// Go is parsed, and only string literals count: a path in a comment is
+// documentation, and this engine's own scans quote vendor asset paths to
+// explain what they refuse. Markup is matched on the attribute form for the
+// same reason. Browser sources are matched on the boundary form, because a
+// path there is either fetched or dead either way.
+func payloadAssetReferences(target string, content []byte) [][]int {
+	switch path.Ext(target) {
+	case ".templ", ".html":
+		return markupAssetReference.FindAllSubmatchIndex(content, -1)
+	case ".go":
+		parsed, err := parser.ParseFile(token.NewFileSet(), target, content, parser.SkipObjectResolution)
+		if err != nil {
+			// Unparseable Go is the compiler's problem to report, not this
+			// check's to guess at.
+			return nil
+		}
+		matches := make([][]int, 0)
+		ast.Inspect(parsed, func(node ast.Node) bool {
+			literal, ok := node.(*ast.BasicLit)
+			if !ok || literal.Kind != token.STRING {
+				return true
+			}
+			// token.Pos is 1-based over the parsed content, so the literal's
+			// offset into content is Pos()-1 and every submatch index shifts
+			// with it. Keeping real offsets is what lets the refusal report
+			// the line the reference is actually on.
+			offset := int(literal.Pos()) - 1
+			for _, match := range assetReference.FindAllSubmatchIndex([]byte(literal.Value), -1) {
+				matches = append(matches, []int{
+					offset + match[0], offset + match[1],
+					offset + match[2], offset + match[3],
+				})
+			}
+			return true
+		})
+		return matches
+	default:
+		return assetReference.FindAllSubmatchIndex(content, -1)
 	}
-	return "static/" + trimmed
 }
 
 // isReferencingPayload reports whether a payload is the kind of text that can

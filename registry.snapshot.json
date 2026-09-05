@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "8dac1a92f32c2fb7f1946f035ecb2b623af34377d8f591ec4305e8717d2e0704"
+      "sha256": "786e3f4578f25f85dca7cc25b20935e5220ca91c8f5f5412848528390e4df142"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "b563f7aeb076d3285a4f8c6d30bc7f1bb7f6c96761339d5ec039ec9427edc30b"
+      "sha256": "a659b8619c84c3d889c8d6cf6f23f5fb88de4667272b99e581fdbe0d22232c6e"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

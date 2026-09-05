@@ -103,8 +103,6 @@ func TestAssetReferencesIgnoreTestPayloads(t *testing.T) {
 // The declaration side, which needs no reference at all to be wrong: a
 // runtime.assets entry or a vendored pin whose module owns no payload for it.
 func TestAssetReferencesRefuseADeclarationWithNoPayload(t *testing.T) {
-	// Manifests write the path with the static/ prefix; the generated registry
-	// strips it rather than adding one, so both shapes resolve to one target.
 	module := Manifest{ID: "ggg/system/static", Kind: ModuleSystem,
 		Runtime: RuntimeContributions{Assets: []AssetContribution{
 			{ID: "ui.grid", Path: "static/ui/grid.js", Kind: AssetScript},
@@ -118,4 +116,46 @@ func TestAssetReferencesRefuseADeclarationWithNoPayload(t *testing.T) {
 	module.Vendors = []VendorArtifact{{Path: "static/vendor/htmx.min.js"}}
 	require.ErrorContains(t, ValidateAssetReferences([]Manifest{module}, nil),
 		"declares vendored asset static/vendor/htmx.min.js but owns no payload")
+}
+
+// A path in a comment is documentation, not a promise. This engine's own scans
+// quote vendor asset paths to explain what they refuse, and the identity
+// permutation fixture removes that adapter — so a prose match turns an
+// explanation into a plan refusal. registry validate caught exactly that.
+func TestAssetReferencesIgnoreCommentsAndPreserveLines(t *testing.T) {
+	seam, files := referrer("ggg/system/modkit", "internal/modkit/shell_scan.go",
+		"package modkit\n\n// a `<script src=\"/static/vendor/clerk.browser.js\">`, referenced from a\n// file the seam owns.\nfunc scan() {}\n",
+		FileClassGo)
+	require.NoError(t, ValidateAssetReferences([]Manifest{seam}, files))
+
+	// The same path in a string literal IS a reference, and the refusal names
+	// the line it is on rather than the top of the file.
+	seam, files = referrer("ggg/system/server", "internal/web/handlers_public.go",
+		"package web\n\n// serveStatic serves the embedded tree.\nfunc redirect() {\n\thttp.Redirect(w, r, \"/static/favicon.svg\", 301)\n}\n",
+		FileClassGo)
+	require.ErrorContains(t, ValidateAssetReferences([]Manifest{seam}, files),
+		"handlers_public.go:5")
+}
+
+// A templ payload is matched on the attribute form, so a Go-level comment
+// inside a template is not a reference either.
+func TestAssetReferencesMatchMarkupAttributesOnly(t *testing.T) {
+	slot, files := referrer("ggg/system/analytics-posthog",
+		"internal/web/templates/slots/posthog.templ",
+		"// loaded from /static/analytics.js when configured\ntempl head() {\n\t<span>x</span>\n}\n",
+		FileClassTempl)
+	require.NoError(t, ValidateAssetReferences([]Manifest{slot}, files))
+}
+
+// One spelling, checked rather than accommodated: a declared asset path is the
+// repository-relative target. Prefixing a bare filename into agreement would
+// make the gate accept the next real typo too.
+func TestAssetReferencesRefuseADeclaredPathThatIsNotATarget(t *testing.T) {
+	module := Manifest{ID: "ggg/system/static", Kind: ModuleSystem,
+		Files: []ManifestFile{{Source: "static/ui/grid.js", Target: "static/ui/grid.js", Class: FileClassScript}},
+		Runtime: RuntimeContributions{Assets: []AssetContribution{
+			{ID: "ui.grid", Path: "ui/grid.js", Kind: AssetScript},
+		}}}
+	require.ErrorContains(t, ValidateAssetReferences([]Manifest{module}, nil),
+		`declares asset ui.grid with path "ui/grid.js"`)
 }
