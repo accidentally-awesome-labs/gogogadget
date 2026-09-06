@@ -477,10 +477,14 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 	t.Run("pristine drop deletes", func(t *testing.T) {
 		firstRegistry, secondRegistry := conflictRegistries(t)
+		// Upstream stops declaring the payload AND stops shipping it: a
+		// registry that dropped only the declaration would publish bytes no
+		// module owns, which ValidateRegistryTreeOwnership refuses.
 		mutatePlannerModule(t, secondRegistry, "ggg/page/optional", func(module *Manifest) {
 			module.Files = []ManifestFile{}
 			module.Revision = 2
 		})
+		delete(secondRegistry, "registry/modules/page/optional/optional.go")
 		source := refSource{snapshots: map[string]Snapshot{
 			"v1": {Commit: testCommitA, FS: firstRegistry},
 			"v2": {Commit: testCommitB, FS: secondRegistry},
@@ -517,6 +521,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 			module.Files = []ManifestFile{}
 			module.Revision = 2
 		})
+		delete(secondRegistry, "registry/modules/page/optional/optional.go")
 		source := refSource{snapshots: map[string]Snapshot{
 			"v1": {Commit: testCommitA, FS: firstRegistry},
 			"v2": {Commit: testCommitB, FS: secondRegistry},

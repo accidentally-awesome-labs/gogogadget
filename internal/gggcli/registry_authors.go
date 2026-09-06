@@ -125,6 +125,14 @@ func runRegistrySign(cc CommandContext, parsed parsedArgs) (Result, error) {
 	if err != nil {
 		return failureEnvelope("registry sign", refusalError(err))
 	}
+	// Ownership is refused before the key is used, so a tree dirtied between
+	// build and sign reports exit 3 like every other refusal instead of the
+	// exit 1 a wrapped writer error would give. SignRegistrySnapshot checks
+	// it again — no caller gets to route around the guard — but this is where
+	// the exit code is decided.
+	if err := modkit.ValidateRegistryTreeOwnership(os.DirFS(dir)); err != nil {
+		return failureEnvelope("registry sign", refusalError(err))
+	}
 	data, err := modkit.SignRegistrySnapshot(dir, private)
 	if err != nil {
 		return failureEnvelope("registry sign", runtimeError(err))

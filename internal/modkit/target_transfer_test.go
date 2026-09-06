@@ -27,10 +27,14 @@ func transferRegistries(t *testing.T, mutate func(second fstest.MapFS)) (fstest.
 
 	second := cloneMapFS(first)
 	// The new owner ships the same bytes from its own directory, so the
-	// transfer is byte-identical and the payload digest is unchanged.
+	// transfer is byte-identical and the payload digest is unchanged. The old
+	// source leaves the tree with its declaration: a registry that dropped
+	// the declaration and kept the file would publish bytes no module owns,
+	// which ValidateRegistryTreeOwnership refuses.
 	adopted := moved
 	adopted.Source = "registry/modules/component/card/optional.go"
 	second[adopted.Source] = &fstest.MapFile{Data: shared}
+	delete(second, moved.Source)
 	mutatePlannerModule(t, second, "ggg/page/optional", func(module *Manifest) {
 		module.Revision = 2
 		module.Files = []ManifestFile{}

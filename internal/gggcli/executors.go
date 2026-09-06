@@ -401,35 +401,61 @@ func (c *Controller) executeRegistryValidate(ctx context.Context, request Regist
 	})}, nil
 }
 
-// applyRegistryBuild refreshes manifest digests, rebuilds the indexes, writes
-// the snapshot, and verifies vendored bytes. dir is the registry tree: the
-// project root for the self-hosting layout, or an explicit --dir for a
-// registry that lives beside the project rather than being it.
+// applyRegistryBuild refreshes manifest digests, rebuilds the indexes,
+// refuses an undeclared payload, writes the snapshot, and verifies vendored
+// bytes — all inside one journal, so a refused build leaves the tree exactly
+// as it found it. dir is the registry tree: the project root for the
+// self-hosting layout, or an explicit --dir for a registry that lives beside
+// the project rather than being it.
 func (c *Controller) applyRegistryBuild(dir string) (Result, error) {
+	// Begin reads registry.json before anything is written. `--dir` pointed
+	// at a tree with no root used to write six index files and refuse
+	// afterwards, and the next build folded those six into the signed
+	// snapshot; that failure is a usage error, not a runtime one.
+	build, err := modkit.BeginRegistryBuild(dir)
+	if err != nil {
+		return failureEnvelope("registry build", usageError(err.Error()))
+	}
+	// failed rolls the tree back and reports the original cause. A rollback
+	// that could not restore is appended rather than swallowed: the operator
+	// has to know whether the tree is still trustworthy.
+	failed := func(cause error) (Result, error) {
+		if restoreErr := build.Rollback(); restoreErr != nil {
+			return failureEnvelope("registry build", rollbackError(fmt.Errorf("%w; %w", cause, restoreErr)))
+		}
+		return failureEnvelope("registry build", cause)
+	}
 	refreshed, err := modkit.RefreshManifestDigests(dir)
 	if err != nil {
-		return failureEnvelope("registry build", runtimeError(err))
+		return failed(runtimeError(err))
 	}
 	// Refusing here rather than warning: revision is what every consumer reads
 	// to decide an update exists, so publishing changed bytes under an
 	// unchanged revision is the one failure a registry cannot recover from
-	// downstream. The digests are already rewritten at this point, so the
-	// remedy is a one-line edit and a re-run.
+	// downstream.
 	if err := modkit.ValidateManifestRevisions(dir); err != nil {
-		return failureEnvelope("registry build", refusalError(err))
+		return failed(refusalError(err))
 	}
 	built, discovered, err := modkit.BuildRegistryIndexes(dir)
 	if err != nil {
-		return failureEnvelope("registry build", runtimeError(err))
+		return failed(runtimeError(err))
+	}
+	// After the indexes, before the snapshot. The indexes are the registry's
+	// statement of which documents belong to it, so ownership cannot be
+	// resolved until this build has rewritten them — and the snapshot must not
+	// exist on disk if the answer is no, because `registry sign` would sign
+	// whatever it finds.
+	if err := modkit.ValidateRegistryTreeOwnership(os.DirFS(dir)); err != nil {
+		return failed(refusalError(err))
 	}
 	if _, snapshotErr := modkit.WriteRegistrySnapshot(dir); snapshotErr != nil {
-		return failureEnvelope("registry build", runtimeError(snapshotErr))
+		return failed(runtimeError(snapshotErr))
 	}
 	built = append(built, modkit.RegistrySnapshotPath)
 	// Vendored bytes are verified here rather than in a separate audit, so
 	// a swapped third-party file fails the build instead of shipping.
 	if err := modkit.VerifyCatalogVendors(dir); err != nil {
-		return failureEnvelope("registry build", runtimeError(err))
+		return failed(runtimeError(err))
 	}
 	return Result{Envelope: normalizeEnvelope(modkit.Envelope{
 		Command: "registry build",

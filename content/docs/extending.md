@@ -291,7 +291,10 @@ The fields that carry weight:
   `self_host: true` (test payloads only) marks an assertion about the
   publishing repository itself, installed only where the project's module path
   *is* that registry's `canonical_module` — see
-  [Modules → Files](/docs/modules#files).
+  [Modules → Files](/docs/modules#files). Ownership runs both ways: a declared
+  payload must exist in the tree, **and** a file in the registry tree must be
+  declared by some manifest's `files` or `migrations` — see
+  [build and validate](#author-a-module) below.
 - **`requires`** — a hard dependency edge with an inclusive contract range,
   `{id, contract: {min, max}}`. It is what makes `add` install a closure and
   `remove` refuse while a dependent is present, and an out-of-range contract
@@ -411,7 +414,8 @@ Then build and validate:
 
 ```sh
 ggg registry build       # rescan the registry tree, refresh payload digests, verify vendored bytes,
-                         # refuse a module whose payloads changed at an unchanged revision
+                         # refuse a module whose payloads changed at an unchanged revision,
+                         # refuse a file in the tree that no module declares
 ggg registry validate    # check the catalog, then prove the closure lifecycle in a derivative
 ggg sync --offline       # install into this tree and regenerate
 ```
@@ -425,6 +429,43 @@ digest, and rebuilds the per-kind indexes by **scanning** `registry/modules/`
 every vendored artifact against its declared byte count and SHA-256, and
 rejects `eval(`, `new Function(`, string-argument `setTimeout`/`setInterval`,
 and references to origins the manifest did not declare.
+
+**Every file in the registry tree must have a declaring owner.** `build`
+refuses — before it writes the snapshot — any file under `registry/` with no
+owner, and `ggg registry sign` refuses the same before producing a signature.
+The refusal names each path and the registry root it belongs to. There are
+exactly three owners:
+
+- **a module**, through its `files` or `migrations` sources, plus the
+  `module.json` and profile documents its registry's indexes list;
+- **the format**, by exact name: `registry.json`, the six per-kind indexes,
+  `registry.snapshot.json`, `registry.snapshot.sig`,
+  `registry-key-rotation.json`, the two detached rotation signatures, and the
+  five `registry/schema/*.schema.json` contracts. By name and not by pattern,
+  or `registry/schema/anything.json` would authorise itself;
+- **the tool**, for generated output (`modkit.IsGeneratedOutputPath`). A
+  `.templ` payload whose source lives in the registry tree gets a `_templ.go`
+  sibling from `make generate`, and a module may not declare one — targeting a
+  generated output is refused outright. Those bytes are never installed
+  either: the directory resolver drops generated output before it distributes
+  anything.
+
+Ownership resolves **per registry root**, so a nested registry
+(`registry/testdata`, `registry/external-testdata`,
+`templates/external-registry`) answers to its own manifests rather than the
+enclosing catalog's. The remedy for an unowned file is a declaration or a
+deletion, never a silent sweep: `ggg sync` removes unowned files from a
+*project* tree, and doing that to a signed catalog would let it gain and lose
+undeclared bytes without a word. `ggg sync`, `add` and `update` apply the same
+rule to every registry they resolve, so `make check` catches it too.
+
+A refused `build` leaves nothing behind. The whole command — digest refresh,
+index rebuild, ownership check, snapshot write, vendor verification — runs
+inside one journal, and any refusal restores every byte and mode it had
+touched. `--dir` pointed at a directory that is not a registry root (no
+`registry.json`) is a usage error, exit 2, raised before the first write:
+that shape used to write six index files and *then* refuse, and the next build
+folded all six into the signed snapshot.
 
 ## Publish your own registry
 
@@ -545,6 +586,14 @@ pending change and `sync --check` refuses.
 fails when the committed signature is missing, stale relative to
 `registry.snapshot.json`, or produced by a key the shipped CLI does not pin, so
 a catalog change that forgets the re-sign cannot reach a tag.
+
+`TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner` and
+`TestTheCommittedCoreSnapshotListsOnlyOwnedFiles` fail when a
+file inside any of this repository's four registry roots — the core catalog,
+`registry/testdata`, `registry/external-testdata`, `templates/external-registry`
+— has no declaring manifest, so an undeclared payload cannot reach the
+signature. `build` and `sign` refuse first; these are the assertions that
+catch a tree dirtied between the two commands.
 
 The private half never enters the tree. Changing `coreRegistryPublicKey` is a
 key rotation once anyone has consumed a tag: publish

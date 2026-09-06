@@ -47,13 +47,17 @@ func loadRegistryRoot(fsys fs.FS) (RegistryRoot, error) {
 	return root, nil
 }
 
-func BuildRegistrySnapshot(fsys fs.FS) ([]byte, error) {
-	root, err := loadRegistryRoot(fsys)
-	if err != nil {
-		return nil, err
-	}
-	files := []SnapshotFile{}
-	err = fs.WalkDir(fsys, ".", func(name string, entry fs.DirEntry, walkErr error) error {
+// walkRegistrySnapshotScope walks exactly the files a registry snapshot
+// covers: registry.json and everything under registry/, minus the snapshot
+// and its signature, minus the never-distributed local paths. Directories are
+// reported too, so a caller can prune with fs.SkipDir.
+//
+// It exists so the ownership gate and the snapshot builder cannot disagree
+// about what "inside the registry tree" means. A gate that walked a
+// hand-copied approximation of this filter would cover less than the
+// signature does, which is the failure mode it was written to close.
+func walkRegistrySnapshotScope(fsys fs.FS, visit func(name string, entry fs.DirEntry) error) error {
+	return fs.WalkDir(fsys, ".", func(name string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
@@ -72,6 +76,17 @@ func BuildRegistrySnapshot(fsys fs.FS) ([]byte, error) {
 			}
 			return nil
 		}
+		return visit(name, entry)
+	})
+}
+
+func BuildRegistrySnapshot(fsys fs.FS) ([]byte, error) {
+	root, err := loadRegistryRoot(fsys)
+	if err != nil {
+		return nil, err
+	}
+	files := []SnapshotFile{}
+	err = walkRegistrySnapshotScope(fsys, func(name string, entry fs.DirEntry) error {
 		if entry.IsDir() {
 			return nil
 		}

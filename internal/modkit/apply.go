@@ -2,14 +2,11 @@ package modkit
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
-	"syscall"
 )
 
 // Generator runs the registry-owned generation stage once per apply: it renders
@@ -42,17 +39,6 @@ type Result struct {
 	Deleted    []string `json:"deleted"`
 }
 
-// journalEntry records one pre-run filesystem state so a failed apply can be
-// restored exactly — bytes and mode. Mode matters because os.CreateTemp makes
-// the staged file 0600: without capturing and restoring the original, a
-// rolled-back file would come back owner-only.
-type journalEntry struct {
-	path    string
-	existed bool
-	content []byte
-	mode    fs.FileMode
-}
-
 // Apply executes a plan through a transaction journal: snapshot every path
 // the plan can touch plus every generator-owned path, stage and atomically
 // write authored/generated outputs, run the generator pipeline once, and write
@@ -71,106 +57,9 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 		return Result{}, fmt.Errorf("apply requires a generator pipeline")
 	}
 
-	journal := make(map[string]*journalEntry)
-	order := make([]string, 0, len(plan.Changes)+1)
-	// preexistingDir answers "did this directory exist before the run" for every
-	// ancestor of every snapshotted path, so rollback can remove the directories
-	// MkdirAll created without touching one the operator already had.
-	preexistingDir := make(map[string]bool)
-	noteDirs := func(path string) {
-		for dir := slashParent(path); dir != ""; dir = slashParent(dir) {
-			if _, seen := preexistingDir[dir]; seen {
-				return
-			}
-			_, statErr := os.Stat(filepath.Join(plan.Root, filepath.FromSlash(dir)))
-			preexistingDir[dir] = statErr == nil
-		}
-	}
-	snapshot := func(path string) (*journalEntry, error) {
-		if entry, ok := journal[path]; ok {
-			return entry, nil
-		}
-		noteDirs(path)
-		full := filepath.Join(plan.Root, filepath.FromSlash(path))
-		data, err := os.ReadFile(full)
-		if err == nil {
-			mode := fs.FileMode(defaultFileMode)
-			if info, statErr := os.Stat(full); statErr == nil {
-				mode = info.Mode().Perm()
-			}
-			entry := &journalEntry{path: path, existed: true, content: data, mode: mode}
-			journal[path] = entry
-			order = append(order, path)
-			return entry, nil
-		}
-		if os.IsNotExist(err) {
-			entry := &journalEntry{path: path, existed: false}
-			journal[path] = entry
-			order = append(order, path)
-			return entry, nil
-		}
-		return nil, fmt.Errorf("snapshot %s: %w", path, err)
-	}
-	// rollback restores every journalled path and reports what it could not
-	// restore. Silently swallowing a restore failure is the worst outcome here:
-	// disk-full is the likeliest cause of the generation failure that triggered
-	// the rollback, it is just as likely to defeat the restore, and exit 5's one
-	// job is to tell the operator whether the tree is trustworthy.
-	rollback := func() error {
-		failures := make([]string, 0)
-		// Restore newest-first so created paths are removed before updated
-		// paths regain their exact prior bytes.
-		for i := len(order) - 1; i >= 0; i-- {
-			entry := journal[order[i]]
-			full := filepath.Join(plan.Root, filepath.FromSlash(entry.path))
-			if entry.existed {
-				if err := os.WriteFile(full, entry.content, entry.mode); err != nil {
-					failures = append(failures, fmt.Sprintf("%s: %v", entry.path, err))
-					continue
-				}
-				// WriteFile does not chmod a file that already exists, and the
-				// staged write replaced the inode, so set the mode explicitly.
-				if err := os.Chmod(full, entry.mode); err != nil {
-					failures = append(failures, fmt.Sprintf("%s: restore mode: %v", entry.path, err))
-				}
-				continue
-			}
-			if err := os.Remove(full); err != nil && !os.IsNotExist(err) {
-				failures = append(failures, fmt.Sprintf("%s: %v", entry.path, err))
-			}
-		}
-
-		// Deepest first, so a created nest empties from the leaf up.
-		created := make([]string, 0, len(preexistingDir))
-		for dir, existed := range preexistingDir {
-			if !existed {
-				created = append(created, dir)
-			}
-		}
-		sort.Slice(created, func(i, j int) bool {
-			if a, b := strings.Count(created[i], "/"), strings.Count(created[j], "/"); a != b {
-				return a > b
-			}
-			return created[i] < created[j]
-		})
-		for _, dir := range created {
-			err := os.Remove(filepath.Join(plan.Root, filepath.FromSlash(dir)))
-			// A directory this run created that is not empty now holds something
-			// this transaction does not own. Leaving it is correct.
-			if err == nil || os.IsNotExist(err) || errors.Is(err, syscall.ENOTEMPTY) ||
-				errors.Is(err, syscall.EEXIST) {
-				continue
-			}
-			failures = append(failures, fmt.Sprintf("%s/: %v", dir, err))
-		}
-
-		if len(failures) == 0 {
-			return nil
-		}
-		sort.Strings(failures)
-		return fmt.Errorf("rollback incomplete, do not trust the tree; could not restore %d path(s): %s",
-			len(failures), strings.Join(failures, "; "))
-	}
+	journal := newFileJournal(plan.Root)
+	snapshot := journal.Snapshot
+	rollback := journal.Rollback
 	// failed reports the transaction outcome. RolledBack is true only when the
 	// restore actually succeeded, so an operator reading `rolled_back` can act
 	// on it; a partial restore names every path it could not put back.
@@ -185,23 +74,23 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 	// 1. Snapshot every touched path plus every generator-owned path before
 	//    any write.
 	for _, change := range plan.Changes {
-		if _, err := snapshot(change.Path); err != nil {
+		if err := snapshot(change.Path); err != nil {
 			return Result{}, err
 		}
 	}
-	if _, err := snapshot("gogogadget.lock.json"); err != nil {
+	if err := snapshot("gogogadget.lock.json"); err != nil {
 		return Result{}, err
 	}
 	for _, path := range e.generator.GeneratedPaths(plan) {
-		if _, err := snapshot(path); err != nil {
+		if err := snapshot(path); err != nil {
 			return Result{}, err
 		}
 	}
 	if e.toolRunner != nil && (len(plan.Lock.Dependencies) > 0 || len(plan.previousDependencies) > 0) {
-		if _, err := snapshot("go.mod"); err != nil {
+		if err := snapshot("go.mod"); err != nil {
 			return Result{}, err
 		}
-		if _, err := snapshot("go.sum"); err != nil {
+		if err := snapshot("go.sum"); err != nil {
 			return Result{}, err
 		}
 		if _, err := ReconcileManagedDependencies(ctx, plan.Root, plan.previousDependencies, plan.Lock.Dependencies, plan.Lock.GoTools, e.toolRunner); err != nil {
@@ -268,17 +157,6 @@ const defaultFileMode fs.FileMode = 0o644
 // FileClassScript gets. `ggg test smoke` and `ggg test visual` exec their
 // scripts directly, so the declared class has to reach the filesystem.
 const executableFileMode fs.FileMode = 0o755
-
-// slashParent returns the parent of a slash-separated relative path, or "" at
-// the top. It is deliberately not filepath.Dir: journal keys are slash paths,
-// and on Windows filepath.Dir would not split them.
-func slashParent(path string) string {
-	i := strings.LastIndex(path, "/")
-	if i <= 0 {
-		return ""
-	}
-	return path[:i]
-}
 
 // atomicWrite writes content to a sibling temp file and renames it into place
 // so a crash cannot leave a half-written target. os.CreateTemp opens at 0600,

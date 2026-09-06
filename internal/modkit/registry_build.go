@@ -121,6 +121,87 @@ func payloadDigest(root, source string) (string, error) {
 	return digestBytes(content), nil
 }
 
+// RegistryBuild is one journalled `ggg registry build` transaction: it
+// snapshots every path a build can write before the first write, so a build
+// that refuses leaves the tree exactly as it found it.
+//
+// It exists because `registry build` had no transaction at all. It is not
+// that it bypassed Engine.Apply's journal — it never reached that code: the
+// command called RefreshManifestDigests, BuildRegistryIndexes and
+// WriteRegistrySnapshot directly, in that order, and the registry root was
+// read for the first time inside the third one. Pointing --dir at a tree with
+// no registry.json therefore wrote six index files and THEN refused, and the
+// next core build absorbed all six into the signed snapshot. Two fixes, both
+// needed: Begin reads the root first, so that shape refuses before any write;
+// and the journal covers every other way a build can fail after writing,
+// including this slice's own ownership refusal, which can only run once the
+// indexes are current.
+type RegistryBuild struct {
+	journal *fileJournal
+}
+
+// BeginRegistryBuild validates the registry root and journals every path a
+// build can write. A tree with no valid registry.json refuses here, before
+// anything is touched.
+func BeginRegistryBuild(dir string) (*RegistryBuild, error) {
+	if _, err := loadRegistryRoot(os.DirFS(dir)); err != nil {
+		return nil, fmt.Errorf("%s is not a registry root: %w", dir, err)
+	}
+	journal := newFileJournal(dir)
+	paths, err := registryBuildWritablePaths(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, path := range paths {
+		if err := journal.Snapshot(path); err != nil {
+			return nil, err
+		}
+	}
+	return &RegistryBuild{journal: journal}, nil
+}
+
+// Rollback restores every journalled path. The returned error, when
+// non-nil, means the tree could not be put back and must not be trusted.
+func (b *RegistryBuild) Rollback() error {
+	if b == nil || b.journal == nil {
+		return nil
+	}
+	return b.journal.Rollback()
+}
+
+// registryBuildWritablePaths is every registry-relative path a build writes:
+// one module document per module directory (RefreshManifestDigests), the six
+// kind indexes (BuildRegistryIndexes), and the snapshot
+// (WriteRegistrySnapshot). Profile documents are absent because the digest
+// refresh skips them, and the signature is absent because signing is a
+// separate command.
+func registryBuildWritablePaths(dir string) ([]string, error) {
+	paths := make([]string, 0, len(catalogIncludes)+1)
+	for _, include := range catalogIncludes {
+		paths = append(paths, include.path)
+		if include.kind == CatalogProfile {
+			continue
+		}
+		kindDir := filepath.Join(dir, "registry", "modules", string(include.kind))
+		entries, err := os.ReadDir(kindDir)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("scan %s: %w", kindDir, err)
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			paths = append(paths, "registry/modules/"+string(include.kind)+"/"+entry.Name()+"/module.json")
+		}
+	}
+	paths = append(paths, RegistrySnapshotPath)
+	sort.Strings(paths)
+	return paths, nil
+}
+
 // BuildRegistryIndexes rewrites each kind index from the documents actually
 // present under registry/. It scans the tree rather than reading the indexes it
 // writes: deriving the index from itself would make a newly authored module

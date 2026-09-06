@@ -278,6 +278,19 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
+	// Every file in the resolved registry tree must have a declaring owner.
+	// This runs on the resolved snapshot rather than on payload bytes because
+	// it is a statement about the CATALOG, not about the selected graph: the
+	// signature covers the whole tree, so the gate has to as well. Refusing
+	// here means `ggg sync`/`add`/`update` — and therefore `make check` —
+	// report an undeclared payload before any byte is written, instead of a
+	// later `registry build` folding it into a snapshot and `registry sign`
+	// making it look deliberate.
+	for _, source := range registrySources {
+		if err := ValidateRegistryTreeOwnership(source.snapshot.FS); err != nil {
+			return Plan{}, err
+		}
+	}
 	if op.Kind == OpAdd {
 		desiredProject, err = projectAfterAdd(desiredProject, catalog, op.Modules)
 		if err != nil {

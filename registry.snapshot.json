@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "d4a63f1c1cd730ba9631b6c4e5749f9da7f9d8452d33849c5ccc024a3270469c"
+      "sha256": "2d84b089df7b72533dcacb27706e11af0ee16eac206cf5e8d5c55b0466685634"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "3c48f9a3e3e6f670922016d25ed7c5ba6c935453a82399fc31b0a19ccda5f54b"
+      "sha256": "60ad86be02e208f68a619795d69c0aea4aa587191cce0136ccb72ccfabaa3661"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

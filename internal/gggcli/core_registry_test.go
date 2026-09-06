@@ -31,6 +31,13 @@ func TestRegistrySigningDefaultsToTheDirectoryHoldingRegistryJSON(t *testing.T) 
 		t.Fatalf("fixture is not the root-level layout under test: %v", err)
 	}
 
+	// build before sign, which is the documented release order: build is what
+	// scans the tree into the indexes, and signing a tree whose indexes do not
+	// list a module document present in it is refused — the snapshot would
+	// carry a document nothing loads.
+	if _, _, err := runApp(t, root, nil, "registry", "build"); err != nil {
+		t.Fatalf("registry build: %v", err)
+	}
 	private := filepath.Join(t.TempDir(), "registry.key")
 	public := filepath.Join(t.TempDir(), "registry.pub")
 	if _, _, err := runApp(t, root, nil, "registry", "keygen", "--private", private, "--public", public); err != nil {
