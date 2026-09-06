@@ -330,6 +330,60 @@ func TestEveryEmittedPathIsRegistryOwned(t *testing.T) {
 	}
 }
 
+// TestEveryEmittedOutputCarriesTheProvenanceMarker holds the emitters to the
+// evidence the stale sweep asks for. IsRegistryOwnedOutputPath answers "is
+// this one of our names", which cannot authorise a delete on its own —
+// `compose.yaml` has the right name whoever wrote it — so the sweep reads the
+// bytes and deletes only what claims this tool's authorship. An output that
+// forgets the banner would be classified as authored the day its render stops
+// producing it, and refuse `ggg sync` instead of being swept.
+//
+// Both directions matter, so both are here: every emitted file carries it, and
+// the pipeline refuses one that does not. Three outputs shipped without a
+// banner — `compose.yaml`, `compose.test.yaml` and
+// `internal/jobs/jobs_registry_gen.go` — which is what kept the marker a
+// convention instead of a mechanism.
+func TestEveryEmittedOutputCarriesTheProvenanceMarker(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	if len(files) == 0 {
+		t.Fatal("the fixture rendered no output; this test would assert nothing")
+	}
+	for _, f := range files {
+		if !HasGeneratedOutputMarker([]byte(f.Content)) {
+			t.Errorf("generated file %s carries no %q marker in its header; the sweep would refuse it as authored bytes",
+				f.Path, GeneratedOutputMarker)
+		}
+	}
+
+	t.Run("an unmarked output is refused", func(t *testing.T) {
+		const path = "internal/web/probe_registry_gen.go"
+		if !IsRegistryOwnedOutputPath(path) {
+			t.Fatalf("%s is not registry-owned; pick a path the pipeline owns", path)
+		}
+		_, err := acceptGeneratedFile("probe", GeneratedFile{Path: path, Content: "package web\n"})
+		if err == nil {
+			t.Fatal("an emitted file with no provenance marker was accepted")
+		}
+		if !strings.Contains(err.Error(), "provenance marker") {
+			t.Fatalf("refusal does not name the marker: %v", err)
+		}
+	})
+
+	t.Run("the marker is bounded to the header", func(t *testing.T) {
+		body := strings.Repeat("// filler\n", 600) + "// " + GeneratedOutputMarker + "\n"
+		if len(body) <= generatedMarkerHeaderBytes {
+			t.Fatalf("fixture is %d bytes, which is inside the %d-byte header window", len(body), generatedMarkerHeaderBytes)
+		}
+		if HasGeneratedOutputMarker([]byte(body)) {
+			t.Fatal("a marker outside the header window claimed authorship; a file that merely quotes the banner would be deletable")
+		}
+	})
+}
+
 // A failing generation has to be reproducible. Both of these iterated a map, so
 // the operator fixed whatever came out first, reran, and got a different
 // complaint — with no signal that more than one thing was wrong.

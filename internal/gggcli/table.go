@@ -160,8 +160,8 @@ func builtInCommands() []CommandSpec {
 			{Name: "claim", Help: "adopt a pre-existing divergent file as a recorded modification (repeatable)", Value: true, Repeatable: true},
 			{Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "test", Summary: "Run one test layer", Usage: "ggg test unit|integration|e2e|visual|smoke|all [--race] [--cover] [--json]", Flags: []FlagSpec{
-			{Name: "race", Help: "run the go test layers under the race detector"},
+		{Name: "test", Summary: "Run one test layer", Usage: "ggg test integration|e2e|visual|smoke|all [--race] [--cover] [--json]", Flags: []FlagSpec{
+			{Name: "race", Help: "run the go test layer under the race detector"},
 			{Name: "cover", Help: "report statement coverage per package"},
 			{Name: "json", Help: "emit the machine envelope"},
 		}},

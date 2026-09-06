@@ -14,18 +14,28 @@ import (
 // generator, not the planner, produces generated output, so a hand-edited or
 // deleted aggregate would otherwise pass the gate. It backs `sync --check` and
 // every dry run.
+//
+// An aggregate the render no longer produces is NOT reported here. It used to
+// be, as `generated_stale` with the instruction "run ggg sync" — prose the
+// human renderer printed without the path, so the gate named nothing. The
+// planner now classifies those outputs instead: a stale one is a named
+// `delete`/`generated` change in the same plan this function checks, and an
+// authored file at a generated name refuses the plan outright. Reporting it
+// twice would double-count the same fact in `sync --check`'s summary.
 func (e *Engine) GeneratedDrift(ctx context.Context, plan Plan) ([]Diagnostic, error) {
 	if e.generator == nil {
 		return nil, nil
 	}
-	rendered, err := e.generator.Render(ctx, plan)
-	if err != nil {
-		return nil, err
+	rendered := plan.rendered
+	if len(rendered) == 0 {
+		var err error
+		rendered, err = e.generator.Render(ctx, plan)
+		if err != nil {
+			return nil, err
+		}
 	}
 	diagnostics := make([]Diagnostic, 0)
-	expected := make(map[string]struct{}, len(rendered))
 	for _, file := range rendered {
-		expected[file.Path] = struct{}{}
 		current, readErr := os.ReadFile(filepath.Join(plan.Root, filepath.FromSlash(file.Path)))
 		switch {
 		case errors.Is(readErr, fs.ErrNotExist):
@@ -41,21 +51,6 @@ func (e *Engine) GeneratedDrift(ctx context.Context, plan Plan) ([]Diagnostic, e
 				Message: "generated output does not match the lock; run ggg sync and do not edit generated files",
 			})
 		}
-	}
-
-	// A stale aggregate left behind by a removed module is drift too: it still
-	// compiles into the project while nothing owns it any more. `ggg sync`
-	// deletes these, so reporting one here is an instruction the operator can
-	// actually act on.
-	stale, err := StaleRegistryOutputs(plan.Root, expected)
-	if err != nil {
-		return nil, err
-	}
-	for _, path := range stale {
-		diagnostics = append(diagnostics, Diagnostic{
-			Code: "generated_stale", Severity: "error", Path: path,
-			Message: "generated output is no longer owned by the selected graph; run ggg sync to delete it",
-		})
 	}
 	sort.Slice(diagnostics, func(i, j int) bool { return diagnostics[i].Path < diagnostics[j].Path })
 	return diagnostics, nil

@@ -4,7 +4,7 @@
     "id": "ggg/system/project-base",
     "kind": "system",
     "name": "project-base",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Project Base",
     "description": "Project scaffold ownership for project-base.",
@@ -35,7 +35,7 @@
         "source": "Makefile",
         "target": "Makefile",
         "class": "asset",
-        "sha256": "610bd5b60ffc0a1f9c0cb5335ea88bef63cb4319cab09b981487f015712c4e6d",
+        "sha256": "8c984f24af7cc7be4a9388d3f4578a4e9c84c112cd62b693b10cfa86bf6b17b6",
         "rewrite_module": false,
         "contract": false
       }

@@ -435,6 +435,53 @@ func TestVisualTaskRunsContainerHarness(t *testing.T) {
 	}
 }
 
+// `ggg test unit` and `ggg test integration` ran the identical argv over the
+// identical packages, and `runTestTask`'s "all" case listed both — so
+// `ggg test all` ran the whole Go suite twice, at 1929 tests across 91
+// packages, before it got to e2e.
+//
+// Mutation: put "unit" back in the "all" list and the suite argv appears
+// twice.
+func TestTestAllRunsTheGoSuiteExactlyOnce(t *testing.T) {
+	root := t.TempDir()
+	runner := &generatingRunner{root: root}
+	controller := NewController(ControllerOptions{Root: root, TaskRunner: runner})
+	plan, err := controller.Preview(context.Background(), TaskMutation{Task: "test", Action: "all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := controller.Apply(context.Background(), plan); err != nil {
+		t.Fatal(err)
+	}
+	suites := 0
+	for _, argv := range runner.argvs {
+		if strings.Join(argv, " ") == "go test -json -count=1 ./..." {
+			suites++
+		}
+	}
+	if suites != 1 {
+		t.Fatalf("the go suite ran %d times: %v", suites, runner.argvs)
+	}
+}
+
+// One behaviour under two names is refused rather than aliased. An alias is
+// how `unit` stayed indistinguishable from `integration` for a release while
+// content/docs/testing.md described it as running no database, so the name is
+// a usage error that names its replacement.
+func TestTestUnitIsAUsageErrorNamingIntegration(t *testing.T) {
+	controller := NewController(ControllerOptions{Root: t.TempDir(), TaskRunner: &recordingTaskRunner{}})
+	_, err := controller.Preview(context.Background(), TaskMutation{Task: "test", Action: "unit"})
+	if err == nil {
+		t.Fatal("ggg test unit was accepted")
+	}
+	if got := ExitCode(err); got != exitUsage {
+		t.Fatalf("exit = %d, want %d (usage)", got, exitUsage)
+	}
+	if !strings.Contains(err.Error(), "ggg test integration") {
+		t.Fatalf("the refusal does not name the surviving mode: %v", err)
+	}
+}
+
 // A failed trusted task must carry the same fixed envelope as any other
 // failure. It returned a zero-value envelope, so the renderer printed
 // "failed (exit 0)" while the process exited 1 — an envelope that contradicts

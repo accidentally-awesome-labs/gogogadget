@@ -455,11 +455,11 @@ func TestProductionDerivesNoHostDSN(t *testing.T) {
 // envelope and `--json` stopped being parseable.
 //
 // This drives the real thing: no injected runner, the process's own stdout and
-// stderr swapped for files, and tasks that really invoke tools. `test unit`
-// runs `go test ./...` in a throwaway module whose one package PASSES, so the
-// child writes "ok <package>" to ITS stdout — which is exactly the byte
-// stream that used to prefix the envelope. `db status` covers the other shape,
-// a child that fails.
+// stderr swapped for files, and tasks that really invoke tools. `test
+// integration` runs `go test ./...` in a throwaway module whose one package
+// PASSES, so the child writes "ok <package>" to ITS stdout — which is exactly
+// the byte stream that used to prefix the envelope. `db status` covers the
+// other shape, a child that fails.
 //
 // Mutation: point osTaskRunner's out back at os.Stdout, and `go test`'s ok
 // line lands ahead of the envelope; json.Decode then fails outright.
@@ -474,7 +474,7 @@ func TestJSONTrustedTaskEmitsExactlyOneDocumentOnStdout(t *testing.T) {
 	writeTestFile(t, root, filepath.Join("pkg", "pkg_test.go"),
 		[]byte("package pkg\n\nimport \"testing\"\n\nfunc TestPasses(t *testing.T) {}\n"))
 
-	for _, task := range [][]string{{"test", "unit"}, {"db", "status"}} {
+	for _, task := range [][]string{{"test", "integration"}, {"db", "status"}} {
 		t.Run(strings.Join(task, " "), func(t *testing.T) {
 			stdout, stderr := captureProcessStreams(t, func() {
 				app := App{Out: os.Stdout, Err: os.Stderr, Root: root, Version: "v1.2.3"}

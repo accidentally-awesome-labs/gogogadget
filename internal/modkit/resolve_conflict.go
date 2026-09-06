@@ -179,6 +179,26 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 	changes = append(changes, lockChange)
 
+	// Same classification as every other plan producer: one answer to "what
+	// happens to an unrendered registry-owned output", reached before the
+	// transaction rather than inside it.
+	var rendered []GeneratedFile
+	if e.generator != nil {
+		preview := Plan{Operation: Operation{Kind: OpSync}, Root: canonicalRoot,
+			RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
+			Project: project, Lock: finalLock, Resolved: liveModuleOrder(finalLock)}
+		generated, renderErr := e.generator.Render(ctx, preview)
+		if renderErr != nil {
+			return Plan{}, fmt.Errorf("render resolved outputs: %w", renderErr)
+		}
+		rendered = generated
+		deletes, scanErr := unrenderedOutputChanges(canonicalRoot, rendered, changes)
+		if scanErr != nil {
+			return Plan{}, scanErr
+		}
+		changes = append(changes, deletes...)
+	}
+
 	conflicts := conflictsFromLock(finalLock)
 	sortPlanOutputs(changes, conflicts, nil)
 	return Plan{
@@ -187,6 +207,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		Project: project, Lock: finalLock,
 		Resolved: liveModuleOrder(finalLock), Order: append([]string{}, finalLock.Order...),
 		Changes: changes, Diagnostics: []Diagnostic{}, Conflicts: conflicts, Staged: []StagedFile{},
+		rendered: rendered,
 	}, nil
 }
 

@@ -437,6 +437,25 @@ func (e *Engine) planRemove(
 		}
 		changes = append(changes, intentChange)
 	}
+	// The same classification every other verb runs, for the same reason: the
+	// removal reaches the same generation stage, so a stale aggregate it
+	// orphans is a named delete here and authored bytes at a generated name
+	// refuse before the transaction opens rather than rolling it back.
+	var rendered []GeneratedFile
+	if e.generator != nil {
+		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit,
+			ModulePath: modulePath, Project: desired, Lock: finalLock, Resolved: resolved}
+		generated, renderErr := e.generator.Render(ctx, preview)
+		if renderErr != nil {
+			return Plan{}, fmt.Errorf("render removal outputs: %w", renderErr)
+		}
+		rendered = generated
+		deletes, scanErr := unrenderedOutputChanges(canonicalRoot, rendered, changes)
+		if scanErr != nil {
+			return Plan{}, scanErr
+		}
+		changes = append(changes, deletes...)
+	}
 	lockContent, err := MarshalLock(finalLock)
 	if err != nil {
 		return Plan{}, fmt.Errorf("marshal removal lock: %w", err)
@@ -470,6 +489,7 @@ func (e *Engine) planRemove(
 		ModulePath: modulePath, Project: desired, Lock: finalLock,
 		Resolved: resolved, Order: append([]string{}, order...),
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: []StagedFile{},
+		rendered: rendered,
 	}, nil
 }
 

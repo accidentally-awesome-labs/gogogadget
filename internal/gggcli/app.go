@@ -285,7 +285,15 @@ func renderHuman(out io.Writer, env modkit.Envelope) error {
 		}
 	}
 	for _, diagnostic := range env.Diagnostics {
-		if _, err := fmt.Fprintf(out, "  %-8s %s %s\n", diagnostic.Severity, diagnostic.Code, diagnostic.Message); err != nil {
+		// The path, when the diagnostic has one. A gate that names nothing on
+		// a terminal is half a gate: `sync --check` printed "generated output
+		// is no longer owned by the selected graph" twice and named neither
+		// file, while `--json` had carried both paths all along.
+		detail := diagnostic.Code
+		if diagnostic.Path != "" {
+			detail += " " + diagnostic.Path
+		}
+		if _, err := fmt.Fprintf(out, "  %-8s %s %s\n", diagnostic.Severity, detail, diagnostic.Message); err != nil {
 			return err
 		}
 	}

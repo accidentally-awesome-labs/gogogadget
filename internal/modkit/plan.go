@@ -153,6 +153,13 @@ type Plan struct {
 	Conflicts            []Conflict   `json:"conflicts"`
 	Staged               []StagedFile `json:"staged"`
 	previousDependencies []LockedDependency
+	// rendered is the generator's output for this plan, computed once while
+	// planning — the planner has to render to classify unrendered outputs and
+	// to scan generated imports — and reused by the drift check, the journal
+	// and the generation stage. Generation is a pure function of the plan, so
+	// the reuse is exact; a plan built by hand carries none and every caller
+	// renders as before. One apply used to render three times.
+	rendered []GeneratedFile
 }
 type plannedAuthoredPayload struct {
 	module  string
@@ -523,6 +530,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}
 	finalLock.Dependencies = plannedDependencies(canonicalRoot, existingLock.Dependencies, graph.modules, effective.Go)
 	finalLock.GoTools = effective.GoTools
+	var rendered []GeneratedFile
 	if e.generator != nil {
 		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 			Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...)}
@@ -530,6 +538,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		if renderErr != nil {
 			return Plan{}, fmt.Errorf("render generated imports: %w", renderErr)
 		}
+		rendered = generated
 		sources := make([]string, 0, len(generated))
 		for _, file := range generated {
 			if strings.HasSuffix(file.Path, ".go") {
@@ -539,6 +548,11 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		if err := ValidateDeclaredImports(authored, sources, declaredImports); err != nil {
 			return Plan{}, err
 		}
+		deletes, scanErr := unrenderedOutputChanges(canonicalRoot, rendered, changes)
+		if scanErr != nil {
+			return Plan{}, scanErr
+		}
+		changes = append(changes, deletes...)
 	}
 	if !reflect.DeepEqual(currentProject, desiredProject) {
 		intentContent, err := MarshalProject(desiredProject)
@@ -573,6 +587,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...), Order: order,
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: staged,
 		previousDependencies: append([]LockedDependency{}, existingLock.Dependencies...),
+		rendered:             rendered,
 	}, nil
 }
 

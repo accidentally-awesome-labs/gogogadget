@@ -41,7 +41,7 @@ check: $(GGG)
 	$(GGG) check
 
 test: $(GGG)
-	$(GGG) test unit
+	$(GGG) test integration
 
 e2e: $(GGG)
 	$(GGG) test e2e

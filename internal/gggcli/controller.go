@@ -388,15 +388,33 @@ func operationOffline(plan Plan) bool {
 // failureEnvelope builds the envelope a failed command emits and wraps the
 // cause so its exit code survives. Handlers return both; the App renders the
 // envelope exactly once.
+//
+// A cause that carries its own coded findings contributes them beside
+// `command_failed`, so a machine consumer reads the refusal as data — one
+// entry per path, under its own code — instead of parsing the prose.
 func failureEnvelope(command string, cause error) (Result, error) {
 	exit := ExitCode(cause)
+	diagnostics := []modkit.Diagnostic{{
+		Code: "command_failed", Severity: "error", Message: cause.Error(),
+	}}
+	diagnostics = append(diagnostics, causeDiagnostics(cause)...)
 	env := normalizeEnvelope(modkit.Envelope{
-		Command: command,
-		OK:      false,
-		Exit:    exit,
-		Diagnostics: []modkit.Diagnostic{{
-			Code: "command_failed", Severity: "error", Message: cause.Error(),
-		}},
+		Command:     command,
+		OK:          false,
+		Exit:        exit,
+		Diagnostics: diagnostics,
 	})
 	return Result{Envelope: env}, cause
+}
+
+// causeDiagnostics reports the coded findings an error carries, if any. The
+// interface is named rather than structural in spirit — only this repository's
+// refusals implement it — and it is the one route by which a planner refusal
+// reaches `diagnostics[]` as records rather than as a sentence.
+func causeDiagnostics(cause error) []modkit.Diagnostic {
+	var carrier interface{ Diagnostics() []modkit.Diagnostic }
+	if errors.As(cause, &carrier) {
+		return carrier.Diagnostics()
+	}
+	return nil
 }

@@ -151,6 +151,181 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 	})
 }
 
+// No byte leaves the tree without being named, and a file the tool did not
+// write is never removed.
+//
+// The generation stage deletes every registry-owned output the selected graph
+// no longer renders, and it used to do so from inside Apply, outside the plan:
+// `Result.Deleted` reached no renderer, `renderHuman` prints `env.Changes`,
+// and so `sync`, `add`, `update` and `remove` each deleted a planted file at a
+// registry-owned name at exit 0 without naming it — in human output and in
+// `--json` alike. `sync --check` counted it as a `generated_stale` diagnostic
+// whose path the human renderer dropped, and the same exit 4 covered "would
+// write a file" and "would delete bytes ggg did not write".
+//
+// Both halves are pinned here because the pair is the property: a marked
+// aggregate is still swept AND named, and unmarked bytes refuse.
+//
+// Mutation: stop classifying unrendered outputs in Engine.Plan, and the marked
+// case loses its change while the authored case is deleted at exit 0.
+func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *testing.T) {
+	// Any registry-owned name works; this one is a `_registry_gen.` infix in
+	// a directory the fixture already installs into.
+	const target = "internal/modules/aa_probe_registry_gen.go"
+	if !modkit.IsRegistryOwnedOutputPath(target) {
+		t.Fatalf("%s is not a registry-owned output; pick a name the pipeline generates", target)
+	}
+	marked := []byte("// Code generated " + modkit.GeneratedOutputMarker + ".\n//\n// index: 0\n\npackage modules\n")
+	authored := []byte("package modules\n\n// A human wrote this and happened to like the name.\nconst AAProbe = \"authored\"\n")
+
+	synced := func(t *testing.T, body []byte) (string, *modkit.Engine) {
+		t.Helper()
+		root, engine := cliProject(t)
+		if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		if _, _, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+			t.Fatalf("sync: %v", err)
+		}
+		writeTestFile(t, root, target, body)
+		return root, engine
+	}
+
+	t.Run("a marked aggregate is a named delete and is swept", func(t *testing.T) {
+		root, engine := synced(t, marked)
+
+		out, _, err := runApp(t, root, engine, "sync", "--check", "--offline", "--json")
+		if err == nil || exitOf(t, err) != 4 {
+			t.Fatalf("check over a pending deletion = %v, want exit 4", err)
+		}
+		var envelope struct {
+			Changes   []modkit.Change `json:"changes"`
+			Generated []string        `json:"generated"`
+		}
+		if err := json.Unmarshal([]byte(out), &envelope); err != nil {
+			t.Fatalf("envelope is not JSON: %v\n%s", err, out)
+		}
+		var deletion *modkit.Change
+		for i := range envelope.Changes {
+			if envelope.Changes[i].Path == target {
+				deletion = &envelope.Changes[i]
+			}
+		}
+		if deletion == nil {
+			t.Fatalf("--json carries no change for the pending deletion: %s", out)
+		}
+		if deletion.Kind != modkit.ChangeDelete || deletion.Class != modkit.DestinationGenerated {
+			t.Fatalf("deletion change = %#v, want delete/generated", *deletion)
+		}
+		if deletion.SHA256 != sha256Hex(marked) {
+			t.Fatalf("deletion digest = %q, want the bytes being removed %q", deletion.SHA256, sha256Hex(marked))
+		}
+		// `generated` reports what the run WRITES. A delete listed there is
+		// indistinguishable from a rendered aggregate.
+		if slices.Contains(envelope.Generated, target) {
+			t.Fatalf("a deleted path is listed under generated: %v", envelope.Generated)
+		}
+
+		// The human gate names it too.
+		human, _, err := runApp(t, root, engine, "sync", "--check", "--offline")
+		if err == nil || exitOf(t, err) != 4 {
+			t.Fatalf("human check = %v, want exit 4", err)
+		}
+		if !strings.Contains(human, target) {
+			t.Fatalf("the terminal gate names no path:\n%s", human)
+		}
+
+		applied, _, err := runApp(t, root, engine, "sync", "--offline")
+		if err != nil {
+			t.Fatalf("sync over a stale aggregate: %v", err)
+		}
+		if !strings.Contains(applied, target) {
+			t.Fatalf("the deletion was not announced:\n%s", applied)
+		}
+		if _, err := os.Stat(filepath.Join(root, target)); !errors.Is(err, fs.ErrNotExist) {
+			t.Fatalf("the stale aggregate survived the sweep: %v", err)
+		}
+	})
+
+	t.Run("authored bytes refuse, are named, and stay on disk", func(t *testing.T) {
+		root, engine := synced(t, authored)
+		lockBefore, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Exit 3, not 4: "would delete bytes ggg did not write" is a refusal,
+		// and the gate's exit code now says which of the two it found.
+		human, humanErr, err := runApp(t, root, engine, "sync", "--check", "--offline")
+		if err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("check over authored bytes = %v, want exit 3", err)
+		}
+		if !strings.Contains(human+humanErr, target) {
+			t.Fatalf("the refusal names no path:\n%s%s", human, humanErr)
+		}
+
+		out, _, err := runApp(t, root, engine, "sync", "--offline", "--json")
+		if err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("sync over authored bytes = %v, want exit 3", err)
+		}
+		var refusal struct {
+			Diagnostics []modkit.Diagnostic `json:"diagnostics"`
+		}
+		if err := json.Unmarshal([]byte(out), &refusal); err != nil {
+			t.Fatalf("envelope is not JSON: %v\n%s", err, out)
+		}
+		coded := false
+		for _, diagnostic := range refusal.Diagnostics {
+			if diagnostic.Code == "generated_unowned" && diagnostic.Path == target {
+				coded = true
+			}
+		}
+		if !coded {
+			t.Fatalf("--json carries no generated_unowned diagnostic naming the file: %s", out)
+		}
+
+		if _, err := os.Stat(filepath.Join(root, target)); err != nil {
+			t.Fatalf("authored bytes were deleted by a refused command: %v", err)
+		}
+		lockAfter, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(lockBefore, lockAfter) {
+			t.Fatal("the refused sync wrote the lock")
+		}
+
+		if _, _, err := runApp(t, root, engine, "add", "ggg/component/card"); err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("add over authored bytes = %v, want exit 3", err)
+		}
+	})
+
+	// `remove` plans on its own path, and classified only inside Apply: it
+	// reported exit 5 over a rolled-back tree where `sync` reported exit 3
+	// over an untouched one — the same question answered two ways.
+	t.Run("remove refuses on the plan, not inside the transaction", func(t *testing.T) {
+		root, engine := cliProject(t)
+		if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		if _, _, err := runApp(t, root, engine, "add", "ggg/component/card"); err != nil {
+			t.Fatalf("add: %v", err)
+		}
+		writeTestFile(t, root, target, authored)
+
+		out, errOut, err := runApp(t, root, engine, "remove", "ggg/component/card")
+		if err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("remove over authored bytes = %v, want exit 3\n%s%s", err, out, errOut)
+		}
+		if !strings.Contains(out+errOut, target) {
+			t.Fatalf("remove refused without naming the path:\n%s%s", out, errOut)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, target)); statErr != nil {
+			t.Fatalf("remove deleted authored bytes: %v", statErr)
+		}
+	})
+}
+
 // dry-run must never touch the tree: zero writes before apply.
 func TestCLIDryRunLeavesIntentUntouched(t *testing.T) {
 	root, engine := cliProject(t)

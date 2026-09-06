@@ -108,8 +108,9 @@ var ciSuiteCommandPrefixes = [][]string{
 
 // ciSuiteModes are the `ggg test` layers that run Go packages. The mode is
 // pinned because `ggg test smoke` satisfies every other assertion here and
-// runs no Go test at all.
-var ciSuiteModes = []string{"unit", "integration", "all"}
+// runs no Go test at all. `unit` was a third accepted mode until it turned
+// out to be `integration` under another name.
+var ciSuiteModes = []string{"integration", "all"}
 
 // The `test` job's suite step must go through the CLI, because a bare
 // `go test` cannot report what it did. `go test` never summarises skips: a

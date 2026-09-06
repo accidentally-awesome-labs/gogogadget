@@ -19,11 +19,22 @@ Five layers, one decision rule:
 integration. User flow → e2e. Pixels → visual.** Never reach for a heavier
 layer than the behavior needs.
 
-`ggg test` runs a layer at a time — `unit`, `integration`, `e2e`, `visual`,
-`smoke`, or `all` — and `ggg check` is the commit gate: generate → stale
+The five layers above are a **decision rule**, not a list of commands.
+`ggg test` runs one mode at a time — `integration`, `e2e`, `visual`, `smoke`,
+or `all` — and `ggg check` is the commit gate: generate → stale
 generated-output refusal → drift check (`sync --check --offline`) → `go vet` →
 the accounted `go test` → `go build`. The `make` targets are thin aliases over
 `bin/ggg`.
+
+There is no `ggg test unit`, and it is worth knowing why, because there was
+one until recently: it ran the identical `go test ./...` over the identical
+packages as `integration`, database fixtures included, while this page
+described it as running no database. Go's test granularity is the package and
+this repository's database-touching packages hold pure tests in the same
+package — `internal/web` carries `designsystem_test.go` beside its integration
+server tests — so a `unit` mode that excluded database-dependent packages
+would drop real coverage rather than describe the truth. The name is a usage
+error (exit 2) naming `integration`, not a silent alias.
 
 ### A skipped test is not a passing test {#skips}
 
@@ -35,7 +46,7 @@ all four printed `ok`, and "targeted tests pass" was reported on that basis.
 386 tests skipped in that run out of 1,895.
 
 So the gate accounts for what the suite did. `ggg check` and `ggg test
-unit|integration` read the `go test -json` event stream and always print
+integration` read the `go test -json` event stream and always print
 
 ```
 tests: 1927 passed, 0 skipped, 0 inapplicable, 0 failed across 91 packages
@@ -155,6 +166,12 @@ project checks the rule too.
 Plain `go test`, no database. Examples: the `Entitled` status matrix, plan
 limits and MRR math, config validation, the `e2e:` token parser, the JSON
 error shape.
+
+Unit is a **layer**, and the layer is what the decision rule above is about:
+write a pure test when the behaviour is pure. It is not a command. The one
+Go-test mode is `ggg test integration`, which runs every package including
+these, because `go test` cannot address a layer — it addresses packages, and
+pure tests live beside database-backed ones in the same package.
 
 ## Contract
 

@@ -1,6 +1,7 @@
 package modkit
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -295,6 +296,45 @@ func IsRegistryOwnedOutputPath(path string) bool {
 		return true
 	}
 	return false
+}
+
+// GeneratedOutputMarker is the provenance banner every registry-owned output
+// carries in its header, and the only positive evidence this tool has that IT
+// wrote a file. IsRegistryOwnedOutputPath answers "is this one of our names",
+// which is not the same question: `compose.yaml` has the right name whoever
+// wrote it, so a name alone cannot authorise a delete. The marker travels with
+// the bytes, so it works with no lock (a genesis, an `init --adopt`, a tree
+// whose lock git reverted) and across binary versions, and it needs no second
+// source of truth that can disagree with the tree.
+//
+// GenerateAll refuses an emitted file that lacks it, so the marker is a
+// mechanism rather than a convention.
+const GeneratedOutputMarker = "by ggg sync; DO NOT EDIT"
+
+// generatedMarkerHeaderBytes bounds the window HasGeneratedOutputMarker reads.
+// The marker is a header banner: the front-matter documentation pages carry it
+// on line 8, after `---` and five metadata keys, which is the deepest any
+// emitter puts it. Bounding the search is what stops a body mention — prose
+// quoting the banner, a test fixture holding it as a string — from laundering
+// an authored file into a deletable one.
+const generatedMarkerHeaderBytes = 4096
+
+// HasGeneratedOutputMarker reports whether content carries the provenance
+// banner in its header.
+//
+// A human who edits a generated file but leaves the banner intact is still
+// answered "generated", and the sweep will delete it when the render stops
+// producing that path. That is deliberate: this repository's rule is that
+// generated files are never hand-edited (AGENTS.md, "Source vs generated"),
+// every emitted file says so in its first line, and a predicate that tried to
+// detect the edit would need the bytes the tool wrote — which is the lock
+// ledger this design rejected. The banner is a claim of authorship, and
+// removing it is how an operator withdraws the claim.
+func HasGeneratedOutputMarker(content []byte) bool {
+	if len(content) > generatedMarkerHeaderBytes {
+		content = content[:generatedMarkerHeaderBytes]
+	}
+	return bytes.Contains(content, []byte(GeneratedOutputMarker))
 }
 
 // adoptableMigration is one migration already present in the project tree,

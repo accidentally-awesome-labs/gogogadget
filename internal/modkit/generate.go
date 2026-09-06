@@ -128,19 +128,40 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 			return nil, fmt.Errorf("generate %s: %w", emitter.name, err)
 		}
 		for i := range emitted {
-			file := emitted[i]
-			if !IsRegistryOwnedOutputPath(file.Path) {
-				return nil, fmt.Errorf("emitter %s produced a path this pipeline does not own: %s", emitter.name, file.Path)
-			}
-			formatted, err := formatGo(&file)
+			accepted, err := acceptGeneratedFile(emitter.name, emitted[i])
 			if err != nil {
-				return nil, fmt.Errorf("generate %s: %w", emitter.name, err)
+				return nil, err
 			}
-			files = append(files, *formatted)
+			files = append(files, accepted)
 		}
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	return files, nil
+}
+
+// acceptGeneratedFile is the gate every emitted file passes through: the path
+// must be one this pipeline owns, Go output must parse and format, and the
+// content must carry the provenance marker.
+//
+// The marker is checked here for the same reason ownership is — this is the
+// one place every output passes — and it is what lets the stale sweep tell an
+// aggregate this tool wrote from a file a human wrote at the same name. An
+// output without it is refused as authored on the day its render stops
+// producing it, so an emitter that forgets the banner has to fail generation
+// now rather than block `ggg sync` later.
+func acceptGeneratedFile(emitter string, file GeneratedFile) (GeneratedFile, error) {
+	if !IsRegistryOwnedOutputPath(file.Path) {
+		return GeneratedFile{}, fmt.Errorf("emitter %s produced a path this pipeline does not own: %s", emitter, file.Path)
+	}
+	formatted, err := formatGo(&file)
+	if err != nil {
+		return GeneratedFile{}, fmt.Errorf("generate %s: %w", emitter, err)
+	}
+	if !HasGeneratedOutputMarker([]byte(formatted.Content)) {
+		return GeneratedFile{}, fmt.Errorf("emitter %s produced %s without the %q provenance marker in its header; the stale sweep cannot tell it from authored bytes",
+			emitter, file.Path, GeneratedOutputMarker)
+	}
+	return *formatted, nil
 }
 
 // one adapts a single-file emitter to the slice contract. A nil file means the
@@ -3996,6 +4017,7 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 	}
 
 	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package jobs\n\n")
 
 	b.WriteString("func workerDefinitions(w *Worker) []Definition {\n")

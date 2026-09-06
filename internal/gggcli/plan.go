@@ -31,10 +31,18 @@ func (c *Controller) planFor(command string, local *modkit.Plan, offline bool) P
 // read off the plan's own classification so the report cannot drift from the
 // transaction. The command name is set before the run id is derived, so the
 // same plan reports the same id the old envelope path produced.
+//
+// `generated` carries the outputs this plan WRITES. A deleted aggregate is a
+// generated-class change too, and listing it here told a machine consumer the
+// file had been produced: `remove --json` reported the removed
+// `accordion_templ.go` under `generated`, indistinguishable from a rendered
+// one. `changes[]` is where a delete is unambiguous — path, `kind:"delete"`,
+// `class:"generated"`, and the digest of the bytes removed — and it is
+// already how a consumer learns about a module removal's deletions.
 func planEnvelope(plan modkit.Plan, command string, exit int) modkit.Envelope {
 	generated := make([]string, 0)
 	for _, change := range plan.Changes {
-		if change.Class == modkit.DestinationGenerated {
+		if change.Class == modkit.DestinationGenerated && change.Kind != modkit.ChangeDelete {
 			generated = append(generated, change.Path)
 		}
 	}

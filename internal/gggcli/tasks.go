@@ -93,7 +93,17 @@ func (c *Controller) previewTrustedTask(mutation TaskMutation) error {
 		"setup": {"": true}, "generate": {"": true}, "dev": {"": true}, "check": {"": true}, "build": {"": true},
 		"services": {"up": true, "down": true, "status": true, "logs": true},
 		"db":       {"migrate": true, "status": true, "seed": true, "reset": true},
-		"test":     {"unit": true, "integration": true, "e2e": true, "visual": true, "smoke": true, "all": true},
+		"test":     {"integration": true, "e2e": true, "visual": true, "smoke": true, "all": true},
+	}
+	// `ggg test unit` and `ggg test integration` were one behaviour under two
+	// names: both ran the same `go test ./...`, over the same 91 packages,
+	// including every database fixture. `unit` is gone rather than aliased,
+	// because an alias is how the two names stayed indistinguishable for a
+	// release while the docs described one of them as running no database.
+	// Unit and integration remain LAYER names in the test-layer decision
+	// rule; the CLI has one Go-test mode.
+	if mutation.Task == "test" && mutation.Action == "unit" {
+		return usageError("ggg test unit is gone; it ran the same packages as `ggg test integration`, database fixtures included. Run `ggg test integration`")
 	}
 	allowed, ok := actions[mutation.Task]
 	if !ok || !allowed[mutation.Action] {
@@ -615,11 +625,11 @@ func (c *Controller) runCheck(ctx context.Context, root string, run func(string,
 }
 
 func (c *Controller) runTestTask(ctx context.Context, run func(string, ...string) error, root, mode string, flags goTestFlags) error {
-	if flags != (goTestFlags{}) && mode != "unit" && mode != "integration" && mode != "all" {
-		return usageError("--race and --cover apply to the go test layers (unit, integration)")
+	if flags != (goTestFlags{}) && mode != "integration" && mode != "all" {
+		return usageError("--race and --cover apply to the go test layer (integration)")
 	}
 	switch mode {
-	case "unit", "integration":
+	case "integration":
 		return c.runAccountedGoTest(ctx, root, flags)
 	case "e2e":
 		// The Playwright harness starts its own server on the host, so the
@@ -646,7 +656,10 @@ func (c *Controller) runTestTask(ctx context.Context, run func(string, ...string
 	case "smoke":
 		return run(root, filepath.Join("scripts", "smoke.sh"))
 	case "all":
-		for _, item := range []string{"unit", "integration", "e2e", "visual", "smoke"} {
+		// One entry per mode, and `unit` used to be the first of them: `ggg
+		// test all` ran the whole Go suite twice, about two minutes wasted per
+		// invocation, because the same behaviour was listed under both names.
+		for _, item := range []string{"integration", "e2e", "visual", "smoke"} {
 			if err := c.runTestTask(ctx, run, root, item, goTestFlags{}); err != nil {
 				return err
 			}

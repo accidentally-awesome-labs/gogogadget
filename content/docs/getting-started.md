@@ -211,7 +211,7 @@ whose every fixture skipped. Run `check` before every commit. Other commands
 you will use daily:
 
 ```sh
-bin/ggg test unit          # go test ./..., with the skip account
+bin/ggg test integration   # go test ./..., with the skip account
 bin/ggg test e2e           # test compose stack + Playwright
 bin/ggg db reset --yes     # destroy and recreate the local database, reseed
 bin/ggg diff               # every file whose bytes differ from the lock
