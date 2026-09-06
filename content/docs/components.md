@@ -25,11 +25,11 @@ go run ./cmd/ggg info ggg/component/badge
 ```
 
 ```text
-component/badge  Badge
+ggg/component/badge  Badge
 state          clean
 revision       1 (contract 1)
 removal_policy free
-requires       element/ui-core
+requires       ggg/element/ui-core
   file internal/web/templates/ui/badge.templ
   gallery  /dev/gallery/feedback
   gallery  /dev/gallery/feedback/badge

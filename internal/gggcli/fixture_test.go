@@ -92,6 +92,18 @@ func fixtureRegistry(t *testing.T) fstest.MapFS {
 		Source: "registry/modules/page/optional/optional.go", Target: "internal/modules/optional.go",
 		Class: modkit.FileClassGo, SHA256: sha256Hex(optionalContent), Contract: true,
 	}}
+	// The page module carries one immutable migration so that removing it
+	// leaves a TOMBSTONE rather than dropping the row: a lock record with
+	// reason "removed", no files, and the ledger retained forever. That row
+	// class is the one every verb that resolves an operand against the lock
+	// has to agree about, and the documented-loop test walks it.
+	optionalMigration := []byte("-- optional forward\nSELECT 1;\n")
+	optionalMigrationSource := "registry/modules/page/optional/migrations/optional-forward.sql"
+	optional.Migrations = []modkit.ManifestMigration{{
+		ID: "optional-forward", Kind: modkit.MigrationImmutable,
+		Source: optionalMigrationSource, SHA256: sha256Hex(optionalMigration),
+	}}
+	files[optionalMigrationSource] = &fstest.MapFile{Data: optionalMigration}
 	putJSON(t, files, "registry/modules/page/optional/module.json", modkit.ModuleDocument{Schema: 2, Module: optional})
 	files[optional.Files[0].Source] = &fstest.MapFile{Data: optionalContent}
 

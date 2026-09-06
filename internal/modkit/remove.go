@@ -14,6 +14,36 @@ import (
 // but whose immutable migration ledger is retained forever.
 const TombstoneReason = "removed"
 
+// InstalledModuleIDs is the set of module ids a lock reports as installed, and
+// it is the resolvable set for every verb whose operand names something the
+// project already has: `remove`, `diff`, and `resolve conflict`.
+//
+// A tombstone row is not an installed module. Its authored files were removed
+// and only its immutable migration ledger is retained, which is why `remove`
+// has always refused one as "not installed". `diff` and `resolve conflict`
+// built their resolvable sets from every lock row instead, so a tombstoned id
+// resolved for them, matched a row whose `files` are empty, and `ggg diff
+// ggg/system/feature-flags-launchdarkly` printed an empty report at exit 0
+// while `ggg remove` on the same id in the same lock refused at exit 3. Same
+// question, two answers — the shape 1416dccd set out to close. The rule lives
+// here once so there is nowhere for a fourth spelling to appear.
+func InstalledModuleIDs(lock Lock) []string {
+	ids := make([]string, 0, len(lock.Modules))
+	for _, module := range lock.Modules {
+		if !installedInLock(module) {
+			continue
+		}
+		ids = append(ids, module.ID)
+	}
+	return ids
+}
+
+// installedInLock is that same rule for a caller that needs the row and not
+// just the id.
+func installedInLock(module LockedModule) bool {
+	return module.Reason != TombstoneReason
+}
+
 func (e *Engine) planRemove(
 	ctx context.Context,
 	canonicalRoot string,
@@ -29,19 +59,17 @@ func (e *Engine) planRemove(
 		return Plan{}, fmt.Errorf("remove does not accept a registry ref")
 	}
 	installed := make(map[string]LockedModule, len(currentLock.Modules))
-	installedIDs := make([]string, 0, len(currentLock.Modules))
 	for _, module := range currentLock.Modules {
-		if module.Reason == TombstoneReason {
+		if !installedInLock(module) {
 			continue
 		}
 		installed[module.ID] = module
-		installedIDs = append(installedIDs, module.ID)
 	}
 	// The installed graph, not the catalog, is `remove`'s resolvable set: the
 	// question it answers is "which of these do I have", and its refusal for a
 	// module it does not have has to stay distinguishable from one the
 	// registry never published.
-	requested, err := ResolveModuleIDs(op.Modules, installedIDs, "installed")
+	requested, err := ResolveModuleIDs(op.Modules, InstalledModuleIDs(currentLock), "installed")
 	if err != nil {
 		return Plan{}, err
 	}

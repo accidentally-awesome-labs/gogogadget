@@ -207,9 +207,11 @@ algorithm, in order:
 5. **Order deterministically.** Dependencies precede dependents, with a lexical
    tie-break, so the resolved order is identical on every machine.
 
-This repository selects `profile/full` and excludes `component/table-empty` and
-`element/divider`, which is why the module reference lists 240 modules while the
-lock file carries 242 records — the two extra are removal tombstones.
+This repository selects `ggg/profile/full` and excludes
+`ggg/component/table-empty`, `ggg/element/divider` and
+`ggg/system/deploy-docker`, which is why the module reference lists 288 modules
+while the lock file carries 293 records — the five extra are removal
+tombstones.
 
 ## The lock
 
@@ -226,12 +228,12 @@ Each module record:
 
 ```json
 {
-  "id": "component/badge",
+  "id": "ggg/component/badge",
   "revision": 1,
   "contract": 1,
   "source_commit": "a9847a3b…",
   "reason": "profile",
-  "required_by": ["component/kanban", "component/member-item"],
+  "required_by": ["ggg/component/kanban", "ggg/component/member-item"],
   "manifest": { … },
   "files": [
     { "path": "internal/web/templates/ui/badge.templ",
@@ -376,8 +378,8 @@ Installed files are yours. Edit them. Nothing marks a file read-only and nothing
 reverts it.
 
 ```sh
-go run ./cmd/ggg diff                      # what have I changed?
-go run ./cmd/ggg diff component/data-table # just this module
+go run ./cmd/ggg diff                          # what have I changed?
+go run ./cmd/ggg diff ggg/component/data-table # just this module
 ```
 
 `diff` prints one line per non-clean file. This is the honest inventory of your
@@ -439,9 +441,9 @@ Then decide, per file:
 
 ```sh
 go run ./cmd/ggg diff --upstream
-go run ./cmd/ggg resolve component/data-table --path internal/… --accept-upstream
-go run ./cmd/ggg resolve component/data-table --path internal/… --keep-local
-go run ./cmd/ggg resolve component/data-table --path internal/… --merged
+go run ./cmd/ggg resolve ggg/component/data-table --path internal/… --accept-upstream
+go run ./cmd/ggg resolve ggg/component/data-table --path internal/… --keep-local
+go run ./cmd/ggg resolve ggg/component/data-table --path internal/… --merged
 ```
 
 | Mode | Bytes on disk | Lock effect |

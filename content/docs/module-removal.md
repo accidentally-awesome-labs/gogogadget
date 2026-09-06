@@ -78,7 +78,7 @@ Each of these is a distinct refusal, each exits 3, and each names what to do.
 **Something else requires it.**
 
 ```text
-error: module system/jobs is required by page/admin-jobs; remove the dependent first
+error: module ggg/system/jobs is required by ggg/page/admin-jobs; remove the dependent first
 ```
 
 Reverse dependencies are read from the lock's `required_by`, so this is answered
@@ -86,7 +86,7 @@ without resolving anything.
 
 **The policy forbids it.** `replacement-required` and `major-version-only` refuse
 outright. `drain-required` refuses when its manifest declares no neutralization
-migration — which is the state `system/jobs` is in today, so it is currently not
+migration — which is the state `ggg/system/jobs` is in today, so it is currently not
 removable at all, and that is the correct answer rather than an oversight to work
 around.
 
@@ -154,7 +154,7 @@ Its requirements are exact:
 
    ```json
    { "code": "purge_not_applicable", "severity": "warn",
-     "module": "component/carousel",
+     "module": "ggg/component/carousel",
      "message": "--purge-data has no effect: module is not drain-required" }
    ```
 

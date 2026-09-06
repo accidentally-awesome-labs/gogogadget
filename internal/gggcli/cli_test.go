@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -871,6 +872,29 @@ func TestCLIDocumentedLoopInstallsAndRemovesWhatTheCatalogPrints(t *testing.T) {
 		t.Fatalf("remove %s left it installed; lock holds %v", unscoped, installed)
 	}
 
+	// The removed module keeps one lock row: a tombstone carrying its retained
+	// migration ledger, with no files. That row is not an installed module,
+	// and every verb that resolves an operand against the lock has to say so
+	// with one voice. `diff` built its resolvable set from every row, so a
+	// tombstoned id resolved, matched a row with no files, and printed an
+	// empty report at exit 0 while `remove` refused the same id at exit 3 —
+	// the silent half-fail for the one id class where it survived.
+	if tombstoned := tombstonedIDsFromLock(t, root); !slices.Contains(tombstoned, printed) {
+		t.Fatalf("remove %s left no tombstone for %s; lock tombstones %v", unscoped, printed, tombstoned)
+	}
+	for _, verb := range []string{"diff", "remove"} {
+		out, _, err := runApp(t, root, engine, verb, printed)
+		if err == nil {
+			t.Fatalf("%s %s answered at exit 0 for a tombstoned id: %q", verb, printed, out)
+		}
+		if code := exitOf(t, err); code != 3 {
+			t.Fatalf("%s %s exit = %d, want 3", verb, printed, code)
+		}
+		if !strings.Contains(err.Error(), "is not installed") {
+			t.Fatalf("%s %s refused with %v, want \"is not installed\"", verb, printed, err)
+		}
+	}
+
 	// add again, in the convenience form.
 	if _, _, err := runApp(t, root, engine, "add", unscoped); err != nil {
 		t.Fatalf("add %s: %v", unscoped, err)
@@ -889,6 +913,51 @@ func TestCLIDocumentedLoopInstallsAndRemovesWhatTheCatalogPrints(t *testing.T) {
 		if _, _, err := runApp(t, root, engine, "add", absent); err == nil {
 			t.Fatalf("add %s succeeded", absent)
 		}
+	}
+}
+
+// TestCLIBothIDFormsSelectTheSameProfile pins the kind list a typed id is
+// checked against, for the one kind where the two forms disagreed.
+//
+// A profile is selectable — `ggg add ggg/profile/full` is as legal as a single
+// module, and CatalogSelectableIDs publishes profiles for exactly that reason
+// — but the two syntax branches asked two lists. The scoped branch hard-coded
+// six kinds including `profile`; the unscoped branch asked validModuleKind,
+// which names the five MANIFEST kinds. So `add ggg/profile/full` planned at
+// exit 0 while `add profile/full` refused at exit 2 with `module kind
+// "profile" is invalid`, and the resolution layer that was ready for it never
+// ran.
+//
+// The assertion is indistinguishability, not two exit codes: both operands
+// name one profile, so both must leave the same intent and the same installed
+// graph, with the intent holding the canonical scoped form either way.
+func TestCLIBothIDFormsSelectTheSameProfile(t *testing.T) {
+	const canonical = "ggg/profile/full"
+	intents := map[string]string{}
+	installs := map[string]string{}
+	for _, operand := range []string{canonical, "profile/full"} {
+		root, engine := cliProject(t)
+		if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		if _, _, err := runApp(t, root, engine, "add", operand); err != nil {
+			t.Fatalf("add %s: %v", operand, err)
+		}
+		intent, err := os.ReadFile(filepath.Join(root, "gogogadget.json"))
+		if err != nil {
+			t.Fatalf("read intent after add %s: %v", operand, err)
+		}
+		if !strings.Contains(string(intent), `"`+canonical+`"`) {
+			t.Fatalf("add %s recorded %s, not the canonical %s", operand, intent, canonical)
+		}
+		intents[operand] = string(intent)
+		installs[operand] = strings.Join(installedIDsFromLock(t, root), ",")
+	}
+	if intents[canonical] != intents["profile/full"] {
+		t.Fatalf("the two id forms wrote different intent:\n%s\n%s", intents[canonical], intents["profile/full"])
+	}
+	if installs[canonical] != installs["profile/full"] {
+		t.Fatalf("the two id forms installed different graphs:\n%s\n%s", installs[canonical], installs["profile/full"])
 	}
 }
 
@@ -927,6 +996,177 @@ func TestCLITargetedUpdateSeesTheWholeGraphsSource(t *testing.T) {
 	if _, _, err := runApp(t, root, engine, "update", "ggg/element/guest"); err != nil {
 		t.Fatalf("targeted update of the slot contributor refused: %v", err)
 	}
+}
+
+// TestCLITargetedUpdateScansRetainedTreeBytes pins the OTHER half of that
+// input scope, the half no test covered.
+//
+// Ten of the twelve static invariants scan payload bytes for a FORBIDDEN
+// pattern, so an absent payload is a scan that never ran. Before the retained
+// bytes were merged in they all passed vacuously on every targeted update, and
+// only two — shell slot renderers and CSP contribution sources — could refuse
+// for an absent file at all. Six of the ten run before the first of those two,
+// and a closure declaring neither reaches apply, so the over-reporters were
+// never the safety net they looked like.
+//
+// The fixture is built so that a NARROWING of the scan set fails it, not only
+// a removal. `beta` owns a test payload that no declaration anywhere points
+// at: no slot, no CSP source, no asset, no adapter, no config field. So the
+// obvious optimisation after reading plan.go — "read only retained files whose
+// package some declaration names" — drops exactly this file, and the ten scans
+// go quiet again with the suite green.
+//
+// The recorder-handoff scan is the instrument because it needs nothing but a
+// module's own declaration that a payload is a Go test: it selects
+// class-"test" Go targets and reads them. The payload is published clean and
+// SCANNED clean (it builds a recorder and uses it inline), then the tree copy
+// gains the goroutine — the same experiment that proved the fix on this
+// repository, where a credential-presence selector planted in a retained
+// ggg/system/analytics-posthog payload made `update ggg/element/avatar` refuse
+// at exit 3 naming file, line and retained module.
+func TestCLITargetedUpdateScansRetainedTreeBytes(t *testing.T) {
+	fsys := retainedPatternRegistry(t)
+	source := refSource{snapshots: map[string]modkit.Snapshot{
+		"main":      {Commit: testCommitA, FS: fsys},
+		testCommitA: {Commit: testCommitA, FS: fsys},
+	}}
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	engine := modkit.New(modkit.Options{Source: source, Generator: modkit.RegistryGenerator{}})
+
+	if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, _, err := runApp(t, root, engine, "add", "ggg/element/alpha", "ggg/element/beta"); err != nil {
+		t.Fatalf("add: %v", err)
+	}
+	// A targeted update of the unrelated module retains beta, whose bytes now
+	// carry the forbidden shape. Post-apply state is what the invariants are
+	// about, and this file is part of it.
+	writeTestFile(t, root, betaTestTarget, betaHandoffTestContent)
+
+	out, _, err := runApp(t, root, engine, "update", "ggg/element/alpha")
+	if err == nil {
+		t.Fatalf("targeted update planned over a retained payload holding a recorder handoff: %q", out)
+	}
+	if code := exitOf(t, err); code != 3 {
+		t.Fatalf("update exit = %d, want 3 (a refusal, not a crash): %v", code, err)
+	}
+	for _, want := range []string{betaTestTarget, "ggg/element/beta", "ResponseRecorder"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("refusal does not name %q, so it cannot be acted on: %v", want, err)
+		}
+	}
+	if !regexp.MustCompile(regexp.QuoteMeta(betaTestTarget) + `:\d+`).MatchString(err.Error()) {
+		t.Fatalf("refusal names no line in %s: %v", betaTestTarget, err)
+	}
+}
+
+const betaTestTarget = "internal/beta/beta_flow_test.go"
+
+// betaCleanTestContent uses a recorder without handing it anywhere, so the
+// published payload passes the same scan that the planted one fails.
+var betaCleanTestContent = []byte(`package beta
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestBetaServesInline(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/", nil))
+	if recorder.Code != http.StatusNoContent {
+		t.Fatalf("code = %d", recorder.Code)
+	}
+}
+`)
+
+// betaHandoffTestContent is the same test with the call moved onto a goroutine,
+// which is the shape ValidateNoRecorderGoroutineHandoff refuses.
+var betaHandoffTestContent = []byte(`package beta
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestBetaServesOnAGoroutine(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	done := make(chan struct{})
+	go func() {
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		}).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/", nil))
+		close(done)
+	}()
+	<-done
+	if recorder.Code != http.StatusNoContent {
+		t.Fatalf("code = %d", recorder.Code)
+	}
+}
+`)
+
+// retainedPatternRegistry publishes two unrelated modules. Updating alpha
+// retains beta, and beta's only payload is a Go test that nothing declares
+// anything about — no slot, no source function, no asset, no adapter — so the
+// only way a plan reads it is by reading every retained target.
+func retainedPatternRegistry(t *testing.T) fstest.MapFS {
+	t.Helper()
+	files := fstest.MapFS{}
+	putJSON(t, files, "registry.json", map[string]any{
+		"schema": 2, "namespace": "ggg", "canonical_module": "github.com/gogogadget/gogogadget",
+		"includes": []string{
+			"registry/elements.json", "registry/components.json", "registry/pages.json",
+			"registry/workflows.json", "registry/systems.json", "registry/profiles.json",
+		},
+	})
+	putJSON(t, files, "registry/elements.json", modkit.CatalogIndex{
+		Schema: 2, Kind: modkit.CatalogElement,
+		Items: []string{
+			"registry/modules/element/alpha/module.json",
+			"registry/modules/element/beta/module.json",
+		},
+	})
+	for name, kind := range map[string]modkit.CatalogKind{
+		"registry/components.json": modkit.CatalogComponent,
+		"registry/pages.json":      modkit.CatalogPage,
+		"registry/workflows.json":  modkit.CatalogWorkflow,
+		"registry/systems.json":    modkit.CatalogSystem,
+		"registry/profiles.json":   modkit.CatalogProfile,
+	} {
+		putJSON(t, files, name, modkit.CatalogIndex{Schema: 2, Kind: kind, Items: []string{}})
+	}
+
+	alphaContent := []byte("package alpha\n\nconst Version = 1\n")
+	alpha := baseModule("ggg/element/alpha", "element", "alpha")
+	alpha.Files = []modkit.ManifestFile{{
+		Source: "registry/modules/element/alpha/alpha.go", Target: "internal/alpha/alpha.go",
+		Class: modkit.FileClassGo, SHA256: sha256Hex(alphaContent), Contract: true,
+	}}
+	putJSON(t, files, "registry/modules/element/alpha/module.json", modkit.ModuleDocument{Schema: 2, Module: alpha})
+	files[alpha.Files[0].Source] = &fstest.MapFile{Data: alphaContent}
+
+	betaContent := []byte("package beta\n\nconst Version = 1\n")
+	beta := baseModule("ggg/element/beta", "element", "beta")
+	beta.Files = []modkit.ManifestFile{
+		{
+			Source: "registry/modules/element/beta/beta.go", Target: "internal/beta/beta.go",
+			Class: modkit.FileClassGo, SHA256: sha256Hex(betaContent), Contract: true,
+		},
+		{
+			Source: "registry/modules/element/beta/beta_flow_test.go", Target: betaTestTarget,
+			Class: modkit.FileClassTest, SHA256: sha256Hex(betaCleanTestContent),
+		},
+	}
+	putJSON(t, files, "registry/modules/element/beta/module.json", modkit.ModuleDocument{Schema: 2, Module: beta})
+	files[beta.Files[0].Source] = &fstest.MapFile{Data: betaContent}
+	files[beta.Files[1].Source] = &fstest.MapFile{Data: betaCleanTestContent}
+	return files
 }
 
 // slotFixtureRegistry publishes two unrelated modules where one declares a
@@ -984,9 +1224,8 @@ func slotFixtureRegistry(t *testing.T) fstest.MapFS {
 	return files
 }
 
-// installedIDsFromLock is the installed graph as the lock records it, which is
-// what an operator's next command resolves against.
-func installedIDsFromLock(t *testing.T, root string) []string {
+// lockOf reads the project lock an operator's next command resolves against.
+func lockOf(t *testing.T, root string) modkit.Lock {
 	t.Helper()
 	data, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
 	if err != nil {
@@ -996,12 +1235,26 @@ func installedIDsFromLock(t *testing.T, root string) []string {
 	if err != nil {
 		t.Fatalf("parse lock: %v", err)
 	}
-	ids := make([]string, 0, len(lock.Modules))
-	for _, module := range lock.Modules {
+	return lock
+}
+
+// installedIDsFromLock is the installed graph as the lock records it. It asks
+// modkit rather than re-deciding, because a test that spells "installed" for
+// itself can agree with one verb while the tool disagrees across three.
+func installedIDsFromLock(t *testing.T, root string) []string {
+	t.Helper()
+	return modkit.InstalledModuleIDs(lockOf(t, root))
+}
+
+// tombstonedIDsFromLock is the complement: rows retained for their immutable
+// migration ledger after their authored files were removed.
+func tombstonedIDsFromLock(t *testing.T, root string) []string {
+	t.Helper()
+	ids := []string{}
+	for _, module := range lockOf(t, root).Modules {
 		if module.Reason == modkit.TombstoneReason {
-			continue
+			ids = append(ids, module.ID)
 		}
-		ids = append(ids, module.ID)
 	}
 	return ids
 }

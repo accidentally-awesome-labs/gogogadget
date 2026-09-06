@@ -267,12 +267,11 @@ func (c *Controller) collectDiff(modules []string, upstream bool) ([]DiffEntry, 
 	// Operands resolve against the installed graph before they filter it.
 	// Filtering on the raw text silently matched nothing for a scoped id the
 	// syntax check had just rejected and for an unscoped one it had accepted,
-	// so `ggg diff element/avatar` printed an empty report and exited 0.
-	installedIDs := make([]string, 0, len(lock.Modules))
-	for _, module := range lock.Modules {
-		installedIDs = append(installedIDs, module.ID)
-	}
-	resolved, err := modkit.ResolveModuleIDs(modules, installedIDs, "installed")
+	// so `ggg diff element/avatar` printed an empty report and exited 0. The
+	// set is modkit's, not a third spelling of "installed": built from every
+	// lock row, a tombstoned id resolved here and reported nothing at exit 0
+	// while `remove` refused the same id at exit 3.
+	resolved, err := modkit.ResolveModuleIDs(modules, modkit.InstalledModuleIDs(lock), "installed")
 	if err != nil {
 		return nil, "", refusalError(err)
 	}

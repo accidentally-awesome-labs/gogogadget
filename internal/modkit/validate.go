@@ -51,11 +51,11 @@ func validateProject(p Project, canonical bool) error {
 	for _, id := range p.Modules {
 		selected[id] = struct{}{}
 		_, kind, _, _ := splitScopedModuleID(id)
-		hasProfile = hasProfile || kind == "profile"
+		hasProfile = hasProfile || kind == profileIDKind
 	}
 	for _, id := range p.Exclude {
 		_, kind, _, _ := splitScopedModuleID(id)
-		if kind == "profile" {
+		if kind == profileIDKind {
 			return fmt.Errorf("project exclude cannot contain profile %q", id)
 		}
 		if _, ok := selected[id]; ok {
@@ -136,7 +136,7 @@ func ValidateScopedProjectModuleID(id string) error {
 	if !ok || !validNamespace(namespace) {
 		return fmt.Errorf("module id %q is invalid", id)
 	}
-	if kind != "element" && kind != "component" && kind != "page" && kind != "workflow" && kind != "system" && kind != "profile" {
+	if !validModuleIDKind(kind) {
 		return fmt.Errorf("module kind %q is invalid", kind)
 	}
 	return nil
@@ -1775,7 +1775,7 @@ func ValidateInstallableModuleID(id string) error {
 	if !ok {
 		return fmt.Errorf("module id %q is invalid; write the scoped form %s that `ggg catalog` prints", id, CanonicalModuleIDForm)
 	}
-	if !validModuleKind(ModuleKind(kind)) {
+	if !validModuleIDKind(kind) {
 		return fmt.Errorf("module kind %q is invalid", kind)
 	}
 	return nil
@@ -1965,6 +1965,35 @@ func validModuleKind(value ModuleKind) bool {
 	default:
 		return false
 	}
+}
+
+// profileIDKind is the kind segment a profile id carries. A profile is not a
+// manifest kind: nothing in the registry publishes a manifest with it, no lock
+// row holds one, and module.schema.json's `kind` enum names the five manifest
+// kinds only. It is still a legal kind segment in an id an operator types,
+// because a profile is selectable — `ggg add ggg/profile/full` is as legal as
+// a single module (CatalogSelectableIDs).
+const profileIDKind = "profile"
+
+// validModuleIDKind is the one answer to "may a module id an operator typed
+// carry this kind segment". Both forms of that id ask it: the canonical scoped
+// form through ValidateScopedProjectModuleID and the bare `<kind>/<name>`
+// convenience form through ValidateInstallableModuleID.
+//
+// They used to ask two different lists. The scoped branch hard-coded six kind
+// strings including `profile`; the unscoped branch called validModuleKind,
+// which names five and omits it. So `ggg add ggg/profile/full` planned at exit
+// 0 while `ggg add profile/full` refused at exit 2 with `module kind "profile"
+// is invalid` — one id, two forms, two answers, for a profile the catalog
+// publishes as selectable and the resolver expands members from.
+//
+// validModuleKind stays the manifest kinds alone rather than absorbing this
+// one, because it also decides a manifest's id and its declared kind
+// (validateManifest) and the catalog path derived from them
+// (catalogItemPath); widening it there would accept a manifest that
+// module.schema.json refuses, which is the parity the schema gate pins.
+func validModuleIDKind(kind string) bool {
+	return kind == profileIDKind || validModuleKind(ModuleKind(kind))
 }
 
 func validRemovalPolicy(value RemovalPolicy) bool {

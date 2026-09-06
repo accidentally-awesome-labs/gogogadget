@@ -364,16 +364,43 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	// it needs the whole graph's source. `payloads` is not that on a targeted
 	// update: plannedModules drops the retained modules, so the file map held
 	// only the advanced closure while the validators still iterated every
-	// manifest. Any targeted update therefore refused on an unrelated module
-	// — `ggg update ggg/element/avatar` reported that
-	// `ggg/system/analytics-posthog`'s shell slot named a renderer "no
-	// installed payload in that package declares", because the package that
-	// declares it belongs to a retained module whose bytes were absent. The
-	// same hole ran the other way for the scanners that look for a forbidden
-	// pattern rather than a required declaration (adapter imports, config
-	// field ownership, shell provider neutrality, seam vendor hosts,
-	// credential-presence selectors, recorder handoff, CLI handler packages):
-	// a retained module's payload was never read, so those passed vacuously.
+	// manifest. The split is two and ten, and the record here said four and
+	// eight until an experiment corrected it.
+	//
+	// TWO of the twelve can refuse because a declared file is ABSENT from the
+	// map. Both require a declaration and fail if they never see it, the same
+	// `found := false` over every key: ValidateShellSlotRenderers
+	// (shell_scan.go:122) and ValidateCSPContributionSources (csp.go:240).
+	// Those over-reported, and they are the false refusal — `ggg update
+	// ggg/element/avatar` reported that `ggg/system/analytics-posthog`'s shell
+	// slot named a renderer "no installed payload in that package declares",
+	// because the package that declares it belongs to a retained module whose
+	// bytes were absent.
+	//
+	// The other TEN ran vacuously: an absent payload is a scan that never
+	// ran, so a forbidden pattern in a retained module's bytes passed.
+	// ValidateCLIHandlerPackages, ValidateShellProviderNeutrality,
+	// ValidateNoCredentialPresenceSelectors, ValidateSeamVendorHosts,
+	// ValidateAssetReferences and ValidateNoRecorderGoroutineHandoff each
+	// spell `content, ok := files[target]; if !ok { continue }`;
+	// ValidateCoreCLIPackages, ValidatePayloadAdapterImports,
+	// ValidateConfigFieldOwnership and ValidateDerivationPackages only ever
+	// iterate `range files`, so a shorter map is a shorter scan. The last two
+	// of those read as declaration-shaped and are not: AssetReferences checks
+	// declarations against a set built from `module.Files` — the manifest,
+	// never this map — and its byte half skips an absent target, so a
+	// truncated map only makes it scan less; DerivationPackages refuses when
+	// its import graph reaches a package, and absent files remove edges, so
+	// fewer edges means fewer chains means it passes.
+	//
+	// Ordering is not the reassurance it looks like: SIX of the ten run
+	// BEFORE the first of the two, and the two refuse only for a closure that
+	// declares a shell slot or a CSP contribution. Measured at 1416dccd with
+	// this fix absent, 697fbf42's loop test PASSED and its targeted `update`
+	// reached apply on exactly such a closure. The over-reporters were a
+	// property of this repository's graph, not a gate, and ten static
+	// invariants were silently not running on real targeted updates in
+	// v0.11.0.
 	//
 	// A retained module's bytes come from the TREE, not from the fresh
 	// snapshot. The tree is what the plan leaves installed for it — its
@@ -453,15 +480,37 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		moduleByID[module.ID] = module
 		declaredImports = append(declaredImports, module.Dependencies.Go...)
 	}
-	authored := map[string][]byte{}
 	for _, payload := range payloads {
-		authored[payload.file.Source] = payload.content
 		moduleDeps := append([]GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}, moduleByID[payload.module].Dependencies.Go...)
 		if err := ValidateModuleDeclaredImports(payload.module, map[string][]byte{payload.file.Source: payload.content}, nil, moduleDeps); err != nil {
 			return Plan{}, err
 		}
 	}
-	if err := ValidateDeclaredImports(authored, nil, declaredImports); err != nil {
+	// The thirteenth whole-graph check now reads the same source as the twelve
+	// above. It used to read `payloads` alone, keyed by registry source path,
+	// while `declaredImports` was assembled from every graph.modules entry
+	// — whole graph on the declaration side, advanced closure on the byte
+	// side, four lines under a comment asserting the opposite.
+	//
+	// Widened rather than scoped down, for three reasons. An undeclared import
+	// added to a retained payload otherwise survives every targeted update:
+	// the digest gate that would catch the divergence is deliberately skipped
+	// for retained rows, whose provenance carries forward below, and the lock's
+	// dependencies are recomputed from manifests rather than from imports, so
+	// go.mod is written without it. `scanFiles` already holds those bytes, so
+	// reading them here costs nothing. And leaving one check of thirteen on a
+	// narrower source than its own declarations is the disagreement that
+	// produced this defect in the first place.
+	//
+	// The key space widens with it, from registry source path to installed
+	// target. The key is a label: ValidateDeclaredImports uses it for the
+	// .go/.templ discriminator and for the "imported by" clause, and the
+	// target is the path an operator can open. The per-module ownership check
+	// above keeps source keys and stays scoped to the bytes this plan writes,
+	// because it asks whether ONE module declares what its OWN payload
+	// imports, and a retained module's answer is the one its own install
+	// already gave.
+	if err := ValidateDeclaredImports(scanFiles, nil, declaredImports); err != nil {
 		return Plan{}, err
 	}
 	claims, err := normalizedClaims(op.Claims)
@@ -545,7 +594,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 				sources = append(sources, file.Content)
 			}
 		}
-		if err := ValidateDeclaredImports(authored, sources, declaredImports); err != nil {
+		if err := ValidateDeclaredImports(scanFiles, sources, declaredImports); err != nil {
 			return Plan{}, err
 		}
 		deletes, scanErr := unrenderedOutputChanges(canonicalRoot, rendered, changes)
