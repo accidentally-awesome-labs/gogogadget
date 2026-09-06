@@ -4,7 +4,7 @@
     "id": "ggg/workflow/project-export",
     "kind": "workflow",
     "name": "project-export",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Project CSV export",
     "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
@@ -104,7 +104,7 @@
         "source": "internal/jobs/export_csv_test.go",
         "target": "internal/jobs/export_csv_test.go",
         "class": "test",
-        "sha256": "3f0fdc2300391f1a5b4200f7d6485e638710dd77fbf4930345983c530afe4422",
+        "sha256": "bbb19d131c5c4e9e3240894b7a7319c25244a7d72c2e23b06534fd55c2a918f7",
         "rewrite_module": true,
         "contract": false
       },

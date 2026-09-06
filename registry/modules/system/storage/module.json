@@ -4,7 +4,7 @@
     "id": "ggg/system/storage",
     "kind": "system",
     "name": "storage",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Object storage seam",
     "description": "Provider-neutral Store port and object-key helpers.",
@@ -47,7 +47,15 @@
         "source": "internal/storage/contract_test.go",
         "target": "internal/storage/contract_test.go",
         "class": "test",
-        "sha256": "e3d2e8cfd91a737627b03556c78f64bc9eb620c94ed6a07e329ac2f04831bcf1",
+        "sha256": "f18d52901f8133a798774cc228813ebb632566fe0de105b2d2928a835b8e0f0e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/storage/mock.go",
+        "target": "internal/storage/mock.go",
+        "class": "go",
+        "sha256": "49973616415cf04fbaf38d2db553a2fae7e637e9f044a3e58c0a42a93541d40d",
         "rewrite_module": true,
         "contract": false
       },

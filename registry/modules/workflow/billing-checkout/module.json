@@ -4,7 +4,7 @@
     "id": "ggg/workflow/billing-checkout",
     "kind": "workflow",
     "name": "billing-checkout",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Checkout and billing portal",
     "description": "Starts a Polar checkout, opens the hosted billing portal, and serves the polled plan-card fragment that settles the post-checkout success race.",
@@ -64,6 +64,10 @@
         {
           "module": "github.com/jackc/pgx/v5",
           "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
       "tools": [],
@@ -83,6 +87,14 @@
         "target": "internal/web/workflow_billing_checkout.go",
         "class": "go",
         "sha256": "39e9c344c263dc5f851283c7880cb2f01fd21a7eacd4a67fb4ec9fcaa33ca1bc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/workflow_billing_checkout_test.go",
+        "target": "internal/web/workflow_billing_checkout_test.go",
+        "class": "test",
+        "sha256": "69a42064b3c801d750f70909412f49210bc6fd35e973cdeacee80f6da34a99da",
         "rewrite_module": true,
         "contract": false
       }

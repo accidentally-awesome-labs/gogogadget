@@ -90,3 +90,61 @@ func TestValidateCoreCLIPackagesWithoutAdapters(t *testing.T) {
 		t.Fatalf("unexpected refusal %v", err)
 	}
 }
+
+// ownedManifest is a module owning one payload target.
+func ownedManifest(id, target string) Manifest {
+	return Manifest{ID: id, Files: []ManifestFile{{Source: target, Target: target, Class: "test"}}}
+}
+
+// The general rule: a payload may import an adapter package only if its own
+// module is that adapter's module. Measured across the whole installed graph
+// at the time it landed, this refuses nothing — 0 false positives — because
+// every payload that named an adapter was migrated onto a seam double first.
+func TestValidatePayloadAdapterImports(t *testing.T) {
+	clerk := adapterManifest("ggg/system/identity-clerk", "internal/identity/clerk")
+	clerk.Files = []ManifestFile{{Source: "internal/web/clerk_test.go", Target: "internal/web/clerk_test.go", Class: "test"}}
+	modules := []Manifest{
+		clerk,
+		adapterManifest("ggg/system/identity-dev", "internal/identity/devadapter"),
+		ownedManifest("ggg/system/server", "internal/web/testhelpers_test.go"),
+	}
+
+	for name, tc := range map[string]struct {
+		target, source string
+		refused        bool
+	}{
+		"consumer payload importing an adapter refused": {
+			target:  "internal/web/testhelpers_test.go",
+			source:  "package web\n\nimport identitydev \"m/internal/identity/devadapter\"\n",
+			refused: true,
+		},
+		"consumer payload on the seam double accepted": {
+			target: "internal/web/testhelpers_test.go",
+			source: "package web\n\nimport \"m/internal/identity\"\n",
+		},
+		"adapter's own payload in another directory accepted": {
+			target: "internal/web/clerk_test.go",
+			source: "package web\n\nimport identityclerk \"m/internal/identity/clerk\"\n",
+		},
+		"generated output is not a payload": {
+			target: "internal/modules/bootstrap_registry_gen.go",
+			source: "package modules\n\nimport _ \"m/internal/identity/clerk\"\n",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			err := ValidatePayloadAdapterImports(modules, map[string][]byte{tc.target: []byte(tc.source)})
+			if tc.refused {
+				if err == nil {
+					t.Fatal("adapter import accepted")
+				}
+				if !strings.Contains(err.Error(), "per-environment provider selection") {
+					t.Fatalf("refusal must state why: %v", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected refusal %v", err)
+			}
+		})
+	}
+}

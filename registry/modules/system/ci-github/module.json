@@ -35,7 +35,7 @@
         "source": ".github/workflows/ci.yml",
         "target": ".github/workflows/ci.yml",
         "class": "asset",
-        "sha256": "56ea04f0708e17c0e8f272d188713511fc7ed0e0ee018968daaacaa96143d4ae",
+        "sha256": "89b31244115aea891d3846fefd93be119faab0282a12fa24cfa21c086470edbb",
         "rewrite_module": false,
         "contract": false
       }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"log/slog"
-	"sync"
 	"testing"
 	"time"
 
@@ -16,34 +15,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// captureSender records what would have been delivered. The digest is the one
-// email the worker renders itself, so the assertions are about content and
-// recipients, not just "a job ran".
-type captureSender struct {
-	mu   sync.Mutex
-	sent []mail.Message
-	err  error
-}
-
-func (c *captureSender) Send(_ context.Context, m mail.Message) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if c.err != nil {
-		return c.err
-	}
-	c.sent = append(c.sent, m)
-	return nil
-}
-
-func (c *captureSender) to() []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	out := make([]string, 0, len(c.sent))
-	for _, m := range c.sent {
-		out = append(out, m.To)
-	}
-	return out
-}
+// The digest is the one email the worker renders itself, so the assertions
+// below are about content and recipients, not just "a job ran". They read
+// them off mail.MockSender, the seam's own double: this file used to carry a
+// copy of it, beside a filesystem adapter constructed in the same package.
 
 func digestWorker(t *testing.T, q *sqlc.Queries, sender mail.Sender) *Worker {
 	t.Helper()
@@ -77,7 +52,7 @@ func TestDigestSendsOnlyToDueUsersWithContent(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	cap := &captureSender{}
+	cap := &mail.MockSender{}
 	w := digestWorker(t, q, cap)
 
 	// never digested + has a notification → sends
@@ -94,7 +69,7 @@ func TestDigestSendsOnlyToDueUsersWithContent(t *testing.T) {
 
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 
-	assert.Equal(t, []string{"due@example.com"}, cap.to(),
+	assert.Equal(t, []string{"due@example.com"}, cap.Recipients(),
 		"only an opted-in, due user with something to report gets mail")
 
 	quiet := getUser(t, q, "u_quiet")
@@ -109,17 +84,17 @@ func TestDigestStampsAfterSendAndStopsRepeating(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	cap := &captureSender{}
+	cap := &mail.MockSender{}
 	w := digestWorker(t, q, cap)
 	seedDigestUser(t, pool, "u_once", "once@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_once", "First thing")
 
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
-	require.Len(t, cap.sent, 1)
+	require.Len(t, cap.Sent(), 1)
 
 	// Same pass again: the stamp makes the user no longer due.
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
-	assert.Len(t, cap.sent, 1, "a second pass must not re-send the same digest")
+	assert.Len(t, cap.Sent(), 1, "a second pass must not re-send the same digest")
 }
 
 // Delivery failure must leave the user due: the stamp is also the next
@@ -129,7 +104,7 @@ func TestDigestLeavesUserDueWhenSendFails(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	failing := &captureSender{err: assert.AnError}
+	failing := &mail.MockSender{Err: assert.AnError}
 	w := digestWorker(t, q, failing)
 	seedDigestUser(t, pool, "u_fail", "fail@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_fail", "Unsent")
@@ -146,7 +121,7 @@ func TestDigestWindowStartsAtLastSend(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	cap := &captureSender{}
+	cap := &mail.MockSender{}
 	w := digestWorker(t, q, cap)
 	seedDigestUser(t, pool, "u_win", "win@example.com", "daily", time.Now().Add(-48*time.Hour))
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_win", "Old news")
@@ -155,8 +130,8 @@ func TestDigestWindowStartsAtLastSend(t *testing.T) {
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_win", "Fresh news")
 
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
-	require.Len(t, cap.sent, 1)
-	body := cap.sent[0].Text + cap.sent[0].HTML
+	require.Len(t, cap.Sent(), 1)
+	body := cap.Sent()[0].Text + cap.Sent()[0].HTML
 	assert.Contains(t, body, "Fresh news")
 	assert.NotContains(t, body, "Old news", "content from before the last digest was already reported")
 }
@@ -166,14 +141,14 @@ func TestDigestEmailLinksAndContent(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	cap := &captureSender{}
+	cap := &mail.MockSender{}
 	w := digestWorker(t, q, cap)
 	seedDigestUser(t, pool, "u_link", "link@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_link", "Export ready")
 
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
-	require.Len(t, cap.sent, 1)
-	m := cap.sent[0]
+	require.Len(t, cap.Sent(), 1)
+	m := cap.Sent()[0]
 	assert.NotEmpty(t, m.Subject)
 	assert.Contains(t, m.HTML, "https://app.example.test/app/files", "notification links are absolute in email")
 	assert.Contains(t, m.HTML, "/app/settings/notifications", "every digest carries the way to turn it off")
@@ -212,7 +187,7 @@ func TestDigestSpeaksTheUsersLanguage(t *testing.T) {
 	ctx := context.Background()
 	clearDigestFixtures(t, pool)
 
-	cap := &captureSender{}
+	cap := &mail.MockSender{}
 	w := digestWorker(t, q, cap)
 	seedDigestUser(t, pool, "u_es", "es@example.com", "daily", nil)
 	seedDigestUser(t, pool, "u_en", "en@example.com", "daily", nil)
@@ -222,10 +197,10 @@ func TestDigestSpeaksTheUsersLanguage(t *testing.T) {
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_en", "Export ready")
 
 	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
-	require.Len(t, cap.sent, 2)
+	require.Len(t, cap.Sent(), 2)
 
 	byTo := map[string]mail.Message{}
-	for _, m := range cap.sent {
+	for _, m := range cap.Sent() {
 		byTo[m.To] = m
 	}
 	assert.Equal(t, "Tu resumen de GoGoGadget", byTo["es@example.com"].Subject,

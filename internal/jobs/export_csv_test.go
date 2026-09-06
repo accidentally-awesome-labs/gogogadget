@@ -2,13 +2,11 @@ package jobs
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,9 +14,9 @@ import (
 func TestExportProjectsCSVJob(t *testing.T) {
 	pool, q := testSetup(t)
 	ctx := context.Background()
-	w := testWorker(q, t.TempDir())
-	dir := t.TempDir()
-	w.Storage = storagefs.NewDevStore(dir)
+	w := testWorker(q)
+	store := storage.NewMockStore()
+	w.Storage = store
 
 	_, err := pool.Exec(ctx, "INSERT INTO users (user_id, email, name, avatar_url) VALUES ('user_ex', 'ex@example.com', 'EX', '') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
@@ -44,8 +42,8 @@ func TestExportProjectsCSVJob(t *testing.T) {
 	assert.True(t, strings.HasSuffix(f.Key, ".csv"))
 	assert.NotEqual(t, "exports/org_ex/"+f.Filename, f.Key, "key must not be just the (second-granular) filename")
 
-	stored, err := os.ReadFile(filepath.Join(dir, f.Key))
-	require.NoError(t, err)
+	stored, ok := store.Object(f.Key)
+	require.True(t, ok, "the export object must be readable back at the key the row names")
 	assert.Contains(t, string(stored), "id,name,status,created_at")
 	assert.Contains(t, string(stored), "Alpha")
 	assert.Contains(t, string(stored), "Beta")

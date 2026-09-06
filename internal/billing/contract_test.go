@@ -12,17 +12,22 @@ import (
 )
 
 // TestMockClientContract runs the shared contract against the test double so
-// the mock can't drift from a real provider client's behavior. MockClient has
-// error hooks only for RevokeSubscription/IngestUsage (RevokeErr/IngestErr
-// fields), so those two provider-error cases are the declared omission set —
-// asserted, not logged, so a dropped hook fails this test instead of silently
-// shrinking the table.
+// the mock can't drift from a real provider client's behavior. MockClient now
+// has an error hook for every method (CheckoutErr, PortalErr, RevokeErr,
+// IngestErr), so the omission set is EMPTY and the whole provider-error half
+// of the table runs. The two that used to be omitted were the two production
+// 422 branches in internal/web/workflow_billing_checkout.go with no test at
+// all — the gap sat exactly where the injection hook was missing.
 func TestMockClientContract(t *testing.T) {
 	errBoom := errors.New("contract boom")
 	billingcontract.RunClient(t,
 		func(t *testing.T) billing.Client { return &billing.MockClient{} },
 		func(t *testing.T, method string) billing.Client {
 			switch method {
+			case "CreateCheckout":
+				return &billing.MockClient{CheckoutErr: errBoom}
+			case "CreatePortalSession":
+				return &billing.MockClient{PortalErr: errBoom}
 			case "RevokeSubscription":
 				return &billing.MockClient{RevokeErr: errBoom}
 			case "IngestUsage":
@@ -30,6 +35,5 @@ func TestMockClientContract(t *testing.T) {
 			default:
 				return nil // no error hook for this method
 			}
-		},
-		"CreateCheckout", "CreatePortalSession")
+		})
 }

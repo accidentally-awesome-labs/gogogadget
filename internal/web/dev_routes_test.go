@@ -1,14 +1,12 @@
 package web
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"testing"
 
-	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
-	identityclerk "github.com/gogogadget/gogogadget/internal/identity/clerk"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -140,8 +138,15 @@ func TestDevSurfaceIsCompletelyRegistered(t *testing.T) {
 
 // productionServer builds a Server from a configuration that actually passed
 // production validation, so the dev gate the tests below read is the value a
-// deployed binary computes rather than a literal the test chose. The identity
-// ports come from the real module constructor for the same reason.
+// deployed binary computes rather than a literal the test chose.
+//
+// The identity ports are the seam's HOSTED double, not a hosted adapter's
+// constructor. What the dev surface depends on is a property, not a vendor:
+// an adapter that cannot mint a synthetic session. Constructing
+// identity-clerk here pinned one production provider selection into a
+// payload of ggg/page/dev-gallery, which declares no identity requirement at
+// all and would stop compiling the moment a project selected any other
+// hosted adapter.
 //
 // The helper checks its own output before returning. A helper that quietly
 // handed back a dev-configured server would make every assertion below pass
@@ -168,20 +173,14 @@ func productionServer(t *testing.T) *Server {
 	require.True(t, cfg.Production(), "fixture must resolve to APP_ENV=production")
 	require.False(t, cfg.BoolValue("DEV_AUTH_BYPASS"), "fixture must not carry the dev bypass")
 
-	ident, err := identityclerk.NewModule(
-		context.Background(),
-		apphost.Map(env, cfg.Now(), "test"),
-		identityclerk.Deps{Config: &cfg},
-	)
-	require.NoError(t, err)
-	require.IsType(t, &identityclerk.Verifier{}, ident.Verifier,
-		"a production identity closure verifies against Clerk, not the fake")
+	hosted := identity.MockHostedVerifier{}
+	_, minting := any(hosted).(identity.SyntheticSessionMinter)
+	require.False(t, minting,
+		"a production identity closure offers no synthetic sessions, which is the whole property this fixture stands for")
 
 	s := integrationServer(t, func(d *Deps) {
 		d.Config = &cfg
-		d.Verifier = ident.Verifier
-		d.Fetcher = ident.Fetcher
-		d.IdentityDeleter = ident.Deleter
+		d.Verifier = hosted
 	})
 	require.True(t, s.cfg.Production(), "the built server must carry the production config")
 	require.False(t, s.devAuthBypass(), "the built server must have the dev gate closed")
@@ -405,8 +404,12 @@ func TestAppScenarioIssuesADevSession(t *testing.T) {
 
 	require.Equal(t, http.StatusSeeOther, code)
 	// Values, not Get: the CSRF cookie is always set, so reading only the first
-	// header would test which cookie happens to be written first.
-	assert.Contains(t, strings.Join(headers.Values("Set-Cookie"), " "), "e2e:user_demo:org_demo")
+	// header would test which cookie happens to be written first. The expected
+	// value is minted through the seam, so this asserts the handler used the
+	// selected adapter rather than a token shape spelled here.
+	prefix, err := identity.MockVerifier{}.MintSession("user_demo", "org_demo", "")
+	require.NoError(t, err)
+	assert.Contains(t, strings.Join(headers.Values("Set-Cookie"), " "), prefix)
 	assert.Equal(t, "/dev/scenarios/billing?session=retried", headers.Get("Location"))
 }
 
@@ -417,7 +420,8 @@ func TestPublicScenarioNeedsNoSession(t *testing.T) {
 	code, headers, body := serve(t, s, "GET", "/dev/scenarios/system-states", nil, nil)
 
 	require.Equal(t, http.StatusOK, code)
-	assert.NotContains(t, strings.Join(headers.Values("Set-Cookie"), " "), "e2e:")
+	assert.NotContains(t, strings.Join(headers.Values("Set-Cookie"), " "), sessionCookieName+"=",
+		"a public scenario must be handed no session cookie at all")
 	assert.Contains(t, body, "System states")
 }
 

@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// With the dev adapter selected, unsigned fixtures are trusted (the
+// With an unsigned adapter selected, unsigned fixtures are trusted (the
 // fresh-clone zero-account path) and no provider secret is consulted at all.
-// Never possible in production: the dev adapter is a development/test target
-// and DEV_AUTH_BYPASS is boot-refused there.
+// Never possible in production: the zero-account adapter is a
+// development/test target and DEV_AUTH_BYPASS is boot-refused there.
 //
 // The mirror-image case — a hosted adapter with no webhook secret refusing
 // the same delivery — belongs to the adapter, and is pinned by
@@ -23,11 +24,11 @@ func TestIdentityWebhookAcceptsUnsignedDevDelivery(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) { d.Config.Values["CLERK_WEBHOOK_SECRET"] = "" })
 	ctx := t.Context()
 
-	payload := userCreatedPayload("user_ns1", "ns1@example.com", "No Secret")
-	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, identityDelivery("msg_ns1"))
+	payload, headers := userCreatedDelivery("msg_ns1", "user_ns1", "ns1@example.com", "No Secret")
+	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, headers)
 	require.Equal(t, http.StatusOK, code)
 
-	mapping, err := s.q.GetIdentitySubject(ctx, sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_ns1"})
+	mapping, err := s.q.GetIdentitySubject(ctx, sqlc.GetIdentitySubjectParams{Provider: identity.MockProvider, Subject: "user_ns1"})
 	require.NoError(t, err)
 	u, err := s.q.GetUserByID(ctx, mapping.UserID)
 	require.NoError(t, err)

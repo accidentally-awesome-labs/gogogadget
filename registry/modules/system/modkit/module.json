@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 41,
+    "revision": 42,
     "contract": 5,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -164,7 +164,7 @@
         "source": "internal/gggcli/gate.go",
         "target": "internal/gggcli/gate.go",
         "class": "go",
-        "sha256": "ce1ed598a4d0cef04c0684a251c489316529c40f14c0df42e5fc6a292ed38219",
+        "sha256": "824dc88a1e583f423304c2de1f7f20aaccd14f93c428c8001cffb8a6e8e931be",
         "rewrite_module": true,
         "contract": false
       },
@@ -172,7 +172,7 @@
         "source": "internal/gggcli/gate_test.go",
         "target": "internal/gggcli/gate_test.go",
         "class": "test",
-        "sha256": "397fcdcf5253c601c9f4d0dec45170c247752377bab124d27567828402ff4d3c",
+        "sha256": "807ed7db323ec78d8c4462f89a21622db641316b69dfd9f3554ae1898ecdb831",
         "rewrite_module": true,
         "contract": false
       },
@@ -413,7 +413,7 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "fa417e0d3dbdaf75b914c869caad1c9d89b8b12f82a6f02bf661b4bdfa4d2a9c",
+        "sha256": "da09145815a7e3d0223554a985550d2577c1a48134b6ea9aa091a4eca6f5dd03",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -422,7 +422,7 @@
         "source": "internal/modkit/cli_scan.go",
         "target": "internal/modkit/cli_scan.go",
         "class": "go",
-        "sha256": "20bf2ecc4ceaaaaea8bbf3b24b58c3efad66ea8a3e6f651ce6a110b2fbbd908b",
+        "sha256": "867230ae95e8323a0a856587f994530cfdbeddaca6bbe33d5f2f101afb583b6d",
         "rewrite_module": true,
         "contract": true
       },
@@ -430,7 +430,7 @@
         "source": "internal/modkit/cli_scan_core_test.go",
         "target": "internal/modkit/cli_scan_core_test.go",
         "class": "test",
-        "sha256": "5d907ed5bd222378969a473fdaee47004b53fa7e5ffc0c1c6da89b390128fb6d",
+        "sha256": "6fccb4cb2dce417de1a5985dc35ba5aeac481e7d914bfafad85b9a8fc6063171",
         "rewrite_module": true,
         "contract": false
       },
@@ -749,7 +749,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "7478d01a0548c72f5d4d8104a4af2028f00890f7443e1257be2ba91877f7fe15",
+        "sha256": "e718e68dce0faf976efc4bcdca18253f04620beb81179b754a2f9d03b95d8bd9",
         "rewrite_module": true,
         "contract": true
       },

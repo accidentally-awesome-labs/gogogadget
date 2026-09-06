@@ -1,7 +1,6 @@
 package web
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -9,7 +8,6 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,9 +32,9 @@ func TestDevLoginSetsCookieAndRedirects(t *testing.T) {
 	require.NotEmpty(t, set, "dev login sets the synthetic session cookie")
 	code, _, _ = serve(t, s, "GET", "/app", nil, nil, &http.Cookie{Name: sessionCookieName, Value: set})
 	require.Equal(t, http.StatusOK, code)
-	_, err := s.q.GetIdentitySubject(t.Context(), sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_demo"})
+	_, err := s.q.GetIdentitySubject(t.Context(), sqlc.GetIdentitySubjectParams{Provider: identity.MockProvider, Subject: "user_demo"})
 	require.NoError(t, err)
-	_, err = s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: "dev", Subject: "org_demo"})
+	_, err = s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: identity.MockProvider, Subject: "org_demo"})
 	require.NoError(t, err)
 }
 
@@ -52,16 +50,15 @@ func TestDevSwitchOrgRewritesRole(t *testing.T) {
 			got = strings.SplitN(strings.TrimPrefix(c, "__session="), ";", 2)[0]
 		}
 	}
-	require.Equal(t, "e2e:user_sw:org_sw:org:member", got, "cookie rewritten with the target org + membership role")
+	want, mintErr := identity.MockVerifier{}.MintSession("user_sw", "org_sw", "org:member")
+	require.NoError(t, mintErr)
+	require.Equal(t, want, got, "cookie rewritten with the target org + membership role, minted through the selected adapter")
 }
 
-// nonMintingVerifier stands for any hosted identity adapter: it verifies the
-// tokens it issued and knows nothing about synthetic sessions.
-type nonMintingVerifier struct{}
-
-func (nonMintingVerifier) Verify(context.Context, string) (*identity.ProviderClaims, error) {
-	return nil, identity.ErrInvalidToken
-}
+// The stand-in for any hosted identity adapter is the seam's own
+// MockHostedVerifier: it verifies the tokens it issued and knows nothing
+// about synthetic sessions. It has to be a distinct type rather than a
+// flag, because whether an adapter can mint is a method-set property.
 
 // The zero-account dev surface depends on the identity adapter selected for
 // this environment being able to mint a synthetic session. That dependency
@@ -74,7 +71,7 @@ func (nonMintingVerifier) Verify(context.Context, string) (*identity.ProviderCla
 // /dev/login redirected to /app, /app bounced to /login, and nothing anywhere
 // said why. The failure has to be named.
 func TestDevLoginRefusesLoudlyWithoutASyntheticSessionMinter(t *testing.T) {
-	s := integrationServer(t, func(d *Deps) { d.Verifier = nonMintingVerifier{} })
+	s := integrationServer(t, func(d *Deps) { d.Verifier = identity.MockHostedVerifier{} })
 
 	code, hdr, body := serve(t, s, "GET", "/dev/login", nil, nil)
 	require.Equal(t, http.StatusServiceUnavailable, code,
@@ -91,8 +88,6 @@ func TestDevLoginRefusesLoudlyWithoutASyntheticSessionMinter(t *testing.T) {
 // The refusal is on the key, at config load, so a process that would have one
 // does not start at all — whatever the selected adapter can do.
 func TestSyntheticMinterDoesNotBypassTheProductionRefusal(t *testing.T) {
-	var _ identity.SyntheticSessionMinter = identitydev.Verifier{}
-
 	env := map[string]string{
 		"APP_ENV": "production", "APP_URL": "https://app.example.com",
 		"DATABASE_URL": "postgres://unused.example/production", "DEV_AUTH_BYPASS": "true",

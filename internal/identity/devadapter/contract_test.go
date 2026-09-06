@@ -120,6 +120,22 @@ func TestModuleNavigatorTracksTheBypass(t *testing.T) {
 	assert.ErrorIs(t, err, identity.ErrNoDestination)
 }
 
+// The optional synthetic-session port, asserted where the adapter that
+// implements it lives. This used to sit in internal/web's dev-session suite,
+// which is a payload of ggg/workflow/dev-session: a module that must NOT
+// name an adapter, because whether a synthetic minter exists is a property
+// of the adapter selected for one environment. The claim itself is about
+// this adapter, so it belongs here.
+func TestVerifierOffersSyntheticSessions(t *testing.T) {
+	var minter identity.SyntheticSessionMinter = Verifier{}
+	token, err := minter.MintSession("user_demo", "org_demo", "org:admin")
+	require.NoError(t, err)
+	claims, err := Verifier{}.Verify(context.Background(), token)
+	require.NoError(t, err)
+	assert.Equal(t, "user_demo", claims.UserSubject)
+	assert.Equal(t, "org:admin", claims.OrgRole)
+}
+
 func TestVerifierParsesE2ETokens(t *testing.T) {
 	v := Verifier{}
 	ctx := context.Background()

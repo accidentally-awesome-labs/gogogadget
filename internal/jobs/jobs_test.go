@@ -5,15 +5,12 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
-	maildev "github.com/gogogadget/gogogadget/internal/mail/dev"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -29,16 +26,21 @@ func testSetup(t *testing.T) (*pgxpool.Pool, *sqlc.Queries) {
 	return pool, q
 }
 
-func testWorker(q *sqlc.Queries, dir string) *Worker {
+// testWorker builds a worker on the mail seam's own double. It used to take
+// a directory, because the sender was the filesystem adapter and the tests
+// read delivered mail back off disk — an adapter is a per-environment
+// provider selection, and a worker test has no opinion about which one is
+// selected.
+func testWorker(q *sqlc.Queries) *Worker {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return NewWorker(q, maildev.NewDevSender(log, dir), log)
+	return NewWorker(q, &mail.MockSender{}, log)
 }
 
 func TestEnqueueProcessComplete(t *testing.T) {
 	_, q := testSetup(t)
 	ctx := context.Background()
-	dir := t.TempDir()
-	w := testWorker(q, dir)
+	sender := &mail.MockSender{}
+	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	require.NoError(t, EnqueueEmail(ctx, q, KindWelcome, mail.Message{
 		To: "new@example.com", Subject: "Welcome", HTML: "<h1>hi</h1>", Text: "hi",
@@ -53,13 +55,12 @@ func TestEnqueueProcessComplete(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, done)
 
-	// DevSender wrote the viewable HTML file.
-	matches, err := filepath.Glob(filepath.Join(dir, "*-new_example.com.html"))
-	require.NoError(t, err)
-	require.Len(t, matches, 1)
-	raw, err := os.ReadFile(matches[0])
-	require.NoError(t, err)
-	assert.Contains(t, string(raw), "<h1>hi</h1>")
+	// The sender received the rendered message, addressed and whole.
+	sent := sender.Sent()
+	require.Len(t, sent, 1)
+	assert.Equal(t, "new@example.com", sent[0].To)
+	assert.Equal(t, "Welcome", sent[0].Subject)
+	assert.Contains(t, sent[0].HTML, "<h1>hi</h1>")
 }
 
 // A poison job is a KNOWN kind whose handler keeps failing — a malformed payload
@@ -70,7 +71,7 @@ func TestEnqueueProcessComplete(t *testing.T) {
 func TestPoisonJobFailsWithBackoff(t *testing.T) {
 	pool, q := testSetup(t)
 	ctx := context.Background()
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 
 	// org_id is a string in EmailPayload, so a number fails to unmarshal.
 	require.NoError(t, Enqueue(ctx, q, KindWelcome, map[string]any{"org_id": 12345}))
@@ -98,7 +99,7 @@ func TestPoisonJobFailsWithBackoff(t *testing.T) {
 func TestDeadLetterAtMaxAttempts(t *testing.T) {
 	pool, q := testSetup(t)
 	ctx := context.Background()
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 
 	var deadLettered string
 	w.OnDeadLetter = func(kind string, err error) { deadLettered = kind }
@@ -142,8 +143,8 @@ func TestTrialEndingGuardSkipsNonTrialing(t *testing.T) {
 		_, _ = pool.Exec(context.Background(), `DELETE FROM users WHERE user_id = 'user_g'`)
 	}()
 
-	dir := t.TempDir()
-	w := testWorker(q, dir)
+	sender := &mail.MockSender{}
+	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, EnqueueAt(ctx, q, KindTrialEnding, EmailPayload{
 		To: "g@example.com", Subject: "trial", HTML: "x", Text: "x", OrgID: "org_g",
 	}, time.Time{}))
@@ -152,10 +153,8 @@ func TestTrialEndingGuardSkipsNonTrialing(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, done)
 
-	// Completed WITHOUT sending (no email file written).
-	matches, err := filepath.Glob(filepath.Join(dir, "*.html"))
-	require.NoError(t, err)
-	assert.Empty(t, matches)
+	// Completed WITHOUT sending.
+	assert.Empty(t, sender.Sent(), "a non-trialing subscription must send no trial-ending mail")
 }
 
 func TestSchedulerClaimsDueAndEnqueues(t *testing.T) {
@@ -163,7 +162,7 @@ func TestSchedulerClaimsDueAndEnqueues(t *testing.T) {
 	ctx := context.Background()
 	_, err := pool.Exec(ctx, "DELETE FROM schedules")
 	require.NoError(t, err)
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 
 	// Due now.
 	due, err := q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
@@ -320,7 +319,7 @@ func TestDunningEmailSkippedAfterRecovery(t *testing.T) {
 	require.NoError(t, err)
 	seedDunningSub(t, pool, "org_recovered", "active")
 
-	sender := &captureSender{}
+	sender := &mail.MockSender{}
 	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, EnqueueEmail(ctx, q, KindDunningFinal, mail.Message{
 		To: "a@example.com", Subject: "Final notice", HTML: "<p>x</p>", Text: "x",
@@ -329,7 +328,7 @@ func TestDunningEmailSkippedAfterRecovery(t *testing.T) {
 	done, err := w.ProcessOne(ctx)
 	require.NoError(t, err)
 	assert.True(t, done, "the job runs…")
-	assert.Empty(t, sender.sent, "…and sends nothing, because the payment recovered")
+	assert.Empty(t, sender.Sent(), "…and sends nothing, because the payment recovered")
 }
 
 func TestDunningEmailSentWhileStillPastDue(t *testing.T) {
@@ -339,7 +338,7 @@ func TestDunningEmailSentWhileStillPastDue(t *testing.T) {
 	require.NoError(t, err)
 	seedDunningSub(t, pool, "org_stillbad", "past_due")
 
-	sender := &captureSender{}
+	sender := &mail.MockSender{}
 	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, EnqueueEmail(ctx, q, KindDunningReminder, mail.Message{
 		To: "b@example.com", Subject: "Still failing", HTML: "<p>x</p>", Text: "x",
@@ -348,8 +347,8 @@ func TestDunningEmailSentWhileStillPastDue(t *testing.T) {
 	done, err := w.ProcessOne(ctx)
 	require.NoError(t, err)
 	require.True(t, done)
-	require.Len(t, sender.sent, 1)
-	assert.Equal(t, "b@example.com", sender.sent[0].To)
+	require.Len(t, sender.Sent(), 1)
+	assert.Equal(t, "b@example.com", sender.Sent()[0].To)
 }
 
 // The final notice also re-notifies in-app: the day-0 notification is a week
@@ -361,7 +360,7 @@ func TestFinalDunningNotifiesInApp(t *testing.T) {
 	require.NoError(t, err)
 	seedDunningSub(t, pool, "org_final", "past_due")
 
-	w := NewWorker(q, &captureSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	w := NewWorker(q, &mail.MockSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, EnqueueEmail(ctx, q, KindDunningFinal, mail.Message{
 		To: "c@example.com", Subject: "Final", HTML: "<p>x</p>", Text: "x",
 	}, "org_final", time.Time{}))
@@ -385,7 +384,7 @@ func TestDunningEmailSkippedWithoutSubscription(t *testing.T) {
 	_, err := pool.Exec(ctx, "DELETE FROM jobs")
 	require.NoError(t, err)
 
-	sender := &captureSender{}
+	sender := &mail.MockSender{}
 	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, EnqueueEmail(ctx, q, KindDunningReminder, mail.Message{
 		To: "d@example.com", Subject: "x", HTML: "<p>x</p>", Text: "x",
@@ -394,7 +393,7 @@ func TestDunningEmailSkippedWithoutSubscription(t *testing.T) {
 	done, err := w.ProcessOne(ctx)
 	require.NoError(t, err, "a missing subscription is a skip, not a failure")
 	assert.True(t, done)
-	assert.Empty(t, sender.sent)
+	assert.Empty(t, sender.Sent())
 }
 
 // A ticker alone put the first janitor sweep 24 hours after process start and
@@ -422,7 +421,7 @@ func TestJanitorRunsBeforeItsFirstTick(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	log := slog.New(slog.DiscardHandler)
-	go NewWorker(q, maildev.NewDevSender(log, t.TempDir()), log).Run(ctx)
+	go NewWorker(q, &mail.MockSender{}, log).Run(ctx)
 
 	deadline := time.Now().Add(10 * time.Second)
 	for countJobs(t, pool) >= before && time.Now().Before(deadline) {
@@ -449,7 +448,7 @@ func TestAPanickingHandlerFailsItsJobRatherThanTheProcess(t *testing.T) {
 	defer pool.Close()
 
 	log := slog.New(slog.DiscardHandler)
-	w := NewWorker(q, maildev.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(q, &mail.MockSender{}, log)
 	w.definitions["test.panic"] = Define("test.panic", false, 2,
 		func(context.Context, struct{}) error { panic("handler exploded") })
 
@@ -482,7 +481,7 @@ func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
 	// A Queries with no pool behind it: every statement it runs dereferences
 	// nil. Constructible, and therefore reachable - the constructor can only
 	// check that the dependency is present, not that it can talk to Postgres.
-	w := NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(&sqlc.Queries{}, &mail.MockSender{}, log)
 
 	assert.NotPanics(t, func() {
 		assert.Zero(t, w.pass(t.Context()),
@@ -495,7 +494,7 @@ func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
 // the guard it was a race between the first claim and the cancel.
 func TestRunSurvivesAnUnusableQueueUntilTheContextEnds(t *testing.T) {
 	log := slog.New(slog.DiscardHandler)
-	w := NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(&sqlc.Queries{}, &mail.MockSender{}, log)
 	w.poll = time.Millisecond
 
 	ctx, cancel := context.WithCancel(t.Context())

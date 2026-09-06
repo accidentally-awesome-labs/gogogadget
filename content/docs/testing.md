@@ -114,6 +114,14 @@ wrapper that execs `scripts/visual-run.sh compare`, the harness described
 under **Visual** below — never a plain `playwright test`, because baselines
 only match inside the pinned container.
 
+One rule cuts across every layer: **a test payload never names an adapter
+package.** A seam ships its own double — `identity.MockVerifier`,
+`mail.MockSender`, `storage.NewMockStore()`, `billing.MockClient`,
+`ratelimit.NewMockLimiter` — and tests hold that, because an adapter is a
+per-environment provider selection that no `requires` can express.
+`ggg sync` refuses a plan that breaks it. See
+[Extending → A seam ships its own test double](/docs/extending#a-seam-ships-its-own-test-double).
+
 ## What a derivative runs {#what-a-derivative-runs}
 
 `ggg check` is the same gate in your project as it is in this repository, with

@@ -927,6 +927,59 @@ is a module like any other:
 Publishing that adapter to other projects, rather than keeping it local, is
 the next section.
 
+### A seam ships its own test double
+
+**Rule: a test payload never names an adapter package.** If your module's
+tests need a `mail.Sender`, they use `mail.MockSender`, not
+`internal/mail/dev`. Every seam ships one:
+
+| Seam | Double |
+|---|---|
+| `internal/identity` | `MockVerifier` (+ `MintSession`), `MockHostedVerifier`, `MockUserFetcher`, `MockDeleter`, `MockNavigator`, `MockWebhook` + `MockDelivery` |
+| `internal/mail` | `MockSender` (`Sent()`, `Recipients()`, `Err`) |
+| `internal/storage` | `NewMockStore()` (`Keys()`, `Object()`, `PutErr`, `DeleteErr`) |
+| `internal/billing` | `MockClient` (`CheckoutErr`/`PortalErr`/`RevokeErr`/`IngestErr`), `MockWebhook` + `MockDelivery` |
+| `internal/ratelimit` | `NewMockLimiter(perMinute, burst)` |
+| `internal/observability` | `NoopReporter` |
+| `internal/analytics` | `NoopCapturer` |
+| `internal/realtime` | `NewMemory()` |
+| `internal/search` | `NewMemory()` |
+
+Why it is a rule and not a preference: `requires` names **modules**, but an
+adapter is a per-environment provider **selection**. A payload that
+constructs `identitydev.Verifier{}` compiles only while
+`providers.identity.test` is `ggg/system/identity-dev`, and that constraint
+cannot be written anywhere in the manifest vocabulary — so the dependency is
+not merely undeclared, it is *undeclarable*. `ggg sync` installs those bytes
+into every project, including ones that select a hosted adapter for tests.
+`modkit.ValidatePayloadAdapterImports` refuses the plan: a payload owned by
+module M may import an adapter package only if M is that adapter's module.
+An adapter's own payloads are exempt, including ones it installs elsewhere
+(`ggg/system/billing-local` owns `internal/web/billing_local_test.go`).
+
+So when you write an adapter (step 2 above), add or extend the **seam's**
+double if consumers will need one, and hold it to the same contract table the
+adapters run. Three practical rules:
+
+- **A working double, not a stub.** Record the calls and take injectable
+  errors, so a consumer can assert both the happy path and the refusal —
+  `MockClient.CheckoutErr` exists because two production 422 branches had no
+  test until the hook did.
+- **Own both directions of a wire format.** `identity.MockDelivery` and
+  `billing.MockDelivery` encode a delivery the double accepts, so a fixture
+  is a typed event rather than hand-written JSON. This is the one coupling
+  the import scan cannot see: a payload can inline an adapter's envelope
+  while importing nothing, and `internal/web/identity_webhook_test.go` did
+  exactly that for a release.
+- **Never spell another module's grammar.** The synthetic session token is
+  written in exactly one place, `internal/identity/devadapter`; a consumer
+  mints through `identity.SyntheticSessionMinter` (`MintSession`) and the
+  seam double has its own grammar for the same reason.
+
+The `contract` packages are harnesses, not doubles: `identity/contract`,
+`mail/contract`, `storage/contract` and `billing/contract` all require a
+caller-supplied implementation, which is what they exist to exercise.
+
 Two slots are worth knowing about before you start: `internal/identity` and
 `internal/billing` still hold their webhook parsers (and therefore the Clerk
 SDK, `svix` and `standard-webhooks`) in the **seam** package rather than in

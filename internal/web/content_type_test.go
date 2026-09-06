@@ -7,12 +7,10 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -170,10 +168,13 @@ func TestInvalidTypeDeclarationIsRefused(t *testing.T) {
 		Config: &config.Config{Env: "test", AppURL: "http://localhost:18080"},
 		Log:    testLogger(), Docs: &content.Docs{},
 		ContentTypes: []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}},
-		Verifier:     identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
-		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
-		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
-		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		// Values of the right type and nothing more: the assertion is the
+		// content-type refusal, so every capability here is a seam-owned
+		// double whose behaviour nothing below reads.
+		Verifier: identity.MockVerifier{}, Fetcher: identity.MockUserFetcher{},
+		IdentityDeleter: &identity.MockDeleter{}, IdentityNavigator: identity.MockNavigator{},
+		IdentityWebhook: identity.MockWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billing.MockWebhook{},
 		SessionLoader: testSessionLoader{},
 	})
 	if err == nil {

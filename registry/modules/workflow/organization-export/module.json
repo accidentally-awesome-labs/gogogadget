@@ -4,7 +4,7 @@
     "id": "ggg/workflow/organization-export",
     "kind": "workflow",
     "name": "organization-export",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Organization data export",
     "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
@@ -86,7 +86,7 @@
         "source": "internal/jobs/export_org_test.go",
         "target": "internal/jobs/export_org_test.go",
         "class": "test",
-        "sha256": "50420f11a20654ef7635740bbd9c72bbeb21f7b4afb3efb01a87a00a353464a6",
+        "sha256": "75fe2bbdce6646f3c7f405cebdd3fa653e8e452bb316dbe2bafa452a5ef2d790",
         "rewrite_module": true,
         "contract": false
       },

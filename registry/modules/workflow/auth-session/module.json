@@ -4,7 +4,7 @@
     "id": "ggg/workflow/auth-session",
     "kind": "workflow",
     "name": "auth-session",
-    "revision": 11,
+    "revision": 12,
     "contract": 1,
     "title": "Sign-in, sign-up and sign-out",
     "description": "Redirects the hosted Clerk Account Portal flows for sign-in, sign-up and sign-out, and owns the session cookie clear plus the account-portal link builder the settings pages use.",
@@ -86,7 +86,7 @@
         "source": "internal/web/auth_test.go",
         "target": "internal/web/auth_test.go",
         "class": "test",
-        "sha256": "6fc92266c9ddd35fd89db40015e3c48adca2ae8660846550544631cf4519cbf2",
+        "sha256": "79a508319ed9e2077ebc095f23f1d88497f2ac39743384007d5b6f72a7d093d0",
         "rewrite_module": true,
         "contract": false
       },

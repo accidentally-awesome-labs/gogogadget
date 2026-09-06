@@ -4,7 +4,7 @@
     "id": "ggg/system/usage",
     "kind": "system",
     "name": "usage",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Usage metering",
     "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
@@ -59,7 +59,7 @@
         "source": "internal/jobs/usage_flush_test.go",
         "target": "internal/jobs/usage_flush_test.go",
         "class": "test",
-        "sha256": "87a5406d21bdb98a8a3be4837160ccfd933f60e4054908b74f424fd045bfeda3",
+        "sha256": "01b5ccf1b3893e686e93fa276505e253f646670598bb0fc10edd1918342d0af1",
         "rewrite_module": true,
         "contract": false
       },

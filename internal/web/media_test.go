@@ -7,13 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,13 +29,15 @@ var onePixelPNG = []byte{
 	0x00, 0x00, 0x00, 0x00, 'I', 'E', 'N', 'D', 0xae, 0x42, 0x60, 0x82,
 }
 
-// mediaServer stores uploads in a temp directory so the test can assert that
-// a rejected upload leaves nothing behind.
-func mediaServer(t *testing.T, id string) (*Server, *http.Cookie, string) {
+// mediaServer stores uploads in the storage seam's own in-memory double, and
+// hands it back so the test can assert what the store holds. "A rejected
+// upload leaves nothing behind" is a claim about the STORE; walking a temp
+// directory could only make it about one adapter's layout.
+func mediaServer(t *testing.T, id string) (*Server, *http.Cookie, *storage.MockStore) {
 	t.Helper()
-	root := t.TempDir()
-	s := integrationServer(t, func(d *Deps) { d.Storage = storagefs.NewDevStore(root) })
-	return s, staffUser(t, s, "user_"+id, "org_"+id, identity.RoleAdmin), root
+	store := storage.NewMockStore()
+	s := integrationServer(t, func(d *Deps) { d.Storage = store })
+	return s, staffUser(t, s, "user_"+id, "org_"+id, identity.RoleAdmin), store
 }
 
 // listAllMedia is the "give me everything" page for assertions.
@@ -106,7 +106,7 @@ func TestMediaUploadServesInline(t *testing.T) {
 // The client's part header is a claim, not evidence. HTML renamed .png and
 // declared image/png must be refused, with no row and no object left behind.
 func TestMediaUploadRejectsSniffedNonImage(t *testing.T) {
-	s, admin, root := mediaServer(t, "media2")
+	s, admin, store := mediaServer(t, "media2")
 	evil := []byte("<!DOCTYPE html><html><body><script>alert(1)</script></body></html>")
 
 	code, body := uploadFile(t, s, "/admin/media", "file", "evil.png", "image/png", evil, admin)
@@ -117,18 +117,11 @@ func TestMediaUploadRejectsSniffedNonImage(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, items, "a rejected upload leaves no row")
 
-	var stored []string
-	_ = filepath.Walk(filepath.Join(root, "content"), func(p string, info os.FileInfo, err error) error {
-		if err == nil && info != nil && !info.IsDir() {
-			stored = append(stored, p)
-		}
-		return nil
-	})
-	assert.Empty(t, stored, "a rejected upload leaves no object")
+	assert.Empty(t, store.Keys(), "a rejected upload leaves no object")
 }
 
 func TestMediaDeleteRemovesRowAndObject(t *testing.T) {
-	s, admin, root := mediaServer(t, "media3")
+	s, admin, store := mediaServer(t, "media3")
 	code, _ := uploadFile(t, s, "/admin/media", "file", "gone.png", "image/png", onePixelPNG, admin)
 	require.Equal(t, http.StatusOK, code)
 
@@ -136,6 +129,7 @@ func TestMediaDeleteRemovesRowAndObject(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, items, 1)
 	m := items[0]
+	require.Equal(t, []string{m.StorageKey}, store.Keys(), "the upload landed at the key the row names")
 
 	code, _, _ = postFormMedia(t, s, fmt.Sprintf("/admin/media/%d/delete", m.ID), admin)
 	require.Equal(t, http.StatusOK, code)
@@ -143,8 +137,8 @@ func TestMediaDeleteRemovesRowAndObject(t *testing.T) {
 	items, err = s.q.ListMedia(t.Context(), listAllMedia())
 	require.NoError(t, err)
 	assert.Empty(t, items)
-	_, statErr := os.Stat(filepath.Join(root, m.StorageKey))
-	assert.True(t, os.IsNotExist(statErr), "the object goes with the row")
+	_, stored := store.Object(m.StorageKey)
+	assert.False(t, stored, "the object goes with the row")
 
 	code, _, _ = serve(t, s, "GET", fmt.Sprintf("/media/%d/gone.png", m.ID), nil, nil)
 	assert.Equal(t, http.StatusNotFound, code)

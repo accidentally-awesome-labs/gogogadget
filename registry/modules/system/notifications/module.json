@@ -4,7 +4,7 @@
     "id": "ggg/system/notifications",
     "kind": "system",
     "name": "notifications",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "In-app notifications",
     "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
@@ -83,7 +83,7 @@
         "source": "internal/jobs/digest_test.go",
         "target": "internal/jobs/digest_test.go",
         "class": "test",
-        "sha256": "76f3f2047b4cf22f9876d92ddb03d19cdf597927441b14841af20981da4b0d50",
+        "sha256": "4e9887ee900375d1f4d0c1700ef45c5fa3aa6d9e1840750bed8134aa7aaebed0",
         "rewrite_module": true,
         "contract": false
       },

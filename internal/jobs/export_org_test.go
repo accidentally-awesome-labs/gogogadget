@@ -13,7 +13,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -57,7 +57,7 @@ func seedExportOrg(t *testing.T, pool poolExec, q *sqlc.Queries, orgID string) {
 func exportWorker(t *testing.T, q *sqlc.Queries, sender mail.Sender) *Worker {
 	t.Helper()
 	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	w.Storage = storagefs.NewDevStore(t.TempDir())
+	w.Storage = storage.NewMockStore()
 	return w
 }
 
@@ -67,7 +67,7 @@ func TestOrgExportContainsEveryCollection(t *testing.T) {
 	orgID := "org_exp1"
 	seedExportOrg(t, pool, q, orgID)
 
-	w := exportWorker(t, q, &captureSender{})
+	w := exportWorker(t, q, &mail.MockSender{})
 	out, err := w.collectOrgExport(ctx, orgID)
 	require.NoError(t, err)
 
@@ -95,7 +95,7 @@ func TestOrgExportNeverLeaksSecrets(t *testing.T) {
 	orgID := "org_exp2"
 	seedExportOrg(t, pool, q, orgID)
 
-	w := exportWorker(t, q, &captureSender{})
+	w := exportWorker(t, q, &mail.MockSender{})
 	out, err := w.collectOrgExport(ctx, orgID)
 	require.NoError(t, err)
 
@@ -122,7 +122,7 @@ func TestOrgExportIsScopedToOneOrg(t *testing.T) {
 	_, err = pool.Exec(ctx, `INSERT INTO projects (org_id, name) VALUES ('org_other', 'Not yours')`)
 	require.NoError(t, err)
 
-	w := exportWorker(t, q, &captureSender{})
+	w := exportWorker(t, q, &mail.MockSender{})
 	out, err := w.collectOrgExport(ctx, "org_exp3")
 	require.NoError(t, err)
 
@@ -138,7 +138,7 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 	orgID := "org_exp4"
 	seedExportOrg(t, pool, q, orgID)
 
-	w := exportWorker(t, q, &captureSender{})
+	w := exportWorker(t, q, &mail.MockSender{})
 	payload := ExportProjectsPayload{OrgID: orgID, UserID: "user_exp"}
 	require.NoError(t, w.exportOrgJSON(ctx, payload))
 
@@ -176,7 +176,7 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 // A storage failure must not leave a files row pointing at nothing.
 func TestOrgExportJobFailsLoudlyWithoutStorage(t *testing.T) {
 	_, q := testdb.Open(t, "jobsexport")
-	w := NewWorker(q, &captureSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	w := NewWorker(q, &mail.MockSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	payload := ExportProjectsPayload{OrgID: "org_exp5", UserID: "user_exp"}
 	err := w.exportOrgJSON(context.Background(), payload)
 	require.Error(t, err, "no storage configured is a job failure, not a silent no-op")

@@ -4,7 +4,7 @@
     "id": "ggg/workflow/identity-webhook-sync",
     "kind": "workflow",
     "name": "identity-webhook-sync",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Identity provider sync",
     "description": "Receives Clerk user and organization events and mirrors them into the local tables.",
@@ -58,7 +58,7 @@
         "source": "internal/web/identity_webhook_test.go",
         "target": "internal/web/identity_webhook_test.go",
         "class": "test",
-        "sha256": "1630614a0b85890bb2e25fc01cd1c90907732cc609996c5235c82a89858c23f2",
+        "sha256": "9d0e1ed3c446a6f86e3800602444725e017b76feec434fcc535e31093d3cd8c6",
         "rewrite_module": true,
         "contract": false
       },
@@ -66,7 +66,7 @@
         "source": "internal/web/webhook_bypass_test.go",
         "target": "internal/web/webhook_bypass_test.go",
         "class": "test",
-        "sha256": "070b356d35fa2f73390e263c1d08906ba01ff165f61a4d8742a226c12dab5b66",
+        "sha256": "a354f2a1dd49f4d8e8be1bf434b58e24fd0a9cd176c8f8545184a81280189fd6",
         "rewrite_module": true,
         "contract": false
       }
@@ -102,15 +102,15 @@
     "locales": {
       "en": {
         "email.welcome.body": "Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.",
-        "email.welcome.cta": "Open your dashboard →",
+        "email.welcome.cta": "Open your dashboard \u2192",
         "email.welcome.subject": "Welcome to GoGoGadget",
         "email.welcome.title": "Welcome aboard%s!"
       },
       "es": {
-        "email.welcome.body": "Tu espacio de trabajo está listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
-        "email.welcome.cta": "Abre tu panel →",
+        "email.welcome.body": "Tu espacio de trabajo est\u00e1 listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
+        "email.welcome.cta": "Abre tu panel \u2192",
         "email.welcome.subject": "Te damos la bienvenida a GoGoGadget",
-        "email.welcome.title": "¡Bienvenido a bordo%s!"
+        "email.welcome.title": "\u00a1Bienvenido a bordo%s!"
       }
     },
     "docs": [],

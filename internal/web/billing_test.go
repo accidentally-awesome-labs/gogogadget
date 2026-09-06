@@ -9,57 +9,56 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
-	billingpolar "github.com/gogogadget/gogogadget/internal/billing/polar"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
-	standardwebhooks "github.com/standard-webhooks/standard-webhooks/libraries/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const testPolarWebhookSecret = "0123456789abcdef0123456789abcdef"
+// The receiver at /webhooks/polar is provider-neutral: it records
+// idempotency on the delivery id and runs the subscription state machine on
+// a neutral event. These fixtures are neutral too — a typed
+// billing.SubscriptionEvent encoded by the seam's own double.
+//
+// They used to be Polar's JSON payload signed with the standard-webhooks
+// library, which put a hosted adapter inside a payload of
+// ggg/page/settings-billing: a per-environment provider selection pinned
+// into a suite that has no opinion about which provider is selected, and
+// which used the seam's own MockClient two hundred lines further down.
+// Polar's signature verification and payload shape are pinned by
+// billing/polar's own contract suite.
 
-// signStandard emits webhook-* headers using the raw secret format Polar
-// supplies through its dashboard and local CLI.
-func signStandard(t *testing.T, secret, msgID string, payload []byte) http.Header {
+func subEvent(eventType, subID, orgID, productID, status string, periodEnd time.Time) billing.SubscriptionEvent {
+	return billing.SubscriptionEvent{
+		Type: eventType, OrgIDHint: orgID,
+		ProviderSubscriptionID: subID, ProviderCustomerID: "cust_1",
+		ProviderProductID: productID, Status: status,
+		CurrentPeriodEnd: periodEnd,
+	}
+}
+
+// deliverBilling posts one event to the receiver and returns its status. The
+// delivery id is explicit at every call site because idempotency is what
+// half these tests are about: the same id is a replay, a new id with the
+// same event is a provider retry.
+func deliverBilling(t *testing.T, s *Server, deliveryID string, event billing.SubscriptionEvent) int {
 	t.Helper()
-	wh, err := standardwebhooks.NewWebhookRaw([]byte(secret))
-	if err != nil {
-		t.Fatal(err)
-	}
-	now := time.Now()
-	sig, err := wh.Sign(msgID, now, payload)
-	if err != nil {
-		t.Fatal(err)
-	}
-	h := http.Header{}
-	h.Set("webhook-id", msgID)
-	h.Set("webhook-timestamp", fmt.Sprint(now.Unix()))
-	h.Set("webhook-signature", sig)
-	return h
+	payload, headers, err := billing.MockDelivery(deliveryID, event)
+	require.NoError(t, err)
+	code, _, _ := serve(t, s, "POST", "/webhooks/polar", payload, headers)
+	return code
 }
 
-func subPayload(eventType, subID, orgID, productID, status string, periodEnd time.Time) []byte {
-	return []byte(fmt.Sprintf(`{
-	  "type": %q,
-	  "data": {
-	    "id": %q, "status": %q, "product_id": %q, "customer_id": "cust_1",
-	    "current_period_end": %q, "cancel_at_period_end": false,
-	    "customer": {"external_id": %q}, "metadata": {"org_id": %q}
-	  }
-	}`, eventType, subID, status, productID, periodEnd.Format(time.RFC3339), orgID, orgID))
-}
-
-func polarServer(t *testing.T, mutate func(*Deps)) *Server {
+// billingWebhookServer selects the seam's webhook double and maps the two
+// paid plans onto product ids, which is what the receiver reads to resolve a
+// plan key.
+func billingWebhookServer(t *testing.T, mutate func(*Deps)) *Server {
 	t.Helper()
 	return integrationServer(t, func(d *Deps) {
-		d.Config.Values["POLAR_ACCESS_TOKEN"] = "polar_test"
-		d.Config.Values["POLAR_WEBHOOK_SECRET"] = testPolarWebhookSecret
-		d.Config.Values["POLAR_SERVER"] = "sandbox"
 		plans := billing.DefaultPlanCatalog().All()
 		plans[1].ProviderProductID, plans[2].ProviderProductID = "prod_pro", "prod_team"
 		d.BillingCatalog, _ = billing.NewPlanCatalog(plans)
-		d.BillingWebhook = billingpolar.Webhook{Secret: testPolarWebhookSecret}
+		d.BillingWebhook = billing.MockWebhook{}
 		if mutate != nil {
 			mutate(d)
 		}
@@ -67,13 +66,12 @@ func polarServer(t *testing.T, mutate func(*Deps)) *Server {
 }
 
 func TestPolarWebhookReplay(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_pb", "org_pb", "org:admin")
-	payload := subPayload("subscription.created", "sub_pb1", "org_pb", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
+	created := subEvent("subscription.created", "sub_pb1", "org_pb", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
 
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", payload, signStandard(t, testPolarWebhookSecret, "msg_pb1", payload))
-	assert.Equal(t, http.StatusOK, code)
+	assert.Equal(t, http.StatusOK, deliverBilling(t, s, "msg_pb1", created))
 
 	sub, err := s.q.GetSubscriptionByOrg(ctx, "org_pb")
 	require.NoError(t, err)
@@ -81,33 +79,30 @@ func TestPolarWebhookReplay(t *testing.T) {
 	assert.Equal(t, "pro", sub.ProductKey)
 	assert.Equal(t, "sub_pb1", sub.ProviderSubscriptionID.String)
 
-	// Replay: 200, no duplicate write (row count stays 1).
-	code, _, _ = serve(t, s, "POST", "/webhooks/polar", payload, signStandard(t, testPolarWebhookSecret, "msg_pb1", payload))
-	assert.Equal(t, http.StatusOK, code)
+	// Replay: same delivery id → 200, no duplicate write (row count stays 1).
+	assert.Equal(t, http.StatusOK, deliverBilling(t, s, "msg_pb1", created))
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM subscriptions WHERE org_id='org_pb'`).Scan(&n))
 	assert.Equal(t, 1, n)
 }
 
 func TestPolarWebhookOneShotCancelEmail(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_oc", "org_oc", "org:admin")
 	t.Cleanup(func() {
 		_, _ = s.db.Exec(context.Background(), "DELETE FROM jobs WHERE kind='email.subscription_canceled'")
 	})
 
-	created := subPayload("subscription.created", "sub_oc", "org_oc", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", created, signStandard(t, testPolarWebhookSecret, "msg_oc1", created))
+	deliverBilling(t, s, "msg_oc1", subEvent("subscription.created", "sub_oc", "org_oc", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
 
-	canceled := subPayload("subscription.canceled", "sub_oc", "org_oc", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour))
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_oc2", canceled))
-	require.Equal(t, http.StatusOK, code)
+	canceled := subEvent("subscription.canceled", "sub_oc", "org_oc", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour))
+	require.Equal(t, http.StatusOK, deliverBilling(t, s, "msg_oc2", canceled))
 
-	// Deliver the same event TWICE more with NEW message ids (provider retry
+	// Deliver the same event TWICE more with NEW delivery ids (provider retry
 	// semantics): the email must still be sent exactly once.
-	serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_oc3", canceled))
-	serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_oc4", canceled))
+	deliverBilling(t, s, "msg_oc3", canceled)
+	deliverBilling(t, s, "msg_oc4", canceled)
 
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM jobs WHERE kind='email.subscription_canceled'`).Scan(&n))
@@ -115,18 +110,15 @@ func TestPolarWebhookOneShotCancelEmail(t *testing.T) {
 }
 
 func TestResubscribe(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_rs", "org_rs", "org:admin")
 
-	created := subPayload("subscription.created", "sub_rs1", "org_rs", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", created, signStandard(t, testPolarWebhookSecret, "msg_rs1", created))
-	canceled := subPayload("subscription.canceled", "sub_rs1", "org_rs", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_rs2", canceled))
+	deliverBilling(t, s, "msg_rs1", subEvent("subscription.created", "sub_rs1", "org_rs", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
+	deliverBilling(t, s, "msg_rs2", subEvent("subscription.canceled", "sub_rs1", "org_rs", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour)))
 
 	// Re-checkout arrives with a NEW provider_subscription_id → overwrites the row.
-	resub := subPayload("subscription.created", "sub_rs2", "org_rs", "prod_team", "active", time.Now().Add(30*24*time.Hour))
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", resub, signStandard(t, testPolarWebhookSecret, "msg_rs3", resub))
+	code := deliverBilling(t, s, "msg_rs3", subEvent("subscription.created", "sub_rs2", "org_rs", "prod_team", "active", time.Now().Add(30*24*time.Hour)))
 	require.Equal(t, http.StatusOK, code)
 
 	var n int
@@ -140,16 +132,14 @@ func TestResubscribe(t *testing.T) {
 }
 
 func TestRevokedMapsPayloadStatus(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_rv", "org_rv", "org:admin")
 
-	created := subPayload("subscription.created", "sub_rv", "org_rv", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", created, signStandard(t, testPolarWebhookSecret, "msg_rv1", created))
+	deliverBilling(t, s, "msg_rv1", subEvent("subscription.created", "sub_rv", "org_rv", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
 
-	// 'revoked' is an EVENT; the payload carries the stored status verbatim.
-	revoked := subPayload("subscription.revoked", "sub_rv", "org_rv", "prod_pro", "unpaid", time.Now().Add(30*24*time.Hour))
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", revoked, signStandard(t, testPolarWebhookSecret, "msg_rv2", revoked))
+	// 'revoked' is an EVENT; the event carries the stored status verbatim.
+	code := deliverBilling(t, s, "msg_rv2", subEvent("subscription.revoked", "sub_rv", "org_rv", "prod_pro", "unpaid", time.Now().Add(30*24*time.Hour)))
 	require.Equal(t, http.StatusOK, code)
 	sub, err := s.q.GetSubscriptionByOrg(ctx, "org_rv")
 	require.NoError(t, err)
@@ -157,20 +147,17 @@ func TestRevokedMapsPayloadStatus(t *testing.T) {
 }
 
 func TestUncanceledReactivates(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_uc", "org_uc", "org:admin")
 
-	created := subPayload("subscription.created", "sub_uc", "org_uc", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", created, signStandard(t, testPolarWebhookSecret, "msg_uc1", created))
-	canceled := subPayload("subscription.canceled", "sub_uc", "org_uc", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_uc2", canceled))
+	deliverBilling(t, s, "msg_uc1", subEvent("subscription.created", "sub_uc", "org_uc", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
+	deliverBilling(t, s, "msg_uc2", subEvent("subscription.canceled", "sub_uc", "org_uc", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour)))
 
 	sub, _ := s.q.GetSubscriptionByOrg(ctx, "org_uc")
 	assert.True(t, sub.CancelAtPeriodEnd)
 
-	uncanceled := subPayload("subscription.uncanceled", "sub_uc", "org_uc", "prod_pro", "active", time.Now().Add(15*24*time.Hour))
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", uncanceled, signStandard(t, testPolarWebhookSecret, "msg_uc3", uncanceled))
+	code := deliverBilling(t, s, "msg_uc3", subEvent("subscription.uncanceled", "sub_uc", "org_uc", "prod_pro", "active", time.Now().Add(15*24*time.Hour)))
 	require.Equal(t, http.StatusOK, code)
 
 	sub, err := s.q.GetSubscriptionByOrg(ctx, "org_uc")
@@ -184,32 +171,30 @@ func TestUncanceledReactivates(t *testing.T) {
 }
 
 func TestPastDueTransitionEmailsOnce(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_pd", "org_pd", "org:admin")
 	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM jobs WHERE kind='email.payment_failed'") })
 
-	created := subPayload("subscription.created", "sub_pd", "org_pd", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", created, signStandard(t, testPolarWebhookSecret, "msg_pd1", created))
+	deliverBilling(t, s, "msg_pd1", subEvent("subscription.created", "sub_pd", "org_pd", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
 
-	pastDue := subPayload("subscription.updated", "sub_pd", "org_pd", "prod_pro", "past_due", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", pastDue, signStandard(t, testPolarWebhookSecret, "msg_pd2", pastDue))
-	serve(t, s, "POST", "/webhooks/polar", pastDue, signStandard(t, testPolarWebhookSecret, "msg_pd3", pastDue))
+	pastDue := subEvent("subscription.updated", "sub_pd", "org_pd", "prod_pro", "past_due", time.Now().Add(30*24*time.Hour))
+	deliverBilling(t, s, "msg_pd2", pastDue)
+	deliverBilling(t, s, "msg_pd3", pastDue)
 
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM jobs WHERE kind='email.payment_failed'`).Scan(&n))
 	assert.Equal(t, 1, n, "payment-failed email fires only on the transition INTO past_due")
 
 	// Recovery → subscription.active clears the grace (cancel flag stays false).
-	active := subPayload("subscription.active", "sub_pd", "org_pd", "prod_pro", "active", time.Now().Add(30*24*time.Hour))
-	serve(t, s, "POST", "/webhooks/polar", active, signStandard(t, testPolarWebhookSecret, "msg_pd4", active))
+	deliverBilling(t, s, "msg_pd4", subEvent("subscription.active", "sub_pd", "org_pd", "prod_pro", "active", time.Now().Add(30*24*time.Hour)))
 	sub, _ := s.q.GetSubscriptionByOrg(ctx, "org_pd")
 	assert.Equal(t, "active", sub.Status)
 }
 
 func TestCheckoutHandlerMockClient(t *testing.T) {
 	mock := &billing.MockClient{}
-	s := polarServer(t, func(d *Deps) { d.Billing = mock })
+	s := billingWebhookServer(t, func(d *Deps) { d.Billing = mock })
 	seedMembership(t, s, "user_co", "org_co", "org:admin")
 
 	code, hdr, _ := postForm(t, s, "/app/billing/checkout", url.Values{"plan": {"pro"}}, sessionCookie("user_co", "org_co", "org:admin"))
@@ -225,7 +210,7 @@ func TestCheckoutHandlerMockClient(t *testing.T) {
 }
 
 func TestCheckoutUnknownPlan422(t *testing.T) {
-	s := polarServer(t, func(d *Deps) { d.Billing = &billing.MockClient{} })
+	s := billingWebhookServer(t, func(d *Deps) { d.Billing = &billing.MockClient{} })
 	seedMembership(t, s, "user_up", "org_up", "org:admin")
 
 	code, _, body := postForm(t, s, "/app/billing/checkout", url.Values{"plan": {"free"}}, sessionCookie("user_up", "org_up", "org:admin"))
@@ -243,7 +228,7 @@ func TestBillingUnselectedPlanRefusesCheckout(t *testing.T) {
 }
 
 func TestEntitledGateInCurrentPlan(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	ctx := t.Context()
 	seedMembership(t, s, "user_eg", "org_eg", "org:admin")
 
@@ -267,7 +252,7 @@ func TestEntitledGateInCurrentPlan(t *testing.T) {
 }
 
 func TestSettingsBillingPage(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	seedMembership(t, s, "user_sb", "org_sb", "org:admin")
 	cookie := sessionCookie("user_sb", "org_sb", "org:admin")
 

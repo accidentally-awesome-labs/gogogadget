@@ -10,19 +10,17 @@ import (
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
-	llmfake "github.com/gogogadget/gogogadget/internal/llm/fake"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/realtime"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -35,14 +33,14 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 
 	module, err := NewModule(context.Background(), host, Deps{
 		Config: &config.Config{Env: "test", AppURL: "http://localhost:8080"},
-		DB:     pool, Queries: queries, Storage: storagefs.NewDevStore(t.TempDir()),
+		DB:     pool, Queries: queries, Storage: storage.NewMockStore(),
 		Flags: flags.NewDBEvaluator(queries, 30*time.Second), Reporter: observability.NoopReporter{},
-		Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
-		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
-		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
-		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
-		Analytics: analytics.NoopCapturer{}, LLM: llmfake.Completer{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
-		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identitydev.Verifier{}, Fetch: identitydev.UserFetcher{}},
+		Verifier: identity.MockVerifier{}, Fetcher: identity.MockUserFetcher{},
+		IdentityDeleter: &identity.MockDeleter{}, IdentityNavigator: identity.MockNavigator{},
+		IdentityWebhook: identity.MockWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billing.MockWebhook{},
+		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimit.NewMockLimiter(100, 200),
+		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identity.MockVerifier{}, Fetch: identity.MockUserFetcher{}},
 		Health: func(context.Context) apphost.HealthReport {
 			return apphost.HealthReport{Ready: true}
 		},
@@ -97,18 +95,18 @@ func TestNewModuleRejectsMissingCapabilityWithoutDatabase(t *testing.T) {
 		}, "server: storage store capability is required"},
 		{"flags", func() Deps {
 			d := base
-			d.Storage = storagefs.NewDevStore(t.TempDir())
+			d.Storage = storage.NewMockStore()
 			return d
 		}, "server: flags evaluator capability is required"},
 		{"reporter", func() Deps {
 			d := base
-			d.Storage = storagefs.NewDevStore(t.TempDir())
+			d.Storage = storage.NewMockStore()
 			d.Flags = flags.NewDBEvaluator(base.Queries, time.Second)
 			return d
 		}, "server: observability reporter capability is required"},
 		{"health", func() Deps {
 			d := base
-			d.Storage = storagefs.NewDevStore(t.TempDir())
+			d.Storage = storage.NewMockStore()
 			d.Flags = flags.NewDBEvaluator(base.Queries, time.Second)
 			d.Reporter = observability.NoopReporter{}
 			return d

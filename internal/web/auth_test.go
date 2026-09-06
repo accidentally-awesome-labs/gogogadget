@@ -10,7 +10,6 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,14 +19,14 @@ func seedUser(t *testing.T, s *Server, id, email, name string) {
 	t.Helper()
 	_, err := s.q.UpsertUser(t.Context(), sqlc.UpsertUserParams{UserID: id, Email: email, Name: name})
 	require.NoError(t, err)
-	_, _ = s.q.InsertIdentitySubject(t.Context(), sqlc.InsertIdentitySubjectParams{Provider: "dev", Subject: id, UserID: id})
+	_, _ = s.q.InsertIdentitySubject(t.Context(), sqlc.InsertIdentitySubjectParams{Provider: identity.MockProvider, Subject: id, UserID: id})
 	t.Cleanup(func() { _ = s.q.DeleteUser(context.Background(), id) })
 }
 
 func seedOrg(t *testing.T, s *Server, id, slug string) {
 	_, err := s.q.UpsertOrg(t.Context(), sqlc.UpsertOrgParams{OrgID: id, Name: slug + " Org", Slug: slug})
 	require.NoError(t, err)
-	_, _ = s.q.InsertIdentityOrganization(t.Context(), sqlc.InsertIdentityOrganizationParams{Provider: "dev", Subject: id, OrgID: id})
+	_, _ = s.q.InsertIdentityOrganization(t.Context(), sqlc.InsertIdentityOrganizationParams{Provider: identity.MockProvider, Subject: id, OrgID: id})
 	t.Cleanup(func() { _ = s.q.DeleteOrg(context.Background(), id) })
 }
 
@@ -177,16 +176,17 @@ func TestSettingsRenderTheSelectedProvidersPages(t *testing.T) {
 	assert.Contains(t, body, `hx-select="#content"`)
 }
 
-// The silent half of the regression, proven at the rendered layer under the
-// adapter this fixture actually selects.
+// The silent half of the regression, proven at the rendered layer under an
+// adapter that manages no profile.
 //
 // Both pages used to build their link from CLERK_PORTAL_URL read by key. The
 // fixture supplies that key — internal/web does not declare it, and the CSP
-// registry still reads it — so with the dev adapter selected the pages
-// rendered a hosted provider's URLs anyway. They now ask the port, the dev
-// adapter refuses because it manages no profile, and the page renders its
-// explanatory copy with no link at all: no foreign host, and no empty href
-// dressed up as one.
+// registry still reads it — so the pages rendered a hosted provider's URLs
+// whatever adapter was selected. They now ask the port; the harness's
+// identity.MockNavigator refuses the three self-service destinations, the
+// way every zero-account adapter does, and the page renders its explanatory
+// copy with no link at all: no foreign host, and no empty href dressed up
+// as one.
 func TestSettingsRenderNoProviderLinkWhenTheAdapterHasNone(t *testing.T) {
 	s := integrationServer(t, nil)
 	require.NotEmpty(t, s.cfg.Value("CLERK_PORTAL_URL"),
@@ -387,7 +387,7 @@ func TestLazyOrgSync(t *testing.T) {
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, "Dashboard")
 
-	mapping, err := s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: "dev", Subject: "org_lazy"})
+	mapping, err := s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: identity.MockProvider, Subject: "org_lazy"})
 	require.NoError(t, err)
 	org, err := s.q.GetOrgByID(t.Context(), mapping.OrgID)
 	require.NoError(t, err)
@@ -396,8 +396,8 @@ func TestLazyOrgSync(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
 	// A later organization.created webhook corrects the placeholder name.
-	payload := orgPayload("organization.created", "org_lazy", "Real Name", "org_lazy")
-	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, identityDelivery("msg_lazy1"))
+	payload, headers := orgDelivery("msg_lazy1", "organization.created", "org_lazy", "Real Name", "org_lazy")
+	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, headers)
 	require.Equal(t, http.StatusOK, code)
 	org, _ = s.q.GetOrgByID(t.Context(), mapping.OrgID)
 	assert.Equal(t, "Real Name", org.Name)
@@ -429,32 +429,42 @@ func TestAuthRoutesHandOffToTheSelectedAdapter(t *testing.T) {
 		"a hosted sign-out must still expire this application's own session cookie")
 }
 
-// The zero-account adapter answers sign-in with its own dev route, so the
+// A zero-account adapter answers sign-in with a route of its own, so the
 // login handler no longer reads DEV_AUTH_BYPASS and no longer spells
-// /dev/login itself: the adapter that owns that key owns that route.
-func TestAuthRoutesUseTheDevAdaptersOwnPages(t *testing.T) {
+// /dev/login itself: the adapter that owns that key owns that route. The
+// hand-off is asserted against the seam's own double rather than against
+// ggg/system/identity-dev, because which adapter is selected for the test
+// environment is a provider choice and this claim is true of any of them.
+func TestAuthRoutesUseTheSelectedAdaptersOwnPages(t *testing.T) {
 	s := integrationServer(t, nil)
+	nav := identity.MockNavigator{BaseURL: "http://localhost:18080"}
 
 	code, hdr, _ := serve(t, s, "GET", "/login", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "http://localhost:18080/dev/login?return_to=http%3A%2F%2Flocalhost%3A18080%2F%3Fafter-auth%3D1",
-		hdr.Get("Location"))
+	assert.Equal(t, must(nav.LoginURL("http://localhost:18080/?after-auth=1")), hdr.Get("Location"))
+	assert.Contains(t, hdr.Get("Location"), "return_to=http%3A%2F%2Flocalhost%3A18080%2F%3Fafter-auth%3D1",
+		"the handler supplies the return target and the adapter owns the parameter name and the escaping")
 
 	code, hdr, _ = serve(t, s, "GET", "/signup", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "http://localhost:18080/dev/login", hdr.Get("Location"))
+	assert.Equal(t, must(nav.SignupURL("")), hdr.Get("Location"))
 
 	code, hdr, _ = serve(t, s, "GET", "/logout", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "http://localhost:18080/", hdr.Get("Location"))
+	assert.Equal(t, must(nav.LogoutURL("http://localhost:18080/")), hdr.Get("Location"))
 }
 
 // Every handler that asks the port refuses visibly when the selected adapter
-// has no page. With its bypass off the dev adapter has no sign-in surface at
-// all — the /dev/login route is not registered — and an unconfigured base
-// leaves it nothing to answer sign-out with either. Each of these used to be
-// a redirect: sign-in and sign-up answered the handler's own /login, which is
-// a loop straight back into the handler that asked.
+// has no page for the destination. Each of these used to be a redirect:
+// sign-in and sign-up answered the handler's own /login, which is a loop
+// straight back into the handler that asked.
+//
+// The behaviour under test is REFUSAL, and it is selected deliberately: an
+// identity.MockNavigator with no BaseURL publishes nothing, which is the
+// state of an adapter whose sign-in route is not registered or whose base is
+// unconfigured. This used to lean on identitydev.Navigator's zero value
+// happening to refuse — a load-bearing accident, in a payload that owns
+// neither the adapter nor its zero-value semantics.
 //
 // Three here plus create-organization in TestRequireOrgRefusesVisibly… and
 // the two settings captions makes refusal proven at the rendered layer for
@@ -462,9 +472,7 @@ func TestAuthRoutesUseTheDevAdaptersOwnPages(t *testing.T) {
 func TestAuthHandlersRefuseVisiblyWhenTheAdapterHasNoPage(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
-		// No BaseURL either, so sign-out has nothing to answer with and all
-		// three destinations refuse for their own stated reason.
-		d.IdentityNavigator = identitydev.Navigator{}
+		d.IdentityNavigator = identity.MockNavigator{}
 	})
 
 	for _, tc := range []struct{ path, says string }{

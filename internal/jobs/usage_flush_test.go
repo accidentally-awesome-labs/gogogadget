@@ -39,7 +39,7 @@ func ageUsage(t *testing.T, pool *pgxpool.Pool, id int64) {
 
 func TestUsageFlushNoOpWithoutBilling(t *testing.T) {
 	pool, q := testSetup(t)
-	w := testWorker(q, t.TempDir()) // Billing nil
+	w := testWorker(q) // Billing nil
 	seedUsageOrg(t, q, "org_u1")
 	e := insertUsage(t, q, "org_u1", "ai_tokens", 100)
 	ageUsage(t, pool, e.ID)
@@ -53,7 +53,7 @@ func TestUsageFlushNoOpWithoutBilling(t *testing.T) {
 
 func TestUsageFlushIngestsAndMarks(t *testing.T) {
 	pool, q := testSetup(t)
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 	mock := &billing.MockClient{}
 	w.Billing = mock
 	seedUsageOrg(t, q, "org_u2")
@@ -88,7 +88,7 @@ var errIngest = errors.New("polar down")
 
 func TestUsageFlushIngestFailureUnflushes(t *testing.T) {
 	pool, q := testSetup(t)
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 	mock := &billing.MockClient{IngestErr: errIngest}
 	w.Billing = mock
 	seedUsageOrg(t, q, "org_u3")

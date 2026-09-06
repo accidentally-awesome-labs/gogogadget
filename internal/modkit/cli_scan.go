@@ -167,3 +167,94 @@ func ValidateCoreCLIPackages(modules []Manifest, files map[string][]byte) error 
 	}
 	return nil
 }
+
+// ValidatePayloadAdapterImports generalizes the rule above to every installed
+// payload: a payload owned by module M may import an adapter package only if
+// M is that adapter's own module.
+//
+// The reason is the one ValidateCoreCLIPackages states for internal/gggcli,
+// and it is not specific to the CLI: a direct import pins an unselected
+// adapter into every build. It is worse than an undeclared dependency,
+// because it is UNDECLARABLE. `requires` names modules; an adapter is a
+// per-environment provider SELECTION, so "this payload compiles only while
+// providers.identity.test is ggg/system/identity-dev" cannot be written in
+// the manifest vocabulary at all. A consumer reaches a selected adapter
+// through the generated boot wiring or the generated per-slot accessors, and
+// tests reach a seam's own test double (billing.MockClient,
+// identity.MockVerifier, mail.MockSender, storage.MockStore,
+// ratelimit.MockLimiter, observability.NoopReporter, analytics.NoopCapturer,
+// realtime.NewMemory, search.NewMemory).
+//
+// An adapter's own payloads are exempt, including the ones it installs into
+// another package's directory: ggg/system/billing-local owns
+// internal/web/billing_local_test.go, which is the sanctioned shape for
+// testing one adapter's surface.
+//
+// KNOWN BLIND SPOT, deliberately not chased: this is an import scan, so it
+// cannot see a payload that inlines an adapter's WIRE FORMAT while importing
+// nothing. internal/web/identity_webhook_test.go was exactly that — JSON
+// envelopes hand-written in the shape of whichever adapter the harness
+// selected — and no import-based rule could have flagged it. Widening this
+// scan to fixture contents would mean guessing which string literals are a
+// provider's schema, which is not a decidable question. The countermeasure
+// is a seam double that owns BOTH directions of its envelope
+// (identity.MockDelivery, billing.MockDelivery), so the honest fixture is
+// also the easy one.
+func ValidatePayloadAdapterImports(modules []Manifest, files map[string][]byte) error {
+	adapters := map[string]string{}
+	owners := map[string]string{}
+	for _, module := range modules {
+		for _, file := range module.Files {
+			owners[file.Target] = module.ID
+		}
+		sys := module.Runtime.System
+		if sys == nil || sys.Adapter == nil {
+			continue
+		}
+		if sys.Package != "" {
+			adapters[strings.Trim(sys.Package, "/")] = module.ID
+		}
+		for _, claimed := range module.Claims.Packages {
+			if trimmed := strings.Trim(claimed, "/"); trimmed != "" {
+				adapters[trimmed] = module.ID
+			}
+		}
+	}
+	if len(adapters) == 0 {
+		return nil
+	}
+	targets := make([]string, 0, len(files))
+	for target := range files {
+		if strings.HasSuffix(target, ".go") {
+			targets = append(targets, target)
+		}
+	}
+	sort.Strings(targets)
+	for _, target := range targets {
+		owner := owners[target]
+		if owner == "" {
+			// Generated outputs have no owning module; the generated boot and
+			// the per-slot accessors are the sanctioned place adapters are named.
+			continue
+		}
+		parsed, err := parser.ParseFile(token.NewFileSet(), target, files[target], parser.ImportsOnly)
+		if err != nil {
+			return fmt.Errorf("scan %s: %w", target, err)
+		}
+		for _, spec := range parsed.Imports {
+			raw := strings.Trim(spec.Path.Value, "\"`")
+			for pkg, id := range adapters {
+				if raw != pkg && !strings.HasSuffix(raw, "/"+pkg) {
+					continue
+				}
+				if id == owner {
+					continue
+				}
+				return fmt.Errorf(
+					"%s is owned by %s and imports adapter package %s owned by %s; an adapter is a per-environment provider selection, which no `requires` can express, so a payload must reach it through the generated wiring or use the seam's own test double",
+					target, owner, pkg, id)
+			}
+		}
+	}
+	return nil
+}

@@ -2,18 +2,17 @@ package modules
 
 import (
 	"context"
-	"github.com/gogogadget/gogogadget/internal/analytics"
-	"github.com/gogogadget/gogogadget/internal/apphost"
-	"github.com/gogogadget/gogogadget/internal/db/testdb"
-	"github.com/gogogadget/gogogadget/internal/llm/fake"
-	"github.com/gogogadget/gogogadget/internal/mail/dev"
-	"github.com/gogogadget/gogogadget/internal/observability"
-	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gogogadget/gogogadget/internal/analytics"
+	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/db/testdb"
+	"github.com/gogogadget/gogogadget/internal/observability"
 )
 
 // bootHost is an otherwise unconfigured environment pointed at an empty scratch
@@ -69,12 +68,55 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 		t.Fatalf("Config.Env = %q, want %q", got, "test")
 	}
 
-	// Ports with a local stand-in must be live.
-	if _, ok := runtime.MailSender.(*dev.DevSender); !ok {
-		t.Fatalf("MailSender = %T, want *dev.DevSender", runtime.MailSender)
-	}
-	if _, ok := runtime.StorageStore.(*filesystem.DevStore); !ok {
-		t.Fatalf("StorageStore = %T, want *filesystem.DevStore", runtime.StorageStore)
+	// Ports with a local stand-in must be live, and must be the adapter this
+	// environment actually selects.
+	//
+	// Both facts come from the generated graph rather than from a type
+	// assertion on an adapter package: providerActive is the table Boot
+	// itself branches on, and XSlotFor constructs the selection for a named
+	// environment. This payload is owned by ggg/system/apphost, which
+	// declares "requires": [], and it used to import internal/mail/dev,
+	// internal/storage/filesystem and internal/llm/fake to name their types
+	// — pinning one provider selection into every project that installs the
+	// runtime host, in a module that cannot declare the dependency because
+	// "the adapter selected for the test environment" is not a module.
+	//
+	// observability and analytics stay as they are: NoopReporter and
+	// NoopCapturer live in the SEAM packages, which every consumer already
+	// requires.
+	env := runtime.Config.Env
+	host := bootHost(t, "boot_fallbacks", nil)
+	for _, tc := range []struct {
+		slot, adapter string
+		booted        any
+		selected      func() (any, error)
+	}{
+		{"ggg/mail", "ggg/system/mail-dev", runtime.MailSender, func() (any, error) {
+			slot, err := MailSlotFor(context.Background(), host, runtime.Config, env)
+			return slot.MailSender, err
+		}},
+		{"ggg/storage", "ggg/system/storage-filesystem", runtime.StorageStore, func() (any, error) {
+			slot, err := StorageSlotFor(context.Background(), host, runtime.Config, env)
+			return slot.StorageStore, err
+		}},
+		{"ggg/llm", "ggg/system/llm-fake", runtime.LLMCompleter, func() (any, error) {
+			slot, err := LlmSlotFor(context.Background(), host, runtime.Config, env)
+			return slot.LLMCompleter, err
+		}},
+	} {
+		if !providerActive(env, tc.slot, tc.adapter) {
+			t.Fatalf("%s: %s is not the adapter selected for %s", tc.slot, tc.adapter, env)
+		}
+		if tc.booted == nil {
+			t.Fatalf("%s capability is nil", tc.slot)
+		}
+		selected, err := tc.selected()
+		if err != nil {
+			t.Fatalf("%s: constructing the selected adapter: %v", tc.slot, err)
+		}
+		if got, want := reflect.TypeOf(tc.booted), reflect.TypeOf(selected); got != want {
+			t.Fatalf("%s booted %v, want the %s adapter's %v", tc.slot, got, env, want)
+		}
 	}
 	if _, ok := runtime.ObservabilityReporter.(observability.NoopReporter); !ok {
 		t.Fatalf("ObservabilityReporter = %T, want observability.NoopReporter", runtime.ObservabilityReporter)
@@ -88,9 +130,6 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 	}
 	if runtime.IdentityVerifier == nil || runtime.IdentityFetcher == nil || runtime.IdentityDeleter == nil || runtime.IdentityNavigator == nil || runtime.IdentityWebhook == nil {
 		t.Fatal("identity capabilities must be provided by the selected local adapter")
-	}
-	if _, ok := runtime.LLMCompleter.(fake.Completer); !ok {
-		t.Fatalf("LlmCompleter = %T, want fake.Completer", runtime.LLMCompleter)
 	}
 }
 

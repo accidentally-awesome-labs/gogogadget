@@ -182,7 +182,7 @@ func webhookTestSetup(t *testing.T) (*Worker, *sqlc.Queries, *pgxpool.Pool, int6
 	require.NoError(t, err)
 	_, err = pool.Exec(ctx, "INSERT INTO org_members (org_id, user_id, role) VALUES ('org_wh', 'user_wh', 'org:admin') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
-	w := testWorker(q, t.TempDir())
+	w := testWorker(q)
 	w.WebhookGuard = func(context.Context, string) error { return nil }
 	w.WebhookTransport = http.DefaultTransport.(*http.Transport).Clone()
 	ep, err := q.InsertWebhookEndpoint(ctx, sqlc.InsertWebhookEndpointParams{

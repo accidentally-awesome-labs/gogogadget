@@ -15,16 +15,15 @@ import (
 // Dunning: the human half of a failed payment. The processor retries the
 // card; these are the messages that get someone to fix it.
 
-// postPolarWebhook signs and delivers one Polar event. Each call needs a
-// unique message id — the handler dedupes on it.
-var polarMsgSeq int
+// postBillingWebhook delivers one neutral subscription event. Each call gets
+// a unique delivery id — the handler dedupes on it.
+var billingDeliverySeq int
 
-func postPolarWebhook(t *testing.T, s *Server, payload []byte) {
+func postBillingWebhook(t *testing.T, s *Server, event billing.SubscriptionEvent) {
 	t.Helper()
-	polarMsgSeq++
-	id := "msg_dun_" + strconv.Itoa(polarMsgSeq)
-	code, _, _ := serve(t, s, "POST", "/webhooks/polar", payload, signStandard(t, testPolarWebhookSecret, id, payload))
-	require.Equal(t, http.StatusOK, code)
+	billingDeliverySeq++
+	require.Equal(t, http.StatusOK,
+		deliverBilling(t, s, "msg_dun_"+strconv.Itoa(billingDeliverySeq), event))
 }
 
 type dunningJob struct {
@@ -48,7 +47,7 @@ func dunningJobs(t *testing.T, s *Server, orgID string) []dunningJob {
 }
 
 func TestPastDueSchedulesFollowUpSequence(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	seedOrg(t, s, "org_dun", "Dun Org")
 	seedMembership(t, s, "user_dun", "org_dun", "org:admin")
 	t.Cleanup(func() {
@@ -56,7 +55,7 @@ func TestPastDueSchedulesFollowUpSequence(t *testing.T) {
 	})
 
 	before := time.Now()
-	postPolarWebhook(t, s, subPayload("subscription.updated", "sub_dun", "org_dun", "prod_pro", "past_due",
+	postBillingWebhook(t, s, subEvent("subscription.updated", "sub_dun", "org_dun", "prod_pro", "past_due",
 		time.Now().Add(20*24*time.Hour)))
 
 	jobs := dunningJobs(t, s, "org_dun")
@@ -73,35 +72,35 @@ func TestPastDueSchedulesFollowUpSequence(t *testing.T) {
 // Re-delivery of the same status must not stack a second sequence: a customer
 // whose card fails five times should not get five sets of warnings.
 func TestRepeatedPastDueDoesNotStackSequences(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	seedMembership(t, s, "user_dun2", "org_dun2", "org:admin")
 	t.Cleanup(func() {
 		_, _ = s.db.Exec(t.Context(), "DELETE FROM jobs WHERE payload->>'org_id' = 'org_dun2'")
 	})
 
-	payload := subPayload("subscription.updated", "sub_dun2", "org_dun2", "prod_pro", "past_due",
+	event := subEvent("subscription.updated", "sub_dun2", "org_dun2", "prod_pro", "past_due",
 		time.Now().Add(20*24*time.Hour))
-	postPolarWebhook(t, s, payload)
-	postPolarWebhook(t, s, payload)
-	postPolarWebhook(t, s, payload)
+	postBillingWebhook(t, s, event)
+	postBillingWebhook(t, s, event)
+	postBillingWebhook(t, s, event)
 
 	assert.Len(t, dunningJobs(t, s, "org_dun2"), 2, "only the transition INTO past_due schedules the sequence")
 }
 
 func TestRecoveryBeforeFollowUpLeavesNothingScheduledTwice(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	seedMembership(t, s, "user_dun3", "org_dun3", "org:admin")
 	t.Cleanup(func() {
 		_, _ = s.db.Exec(t.Context(), "DELETE FROM jobs WHERE payload->>'org_id' = 'org_dun3'")
 	})
 
-	postPolarWebhook(t, s, subPayload("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "past_due",
+	postBillingWebhook(t, s, subEvent("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "past_due",
 		time.Now().Add(20*24*time.Hour)))
 	require.Len(t, dunningJobs(t, s, "org_dun3"), 2)
 
 	// Card fixed: status goes back to active. The jobs stay queued — the
 	// worker's guard is what stops them, and that is tested in internal/jobs.
-	postPolarWebhook(t, s, subPayload("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "active",
+	postBillingWebhook(t, s, subEvent("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "active",
 		time.Now().Add(20*24*time.Hour)))
 	sub, err := s.q.GetSubscriptionByOrg(t.Context(), "org_dun3")
 	require.NoError(t, err)
@@ -109,18 +108,18 @@ func TestRecoveryBeforeFollowUpLeavesNothingScheduledTwice(t *testing.T) {
 
 	// …and a later failure schedules a fresh sequence, because this is a new
 	// transition into past_due.
-	postPolarWebhook(t, s, subPayload("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "past_due",
+	postBillingWebhook(t, s, subEvent("subscription.updated", "sub_dun3", "org_dun3", "prod_pro", "past_due",
 		time.Now().Add(20*24*time.Hour)))
 	assert.Len(t, dunningJobs(t, s, "org_dun3"), 4, "a second failure earns a second sequence")
 }
 
 func TestDunningEmailsCarryBillingLink(t *testing.T) {
-	s := polarServer(t, nil)
+	s := billingWebhookServer(t, nil)
 	seedMembership(t, s, "user_dun4", "org_dun4", "org:admin")
 	t.Cleanup(func() {
 		_, _ = s.db.Exec(t.Context(), "DELETE FROM jobs WHERE payload->>'org_id' = 'org_dun4'")
 	})
-	postPolarWebhook(t, s, subPayload("subscription.updated", "sub_dun4", "org_dun4", "prod_pro", "past_due",
+	postBillingWebhook(t, s, subEvent("subscription.updated", "sub_dun4", "org_dun4", "prod_pro", "past_due",
 		time.Now().Add(20*24*time.Hour)))
 
 	rows, err := s.db.Query(t.Context(),

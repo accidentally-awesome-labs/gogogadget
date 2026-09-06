@@ -4,7 +4,7 @@
     "id": "ggg/system/content",
     "kind": "system",
     "name": "content",
-    "revision": 5,
+    "revision": 6,
     "contract": 1,
     "title": "Content and CMS",
     "description": "Embedded markdown corpus, goldmark rendering, RSS, search, and the database-backed CMS for administrator-authored entries, revisions, and media.",
@@ -203,7 +203,7 @@
         "source": "internal/web/content_type_test.go",
         "target": "internal/web/content_type_test.go",
         "class": "test",
-        "sha256": "d12113c56398e3dfb8f816a0fc9b5fccd646e02aa381c071172257ce560c8bd3",
+        "sha256": "97b952ff047cca47f99fa8ce76385d64f33755a2e1a13d38599aafdeae8e74c2",
         "rewrite_module": true,
         "contract": false
       },
@@ -331,13 +331,13 @@
         "content.type.releases": "Releases"
       },
       "es": {
-        "content.empty": "Todavía no hay nada publicado.",
+        "content.empty": "Todav\u00eda no hay nada publicado.",
         "content.field.author": "Autor",
         "content.published_on": "Publicado el",
-        "content.read_more": "Leer más",
-        "content.type.post": "Publicación",
+        "content.read_more": "Leer m\u00e1s",
+        "content.type.post": "Publicaci\u00f3n",
         "content.type.posts": "Publicaciones",
-        "content.type.release": "Versión",
+        "content.type.release": "Versi\u00f3n",
         "content.type.releases": "Versiones"
       }
     },

@@ -62,7 +62,7 @@
         "source": "internal/billinglocal/contract_test.go",
         "target": "internal/billinglocal/contract_test.go",
         "class": "test",
-        "sha256": "ffacb6bf04563356964745ab53361a6da33b45498bf4923a84b195687eafefcc",
+        "sha256": "e5ba905b5b92a4d54ed2072dbe72d808cf076cd286299c23a6f2bb05f507fdc1",
         "rewrite_module": true,
         "contract": false
       },

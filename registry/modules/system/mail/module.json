@@ -4,7 +4,7 @@
     "id": "ggg/system/mail",
     "kind": "system",
     "name": "mail",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Transactional mail seam",
     "description": "Provider-neutral Sender port, message renderers, and email jobs.",
@@ -64,6 +64,14 @@
         "target": "internal/mail/mail_test.go",
         "class": "test",
         "sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/mail/mock.go",
+        "target": "internal/mail/mock.go",
+        "class": "go",
+        "sha256": "9d252ca64d3aa382ae9bfcbd7aedacd4e8e8e53f96c71b7983384256c2481687",
         "rewrite_module": true,
         "contract": false
       },

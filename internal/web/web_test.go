@@ -13,16 +13,15 @@ import (
 	"github.com/a-h/templ"
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/realtime"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,13 +48,17 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	server, err := NewServer(Deps{
 		Config: &cfg, Log: log, Version: "test",
-		Docs: &content.Docs{}, Storage: storagefs.NewDevStore(t.TempDir()),
+		Docs: &content.Docs{}, Storage: storage.NewMockStore(),
 		Flags: flags.NewDBEvaluator(nil, 30*time.Second), Reporter: observability.NoopReporter{},
-		Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
-		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{},
-		IdentityWebhook: identitydev.Webhook{}, Billing: &billing.MockClient{},
-		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
-		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
+		Verifier: identity.MockVerifier{}, Fetcher: identity.MockUserFetcher{},
+		// This fixture has no database, so nothing here authenticates: the
+		// suites on it render public pages and drive middleware. The
+		// navigator is the zero value, which publishes no destination at
+		// all — a value of the right type, asserted by nothing.
+		IdentityDeleter: &identity.MockDeleter{}, IdentityNavigator: identity.MockNavigator{},
+		IdentityWebhook: identity.MockWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billing.MockWebhook{},
+		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimit.NewMockLimiter(100, 200),
 		SessionLoader: testSessionLoader{},
 	})
 	if err != nil {

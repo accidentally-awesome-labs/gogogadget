@@ -4,7 +4,7 @@
     "id": "ggg/system/rate-limit",
     "kind": "system",
     "name": "rate-limit",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Request rate limiting",
     "description": "Per-key token-bucket limiter with a bursting budget, used to shield the application from a single abusive client.",
@@ -46,6 +46,14 @@
         "sha256": "ff8a95e3d900ac656f6dd0f7515af7fda1ce28311a5d40677cb6b298e3b0c092",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/ratelimit/mock.go",
+        "target": "internal/ratelimit/mock.go",
+        "class": "go",
+        "sha256": "817f4aafda98a2c3bf84311084d249876ce984e865cf43ed2bef3f4918ca8ab8",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/ratelimit/ratelimit.go",

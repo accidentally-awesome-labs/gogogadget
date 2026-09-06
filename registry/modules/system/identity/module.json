@@ -4,7 +4,7 @@
     "id": "ggg/system/identity",
     "kind": "system",
     "name": "identity",
-    "revision": 3,
+    "revision": 4,
     "contract": 2,
     "title": "Identity",
     "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
@@ -69,6 +69,14 @@
         "contract": true
       },
       {
+        "source": "internal/identity/mock.go",
+        "target": "internal/identity/mock.go",
+        "class": "go",
+        "sha256": "1528258b0e609aec1d5ffbc883e5a14c39924a4af4720ce2e2f19717dcd44b38",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/identity/module.go",
         "target": "internal/identity/module.go",
         "class": "go",
@@ -80,7 +88,7 @@
         "source": "internal/identity/module_test.go",
         "target": "internal/identity/module_test.go",
         "class": "test",
-        "sha256": "40bfaf27b3da71a4be39a30ab7ea3add147805ca37b82d7ebd5999d1de066a31",
+        "sha256": "6655447f9c80d35dd81054913178bbf7391ee2921249224c7989cf229f5c6ad8",
         "rewrite_module": true,
         "contract": false
       },
@@ -176,7 +184,7 @@
         "settings.disabled_title": "Account disabled"
       },
       "es": {
-        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
+        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organizaci\u00f3n si crees que esto es un error.",
         "settings.disabled_title": "Cuenta deshabilitada"
       }
     },

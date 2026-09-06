@@ -13,18 +13,17 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/realtime"
-	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -43,8 +42,15 @@ func integrationPool(t *testing.T) *pgxpool.Pool {
 	return pool
 }
 
-// integrationServer builds a Server against real Postgres with the
-// FakeVerifier (DEV_AUTH_BYPASS) auth path.
+// integrationServer builds a Server against real Postgres, authenticated by
+// the identity seam's own doubles.
+//
+// Every capability here is either a seam-owned double or a seam-owned
+// implementation, and none of them is an adapter. This harness serves ~12
+// files owned by eight different modules, so an adapter constructed here
+// would pin one provider selection into all of them — and `requires` cannot
+// express "providers.identity.test is identity-dev", so the pin would be
+// undeclarable as well as undeclared.
 func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	t.Helper()
 	pool := integrationPool(t)
@@ -64,16 +70,16 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	}
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
-		Docs: &content.Docs{}, Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
-		// Bypass mirrors the DEV_AUTH_BYPASS value above: the dev adapter's
-		// sign-in destination is its own /dev/login route, which is
-		// registered only while that key is on.
-		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{BaseURL: cfg.AppURL, Bypass: true},
-		IdentityWebhook: identitydev.Webhook{}, BillingWebhook: billinglocal.LocalWebhook{},
+		Docs: &content.Docs{}, Verifier: identity.MockVerifier{}, Fetcher: identity.MockUserFetcher{},
+		// The navigator answers: its URLs are rendered into pages these
+		// suites assert on. identity.MockNavigator's zero value refuses
+		// every destination instead, which is what the refusal suites use.
+		IdentityDeleter: &identity.MockDeleter{}, IdentityNavigator: identity.MockNavigator{BaseURL: cfg.AppURL},
+		IdentityWebhook: identity.MockWebhook{}, BillingWebhook: billing.MockWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
-		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},
-		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
-		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identitydev.Verifier{}, Fetch: identitydev.UserFetcher{}, AdminEmail: cfg.AdminEmail}),
+		Storage: storage.NewMockStore(), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},
+		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimit.NewMockLimiter(100, 200),
+		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identity.MockVerifier{}, Fetch: identity.MockUserFetcher{}, AdminEmail: cfg.AdminEmail}),
 	}
 	if mutate != nil {
 		mutate(&deps)
@@ -118,19 +124,35 @@ func publishedAt(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 
-// identityDelivery is the header set the selected identity adapter's webhook
-// reads for its delivery id. The receiver is provider-neutral, so its
-// fixtures come from the adapter the test harness selects — the dev adapter's
-// unsigned envelope — never from a hosted provider's signature scheme.
-func identityDelivery(msgID string) http.Header {
-	h := http.Header{}
-	h.Set("id", msgID)
-	return h
+// identityDelivery encodes one neutral identity event as a delivery the
+// selected identity webhook accepts. The receiver is provider-neutral, and
+// so is this fixture: the seam's double owns the encoding, so no payload
+// writes an adapter's wire format. Hand-written envelopes were the last
+// coupling here that no import-based check could see, because a payload can
+// inline an adapter's JSON while importing nothing.
+func identityDelivery(deliveryID string, event identity.Event) ([]byte, http.Header) {
+	payload, headers, err := identity.MockDelivery(deliveryID, event)
+	if err != nil {
+		panic(err)
+	}
+	return payload, headers
 }
 
-// sessionCookie builds a synthetic e2e: session cookie.
+// sessionCookie mints a session cookie through the seam's
+// SyntheticSessionMinter, the same port the zero-account dev surface uses.
+// It deliberately does not spell a token grammar: writing a provider's token
+// shape into neutral code is the defect internal/web/workflow_dev_session.go
+// documents removing, and it survived here afterwards.
+//
+// A mint failure panics rather than failing a test: it means the harness is
+// broken, and every one of the ~135 callers would report the same thing one
+// frame further from the cause.
 func sessionCookie(userID, orgID, role string) *http.Cookie {
-	return &http.Cookie{Name: sessionCookieName, Value: "e2e:" + userID + ":" + orgID + ":" + role}
+	token, err := identity.MockVerifier{}.MintSession(userID, orgID, role)
+	if err != nil {
+		panic(err)
+	}
+	return &http.Cookie{Name: sessionCookieName, Value: token}
 }
 
 // serve issues a request against the full middleware stack.
