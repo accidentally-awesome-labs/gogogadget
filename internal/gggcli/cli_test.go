@@ -11,8 +11,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/gogogadget/gogogadget/internal/modkit"
 )
@@ -621,6 +623,212 @@ func TestStaleEngineRefusalOutranksItsReporter(t *testing.T) {
 			t.Fatalf("%s exit = %d, want %d", name, got, exitRefusal)
 		}
 	}
+}
+
+// TestCLIDocumentedLoopInstallsAndRemovesWhatTheCatalogPrints drives the
+// documented loop — `catalog`, then `add`, `remove` and a targeted `update` —
+// through the CLI, with the module id READ OUT OF `catalog`'s own output
+// rather than written as a literal.
+//
+// Nothing in this repository did that, and the cost was `ggg add` shipping in
+// v0.11.0 unable to install anything in any id form. `ggg registry validate`
+// installs, compiles and removes whole closures, but it does so THROUGH THE
+// ENGINE, so the engine was covered while every verb an operator types was
+// broken: the catalog printed `ggg/element/button` and the operand validator
+// demanded `element/button`, so the scoped form refused at exit 2 as invalid
+// and the unscoped form refused at exit 3 as an unknown catalog id.
+//
+// Reading the id from the catalog is the part that makes this a surface test.
+// A literal in a test file can agree with a validator that disagrees with what
+// the tool prints, which is exactly how two id forms coexisted for a release.
+func TestCLIDocumentedLoopInstallsAndRemovesWhatTheCatalogPrints(t *testing.T) {
+	root, engine := cliProject(t)
+	if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+
+	out, _, err := runApp(t, root, engine, "catalog", "--json")
+	if err != nil {
+		t.Fatalf("catalog: %v", err)
+	}
+	var listed struct {
+		Modules []struct {
+			ID   string `json:"id"`
+			Kind string `json:"kind"`
+		} `json:"modules"`
+	}
+	if err := json.Unmarshal([]byte(out), &listed); err != nil {
+		t.Fatalf("catalog --json is not parseable: %v\n%s", err, out)
+	}
+	printed := ""
+	for _, entry := range listed.Modules {
+		if entry.Kind == "page" {
+			printed = entry.ID
+			break
+		}
+	}
+	if printed == "" {
+		t.Fatalf("catalog printed no page module: %s", out)
+	}
+	if err := modkit.ValidateScopedProjectModuleID(printed); err != nil {
+		t.Fatalf("catalog printed %q, which is not the canonical scoped form %s: %v",
+			printed, modkit.CanonicalModuleIDForm, err)
+	}
+	// The convenience form an operator may type instead, derived from the same
+	// printed id so the two can never drift apart in this test.
+	parts := strings.Split(printed, "/")
+	unscoped := parts[1] + "/" + parts[2]
+
+	// add, in the form the catalog printed.
+	if _, _, err := runApp(t, root, engine, "add", printed); err != nil {
+		t.Fatalf("add %s: %v", printed, err)
+	}
+	installed := installedIDsFromLock(t, root)
+	if !slices.Contains(installed, printed) {
+		t.Fatalf("add %s did not install it; lock holds %v", printed, installed)
+	}
+
+	// remove, in the convenience form, which must resolve to the same module.
+	if _, _, err := runApp(t, root, engine, "remove", unscoped); err != nil {
+		t.Fatalf("remove %s: %v", unscoped, err)
+	}
+	if installed := installedIDsFromLock(t, root); slices.Contains(installed, printed) {
+		t.Fatalf("remove %s left it installed; lock holds %v", unscoped, installed)
+	}
+
+	// add again, in the convenience form.
+	if _, _, err := runApp(t, root, engine, "add", unscoped); err != nil {
+		t.Fatalf("add %s: %v", unscoped, err)
+	}
+	if installed := installedIDsFromLock(t, root); !slices.Contains(installed, printed) {
+		t.Fatalf("add %s did not install %s; lock holds %v", unscoped, printed, installed)
+	}
+
+	// A targeted update of an installed module plans and applies.
+	if _, _, err := runApp(t, root, engine, "update", printed); err != nil {
+		t.Fatalf("update %s: %v", printed, err)
+	}
+
+	// And an id that names nothing refuses rather than half-succeeding.
+	for _, absent := range []string{"ggg/element/nope", "element/nope"} {
+		if _, _, err := runApp(t, root, engine, "add", absent); err == nil {
+			t.Fatalf("add %s succeeded", absent)
+		}
+	}
+}
+
+// TestCLITargetedUpdateSeesTheWholeGraphsSource pins the input scope of the
+// whole-graph validators the planner runs.
+//
+// A targeted update keeps every module outside the advanced closure at its
+// locked manifest, and it used to read payload bytes for the closure ALONE
+// while still running all twelve static invariants over every manifest. So a
+// declaration that legitimately points into another module's package — a shell
+// slot renderer, which cannot declare a requirement on the module that owns
+// the shell — resolved against a file map that did not contain it, and any
+// targeted update refused on an unrelated module. In this repository
+// `ggg update ggg/element/avatar` reported that ggg/system/analytics-posthog
+// named a renderer "no installed payload in that package declares".
+//
+// The fixture is the exact shape: `guest` declares the slot and `host` owns
+// the package the renderer lives in, with no requirement between them, so
+// updating `guest` retains `host`.
+func TestCLITargetedUpdateSeesTheWholeGraphsSource(t *testing.T) {
+	fsys := slotFixtureRegistry(t)
+	source := refSource{snapshots: map[string]modkit.Snapshot{
+		"main":      {Commit: testCommitA, FS: fsys},
+		testCommitA: {Commit: testCommitA, FS: fsys},
+	}}
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	engine := modkit.New(modkit.Options{Source: source, Generator: modkit.RegistryGenerator{}})
+
+	if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, _, err := runApp(t, root, engine, "add", "ggg/element/host", "ggg/element/guest"); err != nil {
+		t.Fatalf("add: %v", err)
+	}
+	if _, _, err := runApp(t, root, engine, "update", "ggg/element/guest"); err != nil {
+		t.Fatalf("targeted update of the slot contributor refused: %v", err)
+	}
+}
+
+// slotFixtureRegistry publishes two unrelated modules where one declares a
+// shell slot renderer that lives in the other's package.
+func slotFixtureRegistry(t *testing.T) fstest.MapFS {
+	t.Helper()
+	files := fstest.MapFS{}
+	putJSON(t, files, "registry.json", map[string]any{
+		"schema": 2, "namespace": "ggg", "canonical_module": "github.com/gogogadget/gogogadget",
+		"includes": []string{
+			"registry/elements.json", "registry/components.json", "registry/pages.json",
+			"registry/workflows.json", "registry/systems.json", "registry/profiles.json",
+		},
+	})
+	putJSON(t, files, "registry/elements.json", modkit.CatalogIndex{
+		Schema: 2, Kind: modkit.CatalogElement,
+		Items: []string{
+			"registry/modules/element/guest/module.json",
+			"registry/modules/element/host/module.json",
+		},
+	})
+	for name, kind := range map[string]modkit.CatalogKind{
+		"registry/components.json": modkit.CatalogComponent,
+		"registry/pages.json":      modkit.CatalogPage,
+		"registry/workflows.json":  modkit.CatalogWorkflow,
+		"registry/systems.json":    modkit.CatalogSystem,
+		"registry/profiles.json":   modkit.CatalogProfile,
+	} {
+		putJSON(t, files, name, modkit.CatalogIndex{Schema: 2, Kind: kind, Items: []string{}})
+	}
+
+	hostContent := []byte("package modules\n\nimport (\n\t\"context\"\n\n\t\"github.com/a-h/templ\"\n)\n\n" +
+		"func HostSlot(_ context.Context, _ map[string]string) templ.Component { return templ.NopComponent }\n")
+	host := baseModule("ggg/element/host", "element", "host")
+	host.Files = []modkit.ManifestFile{{
+		Source: "registry/modules/element/host/host.go", Target: "internal/modules/host.go",
+		Class: modkit.FileClassGo, SHA256: sha256Hex(hostContent), RewriteModule: true, Contract: true,
+	}}
+	host.Dependencies.Go = []modkit.GoDependency{{Module: "github.com/a-h/templ", Version: "v0.3.1020"}}
+	putJSON(t, files, "registry/modules/element/host/module.json", modkit.ModuleDocument{Schema: 2, Module: host})
+	files[host.Files[0].Source] = &fstest.MapFile{Data: hostContent}
+
+	guestContent := []byte("package guest\n\nconst Version = 1\n")
+	guest := baseModule("ggg/element/guest", "element", "guest")
+	guest.Runtime.Slots = []modkit.SlotContribution{{
+		ID: "guest-head", Slot: modkit.ShellSlotHead,
+		Package: "internal/modules", Renderer: "HostSlot",
+	}}
+	guest.Files = []modkit.ManifestFile{{
+		Source: "registry/modules/element/guest/guest.go", Target: "internal/modules/guest.go",
+		Class: modkit.FileClassGo, SHA256: sha256Hex(guestContent), Contract: true,
+	}}
+	putJSON(t, files, "registry/modules/element/guest/module.json", modkit.ModuleDocument{Schema: 2, Module: guest})
+	files[guest.Files[0].Source] = &fstest.MapFile{Data: guestContent}
+	return files
+}
+
+// installedIDsFromLock is the installed graph as the lock records it, which is
+// what an operator's next command resolves against.
+func installedIDsFromLock(t *testing.T, root string) []string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+	if err != nil {
+		t.Fatalf("read lock: %v", err)
+	}
+	lock, err := modkit.ParseLock(data)
+	if err != nil {
+		t.Fatalf("parse lock: %v", err)
+	}
+	ids := make([]string, 0, len(lock.Modules))
+	for _, module := range lock.Modules {
+		if module.Reason == modkit.TombstoneReason {
+			continue
+		}
+		ids = append(ids, module.ID)
+	}
+	return ids
 }
 
 // treeDigest hashes every tracked path under root so a "nothing was written"
