@@ -5,12 +5,18 @@ on:
     branches: [main]
   pull_request:
 
-env:
-  TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable
-
 jobs:
   test:
     runs-on: ubuntu-latest
+    # TEST_DATABASE_URL belongs to THIS job and no other, because this is the
+    # job that runs the server that answers on it. It sat at workflow scope
+    # and reached all seven jobs, which matters now that an explicitly named
+    # but unreachable server is a `testdb` FAILURE rather than a skip:
+    # registry-core and registry-external run with no Postgres service at all,
+    # so a closure fixture that ever grows a database-touching test would turn
+    # those jobs red over a database nobody asked them for.
+    env:
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable
     services:
       postgres:
         image: postgres:16-alpine
@@ -52,8 +58,8 @@ jobs:
       # package whose every fixture skipped prints the same `ok` as one that
       # passed — which is how an entire integration layer skipped against a
       # torn-down stack and was reported as a pass. `ggg test` reads the event
-      # stream, prints the count, and REFUSES a nonzero one here: this job
-      # names TEST_DATABASE_URL above and runs the service container that
+      # stream, prints the count, and REFUSES a nonzero one here: this job's
+      # own env block names TEST_DATABASE_URL and its service container
       # answers on it, so a skip in this job is a test that had everything it
       # asked for and still did not run.
       - name: Test

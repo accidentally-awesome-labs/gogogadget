@@ -13,10 +13,15 @@ import (
 
 // Load reads the process environment, so a test that asserts on which keys are
 // missing owns the whole declared surface or it is really asserting about the
-// operator's shell. `ggg check` exports DATABASE_URL and TEST_DATABASE_URL for
-// the integration packages, and that alone used to delete a key from the
-// production expectation below. Every declared key is cleared first; a .env is
-// never loaded because APP_ENV is always set explicitly.
+// operator's shell. Every declared key is cleared first; a .env is never
+// loaded because APP_ENV is always set explicitly.
+//
+// Nothing in this project exports DATABASE_URL or TEST_DATABASE_URL on a
+// contributor's behalf: `ggg check` and `ggg test` pass a nil environment to
+// every child, and the only setter in the tree is the `test` job's own env
+// block in .github/workflows/ci.yml. An earlier version of this comment
+// claimed otherwise, which is the one place a reader would have concluded
+// that testdb's named-server rule misfires locally.
 func clearDeclaredEnvironment(t *testing.T) {
 	t.Helper()
 	for _, key := range ConfigRegistry {
@@ -501,10 +506,17 @@ func TestResolvedValuesCarryTheirProvenance(t *testing.T) {
 	// derives nothing. The shipped code treats that as legitimate — the layer
 	// is simply absent — so these skip there rather than failing a derivative
 	// for doing the supported thing.
+	//
+	// The skips carry gggcli.InapplicableSkipMarker so the gate's skip
+	// refusal does not fire on them. This file is a distributed payload, and
+	// a derivative on Neon would otherwise get a CI refusal telling it to
+	// "supply what those tests skip for" when there is nothing to supply and
+	// the skip is correct. The marker is a plain string here rather than an
+	// import because internal/config must not depend on the CLI.
 	t.Run("this project's derived address outranks the declared default", func(t *testing.T) {
 		derived, ok := DerivedValue("test", "DATABASE_URL")
 		if !ok {
-			t.Skip("the test environment publishes no local Postgres; nothing to derive")
+			t.Skip("[inapplicable] the test environment publishes no local Postgres; nothing to derive")
 		}
 		clearDeclaredEnvironment(t)
 		t.Setenv("APP_ENV", "test")
@@ -520,7 +532,7 @@ func TestResolvedValuesCarryTheirProvenance(t *testing.T) {
 	t.Run("development derives the development stack", func(t *testing.T) {
 		derived, ok := DerivedValue("development", "DATABASE_URL")
 		if !ok {
-			t.Skip("the development environment publishes no local Postgres; nothing to derive")
+			t.Skip("[inapplicable] the development environment publishes no local Postgres; nothing to derive")
 		}
 		clearDeclaredEnvironment(t)
 		t.Setenv("APP_ENV", "development")
@@ -558,7 +570,7 @@ func derivedFor(t *testing.T, environment string) string {
 	t.Helper()
 	value, ok := DerivedValue(environment, "DATABASE_URL")
 	if !ok {
-		t.Skipf("%s publishes no local Postgres; nothing to derive", environment)
+		t.Skipf("[inapplicable] %s publishes no local Postgres; nothing to derive", environment)
 	}
 	return value
 }

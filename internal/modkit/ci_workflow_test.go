@@ -97,20 +97,40 @@ func TestCIExercisesEveryClosureFamilyForReal(t *testing.T) {
 	}
 }
 
+// ciSuiteCommandPrefixes are the two legitimate ways to invoke the accounted
+// suite in CI: the binary `make setup` just built, or the source it was built
+// from. Mirrors ciValidateCommandPrefixes, and for the same reason — the
+// invocation must be recognised structurally, not by substring.
+var ciSuiteCommandPrefixes = [][]string{
+	{"bin/ggg", "test"},
+	{"go", "run", "./cmd/ggg", "test"},
+}
+
+// ciSuiteModes are the `ggg test` layers that run Go packages. The mode is
+// pinned because `ggg test smoke` satisfies every other assertion here and
+// runs no Go test at all.
+var ciSuiteModes = []string{"unit", "integration", "all"}
+
 // The `test` job's suite step must go through the CLI, because a bare
 // `go test` cannot report what it did. `go test` never summarises skips: a
 // package whose every fixture skipped prints the same `ok` as one that ran,
 // and that is how an entire integration layer skipped against a torn-down
 // stack under four green `ok` lines. CI is the one place a skip cannot be
-// legitimate — this job names TEST_DATABASE_URL and runs the service
-// container that answers on it — and `ggg test` is what reads the event
+// legitimate — this job's own env block names TEST_DATABASE_URL and its
+// service container answers on it — and `ggg test` is what reads the event
 // stream and refuses a nonzero skip count.
 //
-// The race detector has to survive the routing, or closing one hole opens a
-// worse one.
+// The command is matched as a COMMAND, not by substring, which is the
+// standard isMakeSetupStep sets in this file: `run: echo "ggg test
+// integration --race --cover"` satisfies a substring match while running no
+// suite, and a gate defeated by an echo is the exact shape this whole change
+// exists to close. The race detector and the coverage flag are both pinned,
+// or closing one hole opens a worse one, and the mode is pinned because
+// `ggg test smoke` would otherwise pass.
 //
-// Mutation: put `go test -race -cover ./...` back and this fails, naming the
-// step.
+// Mutation: put `go test -race -cover ./...` back, wrap the command in an
+// echo, drop --cover, or change the mode to smoke, and this fails naming the
+// command it found.
 func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	root, err := canonicalProjectRoot(specRepoRoot(t))
 	if err != nil {
@@ -121,29 +141,71 @@ func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	if !ok {
 		t.Fatal("the workflow has no test job")
 	}
-	var suite []string
-	for _, step := range job.Steps {
+
+	var found []string
+	var accounted [][]string
+	setupIndex, suiteIndex := -1, -1
+	for index, step := range job.Steps {
+		if isMakeSetupStep(step) {
+			setupIndex = index
+		}
 		for line := range strings.SplitSeq(step.Run, "\n") {
 			command := strings.TrimSpace(line)
-			if !strings.HasPrefix(command, "go test") && !strings.Contains(command, "ggg test") {
+			fields := strings.Fields(command)
+			if len(fields) == 0 {
+				continue
+			}
+			// A bare `go test` is detected by its own first word, so it
+			// cannot slip back in unnoticed; anything else has to parse as
+			// one of the declared CLI invocations.
+			args, isAccounted := parseCISuiteCommand(fields)
+			if !isAccounted && !(fields[0] == "go" && len(fields) > 1 && fields[1] == "test") {
 				continue
 			}
 			if step.If != "" || step.ContinueOnError {
 				t.Fatalf("the suite step is exempt from failing the build (if: %q, continue-on-error: %v)", step.If, step.ContinueOnError)
 			}
-			suite = append(suite, command)
+			if strings.ContainsAny(strings.TrimSpace(step.Run), "\n|;&>") || strings.Contains(step.Run, "set +e") {
+				t.Fatalf("the suite step wraps the command in shell that can hide its exit status: %q", step.Run)
+			}
+			found = append(found, command)
+			suiteIndex = index
+			if isAccounted {
+				accounted = append(accounted, args)
+			}
 		}
 	}
-	if len(suite) != 1 {
-		t.Fatalf("the test job runs the suite %d times: %q; want exactly one accounted run", len(suite), suite)
+
+	if len(found) != 1 {
+		t.Fatalf("the test job runs the suite %d times: %q; want exactly one accounted run", len(found), found)
 	}
-	command := suite[0]
-	if strings.HasPrefix(command, "go test") {
-		t.Fatalf("the test job runs a bare %q, which cannot report a skip and so cannot refuse one; run it through `ggg test`", command)
+	if len(accounted) != 1 {
+		t.Fatalf("the test job runs %q, which is not an accounted invocation: a bare `go test` cannot report a skip and so cannot refuse one", found[0])
 	}
-	if !strings.Contains(command, "--race") {
-		t.Fatalf("the suite command %q dropped the race detector", command)
+	if setupIndex < 0 || setupIndex > suiteIndex {
+		t.Fatalf("the test job runs the suite before `make setup`, so bin/ggg does not exist yet")
 	}
+	args := accounted[0]
+	if len(args) == 0 || !slices.Contains(ciSuiteModes, args[0]) {
+		t.Fatalf("the suite command %q names mode %q, want one of %v: the other layers run no Go test", found[0], args, ciSuiteModes)
+	}
+	for _, want := range []string{"--race", "--cover"} {
+		if !slices.Contains(args, want) {
+			t.Fatalf("the suite command %q dropped %s", found[0], want)
+		}
+	}
+}
+
+// parseCISuiteCommand returns the arguments after a recognised `ggg test`
+// invocation. The command's own first words must BE the invocation, so an
+// `echo` or any other wrapper fails to parse rather than matching.
+func parseCISuiteCommand(fields []string) ([]string, bool) {
+	for _, prefix := range ciSuiteCommandPrefixes {
+		if len(fields) >= len(prefix) && slices.Equal(fields[:len(prefix)], prefix) {
+			return fields[len(prefix):], true
+		}
+	}
+	return nil, false
 }
 
 func ciJobForFamily(family ClosureFamily) (string, bool) {

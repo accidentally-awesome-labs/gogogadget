@@ -13,10 +13,20 @@ import (
 // TestClientContract runs the shared billing contract against the local
 // zero-account client. The hosted adapter and the seam's mock run the
 // identical table.
+//
+// All four provider-error cases are the declared omission set, and the reason
+// is that this ADAPTER HAS NO FAILURE MODE, not that the methods are somehow
+// unfailable in principle: CreateCheckout builds a query string,
+// CreatePortalSession concatenates one, RevokeSubscription deletes a map key
+// and IngestUsage is `return nil`. The only error the package returns is the
+// nil-receiver guard. Giving it an injectable failure would mean adding a
+// failure mode to a shipped production adapter so that a test table could
+// exercise it.
 func TestClientContract(t *testing.T) {
 	billingcontract.RunClient(t,
 		func(t *testing.T) billing.Client { return New("http://localhost:18080") },
-		nil)
+		nil,
+		"CreateCheckout", "CreatePortalSession", "RevokeSubscription", "IngestUsage")
 }
 
 // TestWebhookContract proves the local envelope round-trips the neutral

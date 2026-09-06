@@ -133,6 +133,16 @@ func (c *Controller) runAccountedGoTest(ctx context.Context, root string, flags 
 	if runErr != nil {
 		return fmt.Errorf("%s: %w", strings.Join(argv, " "), runErr)
 	}
+	// The floor, and it is this file's own thesis turned on this file.
+	// `go test ./...` against a tree that matches no packages exits 0 with a
+	// warning and no events, which this accounting would have rendered as
+	// "tests: 0 passed, 0 skipped, 0 failed across 0 packages" and then
+	// returned nil — a gate reporting success over a suite that does not
+	// exist. Reachable on a mid-genesis derivative, or on a project whose Go
+	// packages have not been generated yet.
+	if err := result.account.refuseEmptyRun(); err != nil {
+		return err
+	}
 	if forbidden {
 		return refusalError(fmt.Errorf("%s", result.account.forbiddenSkipRefusal()))
 	}
@@ -155,23 +165,89 @@ func skipsAreForbidden(lookup func(string) string) bool {
 	return true
 }
 
+// InapplicableSkipMarker is how a test declares that it is skipping because
+// the case does not APPLY here, rather than because something it needed was
+// absent. A skip carrying it is counted separately and never refused.
+//
+// It exists because the CI refusal would otherwise ship a false refusal into
+// every derivative. `internal/config`'s derivation tests skip when the
+// project's test environment publishes no local Postgres, and a derivative
+// that legitimately selects a managed database (Neon is a first-class target
+// here) is in exactly that position: there is nothing to supply and the skip
+// is correct, so "supply what those tests skip for, or make the skip a
+// failure at its source" is unactionable advice. Without a way to say
+// "inapplicable", the only remaining move is to delete the test — which is
+// the pressure that has to be relieved, not applied.
+//
+// It is deliberately a declaration at the skip site and not a heuristic. The
+// gate cannot tell an absent service from an inapplicable case by looking;
+// only the test knows, so only the test may say. Where the inapplicability is
+// known before the subtest starts, NOT REGISTERING the case is still better —
+// an unregistered case is a smaller table, while a marked skip is still a
+// test that did not run.
+const InapplicableSkipMarker = "[inapplicable]"
+
 // goTestAccount is what a suite run actually did, per package and in total.
 type goTestAccount struct {
-	Packages []*packageAccount
-	Passed   int
-	Skipped  int
-	Failed   int
+	Packages     []*packageAccount
+	Passed       int
+	Skipped      int
+	Inapplicable int
+	Failed       int
 }
 
 type packageAccount struct {
-	Name     string
-	Result   string
-	Elapsed  float64
-	Coverage string
-	Passed   int
-	Skipped  int
-	Failed   int
-	output   []string
+	Name         string
+	Result       string
+	Elapsed      float64
+	Coverage     string
+	Passed       int
+	Skipped      int
+	Inapplicable int
+	Failed       int
+	// verdicts is every test name this package reported, with its action.
+	// Counting is deferred to tally, at package close, because whether a name
+	// is a leaf is only knowable once its siblings have been seen.
+	verdicts map[string]string
+	// inapplicable is the test names whose own output carried the marker.
+	inapplicable map[string]bool
+	output       []string
+}
+
+// tally counts LEAF tests. `go test -json` reports a verdict for a parent AND
+// for each of its subtests, so summing every event counts a table-driven test
+// once per case plus once more for the table itself — the totals line would be
+// pass EVENTS under a label that says tests, and this file is not the place to
+// print a number that means something other than what it says. A name that is
+// the prefix of another name is a parent and is not counted.
+func (p *packageAccount) tally() {
+	for name, action := range p.verdicts {
+		if p.isParent(name) {
+			continue
+		}
+		switch action {
+		case "pass":
+			p.Passed++
+		case "skip":
+			if p.inapplicable[name] {
+				p.Inapplicable++
+				continue
+			}
+			p.Skipped++
+		case "fail":
+			p.Failed++
+		}
+	}
+}
+
+func (p *packageAccount) isParent(name string) bool {
+	prefix := name + "/"
+	for other := range p.verdicts {
+		if strings.HasPrefix(other, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // accountGoTest reads a `go test -json` event stream, renders one line per
@@ -222,24 +298,31 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error) 
 			if coverage := coverageOf(event.Output); coverage != "" {
 				pkg.Coverage = coverage
 			}
+			// A test's own output is the only channel `testing` gives a skip
+			// to say WHY, so the marker is read from there and attributed to
+			// the test that wrote it.
+			if event.Test != "" && strings.Contains(event.Output, InapplicableSkipMarker) {
+				if pkg.inapplicable == nil {
+					pkg.inapplicable = map[string]bool{}
+				}
+				pkg.inapplicable[event.Test] = true
+			}
 			pkg.output = append(pkg.output, event.Output)
 		case "pass", "fail", "skip":
 			if event.Test != "" {
-				switch event.Action {
-				case "pass":
-					pkg.Passed++
-					account.Passed++
-				case "skip":
-					pkg.Skipped++
-					account.Skipped++
-				case "fail":
-					pkg.Failed++
-					account.Failed++
+				if pkg.verdicts == nil {
+					pkg.verdicts = map[string]string{}
 				}
+				pkg.verdicts[event.Test] = event.Action
 				continue
 			}
 			pkg.Result = event.Action
 			pkg.Elapsed = event.Elapsed
+			pkg.tally()
+			account.Passed += pkg.Passed
+			account.Skipped += pkg.Skipped
+			account.Inapplicable += pkg.Inapplicable
+			account.Failed += pkg.Failed
 			writeString(progress, pkg.line())
 			if event.Action == "fail" {
 				// The failing package's own output IS the diagnosis, so it
@@ -249,6 +332,8 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error) 
 				}
 			}
 			pkg.output = nil
+			pkg.verdicts = nil
+			pkg.inapplicable = nil
 		}
 	}
 	return account, scanner.Err()
@@ -269,43 +354,68 @@ func (p packageAccount) line() string {
 	if p.Coverage != "" {
 		line += "\t" + p.Coverage
 	}
+	total := p.Passed + p.Failed + p.Skipped + p.Inapplicable
 	switch {
-	case p.Skipped > 0 && p.Passed == 0 && p.Failed == 0:
+	case p.Skipped == 0 && p.Inapplicable > 0 && p.Passed+p.Failed == 0:
+		// Ran nothing, but declared why, so it is not the incident.
+		line += fmt.Sprintf("\tno applicable test: all %d inapplicable", p.Inapplicable)
+	case p.Skipped+p.Inapplicable > 0 && p.Passed == 0 && p.Failed == 0:
 		// The incident, named where it happens: this line used to read `ok`
 		// and nothing else.
-		line += fmt.Sprintf("\tNO TEST RAN: all %d skipped", p.Skipped)
+		line += fmt.Sprintf("\tNO TEST RAN: all %d skipped", p.Skipped+p.Inapplicable)
 	case p.Skipped > 0:
-		line += fmt.Sprintf("\t%d of %d skipped", p.Skipped, p.Passed+p.Failed+p.Skipped)
+		line += fmt.Sprintf("\t%d of %d skipped", p.Skipped, total)
+	}
+	if p.Inapplicable > 0 && p.Passed+p.Failed > 0 {
+		line += fmt.Sprintf("\t%d inapplicable", p.Inapplicable)
 	}
 	return line + "\n"
 }
 
 // summary is the count `go test` never prints. The totals line is emitted on
 // every run, pass or fail, because a skip that is legitimate here is still a
-// test that did not run and the operator has to be able to see it.
+// test that did not run and the operator has to be able to see it. The counts
+// are LEAF tests, not verdict events — see packageAccount.tally.
 //
 // withPackages is false when a refusal is about to print the same breakdown,
 // so the list appears exactly once.
 func (a goTestAccount) summary(withPackages bool) string {
-	out := fmt.Sprintf("tests: %d passed, %d skipped, %d failed across %d packages\n",
-		a.Passed, a.Skipped, a.Failed, len(a.Packages))
+	out := fmt.Sprintf("tests: %d passed, %d skipped, %d inapplicable, %d failed across %d packages\n",
+		a.Passed, a.Skipped, a.Inapplicable, a.Failed, len(a.Packages))
 	if a.Skipped == 0 || !withPackages {
 		return out
 	}
 	return out + a.skipBreakdown()
 }
 
+// refuseEmptyRun is the floor. A suite that reported no package and no test
+// is not a suite that passed, and `go test ./...` against a tree matching no
+// packages exits 0 with nothing but a warning — so without this the gate
+// prints a clean account of nothing and returns success, which is the exact
+// failure it was built to close.
+func (a goTestAccount) refuseEmptyRun() error {
+	if len(a.Packages) == 0 {
+		return refusalError(fmt.Errorf("the suite reported no packages at all: `go test ./...` matched nothing, so this run proves nothing. Generate the project's Go packages first (`ggg generate`), or name a tree that has some"))
+	}
+	if a.Passed+a.Skipped+a.Inapplicable+a.Failed == 0 {
+		return refusalError(fmt.Errorf("the suite reported %d package(s) and not one test: a run that executed nothing is not a run that passed", len(a.Packages)))
+	}
+	return nil
+}
+
 func (a goTestAccount) forbiddenSkipRefusal() string {
 	return fmt.Sprintf("%d test(s) skipped where every service the suite needs is provided (CI is set): a skipped test is not a passing test\n",
 		a.Skipped) + a.skipBreakdown() +
-		"Supply what those tests skip for, or make the skip a failure at its source."
+		"Supply what those tests skip for, make the skip a failure at its source, or — if the case genuinely does not apply here — declare it by putting " +
+		InapplicableSkipMarker + " in the skip message, which is counted separately and never refused."
 }
 
 // skipBreakdown is one line per skipping package, worst first.
 func (a goTestAccount) skipBreakdown() string {
 	out := ""
 	for _, pkg := range a.skippingPackages() {
-		out += fmt.Sprintf("  skipped %d of %d\t%s\n", pkg.Skipped, pkg.Passed+pkg.Failed+pkg.Skipped, pkg.Name)
+		out += fmt.Sprintf("  skipped %d of %d\t%s\n", pkg.Skipped,
+			pkg.Passed+pkg.Failed+pkg.Skipped+pkg.Inapplicable, pkg.Name)
 	}
 	return out
 }

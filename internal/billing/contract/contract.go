@@ -7,7 +7,8 @@ package contract
 import (
 	"context"
 	"net/http"
-	"strings"
+	"slices"
+	"sort"
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -22,15 +23,26 @@ import (
 // call to the named method fails with a provider error, or nil when the
 // implementation cannot inject a failure for that method.
 //
-// An inapplicable error case is NOT REGISTERED, and the set of omissions is
-// reported once by name. It used to be registered and then skipped, which
-// cost six skipped tests across `internal/billing` and
-// `internal/billinglocal` and made the gate's skip count nonzero on a run
-// where every service the suite needs was present. Whether an implementation
-// can be made to fail is known before any subtest starts, so a table that
-// leaves the case out is a smaller table — while a skipped case is a test
-// that reported neither pass nor fail and still counted as having run.
-func RunClient(t *testing.T, factory func(t *testing.T) billing.Client, errFactory func(t *testing.T, method string) billing.Client) {
+// An inapplicable error case is NOT REGISTERED. It used to be registered and
+// then skipped, which cost six skipped tests and executed nothing either way;
+// whether an implementation can be made to fail is known before any subtest
+// starts, so a table that leaves the case out is a smaller table, while a
+// skipped case is a test that reported neither pass nor fail and still
+// counted as having run.
+//
+// expectOmitted DECLARES that set, and the omissions are ASSERTED against it
+// rather than logged. Logging was the first attempt and it was worse than the
+// skip it replaced: a `t.Logf` on a passing parent is discarded by this
+// project's own gate (it forwards a package's output only on failure) and by
+// plain `go test` without `-v`, so the gap appeared in no command the project
+// documents — where before it at least showed as `skipped 2 of 14`. Worse,
+// nothing held the set: dropping an error hook would have silently shrunk the
+// table from six cases to four with no signal at all, while under the old
+// shape the same regression surfaced as one more skip.
+//
+// Passing nothing means "this implementation must be failable in every
+// method", which is what the hosted adapter asserts.
+func RunClient(t *testing.T, factory func(t *testing.T) billing.Client, errFactory func(t *testing.T, method string) billing.Client, expectOmitted ...string) {
 	t.Helper()
 
 	methods := []struct {
@@ -83,9 +95,12 @@ func RunClient(t *testing.T, factory func(t *testing.T) billing.Client, errFacto
 			require.Error(t, m.call(t, context.Background(), failing))
 		})
 	}
-	if len(omitted) > 0 {
-		t.Logf("no provider-error injection for %s: those cases are not part of this implementation's table",
-			strings.Join(omitted, ", "))
+	want := append([]string(nil), expectOmitted...)
+	sort.Strings(want)
+	sort.Strings(omitted)
+	if !slices.Equal(omitted, want) {
+		t.Fatalf("provider-error cases omitted = %v, declared %v: a table that silently changes shape is a coverage change nobody reviewed",
+			omitted, want)
 	}
 }
 

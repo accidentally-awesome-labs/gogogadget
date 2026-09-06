@@ -32,21 +32,61 @@ the same `ok` as one that ran, and that is exactly how it went wrong: the test
 stack was torn down between rounds, `internal/audit`, `internal/notify`,
 `internal/schedules` and `internal/usage` each skipped 100% of their tests,
 all four printed `ok`, and "targeted tests pass" was reported on that basis.
-386 tests skipped in that run out of 1,984.
+386 tests skipped in that run out of 1,895.
 
 So the gate accounts for what the suite did. `ggg check` and `ggg test
 unit|integration` read the `go test -json` event stream and always print
 
 ```
-tests: 1979 passed, 0 skipped, 0 failed across 91 packages
+tests: 1889 passed, 0 skipped, 0 inapplicable, 0 failed across 91 packages
 ```
 
 naming every package that skipped anything, and marking a package that ran
-nothing at all with `NO TEST RAN: all N skipped`. A nonzero skip count is a
-**refusal** when `CI` is set: CI names `TEST_DATABASE_URL` and runs the
-service container that answers on it, so a skip there is a test that had
-everything it asked for. `ggg test` takes `--race` and `--cover`, which is how
-CI runs this gate instead of its own bare `go test`.
+nothing at all with `NO TEST RAN: all N skipped`. The counts are **leaf
+tests**: `go test -json` reports a verdict for a parent and for each of its
+subtests, so summing every event would give a number that means pass *events*
+under a label that says tests.
+
+Three refusals sit on top of it:
+
+- **a nonzero skip count when `CI` is set.** CI's `test` job names
+  `TEST_DATABASE_URL` in its own `env:` block and runs the service container
+  that answers on it, so a skip there is a test that had everything it asked
+  for.
+- **a run that executed nothing.** `go test ./...` against a tree matching no
+  packages exits 0 with a warning, so an account of zero packages or zero
+  tests is refused rather than printed as a clean sheet.
+- **stale generated output**, described under [the CLI](/docs/cli).
+
+`ggg test` takes `--race` and `--cover`, which is how CI runs this gate
+instead of its own bare `go test`. The run is always `-count=1`: Go's test
+cache keys on inputs it can observe, and a database that stopped answering is
+not one, so a cached entry replays a previous run's skip count.
+
+#### Declaring a skip inapplicable {#inapplicable}
+
+A skip is sometimes correct and permanent. `internal/config`'s derivation
+tests skip when the project's `test` environment publishes no local Postgres,
+which is exactly what a project on a managed database (Neon) does: there is
+nothing to supply and the skip is right. Refusing it in CI would be a false
+refusal, and the only remaining move would be deleting the test.
+
+So a skip may declare itself. Put `[inapplicable]` in the skip message:
+
+```go
+t.Skip("[inapplicable] the test environment publishes no local Postgres; nothing to derive")
+```
+
+Those are counted separately, printed as `N inapplicable`, and never refused.
+It is a declaration at the skip site, not a heuristic — the gate cannot tell an
+absent service from an inapplicable case by looking, so only the test may say.
+
+Where the inapplicability is known before the subtest starts, **not
+registering the case is still better**: an unregistered case is a smaller
+table, while a marked skip is still a test that did not run. That is what
+`internal/billing/contract` does, and it asserts its omission set (see
+[Contract](#contract) below) so a silently shrinking table
+fails.
 
 `internal/db/testdb` draws the matching line between **absent** and
 **broken**. `TEST_DATABASE_URL` being set is a request — somebody named a
@@ -135,13 +175,27 @@ declares `health` satisfies `apphost.HealthChecker` — the generated bootstrap
 emits a compile-time assertion, so a declaration without an implementation is
 a build failure, not a runtime nil.
 
+A case an implementation cannot reach is **not registered**, and the set of
+omissions is **declared and asserted**. `billing/contract.RunClient` takes the
+expected omissions as trailing arguments: the hosted Polar adapter passes none
+(every method does real HTTP, so every provider-error case must run), and
+`internal/billinglocal` declares all four, because that adapter has no failure
+mode at all — `IngestUsage` is `return nil`. Registering a case and skipping it
+was the old shape; it executed nothing either way and inflated the gate's skip
+count. Declaring the set is what makes a *shrinking* table fail: drop an error
+hook and the omissions no longer match the declaration.
+
 ## Integration
 
 `internal/db/testdb` gives **every package its own database**
 (`gogogadget_test_<name>`), dropped, recreated, and migrated at `Open` —
 `go test ./...` runs packages in parallel, and a shared database would let
-one package's teardown nuke another's fixtures. Tests self-skip when the
-server is unreachable (`ggg services up` locally; CI provides it).
+one package's teardown nuke another's fixtures. Tests self-skip only when
+**nobody named a server**: an unreachable `TEST_DATABASE_URL` is a failure,
+while the address derived from the test stack this project declares is an
+absence, so `bin/ggg services up --environment test` is what turns the layer
+on locally and CI names the server explicitly. See
+[A skipped test is not a passing test](#skips).
 
 **`TEST_DB_SUFFIX` is appended to that name.** The name is otherwise fixed per
 package and `Open` drops before it creates, so two runs of the same package

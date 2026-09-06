@@ -94,7 +94,7 @@ generation moved any generated file.
 ## Golden commands
 
 - `make dev` — one-terminal loop (templ watch + tailwind watch + air).
-- `make check` — THE gate: generate → **refuse stale generated output** → `ggg sync --check --offline` → vet → accounted `go test` → build. Run before every commit. Two things it refuses that nothing else does: (1) a generated file that generation just moved, i.e. output its declared source no longer produces — the files are rewritten and the gate fails, commit them and re-run; (2) a skipped test where `CI` is set. It always prints `tests: N passed, M skipped, K failed across P packages` and names every skipping package, because `go test` prints `ok` for a package whose every fixture skipped.
+- `make check` — THE gate: generate → **refuse stale generated output** → `ggg sync --check --offline` → vet → accounted `go test` → build. Run before every commit. Three things it refuses that nothing else does: (1) a generated file that generation just moved, i.e. output its declared source no longer produces — the files are rewritten and the gate fails, commit them and re-run; (2) a skipped test where `CI` is set, unless the skip declares itself `[inapplicable]`; (3) a run that executed no package or no test at all. It always prints `tests: N passed, M skipped, I inapplicable, K failed across P packages` (leaf tests) and names every skipping package, because `go test` prints `ok` for a package whose every fixture skipped.
 - `make seed` / `make db-reset` — demo data / nuke local db.
 - `make e2e` — Playwright suite (`ggg test e2e` brings the test stack up itself; the server it drives runs on the host at `:18080`).
 - `make visual` — compare visual baselines in the pinned Linux container (what CI's required `visual` job runs). `make visual-update` — the ONLY thing allowed to overwrite a committed screenshot; macOS screenshots diff by design.
@@ -147,7 +147,12 @@ unreachable is a FAILURE, while a merely derived address (the test stack's
 skips. So run the integration layer against a stack you started
 (`bin/ggg services up --environment test`) or export `TEST_DATABASE_URL`; read
 the `tests: … M skipped …` line `make check` prints before believing a pass.
-`CI` set makes any skip a refusal.
+`CI` set makes any skip a refusal — a skip that is CORRECT AND PERMANENT
+(nothing to supply, e.g. a project on a managed database) must say so with
+`[inapplicable]` in its message, which is counted apart and never refused.
+Better still, where inapplicability is known before the subtest starts, do not
+register the case: `internal/billing/contract` declares and ASSERTS its
+omission set, so a shrinking table fails.
 
 ## Definition of done
 

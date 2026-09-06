@@ -4,7 +4,7 @@
     "id": "ggg/system/billing-local",
     "kind": "system",
     "name": "billing-local",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Local billing",
     "description": "In-app confirmation billing for development and tests",

@@ -27,7 +27,7 @@ bin/ggg info ggg/component/badge
 → vet → the accounted test run → build. The `make` targets are thin aliases
 over `bin/ggg`.
 
-Two refusals belong to `check` and to nothing else:
+Three refusals belong to `check` and to nothing else:
 
 - **Stale generated output.** It digests every generated file, runs the real
   generators, and digests again; a file that moved is output its declared
@@ -40,12 +40,20 @@ Two refusals belong to `check` and to nothing else:
 - **A skip where nothing can be absent.** `go test` never summarises skips, so
   a package whose every fixture skipped prints the same `ok` as one that
   passed. `check` and `ggg test unit|integration` read the `go test -json`
-  event stream, print `tests: N passed, M skipped, K failed across P
-  packages`, name every skipping package, and refuse a nonzero skip count when
-  `CI` is set — CI provides every service the suite asks for, so a skip there
-  is a test that had what it needed and still did not run. `ggg test` also
-  takes `--race` and `--cover`, which is how CI runs the accounted gate rather
-  than its own bare `go test`.
+  event stream, print `tests: N passed, M skipped, I inapplicable, K failed
+  across P packages` (leaf tests, not verdict events), name every skipping
+  package, and refuse a nonzero skip count when `CI` is set — CI provides
+  every service the suite asks for, so a skip there is a test that had what it
+  needed and still did not run. A skip that is correct and permanent declares
+  itself with `[inapplicable]` in its message and is counted apart, so a
+  derivative on a managed database is not refused for doing the supported
+  thing. The run is always `-count=1`, because Go's test cache cannot observe
+  a service that stopped answering and would replay a previous run's count.
+  `ggg test` also takes `--race` and `--cover`, which is how CI runs the
+  accounted gate rather than its own bare `go test`.
+- **A run that executed nothing.** `go test ./...` against a tree matching no
+  packages exits 0 with only a warning, so an account of zero packages or zero
+  tests is refused rather than printed as a clean sheet.
 
 ## The two files
 

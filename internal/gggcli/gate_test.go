@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/gogogadget/gogogadget/internal/modkit"
 )
 
 // The measured incident, in the smallest form that reproduces it: a package
@@ -46,7 +48,7 @@ func TestAccountGoTestReportsWhatTheOkLineHides(t *testing.T) {
 	for _, want := range []string{
 		"NO TEST RAN: all 2 skipped",
 		"example.test/audit",
-		"tests: 1 passed, 2 skipped, 0 failed across 2 packages",
+		"tests: 1 passed, 2 skipped, 0 inapplicable, 0 failed across 2 packages",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("gate output does not contain %q:\n%s", want, rendered)
@@ -165,6 +167,122 @@ func TestAccountedRunNeverReadsTheTestCache(t *testing.T) {
 	for _, want := range []string{"-race", "-cover"} {
 		if !strings.Contains(raced, want) {
 			t.Fatalf("argv %q dropped %s; CI depends on it", raced, want)
+		}
+	}
+}
+
+// The floor, and it is this gate's own thesis turned on this gate. Before it,
+// a run producing exit 0 and no events rendered
+// "tests: 0 passed, 0 skipped, 0 inapplicable, 0 failed across 0 packages"
+// and returned nil — `go test ./...` against a tree that matches no packages
+// exits 0 with only a warning, which a mid-genesis derivative reaches.
+//
+// Mutation: drop refuseEmptyRun and a suite that does not exist reports a
+// pass.
+func TestAccountRefusesARunThatExecutedNothing(t *testing.T) {
+	for name, account := range map[string]goTestAccount{
+		"no packages at all": {},
+		"packages but not one test": {Packages: []*packageAccount{
+			{Name: "example.test/a", Result: "skip"},
+			{Name: "example.test/b", Result: "skip"},
+		}},
+	} {
+		err := account.refuseEmptyRun()
+		if err == nil {
+			t.Fatalf("%s reported success", name)
+		}
+		if got := exitOf(t, err); got != exitRefusal {
+			t.Fatalf("%s exit = %d, want the refusal code %d", name, got, exitRefusal)
+		}
+	}
+	// One real test is enough to make the run a run.
+	ran := goTestAccount{Packages: []*packageAccount{{Name: "example.test/a", Result: "pass", Passed: 1}}, Passed: 1}
+	if err := ran.refuseEmptyRun(); err != nil {
+		t.Fatalf("a run that executed one test was refused: %v", err)
+	}
+}
+
+// The totals line says "tests", so it has to count tests. `go test -json`
+// reports a verdict for a parent AND for each subtest, so summing every event
+// counts a table once per case plus once for the table — a number that means
+// something other than its label, in a gate whose whole subject is numbers
+// meaning what they say.
+//
+// Mutation: count every verdict event and this reads 5 instead of 3.
+func TestAccountCountsLeafTestsNotVerdictEvents(t *testing.T) {
+	stream := events(
+		event{Action: "start", Package: "example.test/table"},
+		event{Action: "pass", Package: "example.test/table", Test: "TestTable/one"},
+		event{Action: "pass", Package: "example.test/table", Test: "TestTable/two"},
+		event{Action: "skip", Package: "example.test/table", Test: "TestTable/three"},
+		event{Action: "pass", Package: "example.test/table", Test: "TestTable"},
+		event{Action: "pass", Package: "example.test/table", Test: "TestAlone"},
+		event{Action: "pass", Package: "example.test/table", Elapsed: 0.1},
+	)
+	account, err := accountGoTest(strings.NewReader(stream), &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("accounting: %v", err)
+	}
+	if account.Passed != 3 || account.Skipped != 1 {
+		t.Fatalf("account = %d passed, %d skipped; want 3 passed (two subtests plus TestAlone) and 1 skipped",
+			account.Passed, account.Skipped)
+	}
+}
+
+// A skip that declares itself inapplicable is counted apart and never
+// refused. Without it the CI refusal ships a false refusal into every
+// derivative: internal/config's derivation tests skip when the project's test
+// environment publishes no local Postgres, which is exactly what a derivative
+// on a managed database does, and "supply what those tests skip for" is not
+// advice anyone there can act on.
+//
+// Mutation: ignore the marker and a derivative on Neon gets exit 3 for doing
+// the supported thing.
+func TestInapplicableSkipsAreCountedApartAndNeverRefused(t *testing.T) {
+	stream := events(
+		event{Action: "start", Package: "example.test/cfg"},
+		event{Action: "output", Package: "example.test/cfg", Test: "TestDerives",
+			Output: "    config_test.go:9: " + InapplicableSkipMarker + " the test environment publishes no local Postgres\n"},
+		event{Action: "skip", Package: "example.test/cfg", Test: "TestDerives"},
+		event{Action: "output", Package: "example.test/cfg", Test: "TestNeedsDB",
+			Output: "    db_test.go:9: no test database server\n"},
+		event{Action: "skip", Package: "example.test/cfg", Test: "TestNeedsDB"},
+		event{Action: "pass", Package: "example.test/cfg", Test: "TestPure"},
+		event{Action: "pass", Package: "example.test/cfg", Elapsed: 0.1},
+	)
+	account, err := accountGoTest(strings.NewReader(stream), &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("accounting: %v", err)
+	}
+	if account.Inapplicable != 1 || account.Skipped != 1 {
+		t.Fatalf("account = %d inapplicable, %d skipped; want 1 and 1", account.Inapplicable, account.Skipped)
+	}
+
+	// And an all-inapplicable run must not be refused even where skips are
+	// forbidden, while the un-marked skip beside it still is.
+	only := goTestAccount{Packages: []*packageAccount{{Name: "example.test/cfg", Passed: 1, Inapplicable: 3}}, Passed: 1, Inapplicable: 3}
+	if only.Skipped != 0 {
+		t.Fatal("an inapplicable skip leaked into the refusable count")
+	}
+	if got := only.summary(true); !strings.Contains(got, "3 inapplicable") {
+		t.Fatalf("summary %q hides the inapplicable count", got)
+	}
+	if got := account.forbiddenSkipRefusal(); !strings.Contains(got, InapplicableSkipMarker) {
+		t.Fatalf("the refusal %q does not tell a derivative how to declare an inapplicable case", got)
+	}
+}
+
+// templ's --lazy skips regeneration when the output is newer than the source.
+// Adding it for speed would silently reduce the drift gate to exactly the
+// mtime comparison the design rejects — and it would fail open, reporting a
+// clean tree over a stale artifact.
+func TestGenerationStepsNeverRunTemplLazily(t *testing.T) {
+	lock := modkit.Lock{GoTools: []string{templGoTool, sqlcGoTool}}
+	for _, step := range generationSteps(lock) {
+		for _, arg := range step {
+			if arg == "--lazy" || arg == "-lazy" {
+				t.Fatalf("generation step %q runs templ lazily, which makes the drift gate an mtime check", strings.Join(step, " "))
+			}
 		}
 	}
 }
