@@ -97,6 +97,55 @@ func TestCIExercisesEveryClosureFamilyForReal(t *testing.T) {
 	}
 }
 
+// The `test` job's suite step must go through the CLI, because a bare
+// `go test` cannot report what it did. `go test` never summarises skips: a
+// package whose every fixture skipped prints the same `ok` as one that ran,
+// and that is how an entire integration layer skipped against a torn-down
+// stack under four green `ok` lines. CI is the one place a skip cannot be
+// legitimate — this job names TEST_DATABASE_URL and runs the service
+// container that answers on it — and `ggg test` is what reads the event
+// stream and refuses a nonzero skip count.
+//
+// The race detector has to survive the routing, or closing one hole opens a
+// worse one.
+//
+// Mutation: put `go test -race -cover ./...` back and this fails, naming the
+// step.
+func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	workflow, _ := readCIWorkflow(t, root)
+	job, ok := workflow.Jobs["test"]
+	if !ok {
+		t.Fatal("the workflow has no test job")
+	}
+	var suite []string
+	for _, step := range job.Steps {
+		for line := range strings.SplitSeq(step.Run, "\n") {
+			command := strings.TrimSpace(line)
+			if !strings.HasPrefix(command, "go test") && !strings.Contains(command, "ggg test") {
+				continue
+			}
+			if step.If != "" || step.ContinueOnError {
+				t.Fatalf("the suite step is exempt from failing the build (if: %q, continue-on-error: %v)", step.If, step.ContinueOnError)
+			}
+			suite = append(suite, command)
+		}
+	}
+	if len(suite) != 1 {
+		t.Fatalf("the test job runs the suite %d times: %q; want exactly one accounted run", len(suite), suite)
+	}
+	command := suite[0]
+	if strings.HasPrefix(command, "go test") {
+		t.Fatalf("the test job runs a bare %q, which cannot report a skip and so cannot refuse one; run it through `ggg test`", command)
+	}
+	if !strings.Contains(command, "--race") {
+		t.Fatalf("the suite command %q dropped the race detector", command)
+	}
+}
+
 func ciJobForFamily(family ClosureFamily) (string, bool) {
 	for name, candidate := range ciRegistryValidateJobs {
 		if candidate == family {

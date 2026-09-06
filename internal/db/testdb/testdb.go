@@ -2,7 +2,10 @@
 // `go test ./...` runs packages in parallel, and sharing one database lets
 // one package's teardown nuke another's fixtures. Databases are named
 // gogogadget_test_<name>, dropped and recreated at Open so every run starts
-// clean. Skips when the server is unreachable (CI provides it).
+// clean.
+//
+// A server that does not answer is a SKIP only when nobody named it; see
+// Unreachable.
 package testdb
 
 import (
@@ -94,6 +97,59 @@ func BaseDSN(t *testing.T) string {
 	return base
 }
 
+// Unreachable ends the calling test for a test-database server that did not
+// answer, and it is the whole of the absent/broken distinction this package
+// draws.
+//
+// TEST_DATABASE_URL being SET is a request: somebody exported an address for
+// this suite, and CI's workflow does exactly that beside the service
+// container that answers on it. A DERIVED address is not a request — it is
+// the address this project's test stack WOULD publish, which is equally true
+// whether or not the stack is running, so a contributor who has never run
+// `ggg services up --environment test` derives one too.
+//
+// So a named server that does not answer is a FAILURE and a merely derived
+// one is an ABSENCE. Before the split every unreachable server was an
+// absence: the test stack was torn down between rounds, an entire package's
+// integration tests skipped, `go test` printed `ok`, and that was reported as
+// a pass.
+//
+// It is exported because every helper that opens its own connection —
+// including this package's own tests — has to make the same call, and two
+// copies of this decision is how one of them stays wrong.
+//
+// It takes a Reporter rather than a *testing.T so the verdict itself is
+// assertable: t.Skipf and t.Fatalf are not observable from the test that
+// provoked them, and a rule about which of the two fires that no test can
+// read is the same class of defect this function exists to close. Every
+// production caller passes its own *testing.T, and both branches end the
+// calling goroutine, so nothing after the call runs.
+func Unreachable(t Reporter, err error) {
+	t.Helper()
+	if operatorNamedTheServer() {
+		t.Fatalf("test database server unreachable: %v\n"+
+			"TEST_DATABASE_URL names this server, so one that does not answer is a broken database and not an absent one. "+
+			"Start it, or unset TEST_DATABASE_URL to let the integration layer skip.", err)
+		return
+	}
+	t.Skipf("no test database server: %v\n"+
+		"Nothing named a server, so this address came from the test stack this project declares. "+
+		"Run `ggg services up --environment test` to run the integration layer, or export TEST_DATABASE_URL.", err)
+}
+
+// Reporter is the slice of *testing.T that Unreachable uses.
+type Reporter interface {
+	Helper()
+	Skipf(format string, args ...any)
+	Fatalf(format string, args ...any)
+}
+
+// operatorNamedTheServer reports whether the base address was NAMED rather
+// than derived. It re-reads the environment instead of taking a parameter so
+// that BaseDSN's precedence and this predicate cannot disagree: they consult
+// the same variable with the same empty-is-unset rule.
+func operatorNamedTheServer() bool { return os.Getenv("TEST_DATABASE_URL") != "" }
+
 // DSN drops and recreates gogogadget_test_<name> and returns its DSN, without
 // migrating. Callers that own their own migration run — a runtime booting the
 // database module, for instance — need an empty database, not a prepared one.
@@ -124,7 +180,7 @@ func DSN(t *testing.T, name string) string {
 	admin.Path = "/postgres"
 	conn, err := pgx.Connect(connectCtx, admin.String())
 	if err != nil {
-		t.Skipf("test database server unreachable: %v", err)
+		Unreachable(t, err)
 	}
 	// Closing gets its own context: the phase budget that opened the
 	// connection is typically spent by the time this runs.

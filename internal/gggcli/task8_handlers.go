@@ -277,5 +277,6 @@ func runTest(ctx context.Context, cc CommandContext, args []string) (Result, err
 	if len(parsed.positional) != 1 {
 		return Result{}, usageError(spec.Usage)
 	}
-	return drivePlanMutation(ctx, cc, "test", TaskMutation{Task: "test", Action: parsed.positional[0]}, false)
+	mutation := TaskMutation{Task: "test", Action: parsed.positional[0], Race: parsed.Bool("race"), Cover: parsed.Bool("cover")}
+	return drivePlanMutation(ctx, cc, "test", mutation, false)
 }

@@ -14,9 +14,9 @@ import (
 // TestMockClientContract runs the shared contract against the test double so
 // the mock can't drift from a real provider client's behavior. MockClient has
 // error hooks only for RevokeSubscription/IngestUsage (RevokeErr/IngestErr
-// fields); CreateCheckout/CreatePortalSession cannot fail, so those
-// provider-error cases skip — a documented gap, with happy paths still
-// enforced.
+// fields); CreateCheckout/CreatePortalSession cannot fail, so the table
+// leaves those provider-error cases out and names them in the run's log — a
+// reported gap rather than a skipped test, with happy paths still enforced.
 func TestMockClientContract(t *testing.T) {
 	errBoom := errors.New("contract boom")
 	billingcontract.RunClient(t,

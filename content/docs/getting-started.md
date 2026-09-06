@@ -197,16 +197,21 @@ All keys and defaults: [Configuration](/docs/configuration) and the generated
 ## The day-to-day loop
 
 ```sh
-bin/ggg check   # generate → drift check → vet → test → build
+bin/ggg check   # generate → stale-output refusal → drift check → vet → test → build
 ```
 
 `check` regenerates first (`ggg generate`: refresh mutable registries, sync,
-templ, sqlc, Tailwind), then proves the tree matches the lock with
-`ggg sync --check --offline`, then vets, tests and builds. Run it before every
-commit. Other commands you will use daily:
+templ, sqlc, Tailwind) and then **refuses if generation moved anything** — a
+generated file its declared source no longer produces is a failure, not a
+silent repair, and the message names each path. Next it proves the tree
+matches the lock with `ggg sync --check --offline`, then vets, tests and
+builds. The test step reports `tests: N passed, M skipped, K failed across P
+packages`: read the skip count, because `go test` prints `ok` for a package
+whose every fixture skipped. Run `check` before every commit. Other commands
+you will use daily:
 
 ```sh
-bin/ggg test unit          # go test ./...
+bin/ggg test unit          # go test ./..., with the skip account
 bin/ggg test e2e           # test compose stack + Playwright
 bin/ggg db reset --yes     # destroy and recreate the local database, reseed
 bin/ggg diff               # every file whose bytes differ from the lock

@@ -58,6 +58,13 @@ stages the upstream candidate under `tmp/ggg/conflicts/` and exits 4 for
 `ggg resolve`. Exit codes: 0 ok, 1 runtime, 2 usage, 3 refusal, 4 conflict,
 5 rolled back. Full workflows: **[/docs/extending](content/docs/extending.md)**.
 
+**No `registry` or `sync` command runs a generator.** `registry build`,
+`registry sign`, `sync --offline` and `sync --check --offline` settle the
+catalog and the lock; they all exit 0 over a `_templ.go` its `.templ` no
+longer produces — measured, with the running binary rendering the old text.
+Finish with `make check`, which runs `generate` first and then REFUSES if
+generation moved any generated file.
+
 ## Repo map
 
 - `cmd/ggg` — the module CLI (thin shell over `internal/modkit`). `cmd/server` — `apphost.OS` → `modules.Boot` → run → `Runtime.Close`; all wiring is generated. `cmd/seed` — `-reset`, `-registry dev|e2e`.
@@ -87,7 +94,7 @@ stages the upstream candidate under `tmp/ggg/conflicts/` and exits 4 for
 ## Golden commands
 
 - `make dev` — one-terminal loop (templ watch + tailwind watch + air).
-- `make check` — THE gate: generate + `ggg sync --check --offline` + vet + test + build. Run before every commit.
+- `make check` — THE gate: generate → **refuse stale generated output** → `ggg sync --check --offline` → vet → accounted `go test` → build. Run before every commit. Two things it refuses that nothing else does: (1) a generated file that generation just moved, i.e. output its declared source no longer produces — the files are rewritten and the gate fails, commit them and re-run; (2) a skipped test where `CI` is set. It always prints `tests: N passed, M skipped, K failed across P packages` and names every skipping package, because `go test` prints `ok` for a package whose every fixture skipped.
 - `make seed` / `make db-reset` — demo data / nuke local db.
 - `make e2e` — Playwright suite (`ggg test e2e` brings the test stack up itself; the server it drives runs on the host at `:18080`).
 - `make visual` — compare visual baselines in the pinned Linux container (what CI's required `visual` job runs). `make visual-update` — the ONLY thing allowed to overwrite a committed screenshot; macOS screenshots diff by design.
@@ -133,10 +140,20 @@ running the same package concurrently). User flow → e2e spec. Pixel-level →
 visual spec (`make visual`; baselines only via `make visual-update`).
 `go run ./cmd/ggg info KIND/NAME` prints the exact commands a module declares.
 
+**A green `ok` from a package whose fixtures all skipped is not a pass.**
+`testdb` skips only when NOBODY NAMED a server: `TEST_DATABASE_URL` set and
+unreachable is a FAILURE, while a merely derived address (the test stack's
+`localhost:15432`, present whether or not the stack runs) is an absence and
+skips. So run the integration layer against a stack you started
+(`bin/ggg services up --environment test`) or export `TEST_DATABASE_URL`; read
+the `tests: … M skipped …` line `make check` prints before believing a pass.
+`CI` set makes any skip a refusal.
+
 ## Definition of done
 
 `make check` green + new behavior covered at the layer from the rule above. If
-you touched a manifest-owned file, `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` first.
+you touched a manifest-owned file, `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` first — then `make check` again, because no
+`registry` or `sync` command runs templ, sqlc or Tailwind.
 
 ## Task playbook
 

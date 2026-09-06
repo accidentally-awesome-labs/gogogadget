@@ -22,10 +22,30 @@ bin/ggg info ggg/component/badge
 ```
 
 `ggg generate` refreshes mutable directory registries, runs
-`ggg sync --offline`, then templ, sqlc and Tailwind; `ggg check` runs
-`generate`, then `ggg sync --check --offline`, vet, tests and build — so the
-local gate itself proves there is no generated drift. The `make` targets are
-thin aliases over `bin/ggg`.
+`ggg sync --offline`, then templ, sqlc and Tailwind. `ggg check` is the gate:
+`generate` → **refuse stale generated output** → `ggg sync --check --offline`
+→ vet → the accounted test run → build. The `make` targets are thin aliases
+over `bin/ggg`.
+
+Two refusals belong to `check` and to nothing else:
+
+- **Stale generated output.** It digests every generated file, runs the real
+  generators, and digests again; a file that moved is output its declared
+  source no longer produces, and the gate fails naming each path (and, for
+  templ, its `.templ`). The files have been rewritten — commit them and
+  re-run. Running the generators is what makes this sound: nothing inside a
+  `_templ.go` names the bytes it came from, and an mtime comparison is
+  meaningless on a fresh checkout. No `registry` or `sync` command runs a
+  generator, so nothing else in the CLI can answer this question.
+- **A skip where nothing can be absent.** `go test` never summarises skips, so
+  a package whose every fixture skipped prints the same `ok` as one that
+  passed. `check` and `ggg test unit|integration` read the `go test -json`
+  event stream, print `tests: N passed, M skipped, K failed across P
+  packages`, name every skipping package, and refuse a nonzero skip count when
+  `CI` is set — CI provides every service the suite asks for, so a skip there
+  is a test that had what it needed and still did not run. `ggg test` also
+  takes `--race` and `--cover`, which is how CI runs the accounted gate rather
+  than its own bare `go test`.
 
 ## The two files
 

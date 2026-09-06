@@ -173,7 +173,8 @@ ggg info ggg/component/data-table  # contract, files, links, verify commands
 ggg add ggg/component/kanban     # install it and its dependency closure
 ggg diff                         # what have I changed since install?
 ggg update ggg/component/badge   # advance named modules only
-ggg sync --check --offline       # does the tree match the lock?
+ggg sync --check --offline       # does the tree match the lock? (registry-owned output only)
+make check                       # THE gate: also refuses generated output its source no longer produces
 ```
 
 Declared intent lives in `gogogadget.json`; resolved truth lives in the

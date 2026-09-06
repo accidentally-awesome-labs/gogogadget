@@ -4,7 +4,7 @@
     "id": "ggg/system/billing",
     "kind": "system",
     "name": "billing",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Billing",
     "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
@@ -60,7 +60,7 @@
         "source": "internal/billing/contract/contract.go",
         "target": "internal/billing/contract/contract.go",
         "class": "go",
-        "sha256": "38018190e7607007dc3a174e56187e73076a40a16d09c0c6c1d6edfb7d265522",
+        "sha256": "b7a823f64c9a8864f5227b874cb1a30bc7d86464abc9e046c041a44d08a01531",
         "rewrite_module": true,
         "contract": false
       },
@@ -68,7 +68,7 @@
         "source": "internal/billing/contract_test.go",
         "target": "internal/billing/contract_test.go",
         "class": "test",
-        "sha256": "2d19fbcdd113a97c54e4ed0189a07c9ad25345bc6fef6d3deca35c1ea022b562",
+        "sha256": "8ee8faf337c2db35d0509913720fa97a5cf72105e4e7c0d796cc3a5f1a76c284",
         "rewrite_module": true,
         "contract": false
       },

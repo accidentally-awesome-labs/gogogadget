@@ -263,10 +263,16 @@ type (
 		Mode        string
 		Volumes     bool
 		Yes         bool
-		Provider    string
-		Subject     string
-		UserID      string
-		OrgID       string
+		// Race and Cover are the two `go test` flags CI needs. They live here
+		// so CI runs the accounted gate instead of its own bare `go test`,
+		// which is how the suite's skip count went unread in the one place
+		// where a skip cannot be legitimate.
+		Race     bool
+		Cover    bool
+		Provider string
+		Subject  string
+		UserID   string
+		OrgID    string
 	}
 )
 

@@ -4,7 +4,7 @@
     "id": "ggg/system/testdb",
     "kind": "system",
     "name": "testdb",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Per-package test databases",
     "description": "Gives every integration-test package its own database so parallel packages cannot nuke each other's fixtures. Skips when no server is reachable.",
@@ -39,7 +39,7 @@
         "source": "internal/db/testdb/testdb.go",
         "target": "internal/db/testdb/testdb.go",
         "class": "go",
-        "sha256": "2ff01ef727920ff2086c7a2209e13f44604292a7c30c1c39ab0569f2e60f87be",
+        "sha256": "67ebdeaacd4609e841cd7706724eccbdb0a076411dc54c0a355d8b278af96027",
         "rewrite_module": true,
         "contract": true
       },
@@ -47,7 +47,7 @@
         "source": "internal/db/testdb/testdb_test.go",
         "target": "internal/db/testdb/testdb_test.go",
         "class": "test",
-        "sha256": "c61054a0d4b56ed4e6b2a13bb4e854678485e52d4099621d9fa4658fee3b3279",
+        "sha256": "7523f1f8188040144da7c2c5a7b11ef604dbf9a0d7740ab07316bcb1225a3375",
         "rewrite_module": true,
         "contract": false
       }

@@ -387,13 +387,9 @@ func (c *Controller) applyTrustedTask(ctx context.Context, mutation TaskMutation
 			}
 		}
 	case "check":
-		for _, argv := range [][]string{selfArgv("generate"), selfArgv("sync", "--check", "--offline"), {"go", "vet", "./..."}, {"go", "test", "./..."}, {"go", "build", "./..."}} {
-			if err = run(root, argv...); err != nil {
-				break
-			}
-		}
+		err = c.runCheck(ctx, root, run)
 	case "test":
-		err = runTestTask(run, root, mutation.Action)
+		err = c.runTestTask(ctx, run, root, mutation.Action, goTestFlags{Race: mutation.Race, Cover: mutation.Cover})
 	case "build":
 		err = run(root, "go", "build", "./cmd/server")
 	}
@@ -587,10 +583,44 @@ func selfArgv(args ...string) []string {
 	return append([]string{"go", "run", "./cmd/ggg"}, args...)
 }
 
-func runTestTask(run func(string, ...string) error, root, mode string) error {
+// runCheck is THE gate, and it VERIFIES rather than repairs. Generation runs
+// first — it always did — but the tree it produces is now compared with the
+// tree it started from, so a generated file whose declared source no longer
+// produces it is a refusal instead of a silent rewrite followed by `ok`.
+func (c *Controller) runCheck(ctx context.Context, root string, run func(string, ...string) error) error {
+	before, err := generatedOutputDigests(root)
+	if err != nil {
+		return err
+	}
+	if err := run(root, selfArgv("generate")...); err != nil {
+		return err
+	}
+	after, err := generatedOutputDigests(root)
+	if err != nil {
+		return err
+	}
+	if err := refuseGenerationDrift(before, after); err != nil {
+		return err
+	}
+	if err := run(root, selfArgv("sync", "--check", "--offline")...); err != nil {
+		return err
+	}
+	if err := run(root, "go", "vet", "./..."); err != nil {
+		return err
+	}
+	if err := c.runAccountedGoTest(ctx, root, goTestFlags{}); err != nil {
+		return err
+	}
+	return run(root, "go", "build", "./...")
+}
+
+func (c *Controller) runTestTask(ctx context.Context, run func(string, ...string) error, root, mode string, flags goTestFlags) error {
+	if flags != (goTestFlags{}) && mode != "unit" && mode != "integration" && mode != "all" {
+		return usageError("--race and --cover apply to the go test layers (unit, integration)")
+	}
 	switch mode {
 	case "unit", "integration":
-		return run(root, "go", "test", "./...")
+		return c.runAccountedGoTest(ctx, root, flags)
 	case "e2e":
 		// The Playwright harness starts its own server on the host, so the
 		// stack supplies dependency services only.
@@ -617,7 +647,7 @@ func runTestTask(run func(string, ...string) error, root, mode string) error {
 		return run(root, filepath.Join("scripts", "smoke.sh"))
 	case "all":
 		for _, item := range []string{"unit", "integration", "e2e", "visual", "smoke"} {
-			if err := runTestTask(run, root, item); err != nil {
+			if err := c.runTestTask(ctx, run, root, item, goTestFlags{}); err != nil {
 				return err
 			}
 		}

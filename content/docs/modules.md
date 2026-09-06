@@ -289,17 +289,25 @@ answer different questions:
 | Question | Command | How it answers |
 |---|---|---|
 | Did I change source I own? | `ggg diff` | Compares on-disk bytes against the recorded upstream base |
-| Is generated output stale? | `ggg sync --check --offline` | Re-renders every aggregate and compares bytes |
+| Is a registry-owned aggregate stale? | `ggg sync --check --offline` | Re-renders every aggregate and compares bytes |
+| Is tool-owned output (templ, sqlc, Tailwind) stale? | `ggg check` | Runs the real generators and refuses if any output moved |
 
 A locally rebuilt generated output is `modified` against its base by
 definition, which is why `ggg diff` is the wrong probe for it. The base digest
 plays no part in detecting generated drift: `generatedDriftDiagnostics` renders
 the aggregates and compares them byte-for-byte with the tree, emitting
 `generated_missing`, `generated_drift`, or `generated_stale` for an aggregate no
-selected module renders any more. It never reads `base_sha256`. So `sync --check`
-exit 0 means every generated output on disk is exactly what generation produces,
-regardless of what the lock recorded — and it is blind to a hand-written file no
-module generates, for which `ggg diff` is the only probe.
+selected module renders any more. It never reads `base_sha256`.
+
+**`sync --check` covers the aggregates it renders and nothing else.** templ,
+sqlc and Tailwind outputs are tool-owned: sync declines to own them, does not
+run those generators, and cannot say whether `settings_templ.go` is what
+`settings.templ` produces — so `sync --check --offline` exits 0 over a stale
+one. Only `ggg check` can answer that, because answering it soundly means
+running the generators and comparing the tree before and after; a `check` that
+finds a difference refuses rather than absorbing the repair. `sync --check` is
+also blind to a hand-written file no module generates, for which `ggg diff` is
+the only probe.
 
 `generated_stale` is actionable: `ggg sync` deletes the outputs the selected
 graph no longer renders. Several emitters produce nothing at all once their
@@ -351,17 +359,25 @@ make generate                                 # ggg sync --offline, then templ/s
 go run ./cmd/ggg sync --check --offline       # is the tree already correct?
 ```
 
-`sync` reconciles the tree to the declared intent. `sync --check` renders
-everything to a temporary tree and compares bytes, failing on changed content,
-missing outputs, or stale registry-owned files that the current selection no
-longer produces. It is exit 4 on drift and writes nothing, which is what makes
-it usable as a gate. `make check` runs it after `make generate`, so the local
-gate proves there is no drift rather than asserting it.
+`sync` reconciles the tree to the declared intent. `sync --check` renders every
+**registry-owned** aggregate to a temporary tree and compares bytes, failing on
+changed content, missing outputs, or stale registry-owned files that the current
+selection no longer produces. It is exit 4 on drift and writes nothing, which is
+what makes it usable as a gate.
+
+It says nothing about templ, sqlc or Tailwind output. Those are tool-owned:
+`sync` neither renders nor runs them, so `sync --check --offline` exits 0 over a
+`_templ.go` that its `.templ` no longer produces. `make check` closes that by
+running `generate` first and then **refusing** if generation moved any
+generated file — so a stale artifact fails the gate instead of being quietly
+rewritten underneath a pass.
 
 If you edit a module's own source **in this repository**, you also have to run
 `go run ./cmd/ggg registry build`, because the payload and its manifest live in
 the same tree and your edit has stalled the recorded digest. Otherwise the next
-sync refuses with a `sha256 mismatch`.
+sync refuses with a `sha256 mismatch`. And if what you edited was a `.templ`, a
+query or `input.css`, finish with `make generate` (or just `make check`): no
+`registry` or `sync` command runs a generator.
 
 ### Update and conflicts {#update-and-conflicts}
 

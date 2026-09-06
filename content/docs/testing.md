@@ -20,9 +20,42 @@ integration. User flow → e2e. Pixels → visual.** Never reach for a heavier
 layer than the behavior needs.
 
 `ggg test` runs a layer at a time — `unit`, `integration`, `e2e`, `visual`,
-`smoke`, or `all` — and `ggg check` is the commit gate: generate → drift check
-(`sync --check --offline`) → `go vet` → `go test` → `go build`. The `make`
-targets are thin aliases over `bin/ggg`.
+`smoke`, or `all` — and `ggg check` is the commit gate: generate → stale
+generated-output refusal → drift check (`sync --check --offline`) → `go vet` →
+the accounted `go test` → `go build`. The `make` targets are thin aliases over
+`bin/ggg`.
+
+### A skipped test is not a passing test {#skips}
+
+`go test` never summarises skips. A package whose every fixture skipped prints
+the same `ok` as one that ran, and that is exactly how it went wrong: the test
+stack was torn down between rounds, `internal/audit`, `internal/notify`,
+`internal/schedules` and `internal/usage` each skipped 100% of their tests,
+all four printed `ok`, and "targeted tests pass" was reported on that basis.
+386 tests skipped in that run out of 1,984.
+
+So the gate accounts for what the suite did. `ggg check` and `ggg test
+unit|integration` read the `go test -json` event stream and always print
+
+```
+tests: 1979 passed, 0 skipped, 0 failed across 91 packages
+```
+
+naming every package that skipped anything, and marking a package that ran
+nothing at all with `NO TEST RAN: all N skipped`. A nonzero skip count is a
+**refusal** when `CI` is set: CI names `TEST_DATABASE_URL` and runs the
+service container that answers on it, so a skip there is a test that had
+everything it asked for. `ggg test` takes `--race` and `--cover`, which is how
+CI runs this gate instead of its own bare `go test`.
+
+`internal/db/testdb` draws the matching line between **absent** and
+**broken**. `TEST_DATABASE_URL` being set is a request — somebody named a
+server — so one that does not answer is a failure. A merely *derived* address
+is not a request: it is what this project's test stack would publish, equally
+true whether or not the stack is running, so a contributor who never ran
+`bin/ggg services up --environment test` gets a skip and the unit layer. "Is
+it set" and "is it defaulted" are different questions, and only the first
+means anyone asked for a database.
 
 Which layer a given change needs is answerable without guessing. Every module
 declares its test inventory, and `ggg info` prints it as commands you can run
@@ -391,8 +424,11 @@ visual and e2e harnesses both set.
 Seven jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
 `make generate` → `git diff --exit-code -- ':!gogogadget.lock.json'`
 (generated code is committed and fresh, which is also what proves no registry
-drift) → `go vet` → `govulncheck` → `go test -race -cover ./...` →
-`make fuzz` → `go build`.
+drift) → `go vet` → `govulncheck` → `bin/ggg test integration --race --cover`
+→ `make fuzz` → `go build`. The test step goes through `ggg` rather than a
+bare `go test -race -cover ./...` for one reason: `ggg` reads the event stream
+and **refuses a nonzero skip count**, and this is the job where nothing can
+legitimately be absent.
 `e2e`, `visual`, `smoke`, `docker`, `registry-core` and `registry-external`
 all depend on `test`: `e2e` installs Chromium and runs `make e2e`; `visual`
 runs `make visual`, which owns its own seeding and host server — do not add

@@ -860,7 +860,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "ddb0c1275bf97d18968457e825a7c01d32a9be0870ebf9a6afbd203b9247b9be"
+      "sha256": "a396d2675ed80839e7278865347c9a42b512e9262b221a4f60d1a6e92bae63d8"
     },
     {
       "path": "registry/modules/system/cache-memory/module.json",
@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "a0826ae11f463135b6d2aa87b50369b106d43f137e3b0c5adc76f513b17b6c87"
+      "sha256": "10c50bf9e04129d883dc13844a1ea1e23a029c34b53111c3c0c4d4d085a1e7ce"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "d4f442933917ff8a55dbcc091a702dd446e267793682b5005bae248bfc5a76b1"
+      "sha256": "93c2191854194aafba3c65d2af67c54f0ae1e16a6f205a3bcade0a7fe91d8236"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "edd68b7b6e6d46bfa9b2c03f70abcd754235be70d3fb95ae808ce5e20533f0c7"
+      "sha256": "7c89253a929a9e278d84c9a061ff5514823ae298bd635ba67991992ea0406b86"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "977f38c7e0fd8f62d272f1bc8107ed05056907acc44f29d2965eb214ee8b09a7"
+      "sha256": "8b5c56e39d82dc556ea2ecc062c7a6c059fa87b3ca6704dc8cc933d1b2830b56"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "registry/modules/system/testdb/module.json",
-      "sha256": "9726518e53ca38821354edea6168f325c1f56d9ad3c804334c943a73f5f05aed"
+      "sha256": "d335f5614ed75095c0387e2511028ab9c72b1e1174513686f954ae3e78646578"
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",

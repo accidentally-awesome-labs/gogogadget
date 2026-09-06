@@ -160,7 +160,11 @@ func builtInCommands() []CommandSpec {
 			{Name: "claim", Help: "adopt a pre-existing divergent file as a recorded modification (repeatable)", Value: true, Repeatable: true},
 			{Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "test", Summary: "Run one test layer", Usage: "ggg test unit|integration|e2e|visual|smoke|all [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
+		{Name: "test", Summary: "Run one test layer", Usage: "ggg test unit|integration|e2e|visual|smoke|all [--race] [--cover] [--json]", Flags: []FlagSpec{
+			{Name: "race", Help: "run the go test layers under the race detector"},
+			{Name: "cover", Help: "report statement coverage per package"},
+			{Name: "json", Help: "emit the machine envelope"},
+		}},
 		{Name: "update", Summary: "Advance named modules, or one registry's ref", Usage: "ggg update [MODULES...] [--registry NAMESPACE --ref REF] [--dry-run] [--json]", Flags: []FlagSpec{
 			{Name: "registry", Help: "registry whose ref moves (requires --ref)", Value: true},
 			{Name: "ref", Help: "registry ref to advance to", Value: true}, {Name: "dry-run", Help: "resolve and report without writing"}, {Name: "json", Help: "emit the machine envelope"},

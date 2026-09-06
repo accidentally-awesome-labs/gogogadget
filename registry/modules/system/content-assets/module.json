@@ -4,7 +4,7 @@
     "id": "ggg/system/content-assets",
     "kind": "system",
     "name": "content-assets",
-    "revision": 17,
+    "revision": 18,
     "contract": 1,
     "title": "Embedded content corpus",
     "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
@@ -171,7 +171,7 @@
         "source": "content/docs/cli.md",
         "target": "content/docs/cli.md",
         "class": "content",
-        "sha256": "174ae105a79d592b8b3d578cf091e43ae94663f6322efaefe7c6c8df9d54b9ce",
+        "sha256": "c8098d0f78e020f65e8d80795d9b1ff1fc3047c4a4a76417dd498da6e28ff51e",
         "rewrite_module": false,
         "contract": false
       },
@@ -227,7 +227,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "d5d4b8388b66460b10efe710487695c83f989fbe286625516a25ced89c8a7d0d",
+        "sha256": "dd7fa7cc149d13b1d20e60f770bb0feb55dca60c1743fff41d2d0ec1a53985e9",
         "rewrite_module": false,
         "contract": false
       },
@@ -259,7 +259,7 @@
         "source": "content/docs/getting-started.md",
         "target": "content/docs/getting-started.md",
         "class": "content",
-        "sha256": "42e78120bdf4232c939222f990b1ae29831b741c61ddf8cb356bacc773ce5414",
+        "sha256": "5ac823f483629c35203be6f0a4b49062a6ec42e449c3b474ba563e02bd59b87c",
         "rewrite_module": false,
         "contract": false
       },
@@ -291,7 +291,7 @@
         "source": "content/docs/modules.md",
         "target": "content/docs/modules.md",
         "class": "content",
-        "sha256": "8c235b508723c4dcd733a0b6387192a7ad60c09f9fc40f8fb8ea6f15e38cb4b1",
+        "sha256": "04bf0fc54cad2cc2ef4fa756f898d5df9ead73b065cc327f01d9f9ec668511da",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "2adfeb5def355d28390d6fa4eee202cfd8b968185b54543dbdbfaa26f75b38df",
+        "sha256": "6a749ac10c8673b048768628a7c182203476feb77350fa55d6d3bbdcb4117e1b",
         "rewrite_module": false,
         "contract": false
       },

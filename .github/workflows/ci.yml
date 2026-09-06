@@ -48,8 +48,16 @@ jobs:
       - name: Vulnerability check
         run: go tool govulncheck ./...
 
+      # The gate, not a bare `go test`. `go test` never summarises skips, so a
+      # package whose every fixture skipped prints the same `ok` as one that
+      # passed — which is how an entire integration layer skipped against a
+      # torn-down stack and was reported as a pass. `ggg test` reads the event
+      # stream, prints the count, and REFUSES a nonzero one here: this job
+      # names TEST_DATABASE_URL above and runs the service container that
+      # answers on it, so a skip in this job is a test that had everything it
+      # asked for and still did not run.
       - name: Test
-        run: go test -race -cover ./...
+        run: bin/ggg test integration --race --cover
 
       - name: Fuzz
         run: make fuzz

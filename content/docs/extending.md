@@ -430,7 +430,8 @@ ggg registry build       # rescan the registry tree, refresh payload digests, ve
                          # refuse a module whose payloads changed at an unchanged revision,
                          # refuse a file in the tree that no module declares
 ggg registry validate    # check the catalog, then prove the closure lifecycle in a derivative
-ggg sync --offline       # install into this tree and regenerate
+ggg sync --offline       # install into this tree: writes the lock and the registry-owned aggregates
+ggg generate             # and ONLY this runs templ, sqlc and Tailwind — `sync` never does
 ```
 
 `registry build` is the authoring step you will forget once: in a self-hosting
@@ -594,6 +595,7 @@ ggg registry build              # refresh digests and indexes, rewrite the snaps
 ggg registry sign   --dir . --key-file <core signing key>
 ggg sync --offline              # settle the lock over the signed catalog
 ggg registry verify --dir . --public-key "$(cat <core public key>)"
+make check                      # generate, refuse stale generated output, then vet/test/build
 git tag -a vX.Y.Z -m "gogogadget vX.Y.Z"
 ```
 
@@ -601,6 +603,18 @@ git tag -a vX.Y.Z -m "gogogadget vX.Y.Z"
 any earlier signature. `sync` after `sign`, always: the lock records the
 catalog it installed, signature included, so signing after the sync leaves one
 pending change and `sync --check` refuses.
+
+**`make check` is not optional and the four registry commands are not
+sufficient alone.** None of `registry build`, `registry sign`, `sync
+--offline` or `sync --check --offline` runs a generator, so all four exit 0
+over a `_templ.go` that its `.templ` no longer produces — measured: a release
+completed at exit 0 with `settings_templ.go` carrying the previous copy, the
+running binary rendered the old text, and it was found by curling a server.
+Those commands settle the **catalog and the lock**; `templ`, `sqlc` and
+Tailwind output is tool-owned and only a command that runs the tools can speak
+for it. `make check` runs `generate` first and then refuses if generation moved
+any generated file, so the staleness fails the gate rather than being rewritten
+underneath a pass.
 
 `TestCommittedSnapshotVerifiesUnderThePinnedCoreKey`
 fails when the committed signature is missing, stale relative to
