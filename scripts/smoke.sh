@@ -24,23 +24,29 @@ fail=0
 #   redirect|<substring> expect a redirect whose Location contains this
 #
 # Redirects to the hosted account portal are asserted by path, not by full URL:
-# the destination host comes from CLERK_PORTAL_URL and differs per deployment,
-# while the hosted sign-in/sign-up/sign-out paths do not.
+# the destination host is whatever the selected adapter was configured with and
+# differs per deployment, while the hosted sign-in/sign-up/sign-out paths do not.
 #
 # The three auth routes have TWO legitimate contracts, and which one holds is a
-# property of the server, not of this script. With Clerk configured they redirect
-# to the hosted portal. In the documented zero-account posture
-# (DEV_AUTH_BYPASS=true and no Clerk keys) `/login` and `/signup` go to
-# `/dev/login` and `/logout` clears the cookie and returns to `/`. Asserting the
-# portal contract unconditionally passed on any machine with Clerk keys in its
-# environment and failed in CI, which runs the zero-account posture on purpose —
-# so the script asserted one configuration while running another.
+# property of the server, not of this script. Every destination now comes from
+# identity.Navigator, so the contract that holds is decided by the identity
+# adapter SELECTED for the environment — not by whether credentials happen to be
+# present. With a hosted adapter selected they redirect to that provider's
+# portal. In the documented zero-account posture, `ggg/system/identity-dev`
+# answers `/login` and `/signup` with its own `/dev/login` and `/logout` with
+# the home page, after the handler has expired the session cookie.
 #
-# The posture is read off `/login`'s own destination, because that is the only
-# signal that tracks the handlers' actual condition (bypass AND Clerk absent).
-# `/dev/login`'s existence tracks the bypass alone, so it says zero-account on a
-# server that has both the bypass and real keys — where the handlers take the
-# hosted path.
+# Asserting the portal contract unconditionally passed on any machine with
+# provider keys in its environment and failed in CI, which runs the
+# zero-account posture on purpose — so the script asserted one configuration
+# while running another.
+#
+# The posture is still read off `/login`'s own destination, and that signal is
+# now exact rather than merely the best available: the handler does nothing but
+# return what the selected adapter answered, so the destination IS the
+# selection. It no longer has to be inferred from a bypass flag and a key being
+# absent, which is what used to make `/dev/login`'s mere existence a misleading
+# signal on a server carrying both.
 #
 # This is not a weaker assertion than a fixed table. It requires `/login` to land
 # on one of exactly two documented destinations, and then requires the other two

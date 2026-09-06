@@ -784,7 +784,7 @@
     },
     {
       "path": "registry/modules/page/settings-account/module.json",
-      "sha256": "fa8f3461e6e23837e9fed58f0a6a48c71fe425e81c4ee04ce9a7ddbfcfa3a0a3"
+      "sha256": "a74b0eff2571337e078eef13e273a8e6c9dbb54a371e09e66419a9cadf082d7b"
     },
     {
       "path": "registry/modules/page/settings-api-tokens/module.json",
@@ -800,7 +800,7 @@
     },
     {
       "path": "registry/modules/page/settings-organization/module.json",
-      "sha256": "cd70d9cb1eb5fd3b6b392aaac9ea93c62bed928efa07bfd4e9e4846516275bdd"
+      "sha256": "f038120312ff591dd673b006f9b4e7ebe8823a87900324463811aef71bc35b72"
     },
     {
       "path": "registry/modules/page/settings-webhooks/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "2d84b089df7b72533dcacb27706e11af0ee16eac206cf5e8d5c55b0466685634"
+      "sha256": "f658a6ce54f500d8138ea5d1033bb97e7d6f33e99a5682491ea016ad3bdbef0a"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "160ea99f7ca62b54f194b8b9486572b088664d58fcb7598767e4ad79193d9167"
+      "sha256": "c61b35d9b11db15b0f8cc436650e9040189dfd4a3ad2424e389a61ed11e3c1e0"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "80a5428dbb8bc49ead5aeb613d208e5fedd215112cec18f4101567d550ca0bb1"
+      "sha256": "88446e685783f66a8f2b403ddb9f124ca5e219e8fcb667d23a89021e08273542"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1208,7 +1208,7 @@
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "59255b6ec68e5d5c8c24bdf4d3f24adf5df8982db539ae95073caae0efe41eee"
+      "sha256": "7a5c2020a115c8157a88c089f6037c5f927f9a944321995aa8e9218fc927ca35"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",

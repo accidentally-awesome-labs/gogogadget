@@ -231,15 +231,22 @@ func (s *Server) renderStatus(w http.ResponseWriter, r *http.Request, status int
 	s.Render(w, r, Page{Title: title, Layout: templates.LayoutPublic}, templates.StatusPage(title, detail))
 }
 
-// providerDestinationUnavailable renders the named failure when the adapter
-// selected for a provider slot publishes no page for a destination a handler
+// providerDestinationUnavailable refuses a request the selected adapter
+// cannot serve, because it publishes no page for the destination a handler
 // asked for.
 //
-// Loud on purpose, and it replaces three silent degradations: the settings
-// pages used to build a provider URL from a configuration key and render no
-// link at all when the selected adapter did not own that key, and the
-// zero-organization guard used to redirect to a same-origin path this
-// application does not serve. Neither said anything, anywhere.
+// This is the one place the refusal is an *event*, and so the one place it is
+// logged. Where a page can degrade honestly instead — the settings pages
+// render a caption that says the profile or organization is local — the
+// refusal is a designed branch that the rendered page already states, and
+// logging it would fire on every view under the zero-account adapter while
+// telling an operator nothing the screen does not.
+//
+// Loud on purpose. It replaces three silent degradations: the settings pages
+// built a provider URL from a configuration key and rendered no link at all
+// when the selected adapter did not own that key, and the zero-organization
+// guard redirected to a same-origin path this application does not serve.
+// Neither said anything, anywhere.
 func (s *Server) providerDestinationUnavailable(w http.ResponseWriter, r *http.Request, slot, destination string, err error) {
 	s.log.Error("provider destination unavailable",
 		"slot", slot, "destination", destination,

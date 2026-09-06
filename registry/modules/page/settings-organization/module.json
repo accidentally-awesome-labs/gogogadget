@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-organization",
     "kind": "page",
     "name": "settings-organization",
-    "revision": 5,
+    "revision": 6,
     "contract": 1,
     "title": "Organization settings",
     "description": "Renders the organization settings tab with the member roster, the hosted Clerk organization-portal link, and the admin-only export control.",
@@ -69,7 +69,7 @@
         "source": "internal/web/page_settings_organization.go",
         "target": "internal/web/page_settings_organization.go",
         "class": "go",
-        "sha256": "670e72bc9e196e057f93eb551919de8eddf06f04ca3d57c4577a32fa913e7180",
+        "sha256": "a966bbeb068586eeee8aa79cac33d7752627b3c131d5d9f888b7567a2826deab",
         "rewrite_module": true,
         "contract": false
       }
@@ -122,6 +122,7 @@
         "settings.org_export_button": "Export data",
         "settings.org_export_started": "Export started — you'll get a notification when it's ready.",
         "settings.org_export_title": "Export organization data",
+        "settings.org_identity_local": "Invitations and roles are managed in this application, not by an external identity provider.",
         "settings.org_identity_managed": "Invitations and roles are managed by your identity provider.",
         "settings.org_manage_link": "Manage organization →",
         "settings.org_members_caption": "Members of this organization, with their email address and role",
@@ -141,6 +142,7 @@
         "settings.org_export_button": "Exportar datos",
         "settings.org_export_started": "Exportación iniciada: recibirás una notificación cuando esté lista.",
         "settings.org_export_title": "Exportar datos de la organización",
+        "settings.org_identity_local": "Las invitaciones y los roles se gestionan en esta aplicación, no en un proveedor de identidad externo.",
         "settings.org_identity_managed": "Las invitaciones y los roles se gestionan en tu proveedor de identidad.",
         "settings.org_manage_link": "Gestionar organización →",
         "settings.org_members_caption": "Miembros de esta organización, con su correo electrónico y su rol",

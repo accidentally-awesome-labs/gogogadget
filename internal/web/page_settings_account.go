@@ -15,16 +15,18 @@ import (
 // provider's URL layout and rendered no link at all under any other.
 //
 // An adapter that manages no profile — the dev adapter derives it from the
-// subject — refuses, and the page renders its explanatory copy with no link
-// rather than a 503: the rest of this page is the visitor's own settings and
-// is not the provider's to withhold.
+// session subject — refuses, and this page degrades rather than 503ing: the
+// rest of it is the visitor's own settings and is not the provider's to
+// withhold. The refusal is deliberately dropped rather than logged. It is not
+// an event: it is the same answer on every view for a whole environment, and
+// the page states it on screen, which is where a visitor can act on it.
+// providerDestinationUnavailable logs the case where the refusal actually
+// costs someone the request.
 func (s *Server) handleSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	user := identity.UserFrom(r.Context())
-	accountURL, err := s.navigator.AccountURL(s.cfg.AppURL + r.URL.Path)
-	if err != nil {
-		s.log.Info("identity adapter publishes no account page",
-			"env", s.cfg.Env, "path", r.URL.Path, "error", err)
-	}
+	// Empty on refusal, which is the template's signal to render the local
+	// caption instead of the provider one. One value, one fact.
+	accountURL, _ := s.navigator.AccountURL(s.cfg.AppURL + r.URL.Path)
 	s.Render(w, r, Page{Title: "Account settings", Layout: templates.LayoutApp},
 		templates.SettingsAccount(*user, accountURL, ""))
 }

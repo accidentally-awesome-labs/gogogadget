@@ -4,7 +4,7 @@
     "id": "ggg/system/e2e-sweeps",
     "kind": "system",
     "name": "e2e-sweeps",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "E2E cross-cutting sweeps",
     "description": "The accessibility, keyboard, progressive-enhancement, loading, mobile, CSP, visual and public-site suites that assert shell and platform behaviour rather than one feature.",
@@ -1783,7 +1783,7 @@
         "source": "scripts/smoke.sh",
         "target": "scripts/smoke.sh",
         "class": "script",
-        "sha256": "b07ac16b052e3692a5db8ba9176d2c24fb65d68ca75c71459dc29daa973ae2fb",
+        "sha256": "a4bf765415e6460be9d1926ce57c48f45a6b50d12bfaa88265ebd6a41942b149",
         "rewrite_module": false,
         "contract": false
       },

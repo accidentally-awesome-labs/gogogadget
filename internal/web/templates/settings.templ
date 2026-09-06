@@ -44,6 +44,14 @@ templ SettingsTabs(active string) {
 	@ui.NavTabs(ui.NavTabsOpts{Items: uiNavItems(ctx, settingsTabs(ctx)), ActivePath: active})
 }
 
+// SettingsAccount renders the signed-in user's own settings.
+//
+// accountPortalURL is the selected identity adapter's account page, or empty
+// when that adapter publishes none. One value, one fact: the caption and the
+// link are both selected from it, so a page can never claim a provider
+// manages this profile and then offer nowhere to manage it. Under
+// ggg/system/identity-dev the profile is derived from the session subject and
+// there is no upstream account at all, which is what the second sentence says.
 templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string) {
 	@SettingsTabs("/app/settings/account")
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "settings.account_title")})
@@ -54,9 +62,11 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 			{Term: i18n.T(ctx, "settings.account_member_since"), Value: user.CreatedAt.Time.Format("January 2, 2006")},
 		}})
 		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-6"}}) {
-			{ i18n.T(ctx, "settings.account_identity_managed") }
 			if accountPortalURL != "" {
+				{ i18n.T(ctx, "settings.account_identity_managed") }
 				@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "settings.account_manage_link"), Href: accountPortalURL})
+			} else {
+				{ i18n.T(ctx, "settings.account_identity_local") }
 			}
 		}
 	}
@@ -148,6 +158,13 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 	}
 }
 
+// SettingsOrg renders the active organization's settings.
+//
+// organizationPortalURL follows SettingsAccount's rule: empty means the
+// selected identity adapter publishes no organization page, and the caption
+// is selected from the same value as the link. Under
+// ggg/system/identity-dev organizations and memberships live in this
+// application's own tables, so the provider sentence would be false.
 templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string, canExport bool) {
 	@SettingsTabs("/app/settings/org")
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "settings.org_title")})
@@ -157,9 +174,11 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			{Term: i18n.T(ctx, "settings.org_slug"), Value: org.Slug},
 		}})
 		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-6"}}) {
-			{ i18n.T(ctx, "settings.org_identity_managed") }
 			if organizationPortalURL != "" {
+				{ i18n.T(ctx, "settings.org_identity_managed") }
 				@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "settings.org_manage_link"), Href: organizationPortalURL})
+			} else {
+				{ i18n.T(ctx, "settings.org_identity_local") }
 			}
 		}
 	}

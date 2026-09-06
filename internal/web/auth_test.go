@@ -162,10 +162,17 @@ func TestSettingsRenderTheSelectedProvidersPages(t *testing.T) {
 	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, cookie)
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, `href="https://accounts.example.test/user?redirect_url=http%3A%2F%2Flocalhost%3A18080%2Fapp%2Fsettings%2Faccount"`)
+	// The caption is selected from the same value as the link, so the other
+	// half of that selection belongs here: with a provider page to point at,
+	// the page says a provider manages the profile.
+	assert.Contains(t, body, "are managed by your identity provider")
+	assert.NotContains(t, body, "You are signed in locally")
 
 	code, _, body = serve(t, s, "GET", "/app/settings/org", nil, nil, cookie)
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, `href="https://accounts.example.test/organization?redirect_url=http%3A%2F%2Flocalhost%3A18080%2Fapp%2Fsettings%2Forg"`)
+	assert.Contains(t, body, "are managed by your identity provider")
+	assert.NotContains(t, body, "managed in this application")
 	assert.Contains(t, body, `aria-current="page"`)
 	assert.Contains(t, body, `hx-select="#content"`)
 }
@@ -187,14 +194,36 @@ func TestSettingsRenderNoProviderLinkWhenTheAdapterHasNone(t *testing.T) {
 	seedMembership(t, s, "user_neutral", "org_neutral", "org:admin")
 	cookie := sessionCookie("user_neutral", "org_neutral", "org:admin")
 
-	for _, path := range []string{"/app/settings/account", "/app/settings/org"} {
-		code, _, body := serve(t, s, "GET", path, nil, nil, cookie)
-		require.Equal(t, http.StatusOK, code, path)
+	// What is gone, and — the part this test used to miss — what is said
+	// instead. Asserting only the absent link pinned a page that still
+	// claimed "managed by your identity provider" while the selected adapter
+	// says in as many words that it manages nothing.
+	for _, tc := range []struct {
+		path, says, saysNot, link string
+	}{
+		{
+			path:    "/app/settings/account",
+			says:    "You are signed in locally",
+			saysNot: "are managed by your identity provider",
+			link:    "Manage your account",
+		},
+		{
+			path:    "/app/settings/org",
+			says:    "managed in this application",
+			saysNot: "are managed by your identity provider",
+			link:    "Manage organization",
+		},
+	} {
+		code, _, body := serve(t, s, "GET", tc.path, nil, nil, cookie)
+		require.Equal(t, http.StatusOK, code, tc.path)
+		assert.Contains(t, body, tc.says,
+			"%s must say what is actually true under the selected adapter", tc.path)
+		assert.NotContains(t, body, tc.saysNot,
+			"%s must not claim a provider manages what this adapter keeps locally", tc.path)
+		assert.NotContains(t, body, tc.link, "%s must render no provider link", tc.path)
 		assert.NotContains(t, body, "accounts.example.test",
-			"%s must not spell a provider the selected adapter is not", path)
-		assert.NotContains(t, body, `href=""`, "%s must not render an empty link", path)
-		assert.NotContains(t, body, "Manage your account", path)
-		assert.NotContains(t, body, "Manage organization", path)
+			"%s must not spell a provider the selected adapter is not", tc.path)
+		assert.NotContains(t, body, `href=""`, "%s must not render an empty link", tc.path)
 	}
 }
 
@@ -420,20 +449,35 @@ func TestAuthRoutesUseTheDevAdaptersOwnPages(t *testing.T) {
 	assert.Equal(t, "http://localhost:18080/", hdr.Get("Location"))
 }
 
-// With its bypass off the dev adapter has no sign-in surface at all: the
-// /dev/login route is not registered. It says so instead of answering the
-// handler's own /login, which is what the old implementation did — a redirect
-// straight back into the handler that asked.
-func TestLoginRefusesVisiblyWhenTheDevAdapterHasNoSignInPage(t *testing.T) {
+// Every handler that asks the port refuses visibly when the selected adapter
+// has no page. With its bypass off the dev adapter has no sign-in surface at
+// all — the /dev/login route is not registered — and an unconfigured base
+// leaves it nothing to answer sign-out with either. Each of these used to be
+// a redirect: sign-in and sign-up answered the handler's own /login, which is
+// a loop straight back into the handler that asked.
+//
+// Three here plus create-organization in TestRequireOrgRefusesVisibly… and
+// the two settings captions makes refusal proven at the rendered layer for
+// all six destinations, not four.
+func TestAuthHandlersRefuseVisiblyWhenTheAdapterHasNoPage(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.Values["DEV_AUTH_BYPASS"] = "false"
-		d.IdentityNavigator = identitydev.Navigator{BaseURL: d.Config.AppURL, Bypass: false}
+		// No BaseURL either, so sign-out has nothing to answer with and all
+		// three destinations refuse for their own stated reason.
+		d.IdentityNavigator = identitydev.Navigator{}
 	})
 
-	code, hdr, body := serve(t, s, "GET", "/login", nil, nil)
-	assert.Equal(t, http.StatusServiceUnavailable, code)
-	assert.Empty(t, hdr.Get("Location"))
-	assert.Contains(t, body, "no sign-in page")
+	for _, tc := range []struct{ path, says string }{
+		{"/login", "no sign-in page"},
+		{"/signup", "no sign-up page"},
+		{"/logout", "no sign-out page"},
+	} {
+		code, hdr, body := serve(t, s, "GET", tc.path, nil, nil)
+		assert.Equal(t, http.StatusServiceUnavailable, code, tc.path)
+		assert.Empty(t, hdr.Get("Location"), "%s must not redirect anywhere", tc.path)
+		assert.Empty(t, hdr.Get("HX-Redirect"), tc.path)
+		assert.Contains(t, body, tc.says, tc.path)
+	}
 }
 
 func must(url string, err error) string {

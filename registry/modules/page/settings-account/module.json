@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-account",
     "kind": "page",
     "name": "settings-account",
-    "revision": 5,
+    "revision": 6,
     "contract": 1,
     "title": "Account settings",
     "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
@@ -55,7 +55,7 @@
         "source": "internal/web/page_settings_account.go",
         "target": "internal/web/page_settings_account.go",
         "class": "go",
-        "sha256": "5e64d7b6b6a93c8810669f68f5f8d73dc47fc4d5491ec5caeddac21887a44a4b",
+        "sha256": "5164b35ba8221182d156d823fae5e7cbf25ad79c200a4cde1094d0d317296832",
         "rewrite_module": true,
         "contract": false
       },
@@ -63,7 +63,7 @@
         "source": "internal/web/templates/settings.templ",
         "target": "internal/web/templates/settings.templ",
         "class": "templ",
-        "sha256": "784dbb1ef48a3bb272320875d851550a92aaef1f3eed7df3ecb48766716c0256",
+        "sha256": "c24a5e0cb5e612e65c94bcdc3782a90389622f4c961fe12a2d8eaf6c9ac1843d",
         "rewrite_module": true,
         "contract": false
       }
@@ -118,6 +118,7 @@
       "en": {
         "settings.account_deleted": "Your account has been deleted. Goodbye!",
         "settings.account_email": "Email",
+        "settings.account_identity_local": "You are signed in locally, so there is no external profile, password, or two-factor setup to manage.",
         "settings.account_identity_managed": "Profile, password, social connections, and two-factor authentication are managed by your identity provider.",
         "settings.account_manage_link": "Manage your account →",
         "settings.account_member_since": "Member since",
@@ -148,6 +149,7 @@
       "es": {
         "settings.account_deleted": "Tu cuenta ha sido eliminada. ¡Hasta pronto!",
         "settings.account_email": "Correo electrónico",
+        "settings.account_identity_local": "Tu sesión es local, así que no hay perfil, contraseña ni autenticación de dos factores externos que gestionar.",
         "settings.account_identity_managed": "El perfil, la contraseña, las conexiones sociales y la autenticación de dos factores se gestionan en tu proveedor de identidad.",
         "settings.account_manage_link": "Gestionar tu cuenta →",
         "settings.account_member_since": "Miembro desde",

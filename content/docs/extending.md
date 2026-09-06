@@ -314,9 +314,22 @@ The fields that carry weight:
     consumers that touch it onto `[new, new]`. Their code calls something the
     old contract does not have, so `[old, new]` would claim compatibility
     with a contract that cannot satisfy it. `ggg/system/identity` went 1 → 2
-    by reshaping `identity.Navigator`; the seven modules that implement or
-    call it moved to `[2, 2]`, while the twenty-nine that use unrelated parts
-    of the seam moved to `[1, 2]`.
+    by reshaping `identity.Navigator`; the six modules that implement or call
+    it moved to `[2, 2]`, while the thirty that use unrelated parts of the
+    seam moved to `[1, 2]`.
+
+  The test for which side a consumer belongs on is whether its own payloads
+  **implement the interface or call a changed method** — not whether they
+  mention the type. Holding an interface-typed field, or assigning a concrete
+  implementation into one, compiles against either contract, so a module that
+  only stores a capability and passes it on belongs on `[old, new]`.
+  `ggg/system/server` is the case worth knowing: it declares
+  `identity.Navigator` in `Deps`, puts it in the capability map and hands it
+  to a constructor, and never calls a method — so it stays `[1, 2]`. Pinning
+  it to `[2, 2]` would have been quietly self-defeating, because `server` is
+  in almost every closure: every other consumer's `[1, 2]` could then never
+  resolve at 1 in practice, and the split would have been a uniform pin
+  wearing two shapes.
 
   Two range shapes on one dependency is a fact about that dependency, not an
   inconsistency. A uniform range is only correct when every consumer's claim
@@ -430,34 +443,41 @@ every vendored artifact against its declared byte count and SHA-256, and
 rejects `eval(`, `new Function(`, string-argument `setTimeout`/`setInterval`,
 and references to origins the manifest did not declare.
 
-**Every file in the registry tree must have a declaring owner.** `build`
-refuses — before it writes the snapshot — any file under `registry/` with no
-owner, and `ggg registry sign` refuses the same before producing a signature.
-The refusal names each path and the registry root it belongs to. There are
-exactly three owners:
+**Every file in the registry tree must have a declaring owner.** Every command
+that can produce a snapshot or a signature refuses first: `build` before it
+writes the snapshot, and `sign` and `rotate` before they produce any
+signature. `sync`, `add` and `update` apply the same rule to every registry
+they resolve, so `make check` catches it too. The refusal names each path and
+the registry root it belongs to. There are exactly three owners:
 
 - **a module**, through its `files` or `migrations` sources, plus the
   `module.json` and profile documents its registry's indexes list;
 - **the format**, by exact name: `registry.json`, the six per-kind indexes,
   `registry.snapshot.json`, `registry.snapshot.sig`,
-  `registry-key-rotation.json`, the two detached rotation signatures, and the
-  five `registry/schema/*.schema.json` contracts. By name and not by pattern,
-  or `registry/schema/anything.json` would authorise itself;
-- **the tool**, for generated output (`modkit.IsGeneratedOutputPath`). A
-  `.templ` payload whose source lives in the registry tree gets a `_templ.go`
-  sibling from `make generate`, and a module may not declare one — targeting a
-  generated output is refused outright. Those bytes are never installed
-  either: the directory resolver drops generated output before it distributes
-  anything.
+  `registry-key-rotation.json`, the two detached rotation signatures, the five
+  `registry/schema/*.schema.json` contracts, and the `.gitignore`
+  `registry init` scaffolds. By name and not by pattern, or
+  `registry/schema/anything.json` would authorise itself;
+- **the tool**, for one case only: `X_templ.go` is owned **iff the same
+  registry declares `X.templ`**. `make generate` runs templ over the whole
+  tree and writes that sibling beside its source, and a module cannot declare
+  the output instead — targeting a generated output is refused outright. So
+  the exemption follows the declaration: editing the source and regenerating
+  keeps the sibling owned, while an `X_templ.go` with no declared `X.templ`
+  refuses. Nothing wider qualifies. A name alone never earns an exemption —
+  a planted `something_registry_gen.txt` is refused like any other stray,
+  because `ggg sync` renders those into a *project* tree and never into a
+  catalog.
 
-Ownership resolves **per registry root**, so a nested registry
+Ownership resolves **per registry root**. A nested registry
 (`registry/testdata`, `registry/external-testdata`,
 `templates/external-registry`) answers to its own manifests rather than the
-enclosing catalog's. The remedy for an unowned file is a declaration or a
-deletion, never a silent sweep: `ggg sync` removes unowned files from a
-*project* tree, and doing that to a signed catalog would let it gain and lose
-undeclared bytes without a word. `ggg sync`, `add` and `update` apply the same
-rule to every registry they resolve, so `make check` catches it too.
+enclosing catalog's, and the check reaches every file the enclosing signature
+covers — including a nested root's own `registry.json` and snapshot, which are
+format-owned files *of that root*. The remedy for an unowned file is a
+declaration or a deletion, never a silent sweep: `ggg sync` removes unowned
+files from a *project* tree, and doing that to a signed catalog would let it
+gain and lose undeclared bytes without a word.
 
 A refused `build` leaves nothing behind. The whole command — digest refresh,
 index rebuild, ownership check, snapshot write, vendor verification — runs
@@ -588,12 +608,15 @@ fails when the committed signature is missing, stale relative to
 a catalog change that forgets the re-sign cannot reach a tag.
 
 `TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner` and
-`TestTheCommittedCoreSnapshotListsOnlyOwnedFiles` fail when a
-file inside any of this repository's four registry roots — the core catalog,
+`TestTheCommittedCoreSnapshotListsOnlyOwnedFiles` fail when a file inside any
+of this repository's four registry roots — the core catalog,
 `registry/testdata`, `registry/external-testdata`, `templates/external-registry`
-— has no declaring manifest, so an undeclared payload cannot reach the
-signature. `build` and `sign` refuse first; these are the assertions that
-catch a tree dirtied between the two commands.
+— has no owner. `build`, `sign` and `rotate` refuse first; these two are the
+belt, and they catch a tree dirtied between the commands.
+`TestOwnershipCoverageIsASupersetOfTheSignedScope` is the one that keeps the
+gate honest about its reach: it asserts that every file a snapshot covers is a
+file the check examined, which is the property a shared walk alone does not
+guarantee.
 
 The private half never enters the tree. Changing `coreRegistryPublicKey` is a
 key rotation once anyone has consumed a tag: publish
