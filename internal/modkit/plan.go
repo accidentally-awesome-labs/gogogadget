@@ -353,40 +353,82 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateCLIHandlerPackages(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	// Every invariant below is a statement about the WHOLE selected graph, so
+	// it needs the whole graph's source. `payloads` is not that on a targeted
+	// update: plannedModules drops the retained modules, so the file map held
+	// only the advanced closure while the validators still iterated every
+	// manifest. Any targeted update therefore refused on an unrelated module
+	// — `ggg update ggg/element/avatar` reported that
+	// `ggg/system/analytics-posthog`'s shell slot named a renderer "no
+	// installed payload in that package declares", because the package that
+	// declares it belongs to a retained module whose bytes were absent. The
+	// same hole ran the other way for the scanners that look for a forbidden
+	// pattern rather than a required declaration (adapter imports, config
+	// field ownership, shell provider neutrality, seam vendor hosts,
+	// credential-presence selectors, recorder handoff, CLI handler packages):
+	// a retained module's payload was never read, so those passed vacuously.
+	//
+	// A retained module's bytes come from the TREE, not from the fresh
+	// snapshot. The tree is what the plan leaves installed for it — its
+	// manifest is overlaid from the lock for exactly the same reason — so
+	// scanning re-published upstream bytes would refuse on a change this
+	// operation is not adopting.
+	scanFiles := payloadsAsFiles(payloads)
+	for _, module := range graph.modules {
+		if _, keep := retained[module.ID]; !keep {
+			continue
+		}
+		for _, file := range module.Files {
+			if file.Class == FileClassGenerated {
+				continue
+			}
+			if _, present := scanFiles[file.Target]; present {
+				continue
+			}
+			content, _, missing, readErr := CurrentTargetState(canonicalRoot, file.Target)
+			if readErr != nil {
+				return Plan{}, readErr
+			}
+			if missing {
+				continue
+			}
+			scanFiles[file.Target] = content
+		}
+	}
+	if err := ValidateCLIHandlerPackages(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateCoreCLIPackages(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateCoreCLIPackages(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidatePayloadAdapterImports(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidatePayloadAdapterImports(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateConfigFieldOwnership(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateConfigFieldOwnership(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateShellProviderNeutrality(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateShellProviderNeutrality(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateSeamVendorHosts(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateSeamVendorHosts(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateShellSlotRenderers(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateShellSlotRenderers(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateNoCredentialPresenceSelectors(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateNoCredentialPresenceSelectors(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateAssetReferences(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateAssetReferences(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateNoRecorderGoroutineHandoff(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateNoRecorderGoroutineHandoff(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateCSPContributionSources(graph.modules, payloadsAsFiles(payloads)); err != nil {
+	if err := ValidateCSPContributionSources(graph.modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
-	if err := ValidateDerivationPackages(graph.modules, payloadsAsFiles(payloads), modulePath); err != nil {
+	if err := ValidateDerivationPackages(graph.modules, scanFiles, modulePath); err != nil {
 		return Plan{}, err
 	}
 	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
