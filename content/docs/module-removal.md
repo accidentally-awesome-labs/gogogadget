@@ -11,7 +11,7 @@ fires **before a single byte moves**. There is no force flag and no
 cannot reconstruct, it says so and stops.
 
 ```sh
-go run ./cmd/ggg remove component/carousel --dry-run
+go run ./cmd/ggg remove ggg/component/carousel --dry-run
 ```
 
 ```text

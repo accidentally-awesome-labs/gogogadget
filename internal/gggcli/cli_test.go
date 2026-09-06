@@ -160,9 +160,15 @@ func TestCLIDryRunLeavesIntentUntouched(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// A dry-run add of a scoped id refuses cleanly; either way the tree is
-	// untouched, which is the contract this test pins.
-	_, _, _ = runApp(t, root, engine, "add", "page/optional", "--dry-run")
+	// The dry run resolves and reports a real plan — the comment here used to
+	// record the opposite ("a dry-run add of a scoped id refuses cleanly"),
+	// which was the id defect written down as if it were the contract. The
+	// declared exit for a dry run over pending work is 4; anything else
+	// (2 invalid operand, 3 unknown id) means the operand was rejected.
+	_, _, err = runApp(t, root, engine, "add", "ggg/page/optional", "--dry-run")
+	if err == nil || exitOf(t, err) != exitConflict {
+		t.Fatalf("add --dry-run = %v, want exit %d", err, exitConflict)
+	}
 	after, err := os.ReadFile(intentPath)
 	if err != nil {
 		t.Fatal(err)

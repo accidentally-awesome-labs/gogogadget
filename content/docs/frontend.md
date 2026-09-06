@@ -525,7 +525,7 @@ rots. The generated
 inventory is authoritative in three places that cannot disagree, because all
 three come from the same manifests:
 
-- `go run ./cmd/ggg info component/<name>` — signature, files, gallery link,
+- `go run ./cmd/ggg info ggg/component/<name>` — signature, files, gallery link,
   verification commands.
 - `internal/web/templates/ui/reference_gen.go` — `ReferenceRegistry`, one
   `Reference{Name, Family, Module, Signature, Summary, Guidance, Keyboard,

@@ -113,7 +113,7 @@ you did not touch.
 Not an error: safe modules updated and at least one conflict is staged
 because you had edited a file upstream also changed. Your bytes were not
 touched. `ggg diff --upstream` names the diff files under
-`tmp/ggg/conflicts/`; read one, then `ggg resolve KIND/NAME --path PATH` with
+`tmp/ggg/conflicts/`; read one, then `ggg resolve NAMESPACE/KIND/NAME --path PATH` with
 `--accept-upstream`, `--keep-local` or `--merged`. `sync --check` keeps
 failing until you do, on purpose: a staged conflict lives in ignored `tmp/`,
 so it must never be committable as a green state. See

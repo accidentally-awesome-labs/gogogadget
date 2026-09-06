@@ -32,6 +32,16 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		return Plan{}, fmt.Errorf("resolve conflict: gogogadget.lock.json is missing")
 	}
 
+	installedIDs := make([]string, 0, len(currentLock.Modules))
+	for _, module := range currentLock.Modules {
+		installedIDs = append(installedIDs, module.ID)
+	}
+	resolvedIDs, err := ResolveModuleIDs([]string{moduleID}, installedIDs, "installed")
+	if err != nil {
+		return Plan{}, err
+	}
+	moduleID = resolvedIDs[0]
+
 	moduleIndex := -1
 	conflictIndex := -1
 	var pendingConflict PendingConflict

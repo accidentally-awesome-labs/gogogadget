@@ -40,9 +40,9 @@ artifact is absent: that lets the core gate pass by skipping.
 ## The loop
 
 ```sh
-go run ./cmd/ggg info KIND/NAME       # owner, files, gallery/route links, verify commands
+go run ./cmd/ggg info NS/KIND/NAME    # owner, files, gallery/route links, verify commands
 go run ./cmd/ggg catalog [--kind K]   # every module and its state (240 selected here)
-go run ./cmd/ggg add KIND/NAME        # edits gogogadget.json, then reconciles
+go run ./cmd/ggg add NS/KIND/NAME     # edits gogogadget.json, then reconciles
 go run ./cmd/ggg diff                 # every file whose bytes differ from the lock
 make generate                         # ggg sync --offline → templ → sqlc → tailwind
 ```
@@ -138,7 +138,9 @@ Pure logic → unit. Handler/route behavior → integration (`TEST_DATABASE_URL`
 per-package DBs via `internal/db/testdb`; set `TEST_DB_SUFFIX` per worker when
 running the same package concurrently). User flow → e2e spec. Pixel-level →
 visual spec (`make visual`; baselines only via `make visual-update`).
-`go run ./cmd/ggg info KIND/NAME` prints the exact commands a module declares.
+`go run ./cmd/ggg info ggg/KIND/NAME` prints the exact commands a module
+declares. Module ids are scoped `<namespace>/<kind>/<name>` — what `ggg
+catalog` prints; a bare `<kind>/<name>` operand resolves to it.
 
 **A green `ok` from a package whose fixtures all skipped is not a pass.**
 `testdb` skips only when NOBODY NAMED a server: `TEST_DATABASE_URL` set and

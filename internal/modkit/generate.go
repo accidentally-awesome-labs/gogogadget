@@ -3506,8 +3506,8 @@ func emitModuleReference(ctx context.Context, modulePath string, lock Lock, grap
 	b.WriteString("Generated from the manifests of every module in `gogogadget.lock.json`, which\n")
 	b.WriteString("are the same records the planner resolves and the remover refuses on. A module\n")
 	b.WriteString("absent from this page is not installed.\n\n")
-	b.WriteString("`ggg info KIND/NAME` prints the same manifest in full, plus the files it owns,\n")
-	b.WriteString("where to look at it, and the commands that verify it. See\n")
+	b.WriteString("`ggg info <namespace>/<kind>/<name>` prints the same manifest in full, plus\n")
+	b.WriteString("the files it owns, where to look at it, and the commands that verify it. See\n")
 	b.WriteString("[Module anatomy and lifecycle](/docs/modules) for what each field means and\n")
 	b.WriteString("[Module removal and data retention](/docs/module-removal) for the policies.\n\n")
 	b.WriteString("**Source** is the registry namespace the lock resolved the module from, so a\n")
@@ -3749,7 +3749,7 @@ func writeVerificationReference(b *strings.Builder, catalog []Manifest) {
 		return
 	}
 	fmt.Fprintf(b, "\n## Verification (%d)\n\n", len(rows))
-	b.WriteString("The same commands `ggg info KIND/NAME` prints. **Capabilities** names the\n")
+	b.WriteString("The same commands `ggg info <namespace>/<kind>/<name>` prints. **Capabilities** names the\n")
 	b.WriteString("declared contracts a module's own suite covers.\n\n")
 	b.WriteString("| Module | Commands | Capabilities |\n")
 	b.WriteString("|---|---|---|\n")

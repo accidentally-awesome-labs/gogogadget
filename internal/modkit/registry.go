@@ -194,6 +194,19 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 	return catalog, nil
 }
 
+// CatalogSelectableIDs is every id an operand may name: modules and profiles
+// alike, because `ggg add ggg/profile/full` is as legal as a single module.
+func CatalogSelectableIDs(catalog Catalog) []string {
+	ids := make([]string, 0, len(catalog.Modules)+len(catalog.Profiles))
+	for _, module := range catalog.Modules {
+		ids = append(ids, module.ID)
+	}
+	for _, profile := range catalog.Profiles {
+		ids = append(ids, profile.ID)
+	}
+	return ids
+}
+
 func readCatalogJSON(fsys fs.FS, name string, dst any) error {
 	data, err := fs.ReadFile(fsys, name)
 	if err != nil {

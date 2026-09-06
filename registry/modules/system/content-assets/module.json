@@ -4,7 +4,7 @@
     "id": "ggg/system/content-assets",
     "kind": "system",
     "name": "content-assets",
-    "revision": 21,
+    "revision": 22,
     "contract": 1,
     "title": "Embedded content corpus",
     "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
@@ -171,7 +171,7 @@
         "source": "content/docs/cli.md",
         "target": "content/docs/cli.md",
         "class": "content",
-        "sha256": "2c10b660c56ff539099832c037ea71b55f39cbfbb2672a7ebc511ab9a53dc744",
+        "sha256": "9a8f6cf303c4e9ac06a7c8d96956873266a0d231ab0142d6fb9bd3b8622bdba6",
         "rewrite_module": false,
         "contract": false
       },
@@ -179,7 +179,7 @@
         "source": "content/docs/components.md",
         "target": "content/docs/components.md",
         "class": "content",
-        "sha256": "bd5e4c76424c09112fccd16b921f35820dbac900257fd0707c0632ed76140208",
+        "sha256": "6a3343e3f9b39c429403ca4d314ea84e6dcd0c4ce38ea1ade1157bae349f6df2",
         "rewrite_module": false,
         "contract": false
       },
@@ -243,7 +243,7 @@
         "source": "content/docs/frontend.md",
         "target": "content/docs/frontend.md",
         "class": "content",
-        "sha256": "15e2e9557d2d6d78abc4713ec7acc0596543c356d677c5207e0079f5a363edff",
+        "sha256": "65f65f39121d10fdd9e607f8508e1d00cc9d95909ade24e0ea1b2c23a6b6bdc4",
         "rewrite_module": false,
         "contract": false
       },
@@ -283,7 +283,7 @@
         "source": "content/docs/module-removal.md",
         "target": "content/docs/module-removal.md",
         "class": "content",
-        "sha256": "93edf2051603b695d2131fad235d4cfcf1c26cef4e7aff7aaf4fdae2f2095be9",
+        "sha256": "975b9f77565f17a1ac7da17208cea6531c5f5afad7c6f93d6ae203b95cbe2f0d",
         "rewrite_module": false,
         "contract": false
       },
@@ -291,7 +291,7 @@
         "source": "content/docs/modules.md",
         "target": "content/docs/modules.md",
         "class": "content",
-        "sha256": "04bf0fc54cad2cc2ef4fa756f898d5df9ead73b065cc327f01d9f9ec668511da",
+        "sha256": "2215767e2e78d606c1b6177b154ce80b10fa4a30d2cddd7d25d009423637610e",
         "rewrite_module": false,
         "contract": false
       },
@@ -363,7 +363,7 @@
         "source": "content/docs/troubleshooting.md",
         "target": "content/docs/troubleshooting.md",
         "class": "content",
-        "sha256": "7c387624039764cf90c60a39e1ff8f49ac634d111924bf640e4bc0b5217ea504",
+        "sha256": "35f4d229294a4960fd4c2afaa5298212d45ae7f6715e2035248608a6f3174fd7",
         "rewrite_module": false,
         "contract": false
       },

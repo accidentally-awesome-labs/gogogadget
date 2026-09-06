@@ -325,7 +325,7 @@ does not render them, so their absence from a render means nothing.
 ### Install
 
 ```sh
-go run ./cmd/ggg add component/data-table
+go run ./cmd/ggg add ggg/component/data-table
 ```
 
 `add` puts the id in `gogogadget.json` (or removes it from `exclude`) and calls
@@ -461,7 +461,7 @@ candidates without touching your source.
 ### Remove
 
 ```sh
-go run ./cmd/ggg remove component/data-table
+go run ./cmd/ggg remove ggg/component/data-table
 ```
 
 Removal is the operation with the most reasons to say no, all of them before any

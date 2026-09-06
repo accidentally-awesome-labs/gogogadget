@@ -291,6 +291,19 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			return Plan{}, err
 		}
 	}
+	// Operands become canonical ids exactly once, here, before any operation
+	// reads them. `add` and `update` resolve against the catalog because that
+	// is the set they can reach; `remove` resolved against the installed graph
+	// on its own path above. Doing it here is what lets an operator type
+	// either form and get the same plan: the unscoped form is a convenience,
+	// and a convenience that is accepted and then not found is worse than one
+	// that was never offered.
+	if len(op.Modules) != 0 && (op.Kind == OpAdd || op.Kind == OpUpdate) {
+		op.Modules, err = ResolveModuleIDs(op.Modules, CatalogSelectableIDs(catalog), "in the catalog")
+		if err != nil {
+			return Plan{}, err
+		}
+	}
 	if op.Kind == OpAdd {
 		desiredProject, err = projectAfterAdd(desiredProject, catalog, op.Modules)
 		if err != nil {

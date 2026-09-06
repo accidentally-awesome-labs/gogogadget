@@ -21,7 +21,7 @@ go run ./cmd/ggg catalog --kind element --installed
 Then ask for one:
 
 ```sh
-go run ./cmd/ggg info component/badge
+go run ./cmd/ggg info ggg/component/badge
 ```
 
 ```text
@@ -227,7 +227,7 @@ detail page for a working starting point.
 If a component is missing from your project, install it:
 
 ```sh
-go run ./cmd/ggg add component/data-table
+go run ./cmd/ggg add ggg/component/data-table
 ```
 
 The dependency closure comes with it. If you need to change how one behaves, edit

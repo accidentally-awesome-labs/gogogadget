@@ -50,7 +50,7 @@ func sortSpecs(table []CommandSpec) {
 // single source of truth for help output and completions.
 func builtInCommands() []CommandSpec {
 	return []CommandSpec{
-		{Name: "add", Summary: "Install one or more modules into the project", Usage: "ggg add KIND/NAME... [--dry-run] [--json]", Flags: []FlagSpec{
+		{Name: "add", Summary: "Install one or more modules into the project", Usage: "ggg add NAMESPACE/KIND/NAME... [--dry-run] [--json]", Flags: []FlagSpec{
 			{Name: "dry-run", Help: "resolve and report without writing"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "build", Summary: "Build the server binary", Usage: "ggg build [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
@@ -109,7 +109,7 @@ func builtInCommands() []CommandSpec {
 		{Name: "generate", Summary: "Refresh mutable registries and generate the project", Usage: "ggg generate [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
 		{Name: "help", Summary: "Show help for ggg or one command", Usage: "ggg help [COMMAND]"},
 		{Name: "identity", Summary: "Identity provider operations", Usage: "ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)"},
-		{Name: "info", Summary: "Report one module's contract", Usage: "ggg info KIND/NAME [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
+		{Name: "info", Summary: "Report one module's contract", Usage: "ggg info NAMESPACE/KIND/NAME [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
 		{Name: "init", Summary: "Initialize or adopt the current directory", Usage: "ggg init [--module MODULE] [--ref REF] [--repository REPO] [--public-key BASE64] [--adopt] [--claim PATH]... [--offline] [--json]", Flags: []FlagSpec{
 			{Name: "module", Help: "Go module path for a directory without go.mod", Value: true},
 			{Name: "ref", Help: "registry ref to pin", Value: true, Default: "main"},
@@ -142,10 +142,10 @@ func builtInCommands() []CommandSpec {
 			{Name: "not-before", Help: "RFC3339 UTC instant the new key activates (rotate)", Value: true},
 			{Name: "ref", Help: "registry ref to pin (add, update)", Value: true, Default: "main"},
 		}},
-		{Name: "remove", Summary: "Remove modules from the project", Usage: "ggg remove KIND/NAME... [--purge-data] [--dry-run] [--json]", Flags: []FlagSpec{
+		{Name: "remove", Summary: "Remove modules from the project", Usage: "ggg remove NAMESPACE/KIND/NAME... [--purge-data] [--dry-run] [--json]", Flags: []FlagSpec{
 			{Name: "purge-data", Help: "run the module's reviewed teardown migration"}, {Name: "dry-run", Help: "resolve and report without writing"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "resolve", Summary: "Resolve one staged conflict", Usage: "ggg resolve KIND/NAME --path PATH (--accept-upstream|--keep-local|--merged) [--json]", Flags: []FlagSpec{
+		{Name: "resolve", Summary: "Resolve one staged conflict", Usage: "ggg resolve NAMESPACE/KIND/NAME --path PATH (--accept-upstream|--keep-local|--merged) [--json]", Flags: []FlagSpec{
 			{Name: "path", Help: "the conflicted file to resolve", Value: true}, {Name: "accept-upstream", Help: "replace local bytes with the staged candidate"},
 			{Name: "keep-local", Help: "keep local bytes and clear the conflict"}, {Name: "merged", Help: "accept the already-merged local bytes"},
 			{Name: "json", Help: "emit the machine envelope"},

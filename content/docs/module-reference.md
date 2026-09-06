@@ -11,8 +11,8 @@ Generated from the manifests of every module in `gogogadget.lock.json`, which
 are the same records the planner resolves and the remover refuses on. A module
 absent from this page is not installed.
 
-`ggg info KIND/NAME` prints the same manifest in full, plus the files it owns,
-where to look at it, and the commands that verify it. See
+`ggg info <namespace>/<kind>/<name>` prints the same manifest in full, plus
+the files it owns, where to look at it, and the commands that verify it. See
 [Module anatomy and lifecycle](/docs/modules) for what each field means and
 [Module removal and data retention](/docs/module-removal) for the policies.
 
@@ -601,7 +601,7 @@ promptly and must fail rather than degrade silently.
 
 ## Verification (165)
 
-The same commands `ggg info KIND/NAME` prints. **Capabilities** names the
+The same commands `ggg info <namespace>/<kind>/<name>` prints. **Capabilities** names the
 declared contracts a module's own suite covers.
 
 | Module | Commands | Capabilities |

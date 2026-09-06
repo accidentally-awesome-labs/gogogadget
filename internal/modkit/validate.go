@@ -1747,25 +1747,80 @@ func validateOptionalStringSet(field string, values []string, canonical bool) er
 	})
 }
 
-func validateProjectModuleID(id string) error {
+// CanonicalModuleIDForm is the module id form every surface prints: the
+// catalog, `ggg info`, the project intent, the lock, and every diagnostic.
+// It is named here because the refusal that rejects an operand has to be able
+// to say what a valid one looks like, and there must be exactly one answer.
+const CanonicalModuleIDForm = "<namespace>/<kind>/<name>"
+
+// ValidateInstallableModuleID checks the SYNTAX of a module id an operator
+// typed. Two forms are legal and they are not equals: the scoped
+// CanonicalModuleIDForm is what everything prints and stores, and a bare
+// `<kind>/<name>` is a convenience an operator may type at a terminal.
+//
+// Syntax is all this decides. The unscoped form names no namespace, so only
+// the resolvable id set can say which module it means — that is
+// ResolveModuleIDs, and every command that takes module operands runs it
+// before planning. The split matters because the two halves used to disagree:
+// this function demanded the unscoped form while the catalog, the lock and the
+// project intent all published scoped ids, so `ggg add ggg/element/divider`
+// refused as invalid at exit 2 and `ggg add element/divider` refused as an
+// unknown catalog id at exit 3. Every id form failed, and `add` — the
+// headline verb of the documented loop — could not install anything.
+func ValidateInstallableModuleID(id string) error {
+	if scopedErr := ValidateScopedProjectModuleID(id); scopedErr == nil {
+		return nil
+	}
 	kind, _, ok := splitModuleID(id)
 	if !ok {
-		return fmt.Errorf("module id %q is invalid", id)
+		return fmt.Errorf("module id %q is invalid; write the scoped form %s that `ggg catalog` prints", id, CanonicalModuleIDForm)
 	}
-	switch kind {
-	case "element", "component", "page", "workflow", "system", "profile":
-		return nil
-	default:
+	if !validModuleKind(ModuleKind(kind)) {
 		return fmt.Errorf("module kind %q is invalid", kind)
 	}
+	return nil
 }
 
-func ValidateInstallableModuleID(id string) error {
-	kind, _, ok := splitModuleID(id)
-	if !ok || !validModuleKind(ModuleKind(kind)) {
-		return fmt.Errorf("module id %q is invalid", id)
+// ResolveModuleIDs maps operator-supplied module ids onto the canonical scoped
+// ids in known, which is the resolvable set for the command: the catalog for
+// `add`/`update`/`info`, the installed graph for `remove`/`diff`. It is the
+// one place the convenience form becomes a real id, so an unscoped operand
+// either resolves or refuses — it is never accepted here and dropped later,
+// which is what `ggg diff element/avatar` did when it reported nothing at all.
+//
+// subject completes the sentence "module X is not …", so a caller keeps its
+// own established wording: "installed" for the installed graph, "in the
+// catalog" for the published one. The two are different remedies.
+func ResolveModuleIDs(operands []string, known []string, subject string) ([]string, error) {
+	scoped := make(map[string]struct{}, len(known))
+	byUnscoped := make(map[string][]string, len(known))
+	for _, id := range known {
+		scoped[id] = struct{}{}
+		if _, kind, name, ok := splitScopedModuleID(id); ok {
+			key := kind + "/" + name
+			byUnscoped[key] = append(byUnscoped[key], id)
+		}
 	}
-	return nil
+	resolved := make([]string, 0, len(operands))
+	for _, operand := range operands {
+		if _, ok := scoped[operand]; ok {
+			resolved = append(resolved, operand)
+			continue
+		}
+		candidates := byUnscoped[operand]
+		switch len(candidates) {
+		case 1:
+			resolved = append(resolved, candidates[0])
+		case 0:
+			return nil, fmt.Errorf("module %q is not %s; `ggg catalog` prints the scoped form %s", operand, subject, CanonicalModuleIDForm)
+		default:
+			sorted := append([]string{}, candidates...)
+			slices.Sort(sorted)
+			return nil, fmt.Errorf("module %q is published by %d namespaces (%s); name one in the scoped form %s",
+				operand, len(sorted), strings.Join(sorted, ", "), CanonicalModuleIDForm)
+		}
+	}
+	return resolved, nil
 }
 
 func splitModuleID(id string) (string, string, bool) {

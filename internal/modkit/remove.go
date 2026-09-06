@@ -28,17 +28,26 @@ func (e *Engine) planRemove(
 	if op.RegistryRef != "" {
 		return Plan{}, fmt.Errorf("remove does not accept a registry ref")
 	}
-	requested := append([]string{}, op.Modules...)
-	sort.Strings(requested)
-	requested = dedupeSorted(requested)
-
 	installed := make(map[string]LockedModule, len(currentLock.Modules))
+	installedIDs := make([]string, 0, len(currentLock.Modules))
 	for _, module := range currentLock.Modules {
 		if module.Reason == TombstoneReason {
 			continue
 		}
 		installed[module.ID] = module
+		installedIDs = append(installedIDs, module.ID)
 	}
+	// The installed graph, not the catalog, is `remove`'s resolvable set: the
+	// question it answers is "which of these do I have", and its refusal for a
+	// module it does not have has to stay distinguishable from one the
+	// registry never published.
+	requested, err := ResolveModuleIDs(op.Modules, installedIDs, "installed")
+	if err != nil {
+		return Plan{}, err
+	}
+	sort.Strings(requested)
+	requested = dedupeSorted(requested)
+
 	requestSet := make(map[string]struct{}, len(requested))
 	for _, id := range requested {
 		requestSet[id] = struct{}{}
@@ -452,7 +461,10 @@ func (e *Engine) planRemove(
 	conflicts := conflictsFromLock(finalLock)
 	sortPlanOutputs(changes, conflicts, nil)
 	operation := op
-	operation.Modules = append([]string{}, op.Modules...)
+	// The recorded operation carries the CANONICAL ids, not the operand text:
+	// a plan is replayed and reported from this, and the convenience form
+	// names no namespace.
+	operation.Modules = append([]string{}, requested...)
 	return Plan{
 		Operation: operation, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit,
 		ModulePath: modulePath, Project: desired, Lock: finalLock,

@@ -161,6 +161,27 @@ transaction journal that restores the exact pre-run bytes on any failure.
 | `ggg migrate schema-1`, `ggg cache prune`, `ggg identity link` | **yes** | One-way schema upgrade, cache pruning, audited identity mapping |
 | `ggg ui` | **yes** | The interactive console (contributed by `ggg/system/cli-ui`) |
 
+## Module ids
+
+**One form is canonical: `<namespace>/<kind>/<name>`.** It is what `ggg
+catalog` prints, what `gogogadget.json` and `gogogadget.lock.json` store, and
+what every message names. Core modules are namespace `ggg`, so
+`ggg/component/badge`; a module from another registry carries that registry's
+namespace.
+
+A bare `<kind>/<name>` is accepted as a convenience wherever a command takes
+module operands — `add`, `remove`, `update`, `info`, `diff`, `resolve` — and it
+**resolves**: `add component/badge` installs `ggg/component/badge` when exactly
+one configured registry publishes `component/badge`, and refuses naming the
+candidates when several do. It is a shorthand for typing, not a second id: it
+is never stored, never printed, and never accepted only to fail later.
+
+This is one rule in one place because it was two. Until `v0.11.0` the operand
+validator required the unscoped form while the catalog, the intent file and the
+lock all used the scoped one, so `ggg add ggg/element/divider` refused as an
+invalid id and `ggg add element/divider` refused as an unknown catalog id.
+Every form of `add` failed.
+
 `ggg registry build` mutates the **registry**, not the project: it rewrites
 manifest digests and `registry/*.json` indexes. In a self-hosting registry the
 payload and its manifest live in the same tree, so editing a module's own source

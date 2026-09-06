@@ -184,13 +184,18 @@ type catalogEntry struct {
 // executeInfo reports one module's contract.
 func (c *Controller) executeInfo(ctx context.Context, request InfoRequest) (Result, error) {
 	id := request.ModuleID
-	if err := modkit.ValidateScopedProjectModuleID(id); err != nil {
+	if err := modkit.ValidateInstallableModuleID(id); err != nil {
 		return Result{}, usageError(fmt.Sprintf("%s: %v", id, err))
 	}
 	catalog, commit, lock, err := c.readCatalog(ctx, false)
 	if err != nil {
 		return failureEnvelope("info", err)
 	}
+	resolved, err := modkit.ResolveModuleIDs([]string{id}, modkit.CatalogSelectableIDs(catalog), "in the catalog")
+	if err != nil {
+		return failureEnvelope("info", refusalError(err))
+	}
+	id = resolved[0]
 	var found *modkit.Manifest
 	for i := range catalog.Modules {
 		if catalog.Modules[i].ID == id {
@@ -259,8 +264,20 @@ func (c *Controller) collectDiff(modules []string, upstream bool) ([]DiffEntry, 
 		return nil, "", usageError(err.Error())
 	}
 
-	wanted := make(map[string]struct{}, len(modules))
-	for _, id := range modules {
+	// Operands resolve against the installed graph before they filter it.
+	// Filtering on the raw text silently matched nothing for a scoped id the
+	// syntax check had just rejected and for an unscoped one it had accepted,
+	// so `ggg diff element/avatar` printed an empty report and exited 0.
+	installedIDs := make([]string, 0, len(lock.Modules))
+	for _, module := range lock.Modules {
+		installedIDs = append(installedIDs, module.ID)
+	}
+	resolved, err := modkit.ResolveModuleIDs(modules, installedIDs, "installed")
+	if err != nil {
+		return nil, "", refusalError(err)
+	}
+	wanted := make(map[string]struct{}, len(resolved))
+	for _, id := range resolved {
 		wanted[id] = struct{}{}
 	}
 	entries := make([]DiffEntry, 0)
