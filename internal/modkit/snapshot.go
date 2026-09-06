@@ -132,7 +132,29 @@ func WriteRegistrySnapshot(root string) ([]byte, error) {
 	return data, nil
 }
 
+// WriteSignedRegistrySnapshot writes the snapshot and its signature, refusing
+// first if any file in the tree has no declaring owner.
+//
+// The gate lives on the primitive, not on its callers. It was on
+// SignRegistrySnapshot alone, justified as "key rotation runs over a tree
+// this already accepted" — which is an unenforced sequencing assumption, and
+// `ggg registry rotate` takes --dir and runs on any tree at any time. So
+// rotation produced three signatures (the rebuilt primary plus .old.sig and
+// .new.sig) over a tree nothing had checked. Every path that can produce a
+// signature now passes the gate because there is only one such path.
 func WriteSignedRegistrySnapshot(root string, private ed25519.PrivateKey) ([]byte, error) {
+	if err := ValidateRegistryTreeOwnership(os.DirFS(root)); err != nil {
+		return nil, err
+	}
+	return writeSignedRegistrySnapshotUnchecked(root, private)
+}
+
+// writeSignedRegistrySnapshotUnchecked is the writer with no ownership gate.
+// Named so the opt-out is visible: it exists for the tests that exercise
+// signature and verification mechanics on deliberately minimal fixtures —
+// trees with no catalog at all, where ownership is not the property under
+// test. No production path calls it.
+func writeSignedRegistrySnapshotUnchecked(root string, private ed25519.PrivateKey) ([]byte, error) {
 	if len(private) != ed25519.PrivateKeySize {
 		return nil, fmt.Errorf("registry signing key must be %d bytes", ed25519.PrivateKeySize)
 	}

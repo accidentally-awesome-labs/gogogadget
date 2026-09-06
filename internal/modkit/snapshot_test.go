@@ -17,7 +17,10 @@ func TestSignedRegistrySnapshotVerifiesPayloadsAndRejectsUnlistedFiles(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := WriteSignedRegistrySnapshot(root, private); err != nil {
+	// Unchecked: the fixture declares no catalog at all (includes is empty),
+	// because what is under test is signature and unlisted-payload
+	// verification rather than ownership.
+	if _, err := writeSignedRegistrySnapshotUnchecked(root, private); err != nil {
 		t.Fatal(err)
 	}
 	encoded := base64.StdEncoding.EncodeToString(public)

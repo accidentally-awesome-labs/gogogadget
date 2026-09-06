@@ -110,20 +110,13 @@ func decodeRegistryPrivateKey(value string) (ed25519.PrivateKey, error) {
 // SignRegistrySnapshot writes the snapshot and its Ed25519 signature into the
 // registry tree rooted at root.
 //
-// Ownership is checked first, and this is the last line of defence rather
-// than the first: `registry build` already refuses before it writes the
-// snapshot, but sign rebuilds the snapshot from the tree it finds, so a tree
+// The ownership gate is on WriteSignedRegistrySnapshot, one level down, so
+// this and key rotation and any future signer all pass it. `registry build`
+// already refuses before it writes the snapshot; the gate here matters
+// because signing rebuilds the snapshot from the tree it finds, so a tree
 // dirtied between the two commands would otherwise be signed. A signature is
-// the one artifact that makes undeclared bytes look deliberate, so nothing
-// gets to produce one over a file no module declares.
-//
-// WriteSignedRegistrySnapshot stays an ungated primitive: it is the writer,
-// used by key rotation over a tree this already accepted and by tests that
-// exercise signature mechanics on deliberately minimal fixtures.
+// the one artifact that makes undeclared bytes look deliberate.
 func SignRegistrySnapshot(root string, private ed25519.PrivateKey) ([]byte, error) {
-	if err := ValidateRegistryTreeOwnership(os.DirFS(root)); err != nil {
-		return nil, err
-	}
 	return WriteSignedRegistrySnapshot(root, private)
 }
 

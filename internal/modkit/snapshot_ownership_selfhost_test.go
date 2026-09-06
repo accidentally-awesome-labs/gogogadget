@@ -42,10 +42,12 @@ func TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner(t *testing.T) {
 	}
 }
 
-// The core snapshot is what actually gets signed, so the gate is checked
-// against the committed file list rather than only against a fresh walk. A
-// snapshot entry the ownership rule would reject is an undeclared payload
-// already inside the signature.
+// The committed snapshot is what actually gets signed, so it is checked
+// entry by entry against the real gate rather than against a hand-rebuilt
+// approximation of it. Two things must hold: nothing listed is unowned, and
+// nothing listed went unexamined. The second is the one that failed — this
+// repository shipped registry/external-testdata's own snapshot and signature
+// inside the core signature while the gate pruned them out of its walk.
 func TestTheCommittedCoreSnapshotListsOnlyOwnedFiles(t *testing.T) {
 	repo, err := filepath.Abs("../..")
 	require.NoError(t, err)
@@ -55,41 +57,22 @@ func TestTheCommittedCoreSnapshotListsOnlyOwnedFiles(t *testing.T) {
 	require.NoError(t, decodeStrict(data, &snapshot))
 	require.NotEmpty(t, snapshot.Files)
 
-	// Ownership per root: build the declared set for the core catalog and for
-	// each nested root, keyed by the path the core snapshot lists.
-	owned := map[string]struct{}{}
-	for _, relative := range []string{".", "registry/testdata", "registry/external-testdata"} {
-		root := filepath.Join(repo, filepath.FromSlash(relative))
-		declared, declErr := declaredRegistryPaths(os.DirFS(root))
-		require.NoError(t, declErr)
-		prefix := ""
-		if relative != "." {
-			prefix = relative + "/"
-		}
-		for path := range declared {
-			owned[prefix+path] = struct{}{}
-		}
-		for path := range registryFormatOwnedPaths {
-			owned[prefix+path] = struct{}{}
-		}
-	}
+	report, err := registryTreeOwnership(os.DirFS(repo))
+	require.NoError(t, err)
+	require.NoError(t, report.refusal(),
+		"a signature over bytes nobody declared makes them look deliberate")
 
-	unowned := make([]string, 0)
-	for _, file := range snapshot.Files {
-		if _, ok := owned[file.Path]; ok {
-			continue
-		}
-		// The snapshot lists `_templ.go` siblings of the fixture registry's
-		// own `.templ` payloads: `make generate` writes them beside their
-		// source, and the snapshot walk does not exclude generated outputs
-		// even though DirectorySource.Resolve does. Tool-owned, same as
-		// everywhere else in this tree.
-		if IsGeneratedOutputPath(file.Path) {
-			continue
-		}
-		unowned = append(unowned, file.Path)
+	examined := make(map[string]struct{}, len(report.examined))
+	for _, path := range report.examined {
+		examined[path] = struct{}{}
 	}
-	require.Emptyf(t, unowned,
-		"the signed snapshot lists %d file(s) no module declares; a signature over bytes nobody declared makes them look deliberate",
-		len(unowned))
+	unexamined := make([]string, 0)
+	for _, file := range snapshot.Files {
+		if _, ok := examined[file.Path]; !ok {
+			unexamined = append(unexamined, file.Path)
+		}
+	}
+	require.Emptyf(t, unexamined,
+		"the committed signature covers %d file(s) the ownership gate never examined: %v",
+		len(unexamined), unexamined)
 }

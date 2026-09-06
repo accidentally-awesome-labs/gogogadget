@@ -71,8 +71,10 @@ func signedGitHubArchive(t *testing.T, prefix string, files map[string]string) [
 		writeTestFile(t, root, name, []byte(data))
 	}
 	private := ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize))
-	if _, err := WriteSignedRegistrySnapshot(root, private); err != nil {
-		t.Fatalf("WriteSignedRegistrySnapshot: %v", err)
+	// Unchecked: these archives are hand-built transport fixtures with no
+	// catalog behind them, so ownership is not the property under test.
+	if _, err := writeSignedRegistrySnapshotUnchecked(root, private); err != nil {
+		t.Fatalf("writeSignedRegistrySnapshotUnchecked: %v", err)
 	}
 	published := map[string]string{}
 	if err := fs.WalkDir(os.DirFS(root), ".", func(name string, entry fs.DirEntry, err error) error {
