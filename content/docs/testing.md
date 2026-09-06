@@ -38,7 +38,7 @@ So the gate accounts for what the suite did. `ggg check` and `ggg test
 unit|integration` read the `go test -json` event stream and always print
 
 ```
-tests: 1889 passed, 0 skipped, 0 inapplicable, 0 failed across 91 packages
+tests: 1927 passed, 0 skipped, 0 inapplicable, 0 failed across 91 packages
 ```
 
 naming every package that skipped anything, and marking a package that ran
