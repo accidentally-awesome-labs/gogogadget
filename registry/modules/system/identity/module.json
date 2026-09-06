@@ -5,7 +5,7 @@
     "kind": "system",
     "name": "identity",
     "revision": 3,
-    "contract": 1,
+    "contract": 2,
     "title": "Identity",
     "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
     "requires": [

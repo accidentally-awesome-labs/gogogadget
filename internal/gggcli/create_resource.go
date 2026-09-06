@@ -342,16 +342,25 @@ func (r resourceSpec) diagnostics() []modkit.Diagnostic {
 }
 
 // coreContractMaxima is the highest contract of a core module that this
-// generator's emitted source is known to work with. Everything it emits
-// predates every core contract bump so far, so the ranges start at 1 and
-// stretch to whatever is published now; a module generated here must resolve
-// against the catalog it was generated from, and a range of exactly [1,1]
-// refused the moment ggg/system/server moved to 2.
+// generator's emitted source is known to work with. The ranges it produces
+// start at 1 and stretch to whatever is published now; a module generated
+// here must resolve against the catalog it was generated from, and a range of
+// exactly [1,1] refused the moment ggg/system/server moved to 2.
+//
+// This map can only move the MAX, which is sound only while every bump it
+// records leaves the surface this generator's output actually touches intact.
+// ggg/system/identity went to 2 by reshaping identity.Navigator, and emitted
+// resources reach identity for claims and org context and never for
+// navigation — so [1,2] is a true claim here. A future bump that changes
+// something the emitted source calls would need the MIN lifted too, which
+// this map cannot express; see the contract-range asymmetry in
+// content/docs/extending.md.
 //
 // TestGeneratedRequirementsCoverCoreContracts holds this against the core
 // registry, so a future bump fails here rather than in a generated project.
 var coreContractMaxima = map[string]int{
-	"ggg/system/server": 2,
+	"ggg/system/identity": 2,
+	"ggg/system/server":   2,
 }
 
 // requirements names every module the emitted source actually imports or

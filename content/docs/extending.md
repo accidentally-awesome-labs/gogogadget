@@ -298,6 +298,32 @@ The fields that carry weight:
   refuses before a payload byte is read. `revision` moves on any
   implementation change; `contract` moves only when a consumer must change
   code.
+
+  **A contract bump is not always a widen, because compatibility runs one
+  way only.** Which end of the range moves depends on what changed:
+
+  - A contract that **removes** surface leaves consumers on `[old, new]`.
+    Code written against the new contract also satisfies the old one, which
+    had strictly more, so declaring both is a true statement. `ggg/system/config`
+    went 1 → 2 by deleting three exported methods, and all of its consumers
+    widened to `[1, 2]`.
+  - A contract that **adds** required surface, or changes a signature, forces
+    consumers that touch it onto `[new, new]`. Their code calls something the
+    old contract does not have, so `[old, new]` would claim compatibility
+    with a contract that cannot satisfy it. `ggg/system/identity` went 1 → 2
+    by reshaping `identity.Navigator`; the seven modules that implement or
+    call it moved to `[2, 2]`, while the twenty-nine that use unrelated parts
+    of the seam moved to `[1, 2]`.
+
+  Two range shapes on one dependency is a fact about that dependency, not an
+  inconsistency. A uniform range is only correct when every consumer's claim
+  in it is true — and this mechanism's whole job is refusing an incompatible
+  install before any bytes are written, which a false claim defeats.
+
+  The range is per module while breakage is per symbol, so a consumer of one
+  part of a seam still has to touch its manifest when an unrelated part of
+  that seam changes. That is a known granularity mismatch, not a signal that
+  the bump was wrong.
 - **`dependencies`** — `go` (exact `{module, version}`), `tools` (per-os/arch
   artifact with URL, SHA-256, format and project-relative `install_path` under
   `bin/`) and `containers` (image with an immutable digest). The lists are
