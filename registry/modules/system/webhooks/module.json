@@ -4,7 +4,7 @@
     "id": "ggg/system/webhooks",
     "kind": "system",
     "name": "webhooks",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Outbound webhooks",
     "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
@@ -213,6 +213,12 @@
         "kind": "immutable",
         "source": "internal/db/migrations/0013_webhook_secret_rotation.sql",
         "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
+      },
+      {
+        "id": "0027_webhook_events_provider_open",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0027_webhook_events_provider_open.sql",
+        "sha256": "a75a43c4415c23566c26e330c837fcd9820709bd317d86e4b1731a92d0f48714"
       }
     ],
     "environment": [],

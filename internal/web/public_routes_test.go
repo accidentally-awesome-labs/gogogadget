@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Untested public routes: legal pages, SEO endpoints, probes.
@@ -41,14 +43,17 @@ func TestHealthAndReadyProbes(t *testing.T) {
 }
 
 // Sign-out clears the session cookie for every adapter and then goes wherever
-// the selected one says. The zero-account adapter's sign-out destination is
-// this application's home page, because its session was only ever that cookie.
+// the selected one says. The destination is read back off the same port the
+// handler asked, so this asserts the HAND-OFF rather than one adapter's
+// spelling of a sign-out page.
 func TestLogoutClearsCookieAndHandsOff(t *testing.T) {
 	s := integrationServer(t, nil)
 
 	code, header, _ := serve(t, s, "GET", "/logout", nil, nil, sessionCookie("user_lo", "org_lo", "org:member"))
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "http://localhost:18080/", header.Get("Location"))
+	want, err := identity.MockNavigator{BaseURL: "http://localhost:18080"}.LogoutURL("http://localhost:18080/")
+	require.NoError(t, err)
+	assert.Equal(t, want, header.Get("Location"))
 	var cleared bool
 	for _, c := range header.Values("Set-Cookie") {
 		if strings.Contains(c, "__session=") && strings.Contains(c, "Max-Age=0") {

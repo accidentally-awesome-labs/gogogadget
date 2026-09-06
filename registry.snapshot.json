@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "5367ad04bceb0f2fc5553ba940c741e420847e385b52d7da4968f05376ce99c5"
+      "sha256": "703849d083c7c715c571673f073b58d6e6245aab4314208cc27a07f980b45449"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1152,7 +1152,7 @@
     },
     {
       "path": "registry/modules/system/webhooks/module.json",
-      "sha256": "d99ab25034bf985f27776ec963977ad294064222c5d86f6099a91e2d0a373117"
+      "sha256": "f5667518d7ae3ef3c863bfb6cf37bca755ab221edc58cd02b25980674777ba16"
     },
     {
       "path": "registry/modules/workflow/account-delete/module.json",
