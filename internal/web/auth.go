@@ -96,8 +96,15 @@ func (s *Server) requireNotDisabled(next http.Handler) http.Handler {
 }
 
 // requireOrg: no active org in claims → query mirror memberships. ≥1 → render
-// SelectOrg; 0 → redirect to Clerk's hosted create-organization (an invited
-// teammate must never be told to found a competing org).
+// SelectOrg; 0 → the selected identity adapter's create-organization page (an
+// invited teammate must never be told to found a competing org).
+//
+// That destination comes from identity.Navigator, not from a provider's
+// configuration key. Read by key it produced `"/create-organization?…"`
+// whenever the selected adapter did not own that key — a relative URL to a
+// route this application does not serve, so the one visitor this branch
+// exists for got a 404 with nothing logged. An adapter with no such page now
+// says so.
 func (s *Server) requireOrg(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := identity.ClaimsFrom(r.Context())
@@ -113,7 +120,11 @@ func (s *Server) requireOrg(next http.Handler) http.Handler {
 				return
 			}
 			if len(orgs) == 0 {
-				target := s.cfg.Value("CLERK_PORTAL_URL") + "/create-organization?redirect_url=" + s.cfg.AppURL + "/app"
+				target, err := s.navigator.CreateOrganizationURL(s.cfg.AppURL + "/app")
+				if err != nil {
+					s.providerDestinationUnavailable(w, r, "identity", "create-organization", err)
+					return
+				}
 				Redirect(w, r, target)
 				return
 			}

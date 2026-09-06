@@ -21,17 +21,27 @@ test.describe('auth', () => {
     await context.close();
   });
 
-  test('user with zero orgs is sent to create one', async ({ browser }) => {
+  test('user with zero orgs gets a named refusal, not a redirect to nowhere', async ({
+    browser,
+  }) => {
     const context = await loginAs(browser, 'noorg');
     const page = await context.newPage();
-    // The 303 targets the portal's create-organization (an invited teammate
-    // must never be told to found a competing org). The host is fake in e2e,
-    // so assert on the attempted navigation, not a successful load.
-    const request = page.waitForRequest((req) =>
-      req.url().includes('accounts.example.test/create-organization'),
-    );
-    await page.goto('/app').catch(() => {});
-    await request;
+    // This case used to assert a 303 to `accounts.example.test/create-organization`
+    // — built by concatenating CLERK_PORTAL_URL, which this environment sets,
+    // onto a hardcoded path, while the adapter actually selected here is
+    // identity-dev. That test encoded the bug: with the dev adapter and no
+    // portal key of its own the same code produced a RELATIVE
+    // `/create-organization`, a route this application does not serve, so the
+    // one visitor this branch exists for got a 404.
+    //
+    // The destination now comes from identity.Navigator. The dev adapter
+    // publishes no org-creation page and neither does this application, so the
+    // guard says so where it can be seen.
+    const response = await page.goto('/app');
+    expect(response?.status()).toBe(503);
+    await expect(page.getByRole('heading', { name: 'Not available' })).toBeVisible();
+    await expect(page.getByText('no create-organization page')).toBeVisible();
+    expect(page.url()).toContain('/app');
     await context.close();
   });
 

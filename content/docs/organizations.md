@@ -75,10 +75,14 @@ JWT (`org_id`, `org_role`, `org_slug`). Two surfaces change it:
   mode the buttons hit `GET /dev/switch-org?org=X` instead, which rewrites the
   synthetic `e2e:` cookie with the membership's role from the mirror.
 
-A user with **zero** memberships is redirected to Clerk's hosted
-`create-organization` page with `redirect_url={APP_URL}/app` — an invited
+A user with **zero** memberships is sent to the selected identity adapter's
+`CreateOrganizationURL` with a return target of `{APP_URL}/app` — an invited
 teammate whose invitation is still pending must never be told to found a
-competing org.
+competing org. With `identity-clerk` that is Clerk's hosted
+`create-organization` page. `identity-dev` has no such page and neither does
+this application, in any environment, so under the zero-account adapter this
+branch renders a named 503 instead of a redirect; local organizations arrive
+through the identity webhook or `ggg db seed`.
 
 ## Org deletion revokes billing first
 

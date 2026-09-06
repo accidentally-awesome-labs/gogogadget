@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -48,11 +49,34 @@ type deleter struct{}
 
 func (deleter) DeleteUser(ctx context.Context, _ string) error { return ctx.Err() }
 
+// navigator answers this fixture's own local surface. It refuses the three
+// destinations a zero-account adapter has nothing to point at, which is the
+// contract's other legal answer.
 type navigator struct{}
 
-func (navigator) LoginURL(string) string  { return "/dev/login" }
-func (navigator) SignupURL(string) string { return "/dev/login" }
-func (navigator) AccountURL() string      { return "/app/settings/account" }
+func (navigator) LoginURL(returnTo string) (string, error) {
+	return devLogin(returnTo)
+}
+func (navigator) SignupURL(returnTo string) (string, error) {
+	return devLogin(returnTo)
+}
+func (navigator) LogoutURL(string) (string, error) { return "/", nil }
+func (navigator) AccountURL(string) (string, error) {
+	return "", fmt.Errorf("identity fixture-local: no account page: %w", identity.ErrNoDestination)
+}
+func (navigator) OrganizationURL(string) (string, error) {
+	return "", fmt.Errorf("identity fixture-local: no organization page: %w", identity.ErrNoDestination)
+}
+func (navigator) CreateOrganizationURL(string) (string, error) {
+	return "", fmt.Errorf("identity fixture-local: no org-creation page: %w", identity.ErrNoDestination)
+}
+
+func devLogin(returnTo string) (string, error) {
+	if returnTo == "" {
+		return "/dev/login", nil
+	}
+	return "/dev/login?return_to=" + url.QueryEscape(returnTo), nil
+}
 
 // webhook reads this adapter's own flat envelope. It never parses another
 // provider's payload shape, which is what keeps the seam neutral.

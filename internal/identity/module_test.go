@@ -24,9 +24,12 @@ func (stubDeleter) DeleteUser(context.Context, string) error { return nil }
 
 type stubNavigator struct{}
 
-func (stubNavigator) LoginURL(string) string  { return "/login" }
-func (stubNavigator) SignupURL(string) string { return "/signup" }
-func (stubNavigator) AccountURL() string      { return "/account" }
+func (stubNavigator) LoginURL(string) (string, error)              { return "/login", nil }
+func (stubNavigator) SignupURL(string) (string, error)             { return "/signup", nil }
+func (stubNavigator) LogoutURL(string) (string, error)             { return "/", nil }
+func (stubNavigator) AccountURL(string) (string, error)            { return "/account", nil }
+func (stubNavigator) OrganizationURL(string) (string, error)       { return "/org", nil }
+func (stubNavigator) CreateOrganizationURL(string) (string, error) { return "", ErrNoDestination }
 
 type stubWebhook struct{}
 

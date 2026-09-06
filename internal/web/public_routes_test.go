@@ -40,12 +40,15 @@ func TestHealthAndReadyProbes(t *testing.T) {
 	}
 }
 
-func TestLogoutDevBranchClearsCookie(t *testing.T) {
-	s := integrationServer(t, nil) // DEV_AUTH_BYPASS without Clerk → dev branch
+// Sign-out clears the session cookie for every adapter and then goes wherever
+// the selected one says. The zero-account adapter's sign-out destination is
+// this application's home page, because its session was only ever that cookie.
+func TestLogoutClearsCookieAndHandsOff(t *testing.T) {
+	s := integrationServer(t, nil)
 
 	code, header, _ := serve(t, s, "GET", "/logout", nil, nil, sessionCookie("user_lo", "org_lo", "org:member"))
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "/", header.Get("Location"))
+	assert.Equal(t, "http://localhost:18080/", header.Get("Location"))
 	var cleared bool
 	for _, c := range header.Values("Set-Cookie") {
 		if strings.Contains(c, "__session=") && strings.Contains(c, "Max-Age=0") {

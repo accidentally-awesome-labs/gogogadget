@@ -4,7 +4,7 @@
     "id": "fixture/system/identity-local",
     "kind": "system",
     "name": "identity-local",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Fixture local identity adapter",
     "description": "A zero-account identity candidate for provider permutation validation.",
@@ -41,7 +41,7 @@
         "source": "registry/modules/system/identity-local/identity_local.go",
         "target": "internal/fixture/identitylocal/identity_local.go",
         "class": "go",
-        "sha256": "6f749d0e5d7a926a88b3a700ef02e2ef2d943514b164e97ece3918c42b791216",
+        "sha256": "75c8be88e30bc508f41354e98bc906522fa7b3a070d3a335e555a1e1323ff1a4",
         "rewrite_module": true,
         "contract": true
       },

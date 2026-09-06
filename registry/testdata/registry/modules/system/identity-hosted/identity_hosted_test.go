@@ -2,6 +2,7 @@ package identityhosted
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 
@@ -43,10 +44,20 @@ func TestExampleIdentityHostedOwnsItsHeaderFamily(t *testing.T) {
 
 func TestExampleIdentityHostedNavigates(t *testing.T) {
 	n := navigator{appURL: "https://accounts.example.invalid"}
-	if got := n.LoginURL("/app"); got != "https://accounts.example.invalid/sign-in?redirect_url=/app" {
+	got, err := n.LoginURL("/app?x=a b")
+	if err != nil {
+		t.Fatalf("LoginURL: %v", err)
+	}
+	if got != "https://accounts.example.invalid/sign-in?redirect_url=%2Fapp%3Fx%3Da+b" {
 		t.Fatalf("LoginURL = %q", got)
 	}
-	if got := n.AccountURL(); got != "https://accounts.example.invalid/account" {
-		t.Fatalf("AccountURL = %q", got)
+	if got, err = n.AccountURL(""); err != nil || got != "https://accounts.example.invalid/account" {
+		t.Fatalf("AccountURL = %q, %v", got, err)
+	}
+	if got, err = n.CreateOrganizationURL(""); err != nil || got != "https://accounts.example.invalid/create-organization" {
+		t.Fatalf("CreateOrganizationURL = %q, %v", got, err)
+	}
+	if _, err = (navigator{}).LogoutURL(""); !errors.Is(err, identity.ErrNoDestination) {
+		t.Fatalf("an unconfigured base must refuse, got %v", err)
 	}
 }

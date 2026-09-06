@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -46,15 +47,39 @@ type deleter struct{}
 
 func (deleter) DeleteUser(ctx context.Context, _ string) error { return ctx.Err() }
 
+// navigator answers this fixture's hosted portal layout. Every path segment
+// and the return-parameter name belong here, not to any caller.
 type navigator struct{ appURL string }
 
-func (n navigator) LoginURL(returnTo string) string {
-	return n.appURL + "/sign-in?redirect_url=" + returnTo
+func (n navigator) LoginURL(returnTo string) (string, error) {
+	return n.page("/sign-in", returnTo)
 }
-func (n navigator) SignupURL(returnTo string) string {
-	return n.appURL + "/sign-up?redirect_url=" + returnTo
+func (n navigator) SignupURL(returnTo string) (string, error) {
+	return n.page("/sign-up", returnTo)
 }
-func (n navigator) AccountURL() string { return n.appURL + "/account" }
+func (n navigator) LogoutURL(returnTo string) (string, error) {
+	return n.page("/sign-out", returnTo)
+}
+func (n navigator) AccountURL(returnTo string) (string, error) {
+	return n.page("/account", returnTo)
+}
+func (n navigator) OrganizationURL(returnTo string) (string, error) {
+	return n.page("/organization", returnTo)
+}
+func (n navigator) CreateOrganizationURL(returnTo string) (string, error) {
+	return n.page("/create-organization", returnTo)
+}
+
+func (n navigator) page(path, returnTo string) (string, error) {
+	if n.appURL == "" {
+		return "", fmt.Errorf("identity fixture-hosted: no portal base for %s: %w",
+			path, identity.ErrNoDestination)
+	}
+	if returnTo == "" {
+		return n.appURL + path, nil
+	}
+	return n.appURL + path + "?redirect_url=" + url.QueryEscape(returnTo), nil
+}
 
 // webhook reads this adapter's own header family and envelope, so no generic
 // handler ever learns a provider's signature scheme.

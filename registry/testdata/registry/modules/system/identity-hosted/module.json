@@ -4,7 +4,7 @@
     "id": "fixture/system/identity-hosted",
     "kind": "system",
     "name": "identity-hosted",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Fixture hosted identity adapter",
     "description": "A managed identity candidate with health reporting for provider permutation validation.",
@@ -41,7 +41,7 @@
         "source": "registry/modules/system/identity-hosted/identity_hosted.go",
         "target": "internal/fixture/identityhosted/identity_hosted.go",
         "class": "go",
-        "sha256": "38122ef8f924ebce01b6cef1d2159205b62ac1a18add9bc0b2c498906f854661",
+        "sha256": "9aa2560d81e1b87d3a9321cc3d56097729c73c3bd4ac0db34046c4ff0d23a25b",
         "rewrite_module": true,
         "contract": true
       },
@@ -49,7 +49,7 @@
         "source": "registry/modules/system/identity-hosted/identity_hosted_test.go",
         "target": "internal/fixture/identityhosted/identity_hosted_test.go",
         "class": "test",
-        "sha256": "252b69d39f70a83c2b8f00c8f159f1341dc937c14bcc240a57c3b6039c5dc30f",
+        "sha256": "4c79264ea1880a4911b7765f43366be8b04625b10c5e816b21fa50376b059b18",
         "rewrite_module": true,
         "contract": false
       }

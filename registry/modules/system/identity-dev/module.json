@@ -4,7 +4,7 @@
     "id": "ggg/system/identity-dev",
     "kind": "system",
     "name": "identity-dev",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Development identity",
     "description": "Synthetic identity for development and tests",
@@ -46,7 +46,7 @@
         "source": "internal/identity/devadapter/contract_test.go",
         "target": "internal/identity/devadapter/contract_test.go",
         "class": "test",
-        "sha256": "58935a4457b6adc489af3b44c93d5291fa512204fabced197483de21fee1ed2a",
+        "sha256": "d5a73c670d3e20fd44bc5b2d529c98b704f251b44e2e6263c4054b21291c6e47",
         "rewrite_module": true,
         "contract": false
       },
@@ -62,7 +62,7 @@
         "source": "internal/identity/devadapter/module.go",
         "target": "internal/identity/devadapter/module.go",
         "class": "go",
-        "sha256": "7a0dfc999017e8e148e2982d15672c3c443b3dddb4bb547a87f85d13338f951e",
+        "sha256": "2169c6d5f1d42abffebd905347e8e46bcc3715c67b18ceed8708462f07c8692e",
         "rewrite_module": true,
         "contract": true
       }

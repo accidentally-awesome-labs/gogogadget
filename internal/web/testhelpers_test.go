@@ -65,7 +65,10 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
 		Docs: &content.Docs{}, Verifier: identitydev.Verifier{}, Fetcher: identitydev.UserFetcher{},
-		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{BaseURL: cfg.AppURL},
+		// Bypass mirrors the DEV_AUTH_BYPASS value above: the dev adapter's
+		// sign-in destination is its own /dev/login route, which is
+		// registered only while that key is on.
+		IdentityDeleter: identitydev.Deleter{}, IdentityNavigator: identitydev.Navigator{BaseURL: cfg.AppURL, Bypass: true},
 		IdentityWebhook: identitydev.Webhook{}, BillingWebhook: billinglocal.LocalWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
 		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},

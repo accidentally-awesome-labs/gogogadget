@@ -146,6 +146,55 @@ func TestNavigatorContract(t *testing.T) {
 	identitycontract.RunNavigator(t, Navigator{BaseURL: "https://accounts.example.test"}, "https://accounts.example.test")
 }
 
+// Every Account Portal path this adapter owns, in one place. These six paths
+// used to be spread across the neutral web package, which knew three of them
+// and `redirect_url` besides.
+func TestNavigatorDestinations(t *testing.T) {
+	n := Navigator{BaseURL: "https://accounts.example.test"}
+	const returnTo = "https://app.example.com/app/settings/account"
+	const escaped = "?redirect_url=https%3A%2F%2Fapp.example.com%2Fapp%2Fsettings%2Faccount"
+
+	for path, destination := range map[string]func(string) (string, error){
+		"/sign-in":             n.LoginURL,
+		"/sign-up":             n.SignupURL,
+		"/sign-out":            n.LogoutURL,
+		"/user":                n.AccountURL,
+		"/organization":        n.OrganizationURL,
+		"/create-organization": n.CreateOrganizationURL,
+	} {
+		got, err := destination(returnTo)
+		require.NoError(t, err, path)
+		assert.Equal(t, "https://accounts.example.test"+path+escaped, got)
+
+		got, err = destination("")
+		require.NoError(t, err, path)
+		assert.Equal(t, "https://accounts.example.test"+path, got,
+			"no return target means no trailing empty parameter")
+	}
+}
+
+// An unconfigured portal base refuses instead of answering a relative URL.
+//
+// CLERK_PORTAL_URL is production-required, so an empty base means this
+// adapter was built without what it needs. Concatenating onto "" produced
+// same-origin paths — "/user", "/create-organization" — that this application
+// does not serve, which is a 404 that looks exactly like a working link.
+func TestNavigatorRefusesWithoutAPortalBase(t *testing.T) {
+	n := Navigator{}
+	for name, destination := range map[string]func(string) (string, error){
+		"LoginURL":              n.LoginURL,
+		"SignupURL":             n.SignupURL,
+		"LogoutURL":             n.LogoutURL,
+		"AccountURL":            n.AccountURL,
+		"OrganizationURL":       n.OrganizationURL,
+		"CreateOrganizationURL": n.CreateOrganizationURL,
+	} {
+		got, err := destination("https://app.example.com/app")
+		assert.ErrorIs(t, err, identity.ErrNoDestination, name)
+		assert.Empty(t, got, name)
+	}
+}
+
 // TestWebhookRefusesWithoutSecret pins the unconfigured refusal: a hosted
 // adapter with no webhook secret must never accept an unsigned delivery.
 func TestWebhookRefusesWithoutSecret(t *testing.T) {

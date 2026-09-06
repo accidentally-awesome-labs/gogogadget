@@ -143,8 +143,13 @@ DEV_AUTH_BYPASS=true
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable
 ```
 
-**Local development with real Clerk:** add the four `CLERK_*` keys. When Clerk
-is configured, `/login` goes to the hosted portal instead of `/dev/login`.
+**Local development with real Clerk:** `/login`'s destination follows the
+adapter selected for the environment, not the presence of keys. While
+`identity-dev` is selected for development it answers `/dev/login`, and the
+four `CLERK_*` keys only feed the app shell and the CSP. `identity-clerk`'s
+own service target declares `production` alone, so exercising the hosted
+portal locally means pointing `APP_ENV=production` at a staging Clerk
+instance rather than mixing the two adapters in one environment.
 
 **Tests** (what `e2e/playwright.config.ts` uses). It sets no database at all —
 the address comes from `e2e/generated/database.ts`, rendered by `ggg sync` from

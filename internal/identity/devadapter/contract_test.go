@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	identitycontract "github.com/gogogadget/gogogadget/internal/identity/contract"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,70 @@ func TestWebhookContract(t *testing.T) {
 }
 
 func TestNavigatorContract(t *testing.T) {
-	identitycontract.RunNavigator(t, Navigator{BaseURL: "http://localhost:18080"}, "http://localhost:18080")
+	identitycontract.RunNavigator(t,
+		Navigator{BaseURL: "http://localhost:18080", Bypass: true}, "http://localhost:18080")
+}
+
+// The destinations this adapter serves, and the ones it refuses, spelled out
+// where a reader can see the whole map at once. Every refusal is
+// identity.ErrNoDestination with an empty URL: the old implementation
+// answered `<app>/login`, `<app>/signup` and `<app>/account`, of which the
+// first two redirect straight back into the handler that asked and the third
+// is a route this application has never served.
+func TestNavigatorDestinations(t *testing.T) {
+	n := Navigator{BaseURL: "http://localhost:18080", Bypass: true}
+
+	for name, got := range map[string]func(string) (string, error){
+		"LoginURL":  n.LoginURL,
+		"SignupURL": n.SignupURL,
+	} {
+		url, err := got("http://localhost:18080/app?x=a b")
+		require.NoError(t, err, name)
+		assert.Equal(t, "http://localhost:18080/dev/login?return_to=http%3A%2F%2Flocalhost%3A18080%2Fapp%3Fx%3Da+b",
+			url, name)
+	}
+
+	logout, err := n.LogoutURL("http://localhost:18080/")
+	require.NoError(t, err)
+	assert.Equal(t, "http://localhost:18080/", logout)
+
+	for name, refuses := range map[string]func(string) (string, error){
+		"AccountURL":            n.AccountURL,
+		"OrganizationURL":       n.OrganizationURL,
+		"CreateOrganizationURL": n.CreateOrganizationURL,
+	} {
+		url, err := refuses("http://localhost:18080/app")
+		assert.ErrorIs(t, err, identity.ErrNoDestination, name)
+		assert.Empty(t, url, name)
+	}
+}
+
+// With the bypass off, /dev/login is not registered, so this adapter has no
+// sign-in surface and says so rather than naming a route that 404s.
+func TestNavigatorRefusesSignInWithoutTheBypass(t *testing.T) {
+	n := Navigator{BaseURL: "http://localhost:18080"}
+	for _, destination := range []func(string) (string, error){n.LoginURL, n.SignupURL} {
+		url, err := destination("http://localhost:18080/app")
+		assert.ErrorIs(t, err, identity.ErrNoDestination)
+		assert.Empty(t, url)
+	}
+}
+
+// The module wires the bypass through from configuration, so the adapter's
+// answer tracks the key that gates its route rather than a second copy of it.
+func TestModuleNavigatorTracksTheBypass(t *testing.T) {
+	m, err := NewModule(context.Background(), nil,
+		Deps{Config: &config.Config{AppURL: "http://localhost:18080", DevAuthBypass: true}})
+	require.NoError(t, err)
+	url, err := m.Navigator.LoginURL("")
+	require.NoError(t, err)
+	assert.Equal(t, "http://localhost:18080/dev/login", url)
+
+	m, err = NewModule(context.Background(), nil,
+		Deps{Config: &config.Config{AppURL: "http://localhost:18080"}})
+	require.NoError(t, err)
+	_, err = m.Navigator.LoginURL("")
+	assert.ErrorIs(t, err, identity.ErrNoDestination)
 }
 
 func TestVerifierParsesE2ETokens(t *testing.T) {

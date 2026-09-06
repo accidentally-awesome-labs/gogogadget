@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
@@ -42,7 +43,7 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 		Verifier:  Verifier{},
 		Fetcher:   UserFetcher{},
 		Deleter:   Deleter{},
-		Navigator: Navigator{BaseURL: d.Config.AppURL},
+		Navigator: Navigator{BaseURL: d.Config.AppURL, Bypass: d.Config.DevAuthBypass},
 		Webhook:   Webhook{},
 	}, nil
 }
@@ -103,16 +104,83 @@ type Deleter struct{}
 
 func (Deleter) DeleteUser(context.Context, string) error { return nil }
 
-// Navigator points at the in-app dev auth pages instead of a hosted portal.
-type Navigator struct{ BaseURL string }
+// Navigator maps each destination onto this adapter's own local surface.
+//
+// There is no hosted portal here, and pretending otherwise is what the old
+// implementation did: it returned `<app>/login`, `<app>/signup` and
+// `<app>/account`, of which the first two are the very handlers that ask this
+// port (an infinite redirect) and the third is a route this application has
+// never served. Each destination below either names a route that exists in
+// the configuration this adapter runs in, or refuses.
+type Navigator struct {
+	BaseURL string
+	// Bypass mirrors DEV_AUTH_BYPASS. The dev session routes are registered
+	// only while it is on — and it is the only condition under which this
+	// adapter can mint a session at all — so it decides whether this adapter
+	// has a sign-in surface to offer.
+	Bypass bool
+}
 
-func (n Navigator) LoginURL(returnTo string) string {
-	return n.BaseURL + "/login?return_to=" + returnTo
+// LoginURL and SignupURL are both the dev login. Minting a session for a
+// subject IS account creation here: the fetcher derives the profile from the
+// subject, so there is no second page a new visitor would need.
+func (n Navigator) LoginURL(returnTo string) (string, error) {
+	return n.session("/dev/login", returnTo)
 }
-func (n Navigator) SignupURL(returnTo string) string {
-	return n.BaseURL + "/signup?return_to=" + returnTo
+func (n Navigator) SignupURL(returnTo string) (string, error) {
+	return n.session("/dev/login", returnTo)
 }
-func (n Navigator) AccountURL() string { return n.BaseURL + "/account" }
+
+// LogoutURL is the home page. The synthetic session is one cookie belonging to
+// this application, so sign-out is complete once the caller has cleared it and
+// there is nothing upstream left to visit.
+func (n Navigator) LogoutURL(string) (string, error) {
+	if n.BaseURL == "" {
+		return "", fmt.Errorf("identity dev: APP_URL is required: %w", identity.ErrNoDestination)
+	}
+	return n.BaseURL + "/", nil
+}
+
+// AccountURL and OrganizationURL refuse. This adapter manages nothing: the
+// profile is derived from the subject and the organization lives in this
+// application's own tables, so the settings page a caller renders the link
+// *on* is already the whole surface. A link back to the page you are reading,
+// captioned "managed by your identity provider", is worse than no link.
+func (n Navigator) AccountURL(string) (string, error) {
+	return "", fmt.Errorf("identity dev: a synthetic profile has no account page: %w",
+		identity.ErrNoDestination)
+}
+func (n Navigator) OrganizationURL(string) (string, error) {
+	return "", fmt.Errorf("identity dev: organizations live in this application's own tables: %w",
+		identity.ErrNoDestination)
+}
+
+// CreateOrganizationURL refuses because this application serves no
+// org-creation route, in any environment: organizations arrive through the
+// identity webhook or the seed. Answering with some other real page — the dev
+// login, the org settings tab — would send a visitor somewhere that cannot do
+// what they were sent to do, which is the failure this port was reshaped to
+// stop. The caller renders a named diagnostic instead.
+func (n Navigator) CreateOrganizationURL(string) (string, error) {
+	return "", fmt.Errorf("identity dev: this application serves no org-creation page: %w",
+		identity.ErrNoDestination)
+}
+
+// session builds a dev session URL, refusing when the route is not registered.
+func (n Navigator) session(path, returnTo string) (string, error) {
+	if n.BaseURL == "" {
+		return "", fmt.Errorf("identity dev: APP_URL is required to reach %s: %w",
+			path, identity.ErrNoDestination)
+	}
+	if !n.Bypass {
+		return "", fmt.Errorf("identity dev: %s is registered only while DEV_AUTH_BYPASS is on: %w",
+			path, identity.ErrNoDestination)
+	}
+	if returnTo == "" {
+		return n.BaseURL + path, nil
+	}
+	return n.BaseURL + path + "?return_to=" + url.QueryEscape(returnTo), nil
+}
 
 // messageIDHeader is this adapter's delivery id. It is deliberately not a
 // hosted provider's header family: an unsigned local envelope has no

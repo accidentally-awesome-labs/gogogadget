@@ -6,6 +6,7 @@ package clerk
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -18,16 +19,48 @@ const Provider = "clerk"
 
 type Deps struct{ Config *config.Config }
 
-// Navigator builds Clerk Account Portal URLs.
+// Navigator builds Clerk Account Portal URLs. Every path segment below is
+// Clerk's, `redirect_url` is Clerk's parameter name, and the escaping is
+// Clerk's problem — the neutral web package used to spell three of these and
+// disagreed with itself about the last one.
 type Navigator struct{ BaseURL string }
 
-func (n Navigator) LoginURL(returnTo string) string {
-	return n.BaseURL + "/sign-in?redirect_url=" + returnTo
+func (n Navigator) LoginURL(returnTo string) (string, error) {
+	return n.page("/sign-in", returnTo)
 }
-func (n Navigator) SignupURL(returnTo string) string {
-	return n.BaseURL + "/sign-up?redirect_url=" + returnTo
+func (n Navigator) SignupURL(returnTo string) (string, error) {
+	return n.page("/sign-up", returnTo)
 }
-func (n Navigator) AccountURL() string { return n.BaseURL }
+func (n Navigator) LogoutURL(returnTo string) (string, error) {
+	return n.page("/sign-out", returnTo)
+}
+func (n Navigator) AccountURL(returnTo string) (string, error) {
+	return n.page("/user", returnTo)
+}
+func (n Navigator) OrganizationURL(returnTo string) (string, error) {
+	return n.page("/organization", returnTo)
+}
+func (n Navigator) CreateOrganizationURL(returnTo string) (string, error) {
+	return n.page("/create-organization", returnTo)
+}
+
+// page is the one place the Account Portal's URL shape is written.
+//
+// An unconfigured base is a refusal rather than a relative URL.
+// CLERK_PORTAL_URL is production-required, so an empty base means this
+// adapter was constructed without the configuration it needs; concatenating
+// a Clerk path onto "" yields a same-origin path this application does not
+// serve, which is a 404 that looks like a working link.
+func (n Navigator) page(path, returnTo string) (string, error) {
+	if n.BaseURL == "" {
+		return "", fmt.Errorf("identity clerk: CLERK_PORTAL_URL is required to reach %s: %w",
+			path, identity.ErrNoDestination)
+	}
+	if returnTo == "" {
+		return n.BaseURL + path, nil
+	}
+	return n.BaseURL + path + "?redirect_url=" + url.QueryEscape(returnTo), nil
+}
 
 type Module struct {
 	Verifier  identity.Verifier

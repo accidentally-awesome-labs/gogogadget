@@ -4,7 +4,7 @@
     "id": "ggg/system/identity",
     "kind": "system",
     "name": "identity",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Identity",
     "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
@@ -40,7 +40,7 @@
         "source": "internal/identity/contract/contract.go",
         "target": "internal/identity/contract/contract.go",
         "class": "go",
-        "sha256": "641e9e586f17f3a1d88f6de5cb2160ddcd54e6d1c8c34ba675f0b6527a456fd3",
+        "sha256": "391f68833d71f2c241b8de618d2e9efb59b04f0ea680ea2eec4a507889a53dc2",
         "rewrite_module": true,
         "contract": false
       },
@@ -48,7 +48,7 @@
         "source": "internal/identity/contracts.go",
         "target": "internal/identity/contracts.go",
         "class": "go",
-        "sha256": "911a3ea78fb79f2718f78db694ad03725eeb074b34bd1ec1ebc67a6c9c5e1684",
+        "sha256": "47fc03b9730920f4ed89dc336d82c555c8ca1ca9a2bc58f6c284d2b33cafa5c7",
         "rewrite_module": true,
         "contract": true
       },
@@ -80,7 +80,7 @@
         "source": "internal/identity/module_test.go",
         "target": "internal/identity/module_test.go",
         "class": "test",
-        "sha256": "d26afced63c3d21ec6c08952c41c2672970df5082aa0c10913291f50276c287c",
+        "sha256": "40bfaf27b3da71a4be39a30ab7ea3add147805ca37b82d7ebd5999d1de066a31",
         "rewrite_module": true,
         "contract": false
       },

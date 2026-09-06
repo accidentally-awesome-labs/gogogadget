@@ -7,6 +7,8 @@ package contract
 import (
 	"context"
 	"net/http"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/identity"
@@ -151,19 +153,77 @@ func RunWebhook(t *testing.T, provider string, harness func(t *testing.T) Webhoo
 	}
 }
 
-// RunNavigator is the Navigator contract: every URL is absolute against the
-// adapter's configured base and a return target survives login and signup.
+// RunNavigator is the Navigator contract. Every destination either answers an
+// absolute URL against the adapter's configured base, or refuses with
+// identity.ErrNoDestination — the one thing no adapter may do is hand back an
+// empty URL and no error, because a caller cannot tell that apart from a
+// working link until a visitor clicks it.
+//
+// The query-parameter name is deliberately not asserted: it belongs to the
+// adapter. What is asserted is that the return target survives the round trip
+// verbatim, which catches a missing escape, a double escape, and a dropped
+// parameter alike.
 func RunNavigator(t *testing.T, n identity.Navigator, baseURL string) {
 	t.Helper()
-	const returnTo = "https://app.example.com/?after-auth=1"
-	for name, got := range map[string]string{
-		"LoginURL":   n.LoginURL(returnTo),
-		"SignupURL":  n.SignupURL(returnTo),
-		"AccountURL": n.AccountURL(),
-	} {
-		assert.True(t, len(got) >= len(baseURL) && got[:len(baseURL)] == baseURL,
-			"%s must be absolute against %q, got %q", name, baseURL, got)
+	// Reserved characters throughout: an unescaped return target would split
+	// into extra parameters here instead of round-tripping.
+	const returnTo = "https://app.example.com/app/settings/account?after-auth=1&x=a b"
+	destinations := map[string]func(string) (string, error){
+		"LoginURL":              n.LoginURL,
+		"SignupURL":             n.SignupURL,
+		"LogoutURL":             n.LogoutURL,
+		"AccountURL":            n.AccountURL,
+		"OrganizationURL":       n.OrganizationURL,
+		"CreateOrganizationURL": n.CreateOrganizationURL,
 	}
-	assert.Contains(t, n.LoginURL(returnTo), returnTo, "LoginURL must carry the return target")
-	assert.Contains(t, n.SignupURL(returnTo), returnTo, "SignupURL must carry the return target")
+	for name, destination := range destinations {
+		t.Run(name, func(t *testing.T) {
+			got, err := destination(returnTo)
+			if err != nil {
+				assert.ErrorIs(t, err, identity.ErrNoDestination,
+					"%s must refuse with identity.ErrNoDestination so a caller can name the failure", name)
+				assert.Empty(t, got, "%s must not answer a URL alongside an error", name)
+				return
+			}
+			require.NotEmpty(t, got,
+				"%s answered an empty URL with no error, which renders as a link to nowhere", name)
+			assert.True(t, strings.HasPrefix(got, baseURL),
+				"%s must be absolute against %q, got %q", name, baseURL, got)
+
+			parsed, parseErr := url.Parse(got)
+			require.NoError(t, parseErr, "%s must answer a parseable URL", name)
+			bare, bareErr := destination("")
+			require.NoError(t, bareErr, "%s served a return target but refuses without one", name)
+			if got == bare {
+				// This destination ignores the return target, which is its
+				// own choice; there is nothing left to round-trip.
+				return
+			}
+			assert.Contains(t, values(parsed), returnTo,
+				"%s changed shape for the return target but does not carry it verbatim: %q", name, got)
+		})
+	}
+
+	// Sign-in and sign-up are the two destinations a visitor is sent to
+	// mid-journey, so losing the return target strands them on the home page.
+	for _, name := range []string{"LoginURL", "SignupURL"} {
+		got, err := destinations[name](returnTo)
+		if err != nil {
+			continue
+		}
+		parsed, parseErr := url.Parse(got)
+		require.NoError(t, parseErr)
+		assert.Contains(t, values(parsed), returnTo, "%s must carry the return target", name)
+	}
+}
+
+// values is every query value in u, so a contract can assert a return target
+// round-tripped without knowing which parameter the adapter chose.
+func values(u *url.URL) []string {
+	query := u.Query()
+	out := make([]string, 0, len(query))
+	for _, v := range query {
+		out = append(out, v...)
+	}
+	return out
 }

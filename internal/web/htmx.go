@@ -231,6 +231,23 @@ func (s *Server) renderStatus(w http.ResponseWriter, r *http.Request, status int
 	s.Render(w, r, Page{Title: title, Layout: templates.LayoutPublic}, templates.StatusPage(title, detail))
 }
 
+// providerDestinationUnavailable renders the named failure when the adapter
+// selected for a provider slot publishes no page for a destination a handler
+// asked for.
+//
+// Loud on purpose, and it replaces three silent degradations: the settings
+// pages used to build a provider URL from a configuration key and render no
+// link at all when the selected adapter did not own that key, and the
+// zero-organization guard used to redirect to a same-origin path this
+// application does not serve. Neither said anything, anywhere.
+func (s *Server) providerDestinationUnavailable(w http.ResponseWriter, r *http.Request, slot, destination string, err error) {
+	s.log.Error("provider destination unavailable",
+		"slot", slot, "destination", destination,
+		"env", s.cfg.Env, "path", r.URL.Path, "error", err)
+	s.renderStatus(w, r, http.StatusServiceUnavailable, "Not available",
+		"The "+slot+" provider selected for this environment has no "+destination+" page.")
+}
+
 // renderError renders the 500 page from the recover middleware.
 func (s *Server) renderError(w http.ResponseWriter, r *http.Request, detail string) {
 	w.WriteHeader(http.StatusInternalServerError)

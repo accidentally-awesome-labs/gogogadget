@@ -15,13 +15,34 @@ mirrors profile data locally. This page covers the session lifecycle, the
 ## The hosted-portal model
 
 GoGoGadget sends sign-in and sign-up through a public callback page so
-clerk-js can establish the local session before a protected route runs:
+clerk-js can establish the local session before a protected route runs.
 
-| App route | Portal destination |
-|---|---|
-| `GET /login` | `{CLERK_PORTAL_URL}/sign-in?redirect_url={APP_URL}/?after-auth=1` |
-| `GET /signup` | `{CLERK_PORTAL_URL}/sign-up?redirect_url={APP_URL}/?after-auth=1` |
-| `GET /logout` | `{CLERK_PORTAL_URL}/sign-out?redirect_url={APP_URL}/` |
+Every destination below is asked for through `identity.Navigator`, so the
+adapter selected for the environment owns the path, the name of the return
+parameter, and the escaping. The neutral web package passes a destination and
+a return target, never a URL fragment. With `identity-clerk` selected:
+
+| App route | Navigator destination | Clerk Account Portal URL |
+|---|---|---|
+| `GET /login` | `LoginURL` | `{CLERK_PORTAL_URL}/sign-in?redirect_url={APP_URL}/?after-auth=1` |
+| `GET /signup` | `SignupURL` | `{CLERK_PORTAL_URL}/sign-up?redirect_url={APP_URL}/?after-auth=1` |
+| `GET /logout` | `LogoutURL` | `{CLERK_PORTAL_URL}/sign-out?redirect_url={APP_URL}/` |
+| `/app/settings/account` link | `AccountURL` | `{CLERK_PORTAL_URL}/user?redirect_url={APP_URL}/app/settings/account` |
+| `/app/settings/org` link | `OrganizationURL` | `{CLERK_PORTAL_URL}/organization?redirect_url={APP_URL}/app/settings/org` |
+| zero-organization guard | `CreateOrganizationURL` | `{CLERK_PORTAL_URL}/create-organization?redirect_url={APP_URL}/app` |
+
+`GET /logout` expires the `__session` cookie before handing off, for every
+adapter. That cookie is the one this application reads on each request, so
+leaving it in place while redirecting to a hosted sign-out kept the visitor
+signed in locally until clerk-js happened to clear it.
+
+A destination the selected adapter does not publish is a refusal
+(`identity.ErrNoDestination`), never an empty URL. The settings pages render
+their explanatory copy with no link; the guards render a named 503 that says
+which provider and which destination. `identity-dev` publishes only
+`LoginURL`/`SignupURL` (its own `/dev/login`) and `LogoutURL` (the home page):
+a synthetic profile has nothing to manage, and this application serves no
+org-creation route in any environment.
 
 The callback renders the public page, lets clerk-js finish its development
 handshake, then replaces the location with `/app`. Redirecting straight to
@@ -34,11 +55,7 @@ fallback sign-in and sign-up URLs to `{APP_URL}/?after-auth=1`. Without these
 fallbacks, an invitee can finish joining successfully but land on Clerk's
 `/default-redirect` page.
 
-Profile management, password changes, 2FA enrollment, and org management live
-at `{CLERK_PORTAL_URL}/user` and `/organization`. The settings pages link to
-those current Account Portal routes with a `redirect_url` back to the page the
-user left. Enabling Google OAuth or TOTP 2FA is Clerk dashboard configuration,
-not code.
+Enabling Google OAuth or TOTP 2FA is Clerk dashboard configuration, not code.
 
 ## The `__session` lifecycle — and why clerk-js is load-bearing
 
@@ -154,11 +171,14 @@ LoadPlan`, and `/admin` adds `RequireAdmin`. The order is load-bearing.
 - **RequireNotDisabled** — a user with `disabled_at` set gets the Disabled
   page with **403** (see [Admin](/docs/admin)).
 - **RequireOrg** — no active org in claims → query mirror memberships: one or
-  more → render the SelectOrg page; zero → redirect to
-  `{CLERK_PORTAL_URL}/create-organization?redirect_url={APP_URL}/app`. Claims
-  naming an org the mirror hasn't synced yet → 503 "Organization sync in
-  progress" (the webhook is in flight). Details in
-  [Organizations](/docs/organizations).
+  more → render the SelectOrg page; zero → redirect to the selected adapter's
+  `CreateOrganizationURL` (Clerk:
+  `{CLERK_PORTAL_URL}/create-organization?redirect_url={APP_URL}/app`). An
+  adapter with no such page — `identity-dev` — makes this a named 503 rather
+  than a redirect, because a relative `/create-organization` is a route this
+  application does not serve. Claims naming an org the mirror hasn't synced
+  yet → 503 "Organization sync in progress" (the webhook is in flight).
+  Details in [Organizations](/docs/organizations).
 - **LoadPlan** — resolves the org's subscription into `ctxSub` + `ctxPlan`
   via [billing entitlements](/docs/billing).
 - **RequireAdmin** — `!user.IsAdmin` → 403.
@@ -184,7 +204,10 @@ SelectOrg and create-organization branches. Every guard and middleware still
 executes; only the token check is synthetic. `identitydev.UserFetcher` synthesizes
 profiles (`<userID>@gogogadget.dev`) so the lazy upsert works with no Clerk
 account. `GET /dev/login` sets the demo cookie
-(`e2e:user_demo:org_demo:org:admin`) and lands in `/app`. See
+(`e2e:user_demo:org_demo:org:admin`) and lands in `/app`; `/login` and
+`/signup` go there too, because that is what this adapter's `LoginURL` and
+`SignupURL` answer — the login handler reads no bypass key and names no dev
+route of its own. See
 [Getting started](/docs/getting-started) for the zero-account walkthrough and
 [Testing](/docs/testing) for the Playwright harness.
 
