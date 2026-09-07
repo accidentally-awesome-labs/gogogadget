@@ -112,20 +112,26 @@ you did not touch.
 
 Not an error: safe modules updated and at least one conflict is staged
 because you had edited a file upstream also changed. Your bytes were not
-touched. `ggg diff --upstream` names the diff files under
-`tmp/ggg/conflicts/`; read one, then `ggg resolve NAMESPACE/KIND/NAME --path PATH` with
-`--accept-upstream`, `--keep-local` or `--merged`. `sync --check` keeps
-failing until you do, on purpose: a staged conflict lives in ignored `tmp/`,
-so it must never be committable as a green state. See
-[Extending](/docs/extending).
+touched. The upstream candidate and its unified diff are on disk under
+`tmp/ggg/conflicts/`, written by the same journalled apply as everything else
+and listed in the run's `changes[]` as `staged`; the exit-4 message names the
+exact command for the conflicted file. `ggg diff --upstream` names the diff
+files too. Read one, then run
+`ggg resolve NAMESPACE/KIND/NAME --path PATH` with `--accept-upstream`,
+`--keep-local` or `--merged`. `sync --check` keeps failing until you do, on
+purpose: a staged conflict lives in ignored `tmp/`, so it must never be
+committable as a green state. See [Extending](/docs/extending).
 
 ## `ggg doctor` reports `candidate_missing`
 
 You cloned a repository whose lock carries conflict metadata but whose
-ignored `tmp/` is empty. Rerun `ggg update` at the lock's target
-`registry_commit`; it re-downloads, re-verifies and re-materializes the
-candidates without touching your source, and `ggg resolve` then works
-normally.
+ignored `tmp/` is empty. It is a warning, not a failure: `ggg resolve` reads
+upstream from the registry snapshot pinned to the conflict's commit and checks
+it against the digest the lock records, so every mode — `--accept-upstream`,
+`--keep-local`, `--merged` — works with an empty `tmp/`. If you want the diff
+to read, rerun `ggg update` at the lock's target `registry_commit`; it
+re-downloads, re-verifies and re-stages the candidate and diff without touching
+your source.
 
 ## Safari drops cookies in local dev
 

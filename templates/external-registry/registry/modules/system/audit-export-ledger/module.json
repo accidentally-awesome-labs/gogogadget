@@ -34,7 +34,7 @@
         "id": "ggg/system/modkit",
         "contract": {
           "min": 2,
-          "max": 5
+          "max": 6
         }
       }
     ],

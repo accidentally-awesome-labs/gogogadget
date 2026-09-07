@@ -106,12 +106,20 @@ var _ = modkit.OpSync
 	return first, second
 }
 
-func materializeConflictPlan(t *testing.T, root string, plan Plan) {
-	t.Helper()
-	materializePlanFixture(t, root, plan)
-	for _, staged := range plan.Staged {
-		writeTestFile(t, root, staged.Path, staged.Content)
+// The conflict fixtures used to call a second helper here that wrote
+// `Plan.Staged` itself, because nothing in production did. Apply writes the
+// staged artifacts as ordinary plan changes now, so materializePlanFixture —
+// which replays exactly `plan.Changes` — is the whole of it.
+
+// stagedChanges is the conflict artifacts as the plan carries them.
+func stagedChanges(plan Plan) []Change {
+	staged := make([]Change, 0, 2)
+	for _, change := range plan.Changes {
+		if change.Class == DestinationStaged {
+			staged = append(staged, change)
+		}
 	}
+	return staged
 }
 
 type preparedConflict struct {
@@ -139,7 +147,7 @@ func prepareConflictFixture(t *testing.T) preparedConflict {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	local := []byte("package button\n\nconst Local = true\n")
 	writeTestFile(t, root, "internal/modules/button.go", local)
 	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
@@ -231,20 +239,30 @@ func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 	if conflict.Module != "ggg/element/button" || conflict.Path != "internal/modules/button.go" {
 		t.Fatalf("conflict = %#v", conflict)
 	}
-	if got, want := len(plan.Staged), 2; got != want {
-		t.Fatalf("staged file count = %d, want %d", got, want)
+	staged := stagedChanges(plan)
+	if got, want := len(staged), 2; got != want {
+		t.Fatalf("staged change count = %d, want %d", got, want)
 	}
-	var candidate, diff StagedFile
-	for _, staged := range plan.Staged {
-		switch staged.Path {
+	var candidate, diff Change
+	for _, change := range staged {
+		if change.Kind != ChangeCreate {
+			t.Fatalf("staged change %s kind = %q, want create", change.Path, change.Kind)
+		}
+		if change.Module != conflict.Module || change.Source != conflict.Path {
+			t.Fatalf("staged change %s = module %q source %q", change.Path, change.Module, change.Source)
+		}
+		switch change.Path {
 		case conflict.CandidatePath:
-			candidate = staged
+			candidate = change
 		case conflict.DiffPath:
-			diff = staged
+			diff = change
 		}
 	}
 	if candidate.Path == "" || diff.Path == "" {
-		t.Fatalf("staged files do not match conflict metadata: %#v / %#v", plan.Staged, conflict)
+		t.Fatalf("staged changes do not match conflict metadata: %#v / %#v", staged, conflict)
+	}
+	if candidate.SHA256 != conflict.UpstreamSHA256 {
+		t.Fatalf("staged candidate digest = %q, want the conflict's %q", candidate.SHA256, conflict.UpstreamSHA256)
 	}
 	if !strings.Contains(string(candidate.Content), `"example.com/acme/app/internal/modkit"`) {
 		t.Fatalf("candidate import is not rewritten:\n%s", candidate.Content)
@@ -283,7 +301,7 @@ func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 	if !reflect.DeepEqual(plan, repeated) {
 		t.Fatal("conflict plan is not deterministic")
 	}
-	materializeConflictPlan(t, fixture.root, plan)
+	materializePlanFixture(t, fixture.root, plan)
 	afterCommit, err := fixture.engine.Plan(context.Background(), fixture.root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 	if err != nil {
 		t.Fatalf("Plan(after conflict lock commit): %v", err)
@@ -309,7 +327,7 @@ func TestUpdateTreatsMatchingLocalAndUpstreamAsClean(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 
 	upstreamSource := secondRegistry["registry/modules/element/button/button.go"].Data
 	upstreamInstalled, err := rewriteModuleImports(
@@ -353,7 +371,7 @@ func TestSyncRefusesImplicitInstalledModuleRemoval(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	intent, err := MarshalProject(Project{
 		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
@@ -381,7 +399,7 @@ func TestResolveConflictModes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fixture := prepareConflictFixture(t)
-			materializeConflictPlan(t, fixture.root, fixture.plan)
+			materializePlanFixture(t, fixture.root, fixture.plan)
 			merged := []byte("package button\n\nconst Merged = true\n")
 			if tt.mode == ResolutionMerged {
 				writeTestFile(t, fixture.root, "internal/modules/button.go", merged)
@@ -432,7 +450,7 @@ func TestResolveConflictModes(t *testing.T) {
 
 func TestConflictPlanDoesNotWriteStaging(t *testing.T) {
 	fixture := prepareConflictFixture(t)
-	for _, staged := range fixture.plan.Staged {
+	for _, staged := range stagedChanges(fixture.plan) {
 		if _, err := os.Stat(filepath.Join(fixture.root, filepath.FromSlash(staged.Path))); !errors.Is(err, fs.ErrNotExist) {
 			t.Fatalf("Plan wrote staged path %s: %v", staged.Path, err)
 		}
@@ -455,7 +473,7 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	if err := os.Remove(filepath.Join(root, "internal/modules/optional.go")); err != nil {
 		t.Fatalf("remove optional: %v", err)
 	}
@@ -499,7 +517,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 		if err != nil {
 			t.Fatalf("Plan(update): %v", err)
@@ -536,7 +554,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		writeTestFile(t, root, "internal/modules/optional.go", []byte("local edit"))
 		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 		if err == nil || !strings.Contains(err.Error(), "removal planning is required") {
@@ -570,13 +588,13 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst Local = true\n"))
 	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 	if err != nil {
 		t.Fatalf("Plan(update): %v", err)
 	}
-	materializeConflictPlan(t, root, update)
+	materializePlanFixture(t, root, update)
 	plan, err := engine.ResolveConflict(
 		context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionAcceptUpstream,
 	)
@@ -599,6 +617,13 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 	}
 }
 
+// A resolution's upstream bytes come from the registry snapshot pinned to the
+// conflict's own commit, and the lock's recorded candidate digest is what
+// proves the two agree. A lock that records a digest the pinned payload does
+// not produce is a resolution against unknown bytes, and it refuses. The
+// tampered copy under tmp/ is written here too, to say plainly that it is NOT
+// what the check reads: the scratch file is the operator's evidence, never an
+// engine input.
 func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	firstRegistry, secondRegistry := conflictRegistries(t)
 	source := refSource{snapshots: map[string]Snapshot{
@@ -616,7 +641,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst LocalA = true\n"))
 	writeTestFile(t, root, "internal/modules/button_helper.go", []byte("package button\n\nconst LocalB = true\n"))
 	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
@@ -626,7 +651,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	if got, want := len(update.Conflicts), 2; got != want {
 		t.Fatalf("conflict count = %d, want %d", got, want)
 	}
-	materializeConflictPlan(t, root, update)
+	materializePlanFixture(t, root, update)
 
 	tampered := []byte("tampered candidate bytes")
 	lockChange := plannedChange(t, update, "gogogadget.lock.json")
@@ -654,7 +679,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	_, err = engine.ResolveConflict(
 		context.Background(), root, "ggg/element/button", "internal/modules/button_helper.go", ResolutionAcceptUpstream,
 	)
-	if err == nil || !strings.Contains(err.Error(), "candidate sha256 does not match target manifest payload") {
+	if err == nil || !strings.Contains(err.Error(), "but the lock records candidate") {
 		t.Fatalf("ResolveConflict error = %v, want fresh payload mismatch", err)
 	}
 }

@@ -165,10 +165,15 @@ func inspectCandidateArtifact(root, module, path, wantDigest string, report *Hea
 			Message: fmt.Sprintf("conflict candidate cannot be read: %v", err),
 		})
 	case missing:
+		// A warning, not an error: nothing consumes these bytes. `ggg resolve`
+		// reads upstream from the registry snapshot pinned to the conflict's
+		// commit, so a cleaned scratch directory costs the operator the diff
+		// they might have wanted to read and nothing else.
 		report.Findings = append(report.Findings, HealthFinding{
-			Code: "candidate_missing", Severity: "error", Module: module, Path: path,
+			Code: "candidate_missing", Severity: "warn", Module: module, Path: path,
 			Message: fmt.Sprintf(
-				"conflict candidate bytes are missing; run ggg update at registry commit %s to re-materialize them",
+				"conflict candidate bytes are missing; every ggg resolve mode still works without them, "+
+					"and ggg update at registry commit %s re-stages the candidate and its diff to read",
 				report.RegistryCommit,
 			),
 		})
@@ -176,7 +181,8 @@ func inspectCandidateArtifact(root, module, path, wantDigest string, report *Hea
 		report.Findings = append(report.Findings, HealthFinding{
 			Code: "candidate_mismatch", Severity: "error", Module: module, Path: path,
 			Message: fmt.Sprintf(
-				"conflict candidate does not match its recorded digest; run ggg update at registry commit %s to re-materialize it",
+				"conflict candidate does not match its recorded digest, so it is not the upstream this conflict was "+
+					"staged from; delete it or re-stage it with ggg update at registry commit %s before merging against it",
 				report.RegistryCommit,
 			),
 		})

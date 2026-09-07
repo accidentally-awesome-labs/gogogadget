@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -363,9 +364,36 @@ func drivePlanMutation(ctx context.Context, cc CommandContext, command string, m
 	env.Command = command
 	if len(env.Conflicts) > 0 && command != "resolve" {
 		return Result{Envelope: normalizeEnvelope(env), Payload: result.Payload},
-			conflictExit(fmt.Errorf("%s: %d staged conflict(s) remain; run `ggg resolve`", command, len(env.Conflicts)))
+			conflictExit(fmt.Errorf("%s: %d staged conflict(s); %s", command, len(env.Conflicts), resolveAdvice(env.Conflicts)))
 	}
 	return Result{Envelope: normalizeEnvelope(env), Payload: result.Payload}, nil
+}
+
+// resolveAdvice names the move that clears a staged conflict. Exit 4 used to
+// say "run `ggg resolve`" while nothing on any production path wrote the
+// candidate, and the refusal `ggg resolve` answered with sent the operator
+// back to `ggg update` to re-materialize it — a closed loop with no exit and
+// the only documented recovery from a conflict. Apply writes the artifacts
+// now, so the advice can be the exact invocation, with the file to read first.
+func resolveAdvice(conflicts []modkit.Conflict) string {
+	first := conflicts[0]
+	modes := "one of --accept-upstream, --keep-local or --merged"
+	if len(conflicts) == 1 {
+		return fmt.Sprintf(
+			"the upstream candidate is staged at %s with its diff beside it; resolve with `ggg resolve %s --path %s` and %s",
+			first.CandidatePath, first.Module, first.Path, modes,
+		)
+	}
+	return fmt.Sprintf(
+		"each upstream candidate and diff is staged under %s; resolve every conflict listed above with `ggg resolve MODULE --path PATH` and %s, starting with `ggg resolve %s --path %s`",
+		conflictRunDir(first.CandidatePath), first.Module, modes, first.Path,
+	)
+}
+
+// conflictRunDir is the per-run staging directory holding one update's
+// artifacts: tmp/ggg/conflicts/<run>/<module>/<file>.candidate → …/<run>/.
+func conflictRunDir(candidatePath string) string {
+	return path.Dir(path.Dir(candidatePath)) + "/"
 }
 
 func runInit(ctx context.Context, cc CommandContext, args []string) (Result, error) {

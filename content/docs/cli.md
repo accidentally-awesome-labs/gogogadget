@@ -279,8 +279,12 @@ same id and a changed plan cannot reuse one.
 `changes` is the authoritative list of what the run does to the tree: one entry
 per path, each with a `kind` (`create`, `update`, `delete`, `unchanged`), a
 `class` (`authored`, `generated`, `migration`, `intent`, `lock`, `dependency`,
-`tool`, `container`, `remote`) and the `sha256` of the bytes involved — for a
-delete, the bytes about to be removed. `generated` is the narrower convenience
+`tool`, `container`, `staged`, `remote`) and the `sha256` of the bytes involved
+— for a delete, the bytes about to be removed. `staged` is a conflict artifact
+under ignored `tmp/ggg/conflicts/`: the complete upstream candidate and its
+unified diff, written by the same journalled apply as everything else, so they
+are created on apply, rolled back with the transaction, and named here rather
+than appearing from nowhere. `generated` is the narrower convenience
 list of generated outputs the run **writes**; a deletion is never in it, so a
 consumer that needs the removal set filters `changes` on `kind == "delete"`.
 
@@ -349,8 +353,11 @@ Exit 4 has two distinct sources and both are honest reports rather than errors:
   gate names what the next `ggg sync` will remove. Nothing was written; run
   `ggg sync`.
 - `ggg update` updated everything it safely could, and one or more modules are
-  now `conflicted` with an upstream candidate staged. Local bytes are untouched;
-  run `ggg diff --upstream` and then `ggg resolve`.
+  now `conflicted`. Local bytes are untouched, the upstream candidate and its
+  diff are on disk under `tmp/ggg/conflicts/` as named `create`/`staged`
+  changes, and the message names the exact next command:
+  `ggg resolve MODULE --path PATH` with one of `--accept-upstream`,
+  `--keep-local` or `--merged`. Read the diff, or `ggg diff --upstream`, first.
 
 Exit 5 means the transaction rolled back. Every journalled path is restored to
 exactly the bytes *and the mode* it had, directories the run created are

@@ -44,7 +44,7 @@
     },
     {
       "path": "registry/modules/system/audit-export-ledger/module.json",
-      "sha256": "d4206db8f8b31045b72df21a77adbccdde179bb685f88b0d1cc809e62bf23a09"
+      "sha256": "199c9b86d6153dfbabcd81720c5a046cdeee9dd7a045ffe4ef73a3211d389586"
     },
     {
       "path": "registry/pages.json",

@@ -196,7 +196,7 @@ func reconcilePlannedState(
 	claims map[string]struct{},
 	retire map[string]struct{},
 	retained map[string]struct{},
-) (Lock, []Change, []Conflict, []StagedFile, []Diagnostic, error) {
+) (Lock, []Change, []Conflict, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
 	// claim them, so a manifest that points at a registry-owned artifact is a
 	// preflight refusal rather than a silent overwrite. Enforce this before
@@ -204,7 +204,7 @@ func reconcilePlannedState(
 	// the same way.
 	for _, payload := range payloads {
 		if IsGeneratedOutputPath(payload.file.Target) {
-			return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+			return Lock{}, nil, nil, nil, fmt.Errorf(
 				"module %s targets generated output %s; generated outputs are tool-owned and cannot be authored",
 				payload.module, payload.file.Target,
 			)
@@ -238,11 +238,11 @@ func reconcilePlannedState(
 			// ownership classifier ever sees it.
 			_, localDigest, missing, stateErr := CurrentTargetState(root, payload.file.Target)
 			if stateErr != nil {
-				return Lock{}, nil, nil, nil, nil, stateErr
+				return Lock{}, nil, nil, nil, stateErr
 			}
 			if !missing && localDigest != upstream {
 				if _, claimed := claims[payload.file.Target]; !claimed {
-					return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+					return Lock{}, nil, nil, nil, fmt.Errorf(
 						"adoption blocked: %s already exists with different bytes than %s provides; "+
 							"re-run with --claim %s to adopt your version as a recorded modification, "+
 							"or delete the file to take the registry copy",
@@ -262,7 +262,7 @@ func reconcilePlannedState(
 
 			change, err := classifyAuthoredTarget(root, payload.module, payload.file, payload.content, ownership)
 			if err != nil {
-				return Lock{}, nil, nil, nil, nil, err
+				return Lock{}, nil, nil, nil, err
 			}
 			changes = append(changes, change)
 			files[payload.module] = append(files[payload.module], LockedFile{
@@ -275,10 +275,10 @@ func reconcilePlannedState(
 		}
 		migrations, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, graph.modules, Lock{}, false, nil)
 		if err != nil {
-			return Lock{}, nil, nil, nil, nil, err
+			return Lock{}, nil, nil, nil, err
 		}
 		changes = append(changes, migrationChanges...)
-		return buildPlannedLock(snapshot.Commit, graph, files, migrations), changes, []Conflict{}, []StagedFile{}, []Diagnostic{}, nil
+		return buildPlannedLock(snapshot.Commit, graph, files, migrations), changes, []Conflict{}, []Diagnostic{}, nil
 	}
 
 	oldModules := make(map[string]LockedModule, len(existing.Modules))
@@ -299,13 +299,13 @@ func reconcilePlannedState(
 			if _, retiring := retire[id]; retiring {
 				tombstone, deletions, err := planRetirement(ctx, root, id, module)
 				if err != nil {
-					return Lock{}, nil, nil, nil, nil, err
+					return Lock{}, nil, nil, nil, err
 				}
 				retiredTombstones = append(retiredTombstones, *tombstone)
 				retiredChanges = append(retiredChanges, deletions...)
 				continue
 			}
-			return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+			return Lock{}, nil, nil, nil, fmt.Errorf(
 				"module %s is installed but no longer selected; removal planning is required", id,
 			)
 		}
@@ -331,7 +331,7 @@ func reconcilePlannedState(
 			}
 			local, localDigest, missing, err := CurrentTargetState(root, payload.file.Target)
 			if err != nil {
-				return Lock{}, nil, nil, nil, nil, err
+				return Lock{}, nil, nil, nil, err
 			}
 			if missing {
 				continue
@@ -354,7 +354,10 @@ func reconcilePlannedState(
 
 	hold := heldModules(detected, graph.modules, oldModules, newModules)
 	runID := conflictRunID(snapshot.Commit, detected)
-	conflicts, pendingConflicts, staged := buildConflictArtifacts(runID, detected)
+	conflicts, pendingConflicts, staged, err := buildConflictArtifacts(root, runID, detected)
+	if err != nil {
+		return Lock{}, nil, nil, nil, err
+	}
 	directConflicts := make(map[string]map[string]struct{})
 	for _, conflict := range detected {
 		if directConflicts[conflict.module] == nil {
@@ -369,7 +372,7 @@ func reconcilePlannedState(
 	ownership := applyOwnershipTransfers(lockedFileOwnership(existing, true), graphOwners)
 	for _, module := range graph.modules {
 		if err := ctx.Err(); err != nil {
-			return Lock{}, nil, nil, nil, nil, err
+			return Lock{}, nil, nil, nil, err
 		}
 		if _, keep := retained[module.ID]; keep {
 			// A targeted update leaves this module at its prior per-module
@@ -386,7 +389,7 @@ func reconcilePlannedState(
 		}
 		oldModule, hadOld := oldModules[module.ID]
 		if _, held := hold[module.ID]; held && !hadOld {
-			return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+			return Lock{}, nil, nil, nil, fmt.Errorf(
 				"module %s cannot be installed while a required module is conflicted", module.ID,
 			)
 		} else if held {
@@ -394,11 +397,11 @@ func reconcilePlannedState(
 			for _, oldFile := range oldModule.Files {
 				_, localDigest, missing, err := CurrentTargetState(root, oldFile.Path)
 				if err != nil {
-					return Lock{}, nil, nil, nil, nil, err
+					return Lock{}, nil, nil, nil, err
 				}
 				if _, conflicted := directConflicts[module.ID][oldFile.Path]; conflicted {
 					if missing {
-						return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+						return Lock{}, nil, nil, nil, fmt.Errorf(
 							"conflicted file %s of module %s is missing; restore it before resolving", oldFile.Path, module.ID,
 						)
 					}
@@ -469,13 +472,13 @@ func reconcilePlannedState(
 				}
 				_, digest, missing, err := CurrentTargetState(root, oldFile.Path)
 				if err != nil {
-					return Lock{}, nil, nil, nil, nil, err
+					return Lock{}, nil, nil, nil, err
 				}
 				if missing {
 					continue
 				}
 				if digest != oldFile.BaseSHA256 {
-					return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+					return Lock{}, nil, nil, nil, fmt.Errorf(
 						"module %s dropped file %s with local modifications; removal planning is required", module.ID, oldFile.Path,
 					)
 				}
@@ -500,7 +503,7 @@ func reconcilePlannedState(
 			if oldFile, ok := oldFiles[payload.file.Target]; ok {
 				_, localDigest, missing, err := CurrentTargetState(root, payload.file.Target)
 				if err != nil {
-					return Lock{}, nil, nil, nil, nil, err
+					return Lock{}, nil, nil, nil, err
 				}
 				if !missing {
 					if localDigest == newDigest {
@@ -521,7 +524,7 @@ func reconcilePlannedState(
 			}
 			change, err := classifyAuthoredTarget(root, module.ID, payload.file, payload.content, ownership)
 			if err != nil {
-				return Lock{}, nil, nil, nil, nil, err
+				return Lock{}, nil, nil, nil, err
 			}
 			changes = append(changes, change)
 			lockedFiles = append(lockedFiles, LockedFile{
@@ -542,7 +545,7 @@ func reconcilePlannedState(
 	}
 	order, err := stableTopologicalOrder(ctx, selected, effectiveModules)
 	if err != nil {
-		return Lock{}, nil, nil, nil, nil, err
+		return Lock{}, nil, nil, nil, err
 	}
 	effectiveList := make([]Manifest, 0, len(order))
 	for _, id := range order {
@@ -550,7 +553,7 @@ func reconcilePlannedState(
 	}
 	migrationFiles, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, effectiveList, existing, true, retained)
 	if err != nil {
-		return Lock{}, nil, nil, nil, nil, err
+		return Lock{}, nil, nil, nil, err
 	}
 	changes = append(changes, migrationChanges...)
 	changes = append(changes, retiredChanges...)
@@ -575,7 +578,10 @@ func reconcilePlannedState(
 		finalLock.Order = append(finalLock.Order, tombstone.ID)
 	}
 	sort.Slice(finalLock.Modules, func(i, j int) bool { return finalLock.Modules[i].ID < finalLock.Modules[j].ID })
-	return finalLock, changes, conflicts, staged, diagnostics, nil
+	// The staged artifacts ride with every other planned write: one journal,
+	// one rollback, one `changes[]` the operator can read before applying.
+	changes = append(changes, staged...)
+	return finalLock, changes, conflicts, diagnostics, nil
 }
 
 func lockedFilesByPath(files []LockedFile) map[string]LockedFile {
@@ -687,10 +693,18 @@ func conflictRunID(newCommit string, conflicts []detectedConflict) string {
 	return digestBytes([]byte(input.String()))[:16]
 }
 
-func buildConflictArtifacts(runID string, detected []detectedConflict) ([]Conflict, map[string][]PendingConflict, []StagedFile) {
+// buildConflictArtifacts derives the conflict record, the lock's pending
+// metadata, and the two staged artifacts per conflict. The artifacts come back
+// as ordinary plan changes: Apply is the only thing in this engine that puts
+// bytes on disk, and a candidate nothing writes is a recovery path that does
+// not exist. Classification runs through classifyOwnedTarget like every other
+// tool-owned destination, so a repeated update over unchanged artifacts is
+// `unchanged` rather than a rewrite, and a symlink or a directory at one of
+// those paths refuses before the transaction opens.
+func buildConflictArtifacts(root, runID string, detected []detectedConflict) ([]Conflict, map[string][]PendingConflict, []Change, error) {
 	conflicts := make([]Conflict, 0, len(detected))
 	pending := make(map[string][]PendingConflict)
-	staged := make([]StagedFile, 0, len(detected)*2)
+	staged := make([]Change, 0, len(detected)*2)
 	for _, item := range detected {
 		pathHash := digestBytes([]byte(item.path))[:10]
 		moduleDir := strings.ReplaceAll(item.module, "/", "-")
@@ -710,12 +724,23 @@ func buildConflictArtifacts(runID string, detected []detectedConflict) ([]Confli
 			Path: item.path, CandidateSHA256: upstreamDigest,
 			CandidatePath: candidatePath, DiffPath: diffPath,
 		})
-		staged = append(staged,
-			StagedFile{Path: candidatePath, SHA256: upstreamDigest, Content: append([]byte(nil), item.upstream.content...)},
-			StagedFile{Path: diffPath, SHA256: digestBytes(diff), Content: diff},
+		// Source is the conflicted target: it is what the artifact is a copy
+		// of, and it is what makes the plan line readable.
+		candidateChange, err := classifyOwnedTarget(
+			root, candidatePath, item.module, item.path, DestinationStaged, item.upstream.content, true,
 		)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		diffChange, err := classifyOwnedTarget(
+			root, diffPath, item.module, item.path, DestinationStaged, diff, true,
+		)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		staged = append(staged, candidateChange, diffChange)
 	}
-	return conflicts, pending, staged
+	return conflicts, pending, staged, nil
 }
 
 func unifiedConflictDiff(target string, local, upstream []byte) []byte {
@@ -797,7 +822,7 @@ func buildReconciledLock(commit string, graph selectedGraph, states map[string]r
 		}, GoTools: []string{}, Dependencies: []LockedDependency{}, Modules: locked}
 }
 
-func sortPlanOutputs(changes []Change, conflicts []Conflict, staged []StagedFile) {
+func sortPlanOutputs(changes []Change, conflicts []Conflict) {
 	sort.Slice(changes, func(i, j int) bool {
 		if changes[i].Path != changes[j].Path {
 			return changes[i].Path < changes[j].Path
@@ -813,7 +838,6 @@ func sortPlanOutputs(changes []Change, conflicts []Conflict, staged []StagedFile
 		}
 		return conflicts[i].Path < conflicts[j].Path
 	})
-	sort.Slice(staged, func(i, j int) bool { return staged[i].Path < staged[j].Path })
 }
 
 // planRetirement is the in-transaction removal of a module this plan itself

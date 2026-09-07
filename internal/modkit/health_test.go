@@ -50,7 +50,7 @@ func snapshotTree(t *testing.T, root string) map[string]string {
 func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("healthy pending state", func(t *testing.T) {
 		fixture := prepareConflictFixture(t)
-		materializeConflictPlan(t, fixture.root, fixture.plan)
+		materializePlanFixture(t, fixture.root, fixture.plan)
 		before := snapshotTree(t, fixture.root)
 		report, err := fixture.engine.Health(context.Background(), fixture.root)
 		if err != nil {
@@ -90,9 +90,13 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		}
 	})
 
+	// A candidate that is gone is a warning, not an error, because no
+	// resolution reads it: `ggg resolve` takes upstream from the registry
+	// snapshot pinned to the conflict's commit. Doctor still names the
+	// artifact so an operator who wants the diff knows how to get it back.
 	t.Run("missing candidate", func(t *testing.T) {
 		fixture := prepareConflictFixture(t)
-		materializeConflictPlan(t, fixture.root, fixture.plan)
+		materializePlanFixture(t, fixture.root, fixture.plan)
 		conflict := fixture.plan.Conflicts[0]
 		if err := os.Remove(filepath.Join(fixture.root, filepath.FromSlash(conflict.CandidatePath))); err != nil {
 			t.Fatalf("remove candidate: %v", err)
@@ -101,12 +105,15 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Health: %v", err)
 		}
-		if report.Ok {
+		if !report.Ok {
 			t.Fatalf("missing-candidate report = ok %t findings %#v", report.Ok, report.Findings)
 		}
 		finding := findFinding(t, report, "candidate_missing")
 		if finding.Module != "ggg/element/button" || finding.Path != conflict.CandidatePath {
 			t.Fatalf("finding = %#v", finding)
+		}
+		if finding.Severity != "warn" {
+			t.Fatalf("missing candidate severity = %q, want warn", finding.Severity)
 		}
 		if !strings.Contains(finding.Message, fixture.plan.Lock.RegistryCommit) {
 			t.Fatalf("finding message omits pending commit: %q", finding.Message)
@@ -115,7 +122,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 
 	t.Run("tampered candidate", func(t *testing.T) {
 		fixture := prepareConflictFixture(t)
-		materializeConflictPlan(t, fixture.root, fixture.plan)
+		materializePlanFixture(t, fixture.root, fixture.plan)
 		conflict := fixture.plan.Conflicts[0]
 		writeTestFile(t, fixture.root, conflict.CandidatePath, []byte("tampered"))
 		report, err := fixture.engine.Health(context.Background(), fixture.root)
@@ -133,7 +140,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("unreadable candidate artifacts", func(t *testing.T) {
 		t.Run("directory at candidate path", func(t *testing.T) {
 			fixture := prepareConflictFixture(t)
-			materializeConflictPlan(t, fixture.root, fixture.plan)
+			materializePlanFixture(t, fixture.root, fixture.plan)
 			conflict := fixture.plan.Conflicts[0]
 			candidatePath := filepath.Join(fixture.root, filepath.FromSlash(conflict.CandidatePath))
 			if err := os.Remove(candidatePath); err != nil {
@@ -154,7 +161,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 
 		t.Run("symlinked candidate", func(t *testing.T) {
 			fixture := prepareConflictFixture(t)
-			materializeConflictPlan(t, fixture.root, fixture.plan)
+			materializePlanFixture(t, fixture.root, fixture.plan)
 			conflict := fixture.plan.Conflicts[0]
 			candidatePath := filepath.Join(fixture.root, filepath.FromSlash(conflict.CandidatePath))
 			outside := filepath.Join(t.TempDir(), "decoy")
@@ -192,15 +199,15 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst LocalA = true\n"))
 		writeTestFile(t, root, "internal/modules/button_helper.go", []byte("package button\n\nconst LocalB = true\n"))
 		update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 		if err != nil {
 			t.Fatalf("Plan(update): %v", err)
 		}
-		materializeConflictPlan(t, root, update)
-		for _, staged := range update.Staged {
+		materializePlanFixture(t, root, update)
+		for _, staged := range stagedChanges(update) {
 			if strings.HasSuffix(staged.Path, ".candidate") {
 				if err := os.Remove(filepath.Join(root, filepath.FromSlash(staged.Path))); err != nil {
 					t.Fatalf("remove candidate %s: %v", staged.Path, err)
@@ -234,7 +241,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 
 	t.Run("stale conflicted target", func(t *testing.T) {
 		fixture := prepareConflictFixture(t)
-		materializeConflictPlan(t, fixture.root, fixture.plan)
+		materializePlanFixture(t, fixture.root, fixture.plan)
 		writeTestFile(t, fixture.root, "internal/modules/button.go", []byte("package button\n\nconst Changed = true\n"))
 		report, err := fixture.engine.Health(context.Background(), fixture.root)
 		if err != nil {
@@ -307,7 +314,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		report, err := engine.Health(context.Background(), root)
 		if err != nil {
 			t.Fatalf("Health: %v", err)
@@ -320,7 +327,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 
 func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 	fixture := prepareConflictFixture(t)
-	materializeConflictPlan(t, fixture.root, fixture.plan)
+	materializePlanFixture(t, fixture.root, fixture.plan)
 	conflict := fixture.plan.Conflicts[0]
 	candidatePath := filepath.Join(fixture.root, filepath.FromSlash(conflict.CandidatePath))
 	localPath := filepath.Join(fixture.root, "internal/modules/button.go")
@@ -348,8 +355,8 @@ func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 	if got := rematerialized.RegistryCommit; got != rematerialized.Lock.RegistryCommit {
 		t.Fatalf("rematerialized commit %q does not match lock %q", got, rematerialized.Lock.RegistryCommit)
 	}
-	var staged, stagedDiff StagedFile
-	for _, candidate := range rematerialized.Staged {
+	var staged, stagedDiff Change
+	for _, candidate := range stagedChanges(rematerialized) {
 		switch candidate.Path {
 		case conflict.CandidatePath:
 			staged = candidate
@@ -358,7 +365,13 @@ func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 		}
 	}
 	if staged.Path == "" || stagedDiff.Path == "" {
-		t.Fatalf("update did not re-stage artifacts %s/%s: %#v", conflict.CandidatePath, conflict.DiffPath, rematerialized.Staged)
+		t.Fatalf("update did not re-stage artifacts %s/%s: %#v",
+			conflict.CandidatePath, conflict.DiffPath, stagedChanges(rematerialized))
+	}
+	// The diff artifact survived the earlier materialization, so only the
+	// candidate is re-created; the diff is planned `unchanged`.
+	if staged.Kind != ChangeCreate {
+		t.Fatalf("re-staged candidate kind = %q, want create", staged.Kind)
 	}
 	if staged.SHA256 != conflict.UpstreamSHA256 || digestBytes(staged.Content) != conflict.UpstreamSHA256 {
 		t.Fatalf("re-staged candidate digest = %q, want %q", staged.SHA256, conflict.UpstreamSHA256)
@@ -379,7 +392,7 @@ func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 		t.Fatalf("Plan wrote candidate bytes during planning: %v", err)
 	}
 
-	materializeConflictPlan(t, fixture.root, rematerialized)
+	materializePlanFixture(t, fixture.root, rematerialized)
 	report, err := fixture.engine.Health(context.Background(), fixture.root)
 	if err != nil {
 		t.Fatalf("Health: %v", err)

@@ -155,10 +155,13 @@ reported by naming the modules that must move together.
 Pristine files are replaced silently. A file you edited that upstream also
 changed is **never** overwritten. Your bytes stay exactly as they are, the
 complete upstream candidate and a unified diff are written under
-`tmp/ggg/conflicts/<run>/<module>/`, the conflict is recorded in the lock, and
-the command exits **4**. Independent modules that had no conflict still
-advance; the conflicted module, its reverse dependents, and any dependency
-whose `contract` also changed stay pinned at their old commit.
+`tmp/ggg/conflicts/<run>/<module>/` — as named `create`/`staged` changes in the
+same journalled transaction as every other write, so they appear in `changes[]`
+and a failed apply removes them again — the conflict is recorded in the lock,
+and the command exits **4** naming the resolve command for the conflicted file.
+Independent modules that had no conflict still advance; the conflicted module,
+its reverse dependents, and any dependency whose `contract` also changed stay
+pinned at their old commit.
 
 Read the diff, then pick one:
 
@@ -177,14 +180,20 @@ ggg resolve ggg/component/badge --path internal/web/templates/ui/badge.templ --m
   same conflict therefore clears for good, and the *next* upstream change to
   that file conflicts correctly instead of re-reporting this one.
 
+Resolving deletes that conflict's candidate and diff, again as named changes,
+so the scratch tree stays a picture of what is still undecided.
+
 Then `ggg sync` and the tree is green again. A conflict is
 deliberately not portable: the candidate bytes live in ignored `tmp/`, so
 `sync --check` keeps failing until someone resolves it and nobody can commit
-a half-updated tree as a good state. If you clone a repo whose lock carries
-conflict metadata but whose `tmp/` is empty, `ggg doctor` reports
-`candidate_missing` and naming the modules; rerunning `ggg update` at the
-lock's target commit re-materializes the candidates without touching your
-source.
+a half-updated tree as a good state. **No resolution mode needs those bytes**:
+`ggg resolve` reads upstream from the registry snapshot pinned to the
+conflict's own commit and checks it against the digest the lock records, so the
+artifacts are yours to read and to merge from, never an engine input. Clone a
+repo whose lock carries conflict metadata into an empty `tmp/` and every mode
+still works; `ggg doctor` reports `candidate_missing` as a warning, and
+re-running `ggg update` at the lock's target commit re-stages the candidate and
+diff if you want to read them.
 
 ## Create source with `ggg create`
 

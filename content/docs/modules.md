@@ -463,10 +463,12 @@ file:
   conflict; your edit simply stays.
 - **Locally edited, and upstream changed it too** — your bytes are **not
   touched**. The complete upstream candidate and a unified diff are staged as
-  `tmp/ggg/conflicts/<run>/<module>/<hash>-<name>.candidate` and `.diff`, the
-  structured metadata (base, local, and upstream digests plus both artifact
-  paths) is recorded in the module's `pending` block in the lock, the module is
-  marked `conflicted`, and the command exits 4.
+  `tmp/ggg/conflicts/<run>/<module>/<hash>-<name>.candidate` and `.diff` — as
+  named `create`/`staged` plan changes, written and rolled back by the same
+  journalled apply as every other file — the structured metadata (base, local,
+  and upstream digests plus both artifact paths) is recorded in the module's
+  `pending` block in the lock, the module is marked `conflicted`, and the
+  command exits 4 naming the `ggg resolve` invocation for that file.
 
 Scope of the hold depends on `contract`: if the conflicted module's contract
 changed, it plus its reverse dependents plus any required dependency whose
@@ -494,6 +496,16 @@ the conflict *and* leaves a later upstream change able to conflict correctly. A
 resolution that left the base behind would either re-report the same conflict
 every run or go quiet permanently.
 
+Resolving one conflict deletes that conflict's two artifacts, named in the plan
+like any other deletion, so `tmp/ggg/conflicts/` holds exactly what is still
+undecided.
+
+No mode reads the staged bytes. `ggg resolve` re-resolves the registry snapshot
+pinned to the conflict's own commit and verifies that upstream against the
+digest the lock recorded, so the artifacts are the operator's copy to read and
+merge from and never an engine input — which is why a cleaned `tmp/` costs you
+the diff and nothing else.
+
 An unresolved conflict is intentionally **not portable**. `sync --check` fails
 until it is resolved, so a pending candidate under ignored temporary storage can
 never be committed as a green state.
@@ -513,7 +525,7 @@ The findings have stable codes so automation can branch on them:
 | `lock_invalid` | error | `gogogadget.lock.json` is not canonical |
 | `conflict_pending` | warn | A staged conflict awaits `ggg resolve` |
 | `module_pinned` | warn | Held by a pending update elsewhere in its closure |
-| `candidate_missing` | error | Conflict recorded but candidate bytes absent |
+| `candidate_missing` | warn | Conflict recorded but candidate bytes absent; every resolve mode still works |
 | `candidate_mismatch` | error | Candidate bytes do not match their digest |
 | `candidate_unreadable` | error | Candidate cannot be read |
 | `candidate_path_invalid` | error | Candidate or diff path escapes the artifact prefix |
@@ -524,9 +536,10 @@ The findings have stable codes so automation can branch on them:
 
 `candidate_missing` is the case this exists for. Conflict metadata lives in the
 committed lock; candidate bytes live under ignored `tmp/`. Clone such a repo and
-the metadata arrives without the bytes. `doctor` names it, and rerunning
-`ggg update` at the lock's target commit re-downloads and re-materializes the
-candidates without touching your source.
+the metadata arrives without the bytes. That is a warning rather than an error
+because resolution does not depend on them: `doctor` names the artifact, and
+rerunning `ggg update` at the lock's target commit re-stages the candidate and
+its diff without touching your source if you want to read them.
 
 ### Remove
 

@@ -351,7 +351,16 @@ func renderInfo(out io.Writer, payload map[string]any) error {
 func renderDiff(out io.Writer, payload map[string]any) error {
 	entries, _ := payload["files"].([]DiffEntry)
 	for _, entry := range entries {
-		if _, err := fmt.Fprintf(out, "%-10s %-24s %s\n", entry.State, entry.Module, entry.Path); err != nil {
+		// `--upstream` exists to hand the operator the staged unified diff for
+		// a conflicted file, and the JSON shape has always carried its path
+		// while the human view dropped it — so the documented move, "read the
+		// diff under tmp/ggg/conflicts/ then resolve", named a file a terminal
+		// never showed.
+		line := fmt.Sprintf("%-10s %-24s %s", entry.State, entry.Module, entry.Path)
+		if entry.Diff != "" {
+			line += "  diff " + entry.Diff
+		}
+		if _, err := fmt.Fprintln(out, line); err != nil {
 			return err
 		}
 	}

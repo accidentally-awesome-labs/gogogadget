@@ -506,7 +506,7 @@ func (e *Engine) planRemove(
 		}
 	}
 	conflicts := conflictsFromLock(finalLock)
-	sortPlanOutputs(changes, conflicts, nil)
+	sortPlanOutputs(changes, conflicts)
 	operation := op
 	// The recorded operation carries the CANONICAL ids, not the operand text:
 	// a plan is replayed and reported from this, and the convenience form
@@ -516,7 +516,7 @@ func (e *Engine) planRemove(
 		Operation: operation, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit,
 		ModulePath: modulePath, Project: desired, Lock: finalLock,
 		Resolved: resolved, Order: append([]string{}, order...),
-		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: []StagedFile{},
+		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts,
 		rendered: rendered,
 	}, nil
 }

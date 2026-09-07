@@ -38,7 +38,7 @@ func targetedUpdateFixture(t *testing.T) (string, *Engine) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	source.snapshots["main"] = Snapshot{Commit: testCommitB, FS: second}
 	return root, engine
 }
@@ -89,7 +89,7 @@ func TestTargetedUpdateAdvancesNamedModulesAndRetainsOthers(t *testing.T) {
 		t.Fatalf("mixed-snapshot registry commit = %q, want %q", got, want)
 	}
 
-	materializeConflictPlan(t, root, update)
+	materializePlanFixture(t, root, update)
 	optionalAfter, err := os.ReadFile(filepath.Join(root, "internal", "modules", "optional.go"))
 	if err != nil {
 		t.Fatal(err)

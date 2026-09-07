@@ -80,7 +80,7 @@ func TestSyncTransfersTargetOwnershipInOnePass(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 
 	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
 	if err != nil {
@@ -170,7 +170,7 @@ func TestSyncRefusesTransferOverLocallyModifiedTarget(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	writeTestFile(t, root, "internal/modules/optional.go", []byte("package optional\n\nconst Version = 99 // local\n"))
 
 	_, err = engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})

@@ -120,7 +120,7 @@ func TestImmutableMigrationNeverRewritten(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	migPath := "internal/db/migrations/0001_opt_forward.sql"
 	if _, err := os.Stat(filepath.Join(root, migPath)); err != nil {
 		t.Fatalf("migration missing: %v", err)

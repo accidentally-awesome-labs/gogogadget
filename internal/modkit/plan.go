@@ -62,6 +62,13 @@ const (
 	DestinationDependency DestinationClass = "dependency"
 	DestinationTool       DestinationClass = "tool"
 	DestinationContainer  DestinationClass = "container"
+	// DestinationStaged marks a conflict artifact under the ignored scratch
+	// root: the complete upstream candidate and its unified diff. They are
+	// neither an authored payload nor a generated output — nothing renders
+	// them and no module owns their path — but they are bytes leaving the
+	// tool, so they are planned, journalled, written by Apply and rolled back
+	// with everything else rather than through a second write path.
+	DestinationStaged DestinationClass = "staged"
 	// DestinationRemote marks a provider-side or deployment-side change
 	// reported in the envelope: the change's path is a remote resource
 	// identity, not a file in the project tree.
@@ -122,13 +129,6 @@ type Conflict struct {
 	DiffPath       string `json:"diff_path"`
 }
 
-// StagedFile is an ignored conflict artifact written only by Apply.
-type StagedFile struct {
-	Path    string `json:"path"`
-	SHA256  string `json:"sha256"`
-	Content []byte `json:"-"`
-}
-
 // ResolutionMode selects how one pending conflict is resolved.
 type ResolutionMode string
 
@@ -151,7 +151,6 @@ type Plan struct {
 	Changes              []Change     `json:"changes"`
 	Diagnostics          []Diagnostic `json:"diagnostics"`
 	Conflicts            []Conflict   `json:"conflicts"`
-	Staged               []StagedFile `json:"staged"`
 	previousDependencies []LockedDependency
 	// rendered is the generator's output for this plan, computed once while
 	// planning — the planner has to render to classify unrendered outputs and
@@ -535,7 +534,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	for id := range retiredAdapters(existingLock, desiredProject) {
 		retiring[id] = struct{}{}
 	}
-	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
+	finalLock, changes, conflicts, diagnostics, err := reconcilePlannedState(
 		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims, retiring, retained,
 	)
 	if err != nil {
@@ -626,7 +625,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, err
 	}
 	changes = append(changes, lockChange)
-	sortPlanOutputs(changes, conflicts, staged)
+	sortPlanOutputs(changes, conflicts)
 
 	operation := op
 	operation.Modules = append([]string{}, op.Modules...)
@@ -634,7 +633,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	return Plan{
 		Operation: operation, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 		Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...), Order: order,
-		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: staged,
+		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts,
 		previousDependencies: append([]LockedDependency{}, existingLock.Dependencies...),
 		rendered:             rendered,
 	}, nil

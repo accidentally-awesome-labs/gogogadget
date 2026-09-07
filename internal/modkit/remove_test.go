@@ -43,7 +43,7 @@ func installedRemovalProject(t *testing.T) (string, *Engine, fstest.MapFS) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	return root, engine, first
 }
 
@@ -124,7 +124,7 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 		if err != nil {
 			t.Fatalf("Plan(remove): %v", err)
@@ -249,7 +249,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 	migrationPath := "internal/db/migrations/0001_optional_forward.sql"
 	if _, err := os.Stat(filepath.Join(root, migrationPath)); err != nil {
 		t.Fatalf("initial migration missing: %v", err)
@@ -273,7 +273,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	if tombstone == nil || len(tombstone.Migrations) != 1 || tombstone.Migrations[0].Number != 1 {
 		t.Fatalf("tombstone migrations = %#v", tombstone)
 	}
-	materializeConflictPlan(t, root, remove)
+	materializePlanFixture(t, root, remove)
 	// The real workflow runs sync between removal and re-add (make generate,
 	// make check): the tombstone must survive it with its ledger intact.
 	synced, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -293,7 +293,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	if slices.Contains(synced.Resolved, "ggg/page/optional") || !slices.Contains(synced.Lock.Order, "ggg/page/optional") {
 		t.Fatalf("post-removal sync resolved/order = %v / %v", synced.Resolved, synced.Lock.Order)
 	}
-	materializeConflictPlan(t, root, synced)
+	materializePlanFixture(t, root, synced)
 	readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(re-add): %v", err)
@@ -356,7 +356,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err == nil || !strings.Contains(err.Error(), "drain-required") {
 			t.Fatalf("Plan error = %v, want drain-required refusal naming neutralization", err)
@@ -379,7 +379,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 
 		remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
@@ -406,7 +406,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if tombstone == nil || len(tombstone.Migrations) != 1 || tombstone.Migrations[0].Number != 1 {
 			t.Fatalf("drain tombstone migrations = %#v", tombstone)
 		}
-		materializeConflictPlan(t, root, remove)
+		materializePlanFixture(t, root, remove)
 
 		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err == nil || !strings.Contains(err.Error(), "not installed") {
@@ -430,7 +430,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}, Offline: true})
 		if err == nil || !strings.Contains(err.Error(), "offline") {
 			t.Fatalf("Plan(offline drain) error = %v, want offline refusal", err)
@@ -453,7 +453,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		remove, err := engine.Plan(context.Background(), root, Operation{
 			Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}, PurgeData: true,
 		})
@@ -496,17 +496,17 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Plan(initial): %v", err)
 		}
-		materializeConflictPlan(t, root, initial)
+		materializePlanFixture(t, root, initial)
 		removePlan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(remove): %v", err)
 		}
-		materializeConflictPlan(t, root, removePlan)
+		materializePlanFixture(t, root, removePlan)
 		readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(re-add): %v", err)
 		}
-		materializeConflictPlan(t, root, readd)
+		materializePlanFixture(t, root, readd)
 		second, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(remove again): %v", err)
@@ -544,13 +544,13 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(initial): %v", err)
 	}
-	materializeConflictPlan(t, root, initial)
+	materializePlanFixture(t, root, initial)
 
 	remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(remove): %v", err)
 	}
-	materializeConflictPlan(t, root, remove)
+	materializePlanFixture(t, root, remove)
 
 	writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst LocalA = true\n"))
 	writeTestFile(t, root, "internal/modules/button_helper.go", []byte("package button\n\nconst LocalB = true\n"))
@@ -561,7 +561,7 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 	if got, want := len(update.Conflicts), 2; got != want {
 		t.Fatalf("conflict count = %d, want %d", got, want)
 	}
-	materializeConflictPlan(t, root, update)
+	materializePlanFixture(t, root, update)
 
 	// Resolving one of two conflicts keeps the clone-lock branch.
 	partial, err := engine.ResolveConflict(context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionAcceptUpstream)

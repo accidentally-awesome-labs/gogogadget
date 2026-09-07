@@ -333,13 +333,12 @@ func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *te
 	// same shape that made `remove` answer exit 5 where `sync` answered exit
 	// 3 — so the shared verdict has to be measured here, not inferred.
 	//
-	// What these do NOT show is that `ggg resolve` works: nothing in
-	// production writes `Plan.Staged`, so cliConflictProject has to
-	// materialize the candidate itself. See the comment there before reading
-	// a green run as coverage of the resolver.
+	// These measure the shared unrendered-output verdict, not the resolver
+	// itself; TestCLIConflictRecoveryDrivesEveryResolveMode is that gate.
 	t.Run("resolve reaches the same verdict as every other plan producer", func(t *testing.T) {
 		t.Run("a marked aggregate is a named delete", func(t *testing.T) {
-			root, engine, conflicted := cliConflictProject(t)
+			fixture := cliConflictProject(t)
+			root, engine, conflicted := fixture.root, fixture.engine, fixture.target
 			writeTestFile(t, root, target, marked)
 
 			out, errOut, err := runApp(t, root, engine,
@@ -356,7 +355,8 @@ func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *te
 		})
 
 		t.Run("authored bytes refuse, are named, and stay on disk", func(t *testing.T) {
-			root, engine, conflicted := cliConflictProject(t)
+			fixture := cliConflictProject(t)
+			root, engine, conflicted := fixture.root, fixture.engine, fixture.target
 			writeTestFile(t, root, target, authored)
 			lockBefore, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
 			if err != nil {

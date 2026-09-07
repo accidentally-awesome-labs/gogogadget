@@ -203,15 +203,26 @@ func mutateFixtureModule(t *testing.T, files fstest.MapFS, manifestPath string, 
 	putJSON(t, files, manifestPath, document)
 }
 
-// cliConflictProject leaves a project with one STAGED conflict, which is the
-// only state `ggg resolve` runs in. Everything the resolve path touches — a
-// local edit, an upstream that moved under it, a candidate staged rather than
-// applied — has to be real, so the fixture builds it the way an operator
-// reaches it: install from one snapshot, edit the installed file, advance the
-// ref to a snapshot that changed the same file.
-//
-// It returns the root, the engine, and the conflicted target.
-func cliConflictProject(t *testing.T) (string, *modkit.Engine, string) {
+// conflictFixture is a project one `ggg update` away from a staged conflict:
+// the installed file has a local edit and the registry's `v2` ref carries a
+// different upstream for the same path.
+type conflictFixture struct {
+	root   string
+	source modkit.Source
+	engine *modkit.Engine
+	// target is the conflicted path; local and upstream are the two sets of
+	// bytes that collide over it.
+	target   string
+	local    []byte
+	upstream []byte
+}
+
+// cliConflictSetup installs from one snapshot and edits the installed file,
+// stopping before the update. Splitting it out is what lets the rollback gate
+// drive the same update through an engine whose generation fails, which is the
+// only way to observe a transaction that has already written the staged
+// artifacts and must put the tree back.
+func cliConflictSetup(t *testing.T) conflictFixture {
 	t.Helper()
 	first := fixtureRegistry(t)
 	second := cloneFixtureFS(first)
@@ -250,54 +261,84 @@ func cliConflictProject(t *testing.T) (string, *modkit.Engine, string) {
 		t.Fatalf("sync: %v", err)
 	}
 	const target = "internal/modules/button.go"
-	writeTestFile(t, root, target, []byte("package button\n\nconst ButtonVersion = 1 // edited locally\n"))
-	out, errOut, updateErr := runApp(t, root, engine, "update", "--registry", "ggg", "--ref", "v2")
+	local := []byte("package button\n\nconst ButtonVersion = 1 // edited locally\n")
+	writeTestFile(t, root, target, local)
+	return conflictFixture{
+		root: root, source: source, engine: engine,
+		target: target, local: local, upstream: buttonV2,
+	}
+}
+
+// stagedConflict is a project with one STAGED conflict, which is the only
+// state `ggg resolve` runs in. Everything the resolve path touches — a local
+// edit, an upstream that moved under it, a candidate staged rather than
+// applied — is real: the fixture reaches the state the way an operator does,
+// then ASSERTS the staging instead of performing it.
+//
+// The assertion used to be a write. `Plan.Staged` had no production writer, so
+// this fixture put the candidate and the diff on disk itself and every resolve
+// test passed over bytes production never produced — while `ggg resolve`
+// refused every real conflict in every mode. A fixture that supplies what a
+// production path owes is exactly how a green suite says nothing about the
+// command.
+type stagedConflict struct {
+	conflictFixture
+	conflict modkit.PendingConflict
+	// updateOut and updateErr are the update's own streams and updateMessage
+	// is the coded error it returned, so a gate can read exactly what the
+	// operator is handed at exit 4.
+	updateOut     string
+	updateErr     string
+	updateMessage string
+}
+
+func cliConflictProject(t *testing.T) stagedConflict {
+	t.Helper()
+	fixture := cliConflictSetup(t)
+	out, errOut, updateErr := runApp(t, fixture.root, fixture.engine, "update", "--registry", "ggg", "--ref", "v2")
 	if updateErr == nil || exitOf(t, updateErr) != 4 {
 		t.Fatalf("update over a locally modified file = %v, want exit 4 with a staged conflict\n%s%s", updateErr, out, errOut)
 	}
 
-	// READ THIS BEFORE DELETING THE BLOCK BELOW. `Plan.Staged` has no
-	// production writer at all: reconcile builds the candidate and diff,
-	// Apply journals and writes `plan.Changes` plus the lock, and nothing in
-	// internal/modkit or internal/gggcli ever puts those bytes on disk —
-	// `grep '\.Staged' | grep -v _test.go` returns nothing. ResolveConflict
-	// then refuses at resolve_conflict.go:69-81 for EVERY resolution mode, so
-	// `ggg resolve` cannot succeed on any real conflict and `ggg update`'s
-	// exit-4 "run `ggg resolve`" is a dead end.
-	//
-	// So this block is not a convenience: it stands in for a production step
-	// that does not exist, and removing it removes the only reason the resolve
-	// tests pass. Do not read them as evidence that the resolver works — they
-	// measure the unrendered-output verdict on the resolve plan path, nothing
-	// more. That defect is its own slice.
-	//
-	// The digest is pinned against the lock's record so a silent change in the
-	// staged bytes fails here rather than downstream.
+	conflict := pendingConflict(t, fixture.root, fixture.target)
+	if got := sha256Hex(fixture.upstream); got != conflict.CandidateSHA256 {
+		t.Fatalf("candidate digest = %q, want the recorded %q", got, conflict.CandidateSHA256)
+	}
+	if got := sha256Hex(readTestFile(t, fixture.root, conflict.CandidatePath)); got != conflict.CandidateSHA256 {
+		t.Fatalf("staged candidate on disk digests %q, want the recorded %q", got, conflict.CandidateSHA256)
+	}
+	if len(readTestFile(t, fixture.root, conflict.DiffPath)) == 0 {
+		t.Fatalf("update staged an empty diff at %s", conflict.DiffPath)
+	}
+	return stagedConflict{
+		conflictFixture: fixture, conflict: conflict,
+		updateOut: out, updateErr: errOut, updateMessage: updateErr.Error(),
+	}
+}
+
+// pendingConflict is the single conflict the lock records for target. More
+// than one, or none, is a broken fixture rather than a case to tolerate.
+func pendingConflict(t *testing.T, root, target string) modkit.PendingConflict {
+	t.Helper()
 	lock, err := modkit.ParseLock(readTestFile(t, root, modkit.LockFileName))
 	if err != nil {
 		t.Fatal(err)
 	}
-	staged := 0
+	found := make([]modkit.PendingConflict, 0, 1)
 	for _, module := range lock.Modules {
 		if module.Pending == nil {
 			continue
 		}
 		for _, conflict := range module.Pending.Conflicts {
-			if conflict.Path != target {
-				continue
+			if conflict.Path == target {
+				found = append(found, conflict)
 			}
-			if got := sha256Hex(buttonV2); got != conflict.CandidateSHA256 {
-				t.Fatalf("candidate digest = %q, want the recorded %q", got, conflict.CandidateSHA256)
-			}
-			writeTestFile(t, root, conflict.CandidatePath, buttonV2)
-			writeTestFile(t, root, conflict.DiffPath, []byte("--- local\n+++ upstream\n"))
-			staged++
 		}
 	}
-	if staged != 1 {
-		t.Fatalf("the lock records %d pending conflict(s) for %s, want exactly 1", staged, target)
+	if len(found) != 1 {
+		t.Fatalf("the lock records %d pending conflict(s) for %s, want exactly 1", len(found), target)
 	}
-	return root, engine, target
+	return found[0]
 }
 
 // exitOf extracts the exit code a CLI error carries.

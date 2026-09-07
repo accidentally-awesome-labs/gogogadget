@@ -66,19 +66,16 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		return Plan{}, fmt.Errorf("module %s has no pending conflict for %s", moduleID, targetPath)
 	}
 
-	candidate, candidateDigest, candidateMissing, err := CurrentTargetState(canonicalRoot, pendingConflict.CandidatePath)
-	if err != nil {
-		return Plan{}, fmt.Errorf("read conflict candidate: %w", err)
-	}
-	if candidateMissing {
-		return Plan{}, fmt.Errorf(
-			"conflict candidate %s is missing; run ggg update at registry commit %s to re-materialize it",
-			pendingConflict.CandidatePath, currentLock.Modules[moduleIndex].Pending.RegistryCommit,
-		)
-	}
-	if candidateDigest != pendingConflict.CandidateSHA256 {
-		return Plan{}, fmt.Errorf("conflict candidate %s sha256 mismatch", pendingConflict.CandidatePath)
-	}
+	// The staged candidate is NOT read here, in any mode. This command
+	// re-resolves the pending registry below and reads the upstream payload
+	// from it, pinned to the conflict's own commit and checked against the
+	// digest the lock recorded — so the bytes under `tmp/` are a copy of an
+	// input this command already has, never the input itself. Requiring them
+	// bought nothing and cost the whole recovery path: `--keep-local`
+	// discards upstream by definition and still refused when the scratch
+	// directory had been cleaned. The artifacts remain the operator's copy to
+	// read and to merge from, and `ggg doctor` reports their state, which is
+	// where an observation about evidence belongs.
 	_, localDigest, localMissing, err := CurrentTargetState(canonicalRoot, targetPath)
 	if err != nil {
 		return Plan{}, err
@@ -139,7 +136,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 	changes, err := resolveModuleFiles(
 		canonicalRoot, currentLock, module, targetManifest, targetPayloads,
-		targetPath, pendingConflict, candidate, candidateDigest, localDigest, localMissing, mode, remaining,
+		targetPath, pendingConflict, localDigest, localMissing, mode, remaining,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -164,6 +161,12 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	} else {
 		module.Pending.Conflicts = remaining
 	}
+
+	// This conflict is decided, so its two artifacts stop being evidence and
+	// become litter under a scratch root nothing else prunes. They leave the
+	// way they arrived: named deletes in the plan, journalled, restored if
+	// the transaction fails.
+	changes = append(changes, stagedArtifactDeletes(canonicalRoot, moduleID, pendingConflict)...)
 
 	lockContent, err := MarshalLock(finalLock)
 	if err != nil {
@@ -196,13 +199,13 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 
 	conflicts := conflictsFromLock(finalLock)
-	sortPlanOutputs(changes, conflicts, nil)
+	sortPlanOutputs(changes, conflicts)
 	return Plan{
 		Operation: Operation{Kind: OpSync}, Root: canonicalRoot,
 		RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 		Project: project, Lock: finalLock,
 		Resolved: liveModuleOrder(finalLock), Order: append([]string{}, finalLock.Order...),
-		Changes: changes, Diagnostics: []Diagnostic{}, Conflicts: conflicts, Staged: []StagedFile{},
+		Changes: changes, Diagnostics: []Diagnostic{}, Conflicts: conflicts,
 		rendered: rendered,
 	}, nil
 }
@@ -229,8 +232,6 @@ func resolveModuleFiles(
 	payloads []plannedAuthoredPayload,
 	targetPath string,
 	pendingConflict PendingConflict,
-	candidate []byte,
-	candidateDigest string,
 	localDigest string,
 	localMissing bool,
 	mode ResolutionMode,
@@ -245,8 +246,19 @@ func resolveModuleFiles(
 	if !declared {
 		return nil, fmt.Errorf("pending conflict path %s is not declared by the target manifest", targetPath)
 	}
-	if digestBytes(freshPayload.content) != candidateDigest {
-		return nil, fmt.Errorf("candidate sha256 does not match target manifest payload")
+	// Upstream comes from the registry snapshot this command pinned to the
+	// conflict's commit, and the lock's recorded digest is what proves it is
+	// the same upstream the conflict was staged from. That check used to run
+	// against the copy under `tmp/`, which made a scratch file load-bearing
+	// for a decision it never informed — and refused every mode when the
+	// copy was gone.
+	candidate := freshPayload.content
+	candidateDigest := digestBytes(candidate)
+	if candidateDigest != pendingConflict.CandidateSHA256 {
+		return nil, fmt.Errorf(
+			"upstream payload for %s at the pending commit digests %s, but the lock records candidate %s",
+			targetPath, candidateDigest, pendingConflict.CandidateSHA256,
+		)
 	}
 
 	changes := []Change{}
@@ -399,6 +411,30 @@ func resolveModuleFiles(
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	module.Files = files
 	return changes, nil
+}
+
+// stagedArtifactDeletes names the two scratch artifacts of one resolved
+// conflict for deletion. Anything that is not a regular file at those paths is
+// left alone: resolution does not read them, so an operator who replaced one
+// with a directory or a symlink gets no refusal from a command that never
+// needed the bytes. A path that no longer exists contributes no change, which
+// keeps `changes[]` an honest statement of what apply will do.
+func stagedArtifactDeletes(root, moduleID string, conflict PendingConflict) []Change {
+	changes := make([]Change, 0, 2)
+	for _, path := range []string{conflict.CandidatePath, conflict.DiffPath} {
+		if path == "" {
+			continue
+		}
+		_, digest, missing, err := CurrentTargetState(root, path)
+		if err != nil || missing {
+			continue
+		}
+		changes = append(changes, Change{
+			Path: path, Module: moduleID, Source: conflict.Path,
+			Kind: ChangeDelete, Class: DestinationStaged, SHA256: digest,
+		})
+	}
+	return changes
 }
 
 func recomputeLockGraph(ctx context.Context, lock *Lock) error {
