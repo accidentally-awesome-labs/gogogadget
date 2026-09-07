@@ -1,63 +1,80 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The UsageCard renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
-        "source": "internal/web/templates/ui/usage-card.templ",
-        "target": "internal/web/templates/ui/usage-card.templ"
-      }
-    ],
     "id": "ggg/component/usage-card",
     "kind": "component",
-    "migrations": [],
     "name": "usage-card",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "UsageCard",
+    "description": "The UsageCard renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/meter",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/meter"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/usage-card.templ",
+        "target": "internal/web/templates/ui/usage-card.templ",
+        "class": "templ",
+        "sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/usage-card_test.go",
+        "target": "internal/web/templates/ui/usage-card_test.go",
+        "class": "test",
+        "sha256": "1203d7ab949de985d979c98808ab2d257cbe9b3973f07d71a0ad6ee3cf00e38e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "usage-card",
+          "family": "communication",
           "signature": "templ UsageCard(o UsageCardOpts)",
+          "summary": "Renders a quota with its meter.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a quota with its meter."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "UsageCard"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

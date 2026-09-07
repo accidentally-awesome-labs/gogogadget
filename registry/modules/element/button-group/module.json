@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ButtonGroup renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "588ab4a48558f0392934f37c7e37ec89e840fc2427f79a70fe213c4c9d440183",
-        "source": "internal/web/templates/ui/button-group.templ",
-        "target": "internal/web/templates/ui/button-group.templ"
-      }
-    ],
     "id": "ggg/element/button-group",
     "kind": "element",
-    "migrations": [],
     "name": "button-group",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "ButtonGroup",
+    "description": "The ButtonGroup renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/button-group.templ",
+        "target": "internal/web/templates/ui/button-group.templ",
+        "class": "templ",
+        "sha256": "588ab4a48558f0392934f37c7e37ec89e840fc2427f79a70fe213c4c9d440183",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/button-group_test.go",
+        "target": "internal/web/templates/ui/button-group_test.go",
+        "class": "test",
+        "sha256": "9204a30f3e4a1ff58c685cc9a3194c3002aeb4c81978869919c31503b55ffc97",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "actions",
-          "guidance": "Unlike ToggleGroup the members are independent commands, not exclusive states, so nothing here carries aria-pressed.",
           "name": "button-group",
+          "family": "actions",
           "signature": "templ ButtonGroup(o ButtonGroupOpts)",
+          "summary": "Joins related controls visually and as one labelled group.",
+          "guidance": "Unlike ToggleGroup the members are independent commands, not exclusive states, so nothing here carries aria-pressed.",
           "states": [
             "default"
-          ],
-          "summary": "Joins related controls visually and as one labelled group."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ButtonGroup"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

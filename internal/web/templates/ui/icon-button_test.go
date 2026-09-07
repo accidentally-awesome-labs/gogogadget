@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// An icon-only button with no accessible name is announced as "button" and
+// nothing else. The name is required, and a caller who forgets gets something
 // noticeable rather than silence.
 func TestIconButtonAlwaysHasAnAccessibleName(t *testing.T) {
 	named := renderComponent(t, IconButton(IconButtonOpts{Icon: IconBell, Label: "Notifications"}))
@@ -21,7 +23,6 @@ func TestIconButtonAlwaysHasAnAccessibleName(t *testing.T) {
 }
 
 // aria-pressed states that a control is a toggle. Claiming it on a plain button
-
 // tells the user something toggles when nothing does.
 func TestOnlyTogglesReportPressedState(t *testing.T) {
 	assert.NotContains(t, renderComponent(t, IconButton(IconButtonOpts{Icon: IconBell, Label: "Bell"})),
@@ -33,9 +34,14 @@ func TestOnlyTogglesReportPressedState(t *testing.T) {
 	off := false
 	assert.Contains(t, renderComponent(t, IconButton(IconButtonOpts{Icon: IconBell, Label: "Bell", Pressed: &off})),
 		`aria-pressed="false"`)
-
-	assert.Contains(t, renderComponent(t, ToggleButton(ToggleButtonOpts{Label: "Grid", On: true})),
-		`aria-pressed="true"`)
 }
 
-// Heading level is document structure and size is visual weight. Tying them
+// An unregistered icon name renders nothing, and iconSwitch used to return a
+// nil templ.Component - so one misspelled name anywhere took down the whole
+// page render. A component that passes a caller-supplied name straight through
+// is where that surfaced, so the surrounding markup must survive an icon that
+// renders nothing at all.
+func TestIconButtonSurvivesAnUnregisteredIcon(t *testing.T) {
+	button := renderComponent(t, IconButton(IconButtonOpts{Label: "Delete"}))
+	assert.Contains(t, button, `aria-label="Delete"`)
+}

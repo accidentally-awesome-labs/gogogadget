@@ -97,6 +97,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"ui_components", one(emitUIComponentsRegistry)},
 		{"ui_metadata", one(emitUIComponentRegistry)},
 		{"ui_reference", one(emitUIReferenceRegistry)},
+		{"ui_renderers", one(emitUIRendererRegistry)},
 		{"alpine_fragments", one(emitAlpineFragments)},
 		{"engines", one(emitEngineRegistry)},
 		{"styles", one(emitStylesRegistry)},
@@ -2545,6 +2546,60 @@ func emitUIReferenceRegistry(ctx context.Context, modulePath string, lock Lock, 
 		return nil, fmt.Errorf("format ui reference registry: %w", err)
 	}
 	return &GeneratedFile{Path: "internal/web/templates/ui/reference_gen.go", Content: string(src)}, nil
+}
+
+// emitUIRendererRegistry renders internal/web/templates/ui/renderers_registry_gen.go:
+// the installed renderers, keyed by symbol, as callable function values.
+//
+// It exists because the cross-cutting contract suites over `package ui` — one
+// options struct per renderer, Attrs reaching the element, an explicit control
+// id, a dedicated HX field reaching the request, a column width honoured, a
+// size that renders a class the stylesheet declares — are properties of
+// ui-core's OWN seams that every installed renderer has to satisfy. Written by
+// hand, their alphabet was a table of 175 symbols owned by 144 other modules
+// sitting in ui-core's test payload, so `go test ./...` in a project that
+// installed 61 of them did not compile. The alphabet is the installed set, so
+// it is generated from the installed set, exactly like ComponentRegistry.
+//
+// The symbol comes from the declared signature rather than from source: this
+// pipeline is a pure function of the manifest graph and runs before templ, so
+// the compiled renderer does not exist yet. A drift test holds each declared
+// signature against the code it describes.
+func emitUIRendererRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package ui\n\n")
+	b.WriteString("// Renderers returns every installed renderer keyed by its symbol name, in\n")
+	b.WriteString("// module order. Each value is a func(XOpts) templ.Component, so a caller\n")
+	b.WriteString("// reflects over it rather than calling it directly.\n")
+	b.WriteString("//\n")
+	b.WriteString("// It is a function rather than a variable because its only readers are the\n")
+	b.WriteString("// contract suites: a package-level map would build itself in every binary\n")
+	b.WriteString("// that links this package and nothing would ever read it.\n")
+	b.WriteString("func Renderers() map[string]any {\n")
+	b.WriteString("\treturn map[string]any{\n")
+	owner := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, c := range m.Runtime.UI {
+			symbol, ok := c.Renderer()
+			if !ok {
+				return nil, fmt.Errorf("ui component %q in %s declares signature %q, which names no renderer",
+					c.Name, m.ID, c.Signature)
+			}
+			if prior, clash := owner[symbol]; clash {
+				return nil, fmt.Errorf("renderer %s is declared by both %s and %s", symbol, prior, m.ID)
+			}
+			owner[symbol] = m.ID
+			fmt.Fprintf(&b, "\t\t%s: %s,\n", goString(symbol), symbol)
+		}
+	}
+	b.WriteString("\t}\n}\n")
+	_ = ctx
+	src, err := format.Source([]byte(b.String()))
+	if err != nil {
+		return nil, fmt.Errorf("format ui renderer registry: %w", err)
+	}
+	return &GeneratedFile{Path: "internal/web/templates/ui/renderers_registry_gen.go", Content: string(src)}, nil
 }
 
 // declaredScenarios merges scenario declarations in module order with

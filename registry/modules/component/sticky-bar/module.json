@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The StickyBar renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "b32f2f5e975cc22d910bfc39125bfed9ed368d2dddae839099c34dd33307bfc0",
-        "source": "internal/web/templates/ui/sticky-bar.templ",
-        "target": "internal/web/templates/ui/sticky-bar.templ"
-      }
-    ],
     "id": "ggg/component/sticky-bar",
     "kind": "component",
-    "migrations": [],
     "name": "sticky-bar",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "StickyBar",
+    "description": "The StickyBar renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/sticky-bar.templ",
+        "target": "internal/web/templates/ui/sticky-bar.templ",
+        "class": "templ",
+        "sha256": "b32f2f5e975cc22d910bfc39125bfed9ed368d2dddae839099c34dd33307bfc0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/sticky-bar_test.go",
+        "target": "internal/web/templates/ui/sticky-bar_test.go",
+        "class": "test",
+        "sha256": "344f8cf8fcc678bca08e4cc24c1166f83c207b1dda0f6fe178a81462b70a5423",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "layout",
-          "guidance": "It is sticky rather than fixed, so it stays inside its scroll container and cannot cover content the container has scrolled past. A fixed bar overlays the viewport, which on a short screen can hide the very field its Save button submits.",
           "name": "sticky-bar",
+          "family": "layout",
           "signature": "templ StickyBar(o StickyBarOpts)",
+          "summary": "Renders a pinned action bar.",
+          "guidance": "It is sticky rather than fixed, so it stays inside its scroll container and cannot cover content the container has scrolled past. A fixed bar overlays the viewport, which on a short screen can hide the very field its Save button submits.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a pinned action bar."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "StickyBar"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

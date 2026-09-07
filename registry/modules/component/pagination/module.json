@@ -1,74 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/pagination",
+    "kind": "component",
+    "name": "pagination",
+    "revision": 2,
     "contract": 1,
-    "data": [],
+    "title": "Pagination",
+    "description": "The Pagination renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The Pagination renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "082cb8c833b042169cdd2ca10af6baa78ab7d49be56768514cea185ea90103d6",
         "source": "internal/web/templates/ui/pagination.templ",
-        "target": "internal/web/templates/ui/pagination.templ"
+        "target": "internal/web/templates/ui/pagination.templ",
+        "class": "templ",
+        "sha256": "082cb8c833b042169cdd2ca10af6baa78ab7d49be56768514cea185ea90103d6",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "d3c09c171b1210e9134c9afcbf931d150e22cfb1a8319d1352e16eb30f593b15",
         "source": "internal/web/templates/ui/pagination_test.go",
-        "target": "internal/web/templates/ui/pagination_test.go"
+        "target": "internal/web/templates/ui/pagination_test.go",
+        "class": "test",
+        "sha256": "0e3f426bd264031f7b80aa9b372e329a4d960dd96f660d1d980dda40bc701339",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/component/pagination",
-    "kind": "component",
-    "migrations": [],
-    "name": "pagination",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 1,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "navigation",
-          "guidance": "Target is the box the pager morphs; Labels carries the localized strings so ui never imports i18n. A single page renders nothing at all: a pager with both arrows dead is noise that still occupies layout.",
           "name": "pagination",
+          "family": "navigation",
           "signature": "templ Pagination(o PaginationOpts)",
+          "summary": "Renders hx-get pager links.",
+          "guidance": "Target is the box the pager morphs; Labels carries the localized strings so ui never imports i18n. A single page renders nothing at all: a pager with both arrows dead is noise that still occupies layout.",
           "states": [
             "default"
-          ],
-          "summary": "Renders hx-get pager links."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "Pagination"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

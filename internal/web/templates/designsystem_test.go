@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -295,23 +296,26 @@ func relativeLuminance(hex string) float64 {
 // to contribute a class the default does not, and that class has to carry its
 // own declaration block.
 //
+// The family set is DERIVED from what the project installed, not written down.
+// A hand-written table named ui.Button, ui.ButtonLink and ui.IconButton — three
+// renderers three other modules own — from ggg/system/server's payload, so a
+// project that installed the shell without one of them wrote a tree whose tests
+// did not compile; and it also exempted every other sized control in the
+// catalog. A button is any installed renderer whose options carry the Action
+// axis.
+//
 // The class lists come from what the components actually render, so a new size
 // or a renamed class cannot pass by agreeing with the test instead of with the
 // stylesheet.
 func TestEverySizeIsStyledForEveryControlFamily(t *testing.T) {
 	source := readInputCSS(t)
 
-	families := map[string]func(ui.Action, ui.Size) templ.Component{
-		"Button": func(a ui.Action, s ui.Size) templ.Component {
-			return ui.Button(ui.ButtonOpts{Label: "Save", Action: a, Size: s})
-		},
-		"ButtonLink": func(a ui.Action, s ui.Size) templ.Component {
-			return ui.ButtonLink(ui.ButtonLinkOpts{Label: "Save", Href: "/x", Action: a, Size: s})
-		},
-		"IconButton": func(a ui.Action, s ui.Size) templ.Component {
-			return ui.IconButton(ui.IconButtonOpts{Icon: ui.IconCheck, Label: "Save", Action: a, Size: s})
-		},
-	}
+	families := sizedRenderers(t, func(opts reflect.Value) bool {
+		field := opts.FieldByName("Action")
+		return field.IsValid() && field.Type() == reflect.TypeOf(ui.Action(""))
+	})
+	require.GreaterOrEqual(t, len(families), 3,
+		"only %d renderers carry the Action axis; the filter has collapsed, not the catalog", len(families))
 
 	for family, render := range families {
 		for _, action := range ui.Actions {
@@ -348,6 +352,45 @@ func TestEverySizeIsStyledForEveryControlFamily(t *testing.T) {
 	}
 }
 
+// sizedRenderers returns one render function per installed renderer whose
+// options carry the ui.Size axis and satisfy include. Each call builds fresh
+// options: Size, Action where the options declare one, and the minimum a
+// control needs before it renders anything - a label, a field name, a
+// destination, an icon - set by field name, because ggg/system/server owns none
+// of these renderers and naming their options structs here is what stopped a
+// generated project's tests from compiling.
+func sizedRenderers(t *testing.T, include func(reflect.Value) bool) map[string]func(ui.Action, ui.Size) templ.Component {
+	t.Helper()
+	out := map[string]func(ui.Action, ui.Size) templ.Component{}
+	for name, raw := range ui.Renderers() {
+		fn := reflect.ValueOf(raw)
+		if fn.Type().NumIn() != 1 || fn.Type().In(0).Kind() != reflect.Struct {
+			continue
+		}
+		probe := reflect.New(fn.Type().In(0)).Elem()
+		size := probe.FieldByName("Size")
+		if !size.IsValid() || size.Type() != reflect.TypeOf(ui.Size("")) || !include(probe) {
+			continue
+		}
+		out[name] = func(action ui.Action, size ui.Size) templ.Component {
+			opts := reflect.New(fn.Type().In(0)).Elem()
+			for field, value := range map[string]any{
+				"Label": "Save", "Name": "field", "Href": "/x", "Icon": ui.IconCheck,
+				"Action": action, "Size": size,
+			} {
+				target := opts.FieldByName(field)
+				declared := reflect.ValueOf(value)
+				if !target.IsValid() || !declared.Type().ConvertibleTo(target.Type()) {
+					continue
+				}
+				target.Set(declared.Convert(target.Type()))
+			}
+			return fn.Call([]reflect.Value{opts})[0].Interface().(templ.Component)
+		}
+	}
+	return out
+}
+
 // The form controls have the same size axis the buttons do, and it had the same
 // hole: .input-lg did not exist at all, and pages that wanted a smaller control
 // wrote Attrs.Class: "input-xs" instead - reaching past the typed API, past
@@ -356,31 +399,45 @@ func TestEverySizeIsStyledForEveryControlFamily(t *testing.T) {
 // The rule is the button rule: a size must contribute a class the default does
 // not, and that class must head its own declaration block. Naming it in the
 // focus or disabled selector lists is not styling it.
+//
+// Derived the same way, for the same reason: the hand-written table named
+// ui.Textarea, which ggg/component/textarea owns and `ggg/profile/minimal` does
+// not install.
+//
+// A form control here is an installed renderer that carries the size axis, a
+// field name, no button Action axis, AND whose root element is the named
+// control itself. The last clause is the whole point: SlugInput and
+// FileDropzone put the size on an inner input and wrap it in a layout div, so
+// their root classes are Tailwind utilities that input.css correctly never
+// declares and their root is byte-identical across sizes. A rule read off the
+// root cannot say anything about a composite, and asserting it anyway would
+// report a working control as an unstyled one.
 func TestEveryInputSizeIsStyledForEveryFormControl(t *testing.T) {
 	source := readInputCSS(t)
 
-	families := map[string]func(ui.Size) templ.Component{
-		"TextInput": func(s ui.Size) templ.Component {
-			return ui.TextInput(ui.TextInputOpts{Name: "field", Size: s})
-		},
-		"NumberInput": func(s ui.Size) templ.Component {
-			return ui.NumberInput(ui.NumberInputOpts{Name: "field", Size: s})
-		},
-		"Select": func(s ui.Size) templ.Component {
-			return ui.Select(ui.SelectOpts{Name: "field", Size: s})
-		},
-		"Textarea": func(s ui.Size) templ.Component {
-			return ui.Textarea(ui.TextareaOpts{Name: "field", Size: s})
-		},
+	sized := sizedRenderers(t, func(opts reflect.Value) bool {
+		name := opts.FieldByName("Name")
+		action := opts.FieldByName("Action")
+		return name.IsValid() && name.Kind() == reflect.String && !action.IsValid()
+	})
+	families := map[string]func(ui.Size) templ.Component{}
+	for control, render := range sized {
+		if !rootCarriesTheFieldName(renderComponent(t, render("", ui.SizeMD))) {
+			continue
+		}
+		families[control] = func(size ui.Size) templ.Component { return render("", size) }
 	}
-
+	require.GreaterOrEqual(t, len(families), 4,
+		"only %d bare sized form controls were derived; the filter has collapsed, not the catalog", len(families))
+	// Only the size axis is asserted. The old table also required every class
+	// the SizeMD render emits to appear in input.css, which held for four
+	// controls whose root carries nothing but `.input` variants and is simply
+	// false in general: OTPInput's root also carries text-center, font-mono and
+	// tracking-otp, which Tailwind compiles from the template and input.css is
+	// right never to declare. The load-bearing half is below, and it now covers
+	// every bare control instead of four.
 	for family, render := range families {
 		base := rootClasses(t, renderComponent(t, render(ui.SizeMD)))
-		for _, class := range base {
-			assert.Containsf(t, source, "."+class,
-				"%s renders .%s, which input.css never mentions", family, class)
-		}
-
 		for _, size := range ui.Sizes {
 			if size == ui.SizeMD {
 				continue
@@ -400,6 +457,16 @@ func TestEveryInputSizeIsStyledForEveryFormControl(t *testing.T) {
 			}
 		}
 	}
+}
+
+// rootCarriesTheFieldName reports whether the first element of the render IS
+// the named control, rather than a wrapper around one.
+func rootCarriesTheFieldName(html string) bool {
+	end := strings.Index(html, ">")
+	if end < 0 {
+		return false
+	}
+	return strings.Contains(html[:end], `name="field"`)
 }
 
 // Table density is the same shape of promise: TableOpts.Density and
@@ -486,38 +553,6 @@ func kindBlock(t *testing.T, source, kind string) string {
 	end := strings.Index(source[start:], "}")
 	require.Greater(t, end, 0, "unterminated .k-%s block", kind)
 	return source[start : start+end]
-}
-
-// The gallery is the catalog's reference surface: if a component is installed
-// but never rendered there, nobody reviewing the design system - human or agent
-// - can see it, and no visual or accessibility gate covers it. Comparing the
-// rendered data-ui markers against the generated registry closes the gap that a
-// hand-kept list leaves open.
-func TestGalleryCoversEveryInstalledComponent(t *testing.T) {
-	html := renderComponent(t, Gallery())
-	rendered := renderedComponentMarkers(html)
-	require.NotEmpty(t, ui.ComponentRegistry, "no components are installed")
-
-	var missing []string
-	for _, c := range ui.ComponentRegistry {
-		if _, ok := rendered[c.Name]; !ok {
-			missing = append(missing, c.Name+" ("+string(c.Family)+")")
-		}
-	}
-	assert.Empty(t, missing, "installed components the gallery never renders")
-
-	for name := range rendered {
-		_, ok := ui.ComponentByName(name)
-		assert.True(t, ok, "gallery renders %q, which no installed module declares", name)
-	}
-}
-
-func renderedComponentMarkers(html string) map[string]struct{} {
-	out := map[string]struct{}{}
-	for _, m := range regexp.MustCompile(`data-ui="([a-z0-9-]+)"`).FindAllStringSubmatch(html, -1) {
-		out[m[1]] = struct{}{}
-	}
-	return out
 }
 
 // Under CSP (script-src 'self') Alpine cannot evaluate expression strings, so
@@ -765,39 +800,6 @@ func readInputCSS(t *testing.T) string {
 	css, err := os.ReadFile(filepath.Join("..", "..", "..", "input.css"))
 	require.NoError(t, err)
 	return string(css)
-}
-
-// A progressbar or meter with no accessible name reports a number with no
-// subject. The gallery is the one page that renders every component, so it is
-// where an unnamed one shows up - and it did: three meters shipped nameless.
-func TestEveryProgressAndMeterInTheGalleryIsNamed(t *testing.T) {
-	html := renderComponent(t, Gallery())
-	for _, role := range []string{"progressbar", "meter"} {
-		for _, tag := range findRoleTags(html, role) {
-			assert.Contains(t, tag, "aria-label=",
-				"a %s with no accessible name announces a number with no subject", role)
-		}
-	}
-}
-
-// findRoleTags returns the opening tags carrying a given role.
-func findRoleTags(html, role string) []string {
-	var out []string
-	needle := `role="` + role + `"`
-	for i := 0; i < len(html); {
-		at := strings.Index(html[i:], needle)
-		if at < 0 {
-			break
-		}
-		at += i
-		start := strings.LastIndex(html[:at], "<")
-		end := strings.Index(html[at:], ">")
-		if start >= 0 && end >= 0 {
-			out = append(out, html[start:at+end])
-		}
-		i = at + len(needle)
-	}
-	return out
 }
 
 // The lazy engine loader has four constraints, and each rules out an easier

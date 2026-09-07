@@ -7,7 +7,7 @@ import (
 )
 
 // unrelated adjacent buttons.
-func TestControlGroupsAreLabelled(t *testing.T) {
+func TestToggleGroupIsLabelled(t *testing.T) {
 	toggles := renderComponent(t, ToggleGroup(ToggleGroupOpts{
 		Label: "Density", Options: []ToggleOption{{Value: "cosy", Label: "Cosy", Selected: true}, {Value: "compact", Label: "Compact"}},
 	}))
@@ -17,8 +17,4 @@ func TestControlGroupsAreLabelled(t *testing.T) {
 	assert.Contains(t, toggles, `aria-pressed="false"`)
 	assert.NotContains(t, toggles, `role="radiogroup"`,
 		"radiogroup promises arrow-key navigation these buttons do not implement")
-
-	group := renderComponent(t, ButtonGroup(ButtonGroupOpts{Label: "Row actions"}))
-	assert.Contains(t, group, `aria-label="Row actions"`)
-	assert.NotContains(t, group, "aria-pressed", "these are commands, not states")
 }

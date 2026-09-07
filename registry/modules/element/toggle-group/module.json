@@ -1,88 +1,88 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/element/toggle-group",
+    "kind": "element",
+    "name": "toggle-group",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "ToggleGroup",
+    "description": "The ToggleGroup renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/icon",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/icon-button",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The ToggleGroup renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "d558f1aec7560ea404d7a8c21926f779ce891c924ab5a834a9338dc585a6aeea",
         "source": "internal/web/templates/ui/toggle-group.templ",
-        "target": "internal/web/templates/ui/toggle-group.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/toggle-group.templ",
+        "class": "templ",
+        "sha256": "d558f1aec7560ea404d7a8c21926f779ce891c924ab5a834a9338dc585a6aeea",
         "rewrite_module": true,
-        "sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+        "contract": true
+      },
+      {
         "source": "internal/web/templates/ui/toggle-group_test.go",
-        "target": "internal/web/templates/ui/toggle-group_test.go"
+        "target": "internal/web/templates/ui/toggle-group_test.go",
+        "class": "test",
+        "sha256": "773145126485aa1fd4998defec36459067e81f2dd79acfcddbee95d0e81de942",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/element/toggle-group",
-    "kind": "element",
-    "migrations": [],
-    "name": "toggle-group",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon-button"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "actions",
-          "guidance": "These are buttons with aria-pressed rather than role=\"radiogroup\": a radio group promises arrow-key navigation between options, and the buttons here are each independently tabbable. Announcing the honest role is better than claiming a keyboard contract that is not implemented.",
           "name": "toggle-group",
+          "family": "actions",
           "signature": "templ ToggleGroup(o ToggleGroupOpts)",
+          "summary": "Renders exclusive toggles as a labelled group.",
+          "guidance": "These are buttons with aria-pressed rather than role=\"radiogroup\": a radio group promises arrow-key navigation between options, and the buttons here are each independently tabbable. Announcing the honest role is better than claiming a keyboard contract that is not implemented.",
           "states": [
             "default"
-          ],
-          "summary": "Renders exclusive toggles as a labelled group."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "ToggleGroup"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

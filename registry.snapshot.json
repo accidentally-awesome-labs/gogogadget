@@ -80,23 +80,23 @@
     },
     {
       "path": "registry/modules/component/accordion/module.json",
-      "sha256": "fcda72c01550ff789d21ff94f64fa134d72a89b2be3710b54b684f2c6fdad612"
+      "sha256": "10903a6b97532262872a10dccc1413be83fc71ee7f768120cb5cd7fc728d62c2"
     },
     {
       "path": "registry/modules/component/activity-item/module.json",
-      "sha256": "1ab41c89ecd4da413cdf48694acbf3c702062467eab004ee9cb825375e332e98"
+      "sha256": "bfed5e8f0d16ce1b6e886fbf642769e00ece83cc349643eb7fbf4423d93c0fbf"
     },
     {
       "path": "registry/modules/component/alert-dialog/module.json",
-      "sha256": "f3461b8f52b2b5f5f9648217a51dc5d2e07efaf4f53f4561adcaa64b2f11eab0"
+      "sha256": "d35427dc58532bfe23e369fc5c16915cbc409657cac22a9fd4b4e00b1625ddd2"
     },
     {
       "path": "registry/modules/component/aspect-ratio/module.json",
-      "sha256": "d24b43e4c9f9fe2ca6d4802fa7dc80b8db80b37ee186c173920604582a5bfcf9"
+      "sha256": "d5ea8e09e80e615b7ac527c51af9be0d2e3e1b1ebbbf76243f0bc1249eb6568e"
     },
     {
       "path": "registry/modules/component/attachment/module.json",
-      "sha256": "07098b297625d82fdf501d6f1c16e5251d4ac630563383352d9738ef6b812318"
+      "sha256": "9770ed23a178b5b69bed4f31f75cba3ded50311f1c389ba3668a4d16247a69ca"
     },
     {
       "path": "registry/modules/component/back-link/module.json",
@@ -140,11 +140,11 @@
     },
     {
       "path": "registry/modules/component/chat-log/module.json",
-      "sha256": "29ad887d7e55281c7288f1a683e393c1d66826bce3499d7958896a7679fab042"
+      "sha256": "9746fe37bfdaf4389a627d2e7de9e61ea43b906312580c733a667771d2d0ddfb"
     },
     {
       "path": "registry/modules/component/chat-message/module.json",
-      "sha256": "bcac090db43631d619428a112fc9b9a177db465876ad906ae3c5a61995521395"
+      "sha256": "59406a732c1d1743caeb6935aac3f8b34356a3771fdef3b31e4260b19646b936"
     },
     {
       "path": "registry/modules/component/checkbox-group/module.json",
@@ -164,11 +164,11 @@
     },
     {
       "path": "registry/modules/component/column-header/module.json",
-      "sha256": "88c64251a8f765aca89a08e480ba70eb8d329ecda4a116d6a76a1ac3d2dcf4ef"
+      "sha256": "d16cd64f7c731f07ca541d97775561ff1f7b490cb79d932ba99edac53a975ef9"
     },
     {
       "path": "registry/modules/component/combobox/module.json",
-      "sha256": "3ec5c2eb9fcfda9550ace0df818b64518e15a835d01aa48cf94c82993a1a4fd4"
+      "sha256": "7612a9bc8d088f01b28e0e4396cca3a4b057ad503145622912a55ac49aa8a875"
     },
     {
       "path": "registry/modules/component/command/module.json",
@@ -180,7 +180,7 @@
     },
     {
       "path": "registry/modules/component/comment/module.json",
-      "sha256": "e649351641e83aed79ecbeaebc7c9fac46ebf22ea8ac278debaa31bc36b524ce"
+      "sha256": "d5a38833700b3f26c8cb5b96ba5128256a272ad1a52acf335845e01f59392e04"
     },
     {
       "path": "registry/modules/component/composer/module.json",
@@ -196,19 +196,19 @@
     },
     {
       "path": "registry/modules/component/context-menu/module.json",
-      "sha256": "dfe2cd94b49888ca6c8df889e135b14f2245e144afdc8cc0aa6b6ad965ba870a"
+      "sha256": "046ece8522a60ebf2844d5789bbcdf610a98fd73b32e8a0e29a02df699fe0128"
     },
     {
       "path": "registry/modules/component/cursor-pagination/module.json",
-      "sha256": "43488d35cbd9ac5cb136e053e157fd0870e409a79fb33813cc128bdae9cebcf1"
+      "sha256": "a12b960988b048f90c6936c8c9c4ca0d6d75dad857ad3ef78cb1348a31c0caf5"
     },
     {
       "path": "registry/modules/component/data-grid/module.json",
-      "sha256": "558f74ba5039bf688b4abfbb142dca4e12060dd1aa7fe9c87c4d6d3d86ab30b6"
+      "sha256": "31d5ee66a830f5dd411a72b10ec1714b64b4cc49915267a444df89813c7d3620"
     },
     {
       "path": "registry/modules/component/data-table/module.json",
-      "sha256": "220a3e6951a9db0d974b662fb99919777588d60bdbb7754dc63db098b9125987"
+      "sha256": "0976603bd18f80c84b4313d159f8b52e4ffa82e6649a1e1a03f528f910802598"
     },
     {
       "path": "registry/modules/component/date-field/module.json",
@@ -216,7 +216,7 @@
     },
     {
       "path": "registry/modules/component/date-range-field/module.json",
-      "sha256": "5e2926dffabb91a47c3068478fa86fb080c3a59fcb8d2ecf33439b91c30c6647"
+      "sha256": "666bc88593db4f0b74bf16a48f796b94f88bd3db4f0e611629ddc58fab38b81f"
     },
     {
       "path": "registry/modules/component/date-time-field/module.json",
@@ -224,11 +224,11 @@
     },
     {
       "path": "registry/modules/component/delivery-status/module.json",
-      "sha256": "9f245dae7aaf48a63decc7cdb3dfb9bfce8e79601ae33fa4d7d143201e215233"
+      "sha256": "699878c549dfc9f90cd948af564391b809e173cab97db410ef277ec2a18d4e68"
     },
     {
       "path": "registry/modules/component/description-list/module.json",
-      "sha256": "47e0c311e8c7313951ad33f77414e325d02b9f686fdf2fd5aaedfbe6db954297"
+      "sha256": "40f1af12fa46f449f7d0794e4243a665ce2735ab7a0c79e9cfcf13bfdffdb332"
     },
     {
       "path": "registry/modules/component/dialog/module.json",
@@ -236,23 +236,23 @@
     },
     {
       "path": "registry/modules/component/disclosure/module.json",
-      "sha256": "7b302504adf75885ab769c028bcb4840966902e0d9b4f5af2ce67c83853e9f0b"
+      "sha256": "e79918ec704f388fa25c0767dad9c6a3519947d2da14db0dcb54f9996be04e6d"
     },
     {
       "path": "registry/modules/component/drawer/module.json",
-      "sha256": "078f262ddca16150af955194f0bedb90dad32be6aecda9aab1d74587ce8eb95c"
+      "sha256": "1061d7c79cc445703533b380fc38b1405e5b0d4999cd132c752e364405d70586"
     },
     {
       "path": "registry/modules/component/dropdown-menu/module.json",
-      "sha256": "088041610da4b965c31d794dc04dbed2d668a3a4c5bedf4690941b9e5f70cbab"
+      "sha256": "3b124123d927629757c89b2bd230ed492d6ac39ca6c7d29f0bfb476ea8349324"
     },
     {
       "path": "registry/modules/component/empty-state/module.json",
-      "sha256": "157f6e229aed25a6b4749673b87913fe38100887defbb0152670eaf32cb0f229"
+      "sha256": "1e3c709900261f700e1aed5d74435dd218914f5547a283f9a47840035d61bb90"
     },
     {
       "path": "registry/modules/component/error-state/module.json",
-      "sha256": "fa824e733f95a84e91ae9ff4c9b8dfcb78109280063f5540e85f31e25ff44e7c"
+      "sha256": "4e47a6db2368867ceae6cfaf1f04485e6f23839e0ba00e35f111482bc099595f"
     },
     {
       "path": "registry/modules/component/field-error/module.json",
@@ -260,7 +260,7 @@
     },
     {
       "path": "registry/modules/component/field/module.json",
-      "sha256": "a9303e7c130cfbb4628869e3c6161fb3e1deee41b213bded892c4cd52e601cc6"
+      "sha256": "925c0b6be5bb19f367f89fb128a71e3c04c02dc9bae2c3556525df1ccc807ebc"
     },
     {
       "path": "registry/modules/component/fieldset/module.json",
@@ -268,7 +268,7 @@
     },
     {
       "path": "registry/modules/component/file-dropzone/module.json",
-      "sha256": "52a92578e9298d8ce372e58a86167f5ef109429459d5eba4d3e23a35032d2732"
+      "sha256": "ddf668aec7141a978f81a363bcc0a69bdc6846d092348e327de24eaa42bf002c"
     },
     {
       "path": "registry/modules/component/file-input/module.json",
@@ -280,7 +280,7 @@
     },
     {
       "path": "registry/modules/component/form/module.json",
-      "sha256": "bc9f3bf202bb46c2f000450022ebefbae40e16f9beea875251812cd4439f1c5a"
+      "sha256": "8326f0d877ce37e74e87b2cea156c607ae22eac6e2975c543ed53dc217447be8"
     },
     {
       "path": "registry/modules/component/grid/module.json",
@@ -292,7 +292,7 @@
     },
     {
       "path": "registry/modules/component/hover-card/module.json",
-      "sha256": "a87c0739319f4715af3c9c0680540ee7e38297f89ac492c40703baa0a8709d4e"
+      "sha256": "214d7fe05e5bd3a4657e0b7472abfff41a1a6d03b48841be5c6c97df5f845591"
     },
     {
       "path": "registry/modules/component/inline/module.json",
@@ -328,11 +328,11 @@
     },
     {
       "path": "registry/modules/component/member-item/module.json",
-      "sha256": "dd6043ddee2d690fc524f141430236a5f76b4000db45ef03ae570fc045348c28"
+      "sha256": "6a4a9ef26e609905a999c20cadc5a09d96b7338dad27deabd10c828d5eae55dc"
     },
     {
       "path": "registry/modules/component/mention-chip/module.json",
-      "sha256": "17410ac9be609d9d3f15b9f64646f1f73e5abefce412f64284edba19c7bab308"
+      "sha256": "e30ae41c46379439e663aabed85edcf156cea18a7f687c22ab5be711debc28b5"
     },
     {
       "path": "registry/modules/component/menubar/module.json",
@@ -340,7 +340,7 @@
     },
     {
       "path": "registry/modules/component/meter/module.json",
-      "sha256": "324d5b3dc94685788fb05547dc52cfbfd05759c1f620c5a247e244f09cb88909"
+      "sha256": "ac4a8ad746cecaa3a3cbfda8f501d4e3c4eb40cbd6acfb02a799b618468986fd"
     },
     {
       "path": "registry/modules/component/metric/module.json",
@@ -348,7 +348,7 @@
     },
     {
       "path": "registry/modules/component/multi-select/module.json",
-      "sha256": "69710f64e009452c2ae615e09a86293d4a221b5673a06542120ce7c3c3f2a4ba"
+      "sha256": "f9f092c31db2451076e2d011b4f48cc70bbfe5fee398e5abc0ee81722af95b1a"
     },
     {
       "path": "registry/modules/component/nav-tabs/module.json",
@@ -360,11 +360,11 @@
     },
     {
       "path": "registry/modules/component/notice/module.json",
-      "sha256": "80ab427b007ee89d1848b5ef9ebbcf23e40f027882f40d805e68c760b5199cf5"
+      "sha256": "7b1bd168b9be61480957933e20f80be2eef3e68d82389af56c8807bb1026ae5b"
     },
     {
       "path": "registry/modules/component/notification-item/module.json",
-      "sha256": "cd61c8574b663c8174131f14bf977e21190df60872fe61ff03d612434c98884f"
+      "sha256": "e948f8c1d4be5ea50a3d34608ea69ac6c7cfb844854f5652acd922555a880f22"
     },
     {
       "path": "registry/modules/component/number-input/module.json",
@@ -372,11 +372,11 @@
     },
     {
       "path": "registry/modules/component/onboarding-checklist/module.json",
-      "sha256": "fb922d48ae1940f4ed1c9da88ae065c1f95154a43f6a6922a0775e248fc6c7e1"
+      "sha256": "401dfb966f750b5a1998e8de225c3152296ae22e4e05de8c4953b3bceb26fffa"
     },
     {
       "path": "registry/modules/component/otp-input/module.json",
-      "sha256": "8112a98588bebd2ffc932374861f5e1f63e986400915ad687506b8a27ae8ab48"
+      "sha256": "a4dbb3164ae7d1d47a73e712e4a4b0e345e5ce00c89f9bfb9175c833dfee87ff"
     },
     {
       "path": "registry/modules/component/page-header/module.json",
@@ -384,11 +384,11 @@
     },
     {
       "path": "registry/modules/component/pagination/module.json",
-      "sha256": "3e91a51c8110aeb9b44c2ed6b92ecabfa0404e548a0b0dc4fb33f058f400b7bf"
+      "sha256": "74318235be07eafe82a6da0d974e2cfbcbc61643153e2fd6bccc4eca095d1830"
     },
     {
       "path": "registry/modules/component/panels/module.json",
-      "sha256": "9ffc89a53122c5c59ae231686a4bfdf82e96d4a623867a16dab3fbd4b67d2898"
+      "sha256": "957450cc24ddf4fce1a7802ac80a992d0f9c8857dcbb14b3cee9c4d36fd6c2e2"
     },
     {
       "path": "registry/modules/component/password-input/module.json",
@@ -404,15 +404,15 @@
     },
     {
       "path": "registry/modules/component/progress-bar/module.json",
-      "sha256": "8bfd20c11d2aede6f52cb5b5f1cf30413b8233c32755ac84141b1961b624d548"
+      "sha256": "6724560e0ea1d61e198577ca417fad5805fb58f79ed637268a8a8254e21dfa37"
     },
     {
       "path": "registry/modules/component/progress-circle/module.json",
-      "sha256": "be0277d66d983f91ce513b23e1cdf4795323f9724a23589777492c04cc48aea6"
+      "sha256": "d2dd9fcf6aaa649e006857321e4c7921a7029a81caaba7508042350ae4d62f2d"
     },
     {
       "path": "registry/modules/component/questionnaire/module.json",
-      "sha256": "737307fe249544170001360f972bdee6db94dbbd0b5d5cea24e692a1052dea24"
+      "sha256": "63c82cf53cc252fd25e4d5a1df2dccaeeb05cfb358bb4240975c6f23d114c0ee"
     },
     {
       "path": "registry/modules/component/radio-group/module.json",
@@ -424,15 +424,15 @@
     },
     {
       "path": "registry/modules/component/row-actions/module.json",
-      "sha256": "53c01bbbb9260944bd6c8c69b5c5614dd4c612084dc64ba2770bb3d816d4f914"
+      "sha256": "319b1b5cb9a43c3e858bf9456f95c8c960858f268f66ce446277c73a6a2570d7"
     },
     {
       "path": "registry/modules/component/scroll-area/module.json",
-      "sha256": "201f4cec1c85ac171effc9ecf5293a18a322f2f0fe82e0d68c4659da48815d49"
+      "sha256": "988107bdc6ad6cbe4074e85e06d9f4103ddec2174a892aec14c2965d71761b3a"
     },
     {
       "path": "registry/modules/component/search-input/module.json",
-      "sha256": "fe7a22f2fc36d34d56288c0b175882d867afcc2065d36850c275304c4e0e9b29"
+      "sha256": "03e8a913c13eaaead521812b971da56c7d4fa1bbc9e3ac2e1a37bcdf1713eabc"
     },
     {
       "path": "registry/modules/component/secret-reveal/module.json",
@@ -444,7 +444,7 @@
     },
     {
       "path": "registry/modules/component/section/module.json",
-      "sha256": "edd10c84b53bbfdf0e3cd584da5c22e836ee53d5e1dd877008722bbd4416f8df"
+      "sha256": "373343b6cf93750defaa46445417d0abcbf2fa7ee69976fd5e6cb13f6f0777b2"
     },
     {
       "path": "registry/modules/component/select/module.json",
@@ -452,11 +452,11 @@
     },
     {
       "path": "registry/modules/component/selection-bar/module.json",
-      "sha256": "42af690874711c2d59dcc7f0ccbfd8cb72ab245adb5c3ba43d494120cb534e54"
+      "sha256": "f6d9c450e4d641a1ec87070d1ecf50b1df7f92b55d3696ad00b2579c477c960c"
     },
     {
       "path": "registry/modules/component/settings-section/module.json",
-      "sha256": "cde9d191fc67df825845b3f946370a267f542fe898d2fdbd30766de2349fd844"
+      "sha256": "e21940c0f6746713910ba8560db23b06aec8184a1b646b1a281c9da547127901"
     },
     {
       "path": "registry/modules/component/skeleton/module.json",
@@ -468,11 +468,11 @@
     },
     {
       "path": "registry/modules/component/slug-input/module.json",
-      "sha256": "c60b09265a6277f1425416f7ede05251abf4d8a7811dea342e4733009321344c"
+      "sha256": "7bf6a9eec07d813830efa4a0fe2b61712aee089f26f88f7b0514f64b802ec3cf"
     },
     {
       "path": "registry/modules/component/split/module.json",
-      "sha256": "e268bd054b08fefc655954bcc8eee7b34b9f9edd79ed9a8f833fb0c3ae9d4f2e"
+      "sha256": "39758a58b9f5ca1a8b2b471c8b6db1449e372d4f33557bf0829ae3940c13bd89"
     },
     {
       "path": "registry/modules/component/stack/module.json",
@@ -492,7 +492,7 @@
     },
     {
       "path": "registry/modules/component/sticky-bar/module.json",
-      "sha256": "da9d545df6826e3097b7c4424f716679fa4a0c7a66f4db85e087b0e397890527"
+      "sha256": "3637d9470e237f48b560973b34f348c5b102584404a8c1a7d60c0690ebc25dd3"
     },
     {
       "path": "registry/modules/component/switch/module.json",
@@ -524,7 +524,7 @@
     },
     {
       "path": "registry/modules/component/tags-input/module.json",
-      "sha256": "b97e98efcdef98ba218d5094e575afb5986db9af4376b03f4693742b83f5dcaa"
+      "sha256": "1eb65916a93f392a31ea73ff57d610ed5e9d730c62d45f6b208842cd4342c7de"
     },
     {
       "path": "registry/modules/component/terminal-page/module.json",
@@ -532,7 +532,7 @@
     },
     {
       "path": "registry/modules/component/text-input/module.json",
-      "sha256": "aca32661c31acbebdecd8df7680bf83c6677f62cf2ddde048424d74fcabbca2f"
+      "sha256": "db27d178b32ebd64c380d7cdf4a15b3cc99971ea805c4dc978aa841b4c098c56"
     },
     {
       "path": "registry/modules/component/textarea/module.json",
@@ -544,7 +544,7 @@
     },
     {
       "path": "registry/modules/component/tile/module.json",
-      "sha256": "ed1348c5027fc0bddbe76656dd873ac4cb5130e08490fd32b1c871d2b082d6c6"
+      "sha256": "44ce996a42ec2e122e321b6176349800d6f4878da7c7e6e483447a9f0b6b4a22"
     },
     {
       "path": "registry/modules/component/time-field/module.json",
@@ -560,23 +560,23 @@
     },
     {
       "path": "registry/modules/component/toast/module.json",
-      "sha256": "74cea015db4c143111571ea19f223ab146b7d23a3a3f17fa890b8ed7e27ba277"
+      "sha256": "1b9f5692bdee921451c57805ec051f5bb65ba0fe09cc86f958a1040b0a8bc5a3"
     },
     {
       "path": "registry/modules/component/toolbar/module.json",
-      "sha256": "13bcf6031e053c05e4efa20b59f17cdbebe39d6d672d72cdefc500aa8aff0fd9"
+      "sha256": "4fc755e67c904fc949e01c67c5be8d96900368aaed8ce29b86c8f981587d0cb2"
     },
     {
       "path": "registry/modules/component/tooltip/module.json",
-      "sha256": "61733b4972819cd2d228facb391f22c2d4cffed264089caaf29a911d5642c237"
+      "sha256": "fb6fb024ccb630177260e983ef7baadfe274399d0c9755667c594a94e74e0daf"
     },
     {
       "path": "registry/modules/component/tree/module.json",
-      "sha256": "ea7d0b3de64d5ceb9994849c35aa479339007a36a7444570eaef0a2d077e5871"
+      "sha256": "b6947635d0e6f8acc0df78fb9128ccd32270dece2a4d0110c332eab2fdabe7f0"
     },
     {
       "path": "registry/modules/component/usage-card/module.json",
-      "sha256": "edd3117b5a9ccefc1777aaf033462ecbd625463a3bb12f46b2b01e6d44f08539"
+      "sha256": "18277865e4eff11af4c20689802b9e60bba7c45a3c67e0a644c054a94bc9790f"
     },
     {
       "path": "registry/modules/element/avatar-group/module.json",
@@ -588,15 +588,15 @@
     },
     {
       "path": "registry/modules/element/button-group/module.json",
-      "sha256": "43b6e6d17656f1943b101e6b3888e1ca51a70ec5bf0b4d14bf3ea05e05fc69b6"
+      "sha256": "580db90e259f4f578110be2fef2ef118e4bfa032e98330c8421192ce36020fb7"
     },
     {
       "path": "registry/modules/element/button-link/module.json",
-      "sha256": "cb4d50d2f764b18fb138cf534465bffae2ddc21f803a7c40861e2776527284ae"
+      "sha256": "807a244cb558e04fe9585b26aa4fc2074640e5ae145be2d9b3e3bcd06e5c7b6c"
     },
     {
       "path": "registry/modules/element/button/module.json",
-      "sha256": "a59573c66c05ac51594a8226cd7c0e0c6e66fbf072cf7b1557ed4ae2b190497f"
+      "sha256": "13c50792dcd3278bcd95bd1d7a31b9ddb1cae67d9d5805d167f0557d19fe9996"
     },
     {
       "path": "registry/modules/element/code/module.json",
@@ -616,11 +616,11 @@
     },
     {
       "path": "registry/modules/element/icon-button/module.json",
-      "sha256": "a27ffa4f637592462c0caf12bdf8c7f0f156b86d6159028ad99730854f05a499"
+      "sha256": "8cc4b56549eb529dc92ce9b405be6a56ff34110e1150c23613daf4356bed9cd8"
     },
     {
       "path": "registry/modules/element/icon/module.json",
-      "sha256": "b7341ffb6a2e84de829042333f81375d0185f2a0de969f7b9af73baa143519cd"
+      "sha256": "36e3d7a1a70e47478022c5cf73c3bb32128f20b6d7c824a36eb69b6b1dbea4f7"
     },
     {
       "path": "registry/modules/element/kbd/module.json",
@@ -648,11 +648,11 @@
     },
     {
       "path": "registry/modules/element/toggle-button/module.json",
-      "sha256": "ea4b559bbabd3a6db0bdbbdc41cf9a37a49e118ba7459c2a27063b2fc4a6dd60"
+      "sha256": "0b77e2294cacbe70f3aa2389bfd7db561a3a1936f3f08a5d1ce94c0f4b47f459"
     },
     {
       "path": "registry/modules/element/toggle-group/module.json",
-      "sha256": "f85d405941e7896df7420b444c11009d2ebed40853b4378889e83c16a047cfcb"
+      "sha256": "f861a0cea4322e4f3871601006fae9272481dd83bd5ba1aa22036f93df25a0b5"
     },
     {
       "path": "registry/modules/element/truncate/module.json",
@@ -660,7 +660,7 @@
     },
     {
       "path": "registry/modules/element/ui-core/module.json",
-      "sha256": "5b521259ccc0970974e09c55b3afe46e02d04aa6612a39ae6bf02b231356455f"
+      "sha256": "d56a4e56b302f7ede7cd35e8e579c68d60244b15a6698702dca6fb7c278f7944"
     },
     {
       "path": "registry/modules/element/visually-hidden/module.json",
@@ -696,7 +696,7 @@
     },
     {
       "path": "registry/modules/page/admin-flags/module.json",
-      "sha256": "9a8261c7b1bf2512a762dd0c34d7f3cc1609c1076576e0d80769b9e92f34a6d5"
+      "sha256": "ba06ba21c355f082fde67dbd6783cfe62c1432366312503198ae44e679114cb7"
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
@@ -736,7 +736,7 @@
     },
     {
       "path": "registry/modules/page/dev-gallery/module.json",
-      "sha256": "6a822dac6c353b0af3f721d52107a6ad7324a46bd636a9dfb7ddf77ed8c5b0f3"
+      "sha256": "ddd1662024c654bf41e5d05446700a3fbe2ed9154479e633074a54b26a0e91eb"
     },
     {
       "path": "registry/modules/page/docs-index/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "83b6f4514f4c20d60f44ba39e6a2217a8d3e75e98f96e5778a3d0b553e74d5f0"
+      "sha256": "0d16459b551c6d8c30df4820bb586554a6305f88851edf669d5a7e31e856b5e4"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "d9670b3d856b72c61351e3413422d80fbab680c68ebfe94c2a40796f749dfa42"
+      "sha256": "dd9d9b786245a3a860072cf8dceb654b7057cec129f7aad53753422b3ef0cf50"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1172,7 +1172,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",
-      "sha256": "baaeff9a8e2d2a4bec2ddd65411ac6314f6baaa1a5aa585ee9af2f64144785d5"
+      "sha256": "8dd4b74a0de8fd72ef3527a4b778cdb37855c44c4efbd9795835ffabdb2caaac"
     },
     {
       "path": "registry/modules/workflow/admin-job-requeue/module.json",
@@ -1208,7 +1208,7 @@
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "5c0c63d2ff1f92745cd1d1987f86cbd24b5be34626e162f00718da26bf72afc6"
+      "sha256": "33cf1728a773c112ca10039fe8ad49d530346aed3ddf9e2951f1b42a350f0828"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
@@ -1228,7 +1228,7 @@
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
-      "sha256": "604a67171976fac171191b720f695fc5baaa56249924ae95c8a75e9c8800dc50"
+      "sha256": "12f63852d8b794afbde415b4bd226517301dd6db052ef65d74f1b158734c55c1"
     },
     {
       "path": "registry/modules/workflow/impersonation/module.json",

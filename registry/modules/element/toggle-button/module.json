@@ -1,77 +1,94 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ToggleButton renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "277d0bce7a450e5b22f1533a0d3e80cca1464128cf1e80c98f707517dc2fd9dc",
-        "source": "internal/web/templates/ui/toggle-button.templ",
-        "target": "internal/web/templates/ui/toggle-button.templ"
-      }
-    ],
     "id": "ggg/element/toggle-button",
     "kind": "element",
-    "migrations": [],
     "name": "toggle-button",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "ToggleButton",
+    "description": "The ToggleButton renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/button",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/button"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon-button",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon-button"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/toggle-button.templ",
+        "target": "internal/web/templates/ui/toggle-button.templ",
+        "class": "templ",
+        "sha256": "277d0bce7a450e5b22f1533a0d3e80cca1464128cf1e80c98f707517dc2fd9dc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/toggle-button_test.go",
+        "target": "internal/web/templates/ui/toggle-button_test.go",
+        "class": "test",
+        "sha256": "d19511d9bed0fbf5002970590be3b3deb3c2d2429593af55527c948a60f9c0c9",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "actions",
           "name": "toggle-button",
+          "family": "actions",
           "signature": "templ ToggleButton(o ToggleButtonOpts)",
+          "summary": "Renders a button that reports its own pressed state.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a button that reports its own pressed state."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ToggleButton"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

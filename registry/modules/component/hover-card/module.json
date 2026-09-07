@@ -1,78 +1,78 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/hover-card",
+    "kind": "component",
+    "name": "hover-card",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "HoverCard",
+    "description": "The HoverCard renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The HoverCard renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "471cd16f5baf94b8a60d9de92ebfc7bdcbfcf8afd241e641b8871597fcd4bc4c",
         "source": "internal/web/templates/ui/hover-card.templ",
-        "target": "internal/web/templates/ui/hover-card.templ"
+        "target": "internal/web/templates/ui/hover-card.templ",
+        "class": "templ",
+        "sha256": "471cd16f5baf94b8a60d9de92ebfc7bdcbfcf8afd241e641b8871597fcd4bc4c",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "2a0129882259045841922c5b2d87b3fd4362da40702fd900e56631428fc38913",
         "source": "internal/web/templates/ui/hover-card_test.go",
-        "target": "internal/web/templates/ui/hover-card_test.go"
+        "target": "internal/web/templates/ui/hover-card_test.go",
+        "class": "test",
+        "sha256": "e369c824262065f15450ca68b7603de0af6aaffb9b3fedc696f519a4f8cbf70f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/component/hover-card",
-    "kind": "component",
-    "migrations": [],
-    "name": "hover-card",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "alpine": "uiHoverCard",
-          "engine": "alpine",
-          "family": "overlays",
-          "guidance": "Focus is not optional: a panel that only opens on hover is unreachable by keyboard and on touch, where there is no hover state at all. The content is a description rather than a label, because the trigger already has a name and replacing it with a paragraph of preview text would make the link unreadable in a screen reader's link list.",
-          "keyboard": "The trigger is focusable and opens the card on focus as well as hover, and Escape closes it.",
           "name": "hover-card",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiHoverCard",
           "native_fallback": "visible trigger",
           "signature": "templ HoverCard(o HoverCardOpts)",
+          "summary": "Renders a preview that opens on hover *and* focus.",
+          "guidance": "Focus is not optional: a panel that only opens on hover is unreachable by keyboard and on touch, where there is no hover state at all. The content is a description rather than a label, because the trigger already has a name and replacing it with a paragraph of preview text would make the link unreadable in a screen reader's link list.",
+          "keyboard": "The trigger is focusable and opens the card on focus as well as hover, and Escape closes it.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a preview that opens on hover *and* focus."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "HoverCard"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

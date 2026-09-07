@@ -38,17 +38,26 @@ func TestFilteredEmptyStateOffersAnEscape(t *testing.T) {
 
 // An empty list is a resting state, not news. ErrorState is the announced
 // counterpart for a region that failed after the user acted.
-func TestEmptyStateIsSilentAndErrorStateIsNot(t *testing.T) {
+func TestEmptyStateIsSilent(t *testing.T) {
 	assert.NotContains(t, renderComponent(t, EmptyState(EmptyStateOpts{Body: "None"})), "role=")
+}
 
-	failed := renderComponent(t, ErrorState(ErrorStateOpts{
-		Title: "Could not load", Body: "The request failed.", RetryURL: "/retry", Target: "#t",
-	}))
-	assert.Contains(t, failed, `role="alert"`)
-	assert.Contains(t, failed, `href="/retry"`, "the retry works with scripts disabled")
-	assert.Contains(t, failed, `hx-get="/retry"`)
-	assert.Contains(t, failed, "Try again")
-
-	// A failure with no next step leaves the user only able to reload and hope.
-	assert.NotContains(t, renderComponent(t, ErrorState(ErrorStateOpts{Title: "x", Body: "y"})), "<a ")
+// EmptyVariant is a closed enum this module declares, so its normalization and
+// its declared set are exercised here rather than in ui-core's enums_test.go:
+// naming it there put a symbol ggg/component/empty-state owns in the payload
+// every closure installs.
+//
+// The default is a judgement: an unset empty state is the standalone card,
+// because inline would render without the border its container expects to
+// supply.
+func TestDeclaredEmptyVariantsRoundTrip(t *testing.T) {
+	assert.Equal(t, EmptyCard, EmptyVariant("").Value(),
+		"an unset empty state is the standalone card: inline would render "+
+			"without the border its container expects to supply")
+	assert.Equal(t, EmptyCard, EmptyVariant("banner").Value())
+	for _, v := range EmptyVariants {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	assertDistinct(t, "EmptyVariants", EmptyVariants)
 }

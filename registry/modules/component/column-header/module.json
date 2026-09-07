@@ -1,81 +1,81 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/column-header",
+    "kind": "component",
+    "name": "column-header",
+    "revision": 2,
     "contract": 1,
-    "data": [],
+    "title": "ColumnHeader",
+    "description": "The ColumnHeader renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/icon",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The ColumnHeader renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
         "source": "internal/web/templates/ui/column-header.templ",
-        "target": "internal/web/templates/ui/column-header.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/column-header.templ",
+        "class": "templ",
+        "sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
         "rewrite_module": true,
-        "sha256": "249ee34933666319f7582d3fbc5c9a3d92e1f233634b110de366088519894015",
-        "source": "internal/web/templates/ui/column-header_test.go",
-        "target": "internal/web/templates/ui/column-header_test.go"
-      }
-    ],
-    "id": "ggg/component/column-header",
-    "kind": "component",
-    "migrations": [],
-    "name": "column-header",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+        "contract": true
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+        "source": "internal/web/templates/ui/column-header_test.go",
+        "target": "internal/web/templates/ui/column-header_test.go",
+        "class": "test",
+        "sha256": "83f287f14f73b759dca9046683f4062fb234a803221043b044ec8a29aa32b22d",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "data",
-          "guidance": "aria-sort is what tells a screen-reader user which column orders the table and in which direction. Without it a sorted table is indistinguishable from an unsorted one, and the little arrow glyph is invisible to them.",
           "name": "column-header",
+          "family": "data",
           "signature": "templ ColumnHeader(o ColumnHeaderOpts)",
+          "summary": "Renders a th with sort semantics.",
+          "guidance": "aria-sort is what tells a screen-reader user which column orders the table and in which direction. Without it a sorted table is indistinguishable from an unsorted one, and the little arrow glyph is invisible to them.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a th with sort semantics."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "ColumnHeader"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

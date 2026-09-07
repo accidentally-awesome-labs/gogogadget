@@ -1,78 +1,95 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ErrorState renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "14a646ea953c51f00cf3df1116f2deaf51650756460035cd29c0dfa489b25020",
-        "source": "internal/web/templates/ui/error-state.templ",
-        "target": "internal/web/templates/ui/error-state.templ"
-      }
-    ],
     "id": "ggg/component/error-state",
     "kind": "component",
-    "migrations": [],
     "name": "error-state",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "ErrorState",
+    "description": "The ErrorState renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/cursor-pagination",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/cursor-pagination"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/error-state.templ",
+        "target": "internal/web/templates/ui/error-state.templ",
+        "class": "templ",
+        "sha256": "14a646ea953c51f00cf3df1116f2deaf51650756460035cd29c0dfa489b25020",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/error-state_test.go",
+        "target": "internal/web/templates/ui/error-state_test.go",
+        "class": "test",
+        "sha256": "619adefef0af19b4a805e67eed5f440a3ef568ed80d992a1b559c36aaae4247d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "role=\"alert\" because a region that failed after the user acted must be announced - unlike EmptyState, which is a resting state and not news. The retry is a real link with an hx-get, so it works with scripts disabled.",
           "name": "error-state",
+          "family": "feedback",
           "signature": "templ ErrorState(o ErrorStateOpts)",
+          "summary": "Renders a failed region with a retry.",
+          "guidance": "role=\"alert\" because a region that failed after the user acted must be announced - unlike EmptyState, which is a resting state and not news. The retry is a real link with an hx-get, so it works with scripts disabled.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a failed region with a retry."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ErrorState"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

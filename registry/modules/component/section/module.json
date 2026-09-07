@@ -1,64 +1,81 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Section renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "faffe4bcfe6bfed863eddcf97722b2b85d00371697473bc62d515404de33c436",
-        "source": "internal/web/templates/ui/section.templ",
-        "target": "internal/web/templates/ui/section.templ"
-      }
-    ],
     "id": "ggg/component/section",
     "kind": "component",
-    "migrations": [],
     "name": "section",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Section",
+    "description": "The Section renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/section.templ",
+        "target": "internal/web/templates/ui/section.templ",
+        "class": "templ",
+        "sha256": "faffe4bcfe6bfed863eddcf97722b2b85d00371697473bc62d515404de33c436",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/section_test.go",
+        "target": "internal/web/templates/ui/section_test.go",
+        "class": "test",
+        "sha256": "cb22919671e84cac0071c380ea661b703de4055f472aa48e63922e7774d68d44",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "layout",
-          "guidance": "It is a <section> with an accessible name, which is what makes it a landmark a screen reader can jump to. A <section> without a name is not a landmark at all - it is an anonymous div with extra letters.",
           "name": "section",
+          "family": "layout",
           "signature": "templ Section(o SectionOpts)",
+          "summary": "Renders a landmark region with its own heading.",
+          "guidance": "It is a \u003csection\u003e with an accessible name, which is what makes it a landmark a screen reader can jump to. A \u003csection\u003e without a name is not a landmark at all - it is an anonymous div with extra letters.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a landmark region with its own heading."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Section"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

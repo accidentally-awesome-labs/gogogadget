@@ -4,7 +4,7 @@
     "id": "ggg/element/ui-core",
     "kind": "element",
     "name": "ui-core",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "UI core",
     "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
@@ -60,7 +60,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "a1c966f7fd79f2f3e61c81315b5f6ca7a2a81718ae43f0cdd45c31dcb3f38584",
+        "sha256": "b04f9869b9d8584492ad5426680dd653830082fc0aca7da735dfc2035bfef164",
         "rewrite_module": true,
         "contract": false
       },
@@ -68,7 +68,7 @@
         "source": "internal/web/templates/ui/control-id_test.go",
         "target": "internal/web/templates/ui/control-id_test.go",
         "class": "test",
-        "sha256": "6c865b4b1313271adc80699df9c793ededc828978559124eb033c62ab5314bfd",
+        "sha256": "8b1781355064cbb5ffa0d900acc4aa992cf4d8ed510268d62575d02b81872579",
         "rewrite_module": true,
         "contract": false
       },
@@ -92,7 +92,7 @@
         "source": "internal/web/templates/ui/enums_test.go",
         "target": "internal/web/templates/ui/enums_test.go",
         "class": "test",
-        "sha256": "96375eced2cb91517f01d409cf4a9135f909dd2b50d3bd20c16a215dd547a21f",
+        "sha256": "e6780bfe29dd00dc52e7d4bcf156502fc4b0ec7bdbe65c059cd0bec358f923a1",
         "rewrite_module": true,
         "contract": false
       },
@@ -116,15 +116,7 @@
         "source": "internal/web/templates/ui/icons_test.go",
         "target": "internal/web/templates/ui/icons_test.go",
         "class": "test",
-        "sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/ui/menu-item_test.go",
-        "target": "internal/web/templates/ui/menu-item_test.go",
-        "class": "test",
-        "sha256": "552f606b66ef9931e02959ee23d7c8ef63eac5f38548a4da68e48820b119dcb6",
+        "sha256": "4ab6cc3b5a571031cd80d5d0526750ed5c071df08411defcad175cbbcd08f8a2",
         "rewrite_module": true,
         "contract": false
       },
@@ -132,7 +124,7 @@
         "source": "internal/web/templates/ui/opts_hx_test.go",
         "target": "internal/web/templates/ui/opts_hx_test.go",
         "class": "test",
-        "sha256": "ae4e0d3ed73198aeb39113787e06320dee25c01d0719ea6954fbbaa0e4c3d00d",
+        "sha256": "ef164281ce80adfba051fb3288c07c7f4e09dcb58b8e6895a6bf177e71a457d6",
         "rewrite_module": true,
         "contract": false
       },

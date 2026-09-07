@@ -1,56 +1,73 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ChatMessage renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "a741379471d649d609eeb57a228c506ff2e0a244067f8e5b52a80412ec2332f2",
-        "source": "internal/web/templates/ui/chat-message.templ",
-        "target": "internal/web/templates/ui/chat-message.templ"
-      }
-    ],
     "id": "ggg/component/chat-message",
     "kind": "component",
-    "migrations": [],
     "name": "chat-message",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "ChatMessage",
+    "description": "The ChatMessage renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/chat-message.templ",
+        "target": "internal/web/templates/ui/chat-message.templ",
+        "class": "templ",
+        "sha256": "a741379471d649d609eeb57a228c506ff2e0a244067f8e5b52a80412ec2332f2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/chat-message_test.go",
+        "target": "internal/web/templates/ui/chat-message_test.go",
+        "class": "test",
+        "sha256": "e1d8b4c04128180408a28d054738f68b970b1df9c62e5e20ff25d855faf5ed35",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "chat-message",
+          "family": "communication",
           "signature": "templ ChatMessage(o ChatMessageOpts)",
+          "summary": "Renders one message.",
           "states": [
             "default"
-          ],
-          "summary": "Renders one message."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ChatMessage"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

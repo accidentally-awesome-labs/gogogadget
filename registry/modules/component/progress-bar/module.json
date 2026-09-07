@@ -1,75 +1,75 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/progress-bar",
+    "kind": "component",
+    "name": "progress-bar",
+    "revision": 2,
     "contract": 1,
-    "data": [],
+    "title": "ProgressBar",
+    "description": "The ProgressBar renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The ProgressBar renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
         "source": "internal/web/templates/ui/progress-bar.templ",
-        "target": "internal/web/templates/ui/progress-bar.templ"
+        "target": "internal/web/templates/ui/progress-bar.templ",
+        "class": "templ",
+        "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
         "source": "internal/web/templates/ui/progress-bar_test.go",
-        "target": "internal/web/templates/ui/progress-bar_test.go"
+        "target": "internal/web/templates/ui/progress-bar_test.go",
+        "class": "test",
+        "sha256": "105a3cac0f7fa35c52ca884ca0674e95622a446de8004092d5d2cd38ba0c5c5a",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/component/progress-bar",
-    "kind": "component",
-    "migrations": [],
-    "name": "progress-bar",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 1,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "progressbar, not meter: a progress bar describes a task advancing towards completion, while a meter describes a measurement within a range. Screen readers announce them differently, and using meter for a running task tells the user a quota is filling up.",
           "name": "progress-bar",
+          "family": "feedback",
           "signature": "templ ProgressBar(o ProgressBarOpts)",
+          "summary": "Renders task progress with progressbar semantics.",
+          "guidance": "progressbar, not meter: a progress bar describes a task advancing towards completion, while a meter describes a measurement within a range. Screen readers announce them differently, and using meter for a running task tells the user a quota is filling up.",
           "states": [
             "default",
             "loading"
-          ],
-          "summary": "Renders task progress with progressbar semantics."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "ProgressBar"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

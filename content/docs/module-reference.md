@@ -409,7 +409,7 @@ checklist and a console URL rather than executing anything.
 | `ggg/usage` | `ggg/system/usage-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/webhooks` | `ggg/system/webhooks-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 
-## Dependencies (146)
+## Dependencies (185)
 
 Declared, not discovered: an authored import the owning manifest does not
 declare is refused before `go.mod` is touched, and the last owner's removal
@@ -418,20 +418,35 @@ drops the requirement again unless the project already had it.
 | Module | Go modules | Tools | Containers |
 |---|---|---|---|
 | `ggg/component/accordion` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/activity-item` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/alert-dialog` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/aspect-ratio` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/attachment` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/breadcrumbs` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/calendar` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/carousel` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/char-counter` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/chart` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/chat-log` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/chat-message` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/checkbox-group` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/column-header` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/combobox` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/command` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/comment` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/confirm-action` | `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/component/data-grid` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/context-menu` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/cursor-pagination` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/data-grid` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/data-table` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/date-range-field` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/delivery-status` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/description-list` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/disclosure` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/drawer` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/dropdown-menu` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/empty-state` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/error-state` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/field` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/file-dropzone` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/form` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
@@ -440,34 +455,57 @@ drops the requirement again unless the project already had it.
 | `ggg/component/input-addon` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/kanban` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/markdown-editor` | `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/component/notification-item` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/member-item` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/mention-chip` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/meter` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/multi-select` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/notice` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/notification-item` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/number-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/onboarding-checklist` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/otp-input` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/pagination` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/panels` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/password-input` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/progress-bar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/progress-circle` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/questionnaire` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/row-actions` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/scroll-area` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/search-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/section` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/selection-bar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/settings-section` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/skeleton` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/skip-link` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/slug-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/split` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/status-dot` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/steps` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/sticky-bar` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/tab-panels` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/tags-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/text-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/tile` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/toast` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/toolbar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/tooltip` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/component/tree` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/usage-card` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/avatar` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/avatar-group` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/button` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/button-group` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/button-link` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/copy-button` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/heading` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/icon` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/icon-button` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/kbd` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/link` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/separator` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/text` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/toggle-button` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/toggle-group` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/truncate` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/element/ui-core` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
@@ -517,7 +555,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/mail-dev` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/mail-resend` | `github.com/resendlabs/resend-go v1.7.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/metrics` | `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/system/modkit` | `github.com/santhosh-tekuri/jsonschema/v6 v6.0.2` `github.com/stretchr/testify v1.11.1` `golang.org/x/mod v0.38.0` `gopkg.in/yaml.v3 v3.0.1` | — | — |
+| `ggg/system/modkit` | `github.com/a-h/templ v0.3.1020` `github.com/santhosh-tekuri/jsonschema/v6 v6.0.2` `github.com/stretchr/testify v1.11.1` `golang.org/x/mod v0.38.0` `gopkg.in/yaml.v3 v3.0.1` | — | — |
 | `ggg/system/notifications` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/notifications-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
 | `ggg/system/observability` | `github.com/getsentry/sentry-go v0.48.0` `github.com/stretchr/testify v1.11.1` | — | — |
@@ -545,6 +583,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/webhooks-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
 | `ggg/workflow/account-export` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/admin-content` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/admin-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/admin-schedules` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/admin-user-governance` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/api-ai-chat` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
@@ -599,7 +638,7 @@ promptly and must fail rather than degrade silently.
 | `ggg/system/usage-postgres` | `usage.recorder` | — | — | yes |
 | `ggg/system/webhooks-postgres` | `webhooks.emitter` | — | — | yes |
 
-## Verification (165)
+## Verification (204)
 
 The same commands `ggg info <namespace>/<kind>/<name>` prints. **Capabilities** names the
 declared contracts a module's own suite covers.
@@ -607,43 +646,82 @@ declared contracts a module's own suite covers.
 | Module | Commands | Capabilities |
 |---|---|---|
 | `ggg/component/accordion` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/activity-item` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/alert-dialog` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/aspect-ratio` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/attachment` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/breadcrumbs` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/calendar` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/char-counter` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/chart` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/chat-log` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/chat-message` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/checkbox-group` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/column-header` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/combobox` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/comment` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/confirm-action` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/context-menu` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/cursor-pagination` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/data-table` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/date-range-field` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/delivery-status` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/description-list` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/disclosure` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/drawer` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/dropdown-menu` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/empty-state` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/error-state` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/field` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/file-dropzone` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/form-actions` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/hover-card` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/input-addon` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/member-item` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/mention-chip` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/meter` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/multi-select` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/notice` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/number-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/onboarding-checklist` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/otp-input` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/pagination` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/password-input` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/progress-bar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/progress-circle` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/row-actions` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/scroll-area` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/section` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/selection-bar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/settings-section` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/skeleton` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/skip-link` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/slug-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/split` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/status-dot` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/steps` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/sticky-bar` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/tab-panels` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/tags-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/text-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/tile` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/component/toast` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/toolbar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/tooltip` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/tree` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/usage-card` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/avatar` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/avatar-group` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/button` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/button-group` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/button-link` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/copy-button` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/heading` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/icon` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/icon-button` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/kbd` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/separator` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/toggle-button` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/toggle-group` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/truncate` | `go test -count=1 ./internal/web/templates/ui` | — |
 | `ggg/element/visually-hidden` | `go test -count=1 ./internal/web/templates/ui` | — |
@@ -664,7 +742,7 @@ declared contracts a module's own suite covers.
 | `ggg/page/blog` | `go test -count=1 ./internal/web` | — |
 | `ggg/page/changelog` | `go test -count=1 ./internal/web` | — |
 | `ggg/page/dashboard` | `go test -count=1 ./internal/web` | — |
-| `ggg/page/dev-gallery` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/dev-gallery` | `go test -count=1 ./internal/web ./internal/web/templates` | — |
 | `ggg/page/docs` | `go test -count=1 ./internal/web` | — |
 | `ggg/page/docs-index` | `go test -count=1 ./internal/web` | — |
 | `ggg/page/docs-search` | `go test -count=1 ./internal/web` | — |

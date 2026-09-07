@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Toolbar renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "5d92152fd1f73a1dbd6a964888564d7b854f3187cd0a6ebb6a03bab3a3e1d280",
-        "source": "internal/web/templates/ui/toolbar.templ",
-        "target": "internal/web/templates/ui/toolbar.templ"
-      }
-    ],
     "id": "ggg/component/toolbar",
     "kind": "component",
-    "migrations": [],
     "name": "toolbar",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Toolbar",
+    "description": "The Toolbar renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/toolbar.templ",
+        "target": "internal/web/templates/ui/toolbar.templ",
+        "class": "templ",
+        "sha256": "5d92152fd1f73a1dbd6a964888564d7b854f3187cd0a6ebb6a03bab3a3e1d280",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/toolbar_test.go",
+        "target": "internal/web/templates/ui/toolbar_test.go",
+        "class": "test",
+        "sha256": "83e7b5929301aa7fa7673a04d855da72faf78bc73a0e7f9782fe419f7497e420",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "layout",
-          "guidance": "role=\"group\", not role=\"toolbar\": a toolbar promises arrow-key navigation between its controls with a single tab stop. These controls are each tabbable, so claiming toolbar would advertise a keyboard contract that is not implemented.",
           "name": "toolbar",
+          "family": "layout",
           "signature": "templ Toolbar(o ToolbarOpts)",
+          "summary": "Renders a group of related controls.",
+          "guidance": "role=\"group\", not role=\"toolbar\": a toolbar promises arrow-key navigation between its controls with a single tab stop. These controls are each tabbable, so claiming toolbar would advertise a keyboard contract that is not implemented.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a group of related controls."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Toolbar"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

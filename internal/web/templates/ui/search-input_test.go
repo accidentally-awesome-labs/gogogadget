@@ -71,3 +71,20 @@ func TestSearchInputSynchronisesFieldAndSubmit(t *testing.T) {
 	require.Equal(t, 1, strings.Count(html, `hx-sync="closest form:replace"`),
 		"the field joins the form's queue rather than keeping its own")
 }
+
+// A caller who names no target wants plain link navigation. Emitting
+// hx-target="" makes htmx intercept the click and swap into an empty selector,
+// so the request lands nowhere and the href that would have worked is skipped.
+func TestUntargetedSearchInputEmitsNoHTMX(t *testing.T) {
+	const name = "search input"
+	html := renderComponent(t, SearchInput(SearchInputOpts{
+		Name: "q", GetURL: "/x", AriaLabel: "Search",
+	}))
+
+	assert.NotContains(t, html, `hx-target=""`, "%s emits an empty target", name)
+	assert.NotContains(t, html, "hx-get", "%s should navigate, not swap", name)
+	// The search input has no href to keep: it is a named field, and what must
+	// survive is the caller's ability to wrap it in a form.
+	assert.Contains(t, html, `name="q"`)
+	assert.Contains(t, html, `type="search"`)
+}

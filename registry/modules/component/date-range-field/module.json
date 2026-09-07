@@ -1,68 +1,85 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The DateRangeField renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
-        "source": "internal/web/templates/ui/date-range-field.templ",
-        "target": "internal/web/templates/ui/date-range-field.templ"
-      }
-    ],
     "id": "ggg/component/date-range-field",
     "kind": "component",
-    "migrations": [],
     "name": "date-range-field",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "DateRangeField",
+    "description": "The DateRangeField renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/field",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/field"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/date-range-field.templ",
+        "target": "internal/web/templates/ui/date-range-field.templ",
+        "class": "templ",
+        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/date-range-field_test.go",
+        "target": "internal/web/templates/ui/date-range-field_test.go",
+        "class": "test",
+        "sha256": "eb93883ec238d157e47530def248c561b70dd7b48a960eaab43aee45ed48cf68",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "alpine": "uiDateRange",
-          "engine": "alpine",
-          "family": "forms",
-          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
           "name": "date-range-field",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiDateRange",
           "native_fallback": "native input",
           "signature": "templ DateRangeField(o DateRangeFieldOpts)",
+          "summary": "Renders a start and end date as two native date inputs.",
+          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
           "states": [
             "default",
             "error"
-          ],
-          "summary": "Renders a start and end date as two native date inputs."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "DateRangeField"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

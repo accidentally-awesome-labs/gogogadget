@@ -379,6 +379,15 @@ func TestLoadPlanDefaultsFree(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
 
+// A session that names an organization the mirror has never seen must seed it,
+// because the first request after a sign-up arrives before any webhook does.
+//
+// What a later organization.created webhook does with the placeholder is
+// ggg/workflow/identity-webhook-sync's claim and lives in its own payload: the
+// tail of this test used to call orgDelivery, a fixture that module's test
+// payload defines, from a payload ggg/workflow/auth-session owns - so a closure
+// that installs the session without the webhook receiver, which every shipped
+// profile does, wrote a tree whose tests did not compile.
 func TestLazyOrgSync(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedUser(t, s, "user_lazy", "lazy@example.com", "Lazy")
@@ -395,12 +404,9 @@ func TestLazyOrgSync(t *testing.T) {
 	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{OrgID: mapping.OrgID, UserID: "user_lazy"})
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
-	// A later organization.created webhook corrects the placeholder name.
-	payload, headers := orgDelivery("msg_lazy1", "organization.created", "org_lazy", "Real Name", "org_lazy")
-	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, headers)
-	require.Equal(t, http.StatusOK, code)
-	org, _ = s.q.GetOrgByID(t.Context(), mapping.OrgID)
-	assert.Equal(t, "Real Name", org.Name)
+	// The placeholder name is the subject until something authoritative says
+	// otherwise, which is what makes the correction worth asserting elsewhere.
+	assert.Equal(t, "org_lazy", org.Name)
 }
 
 // /login, /signup and /logout hand off to whatever the selected identity

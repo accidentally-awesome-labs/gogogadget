@@ -9,22 +9,10 @@ import (
 // progressbar and meter are announced differently. A progress bar describes a
 // task advancing towards completion; a meter describes a measurement inside a
 // range. Using meter for a running task tells the user a quota is filling up.
-func TestProgressBarAndMeterUseDifferentSemantics(t *testing.T) {
+func TestProgressBarUsesProgressbarSemantics(t *testing.T) {
 	progress := renderComponent(t, ProgressBar(ProgressBarOpts{Value: 63, Max: 100, Label: "Storage"}))
 	assert.Contains(t, progress, `role="progressbar"`)
 	assert.NotContains(t, progress, "<meter")
-
-	quota := renderComponent(t, Meter(MeterOpts{Percent: 63, Label: "Storage"}))
-	assert.Contains(t, quota, `role="meter"`,
-		"a quota bar with no role at all is invisible to assistive technology")
-	assert.NotContains(t, quota, `role="progressbar"`,
-		"calling a quota a progress bar implies it will finish")
-	assert.Contains(t, quota, `aria-valuenow="63"`)
-	assert.Contains(t, quota, `aria-label="Storage"`)
-
-	// Over-quota clamps rather than overflowing the track.
-	assert.Contains(t, renderComponent(t, Meter(MeterOpts{Percent: 140, Label: "x"})),
-		`aria-valuenow="100"`)
 }
 
 // A negative value means indeterminate: work is happening but its extent is
@@ -59,15 +47,4 @@ func TestProgressReportsWhatIsProgressing(t *testing.T) {
 	// Out-of-range values clamp rather than overflowing the track.
 	assert.Contains(t, renderComponent(t, ProgressBar(ProgressBarOpts{Value: 500, Max: 100, Label: "x"})),
 		"width: 100.00%")
-}
-
-// The ring is decoration: the semantics live on the wrapper, so assistive
-// technology gets a value rather than a description of two circles.
-func TestProgressCircleHidesItsGeometry(t *testing.T) {
-	html := renderComponent(t, ProgressCircle(ProgressCircleOpts{Value: 25, Max: 100, Label: "Quota"}))
-	assert.Contains(t, html, `role="progressbar"`)
-	assert.Contains(t, html, `aria-valuenow="25"`)
-	assert.Contains(t, html, `aria-hidden="true"`)
-	assert.Contains(t, html, `stroke-dashoffset="75.40"`,
-		"a quarter complete leaves three quarters of the circumference as gap")
 }

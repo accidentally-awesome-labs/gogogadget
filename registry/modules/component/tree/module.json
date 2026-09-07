@@ -1,125 +1,137 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/tree",
+    "kind": "component",
+    "name": "tree",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "Tree",
+    "description": "Nested details upgraded with the APG keyboard model: one tab stop, arrows, Home/End and typeahead. Every branch opens with no script.",
+    "requires": [
+      {
+        "id": "ggg/component/column-header",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/icon",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Nested details upgraded with the APG keyboard model: one tab stop, arrows, Home/End and typeahead. Every branch opens with no script.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
-        "source": "internal/web/templates/ui/tree.templ",
-        "target": "internal/web/templates/ui/tree.templ"
-      },
-      {
+        "source": "internal/web/templates/ui/tree-grid_test.go",
+        "target": "internal/web/templates/ui/tree-grid_test.go",
         "class": "test",
-        "contract": false,
+        "sha256": "6adb8bb09eec675792aafdb0dee1ebd1657eefdfe089db7061795c74c44555be",
         "rewrite_module": true,
-        "sha256": "d7e9f34dc501f4557fba56c5fbe7609907d2477093c9b09426baf64206013c4a",
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/tree.templ",
+        "target": "internal/web/templates/ui/tree.templ",
+        "class": "templ",
+        "sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/web/templates/ui/tree_test.go",
-        "target": "internal/web/templates/ui/tree_test.go"
+        "target": "internal/web/templates/ui/tree_test.go",
+        "class": "test",
+        "sha256": "d7e9f34dc501f4557fba56c5fbe7609907d2477093c9b09426baf64206013c4a",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "d331889c46746c0e4da42d1bdafbd5622479b6c5424af14a0f440709bbaf5e21",
         "source": "static/ui/tree.js",
-        "target": "static/ui/tree.js"
+        "target": "static/ui/tree.js",
+        "class": "asset",
+        "sha256": "d331889c46746c0e4da42d1bdafbd5622479b6c5424af14a0f440709bbaf5e21",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
-    "id": "ggg/component/tree",
-    "kind": "component",
-    "migrations": [],
-    "name": "tree",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/column-header"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
-      "assets": [
-        {
-          "id": "ui-tree",
-          "kind": "script",
-          "path": "static/ui/tree.js"
-        }
-      ],
       "ui": [
         {
-          "alpine": "uiTree",
-          "engine": "alpine",
+          "name": "tree",
           "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree",
+          "signature": "templ Tree(o TreeOpts)",
+          "summary": "Renders a disclosure tree.",
           "guidance": "It is built from nested `details` elements, so with no JavaScript every branch still opens and every leaf is still reachable. The controller adds the APG keyboard model on top - roving focus, arrows, Home/End and typeahead - by upgrading this markup rather than replacing it. A div-based tree would have to implement disclosure, keyboard and semantics all at once, and would offer nothing when any of the three failed.",
           "keyboard": "A roving tabindex gives the tree one tab stop; ArrowUp/ArrowDown move between visible nodes, ArrowRight opens a branch or steps into it, ArrowLeft closes it or steps out, Home/End jump to the ends, and printable characters start typeahead.",
-          "name": "tree",
-          "signature": "templ Tree(o TreeOpts)",
           "states": [
             "default"
-          ],
-          "summary": "Renders a disclosure tree."
+          ]
         },
         {
-          "alpine": "uiTree",
-          "engine": "alpine",
-          "family": "advanced",
-          "guidance": "This is a table, because the data is rows and columns and a table already reports both. Depth is carried by aria-level on each row rather than by indentation alone: indentation is a visual convention that conveys nothing to a screen reader, and \"level 3\" is the fact the user needs.",
           "name": "tree-grid",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree",
           "signature": "templ TreeGrid(o TreeGridOpts)",
+          "summary": "Renders a hierarchy with columns.",
+          "guidance": "This is a table, because the data is rows and columns and a table already reports both. Depth is carried by aria-level on each row rather than by indentation alone: indentation is a visual convention that conveys nothing to a screen reader, and \"level 3\" is the fact the user needs.",
           "states": [
             "default",
             "overflow"
-          ],
-          "summary": "Renders a hierarchy with columns."
+          ]
         },
         {
-          "family": "advanced",
           "name": "tree-node",
+          "family": "advanced",
           "signature": "templ TreeNode(o TreeNodeOpts)",
+          "summary": "Renders one node and its children.",
           "states": [
             "default",
             "loading"
-          ],
-          "summary": "Renders one node and its children."
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-tree",
+          "path": "static/ui/tree.js",
+          "kind": "script"
         }
       ]
     },
-    "tests": {},
-    "title": "Tree"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

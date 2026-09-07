@@ -4,13 +4,17 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 65,
+    "revision": 70,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
     "requires": [],
     "dependencies": {
       "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
         {
           "module": "github.com/santhosh-tekuri/jsonschema/v6",
           "version": "v6.0.2"
@@ -236,7 +240,7 @@
         "source": "internal/gggcli/profile_genesis_test.go",
         "target": "internal/gggcli/profile_genesis_test.go",
         "class": "test",
-        "sha256": "792ef4cc6982fea0cd771cb512b591099bfb81ee933cd4c19078887712f0eba9",
+        "sha256": "10e42bf1129e223a7375403d4b9864bb61655d19b51ac1c78548e5f3de7e4f4b",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -613,7 +617,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "927b50ac1573104f13e9a8cff182cc0da68b3cf39829dfe8a0f1109504bbf067",
+        "sha256": "c0c327a797a8d8bd86e2fdb519f43eda8b6a1d1bfc937d762aada67ee8a9d28f",
         "rewrite_module": true,
         "contract": false
       },
@@ -621,7 +625,7 @@
         "source": "internal/modkit/generate_test.go",
         "target": "internal/modkit/generate_test.go",
         "class": "test",
-        "sha256": "544ca7ed808afb488d40400476e0543dd1479585adea2181d49ae71a445260ed",
+        "sha256": "bc94c7f0e6ffbf2b8fc094982f247b61eab23beda7f1c42a1560d348d0f3de10",
         "rewrite_module": true,
         "contract": false
       },
@@ -709,7 +713,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "406920a97832e6f743b00046e0c6e18409d3ec45e4d1fd90cf1cc7ed12232c42",
+        "sha256": "3a9468da8f814285a8dfb3d93f382e6c373fbdac01da3229502a9f33363b97a9",
         "rewrite_module": true,
         "contract": true
       },
@@ -717,7 +721,7 @@
         "source": "internal/modkit/model_regression_test.go",
         "target": "internal/modkit/model_regression_test.go",
         "class": "test",
-        "sha256": "5007f9633c42dbb8e0e001b3d44adceafc9e2be4ce00e92ef96227371546430f",
+        "sha256": "18f2a9cde21fa15a87b9b74760cd8c8df005c293a16c8851199ed11c02957382",
         "rewrite_module": true,
         "contract": false
       },
@@ -830,7 +834,7 @@
         "source": "internal/modkit/reference_test.go",
         "target": "internal/modkit/reference_test.go",
         "class": "test",
-        "sha256": "1b36579a443d95c3ca915d9af127c60b8eb2e31e2882917d3a8b3d21cd6f4c5d",
+        "sha256": "1b96a0ed7cbb6f1dc462921fa590f98e8fcc84a17aa19c94217bd8b2fc903088",
         "rewrite_module": true,
         "contract": false
       },
@@ -1141,7 +1145,7 @@
         "source": "internal/modkit/ui_scan.go",
         "target": "internal/modkit/ui_scan.go",
         "class": "go",
-        "sha256": "ec32158015fb5442a4b250dbedfe307f518c70e3e64d4a97fabb035302aea400",
+        "sha256": "1e2ab5ebe4072ad68cb410360f67bfbd5e16efebb80e28b7891a0c4fc32420db",
         "rewrite_module": true,
         "contract": true
       },
@@ -1163,10 +1167,19 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/ui_test_payload_selfhost_test.go",
+        "target": "internal/modkit/ui_test_payload_selfhost_test.go",
+        "class": "test",
+        "sha256": "5ae4332947fa5d7b71d3c7086a8f09149e5949582631d87a18d4a424da63d7e9",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "248e16b6d1d1154d7be4ab6d503e80102c3e6aab3c49cb3c41bb01fe7bcab6f4",
+        "sha256": "b765cef65b3636bbd151db6c1054008ba64e438351537fdc66a4a278b27cae80",
         "rewrite_module": true,
         "contract": false
       },

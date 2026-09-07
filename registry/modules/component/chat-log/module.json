@@ -1,82 +1,82 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/chat-log",
+    "kind": "component",
+    "name": "chat-log",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "ChatLog",
+    "description": "The ChatLog renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/button",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The ChatLog renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
         "source": "internal/web/templates/ui/chat-log.templ",
-        "target": "internal/web/templates/ui/chat-log.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/chat-log.templ",
+        "class": "templ",
+        "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
         "rewrite_module": true,
-        "sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
-        "source": "internal/web/templates/ui/chat-log_test.go",
-        "target": "internal/web/templates/ui/chat-log_test.go"
-      }
-    ],
-    "id": "ggg/component/chat-log",
-    "kind": "component",
-    "migrations": [],
-    "name": "chat-log",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/button"
+        "contract": true
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+        "source": "internal/web/templates/ui/chat-log_test.go",
+        "target": "internal/web/templates/ui/chat-log_test.go",
+        "class": "test",
+        "sha256": "54c2a1856f8d349396ec18f9782156872f3f47908e65ceb5d8613d3cb0e1e82a",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
-          "guidance": "Polite, never assertive: an assertive log interrupts the screen reader on every token of a streaming response, which makes the page unusable. role=log is the specific one for an append-only transcript - it tells assistive technology that only additions matter, so earlier messages are not re-read.",
           "name": "chat-log",
+          "family": "communication",
           "signature": "templ ChatLog(o ChatLogOpts)",
+          "summary": "Renders the transcript as a polite live region.",
+          "guidance": "Polite, never assertive: an assertive log interrupts the screen reader on every token of a streaming response, which makes the page unusable. role=log is the specific one for an append-only transcript - it tells assistive technology that only additions matter, so earlier messages are not re-read.",
           "states": [
             "busy",
             "default"
-          ],
-          "summary": "Renders the transcript as a polite live region."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "ChatLog"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

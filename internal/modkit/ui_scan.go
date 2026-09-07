@@ -17,12 +17,6 @@ import (
 // path is its own.
 const uiPackageSuffix = "internal/web/templates/ui"
 
-// uiRendererSignature reads the renderer's name out of a declared signature.
-// The manifest states `templ Badge(o BadgeOpts)`; a drift test already holds
-// that string against the code, so it is the one place the package's exported
-// surface is written down as data.
-var uiRendererSignature = regexp.MustCompile(`^templ\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(`)
-
 // ValidateUIComponentRequires refuses a payload that renders a ui component its
 // own module has no declared path to.
 //
@@ -120,19 +114,21 @@ func ValidateUIComponentRequires(modules, catalog []Manifest, files map[string][
 }
 
 // uiRendererOwners maps every declared renderer and its options struct onto the
-// module that declares it. A duplicate is a refusal elsewhere — the component
-// registry generator rejects two owners for one name — so the last writer here
-// cannot mask one.
+// module that declares it. The name comes out of the declared signature through
+// UIContribution.Renderer, the same projection the generated renderer registry
+// uses, so the package's exported surface is written down as data exactly once.
+// A duplicate is a refusal elsewhere — the component registry generator rejects
+// two owners for one name — so the last writer here cannot mask one.
 func uiRendererOwners(modules []Manifest) map[string]string {
 	owner := map[string]string{}
 	for _, module := range modules {
 		for _, contribution := range module.Runtime.UI {
-			match := uiRendererSignature.FindStringSubmatch(contribution.Signature)
-			if match == nil {
+			symbol, ok := contribution.Renderer()
+			if !ok {
 				continue
 			}
-			owner[match[1]] = module.ID
-			owner[match[1]+"Opts"] = module.ID
+			owner[symbol] = module.ID
+			owner[symbol+"Opts"] = module.ID
 		}
 	}
 	return owner

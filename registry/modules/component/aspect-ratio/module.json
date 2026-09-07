@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The AspectRatio renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "5505aecec37d80ec4e2cc80ab60c2e61a62db518345f5fe79569e42ced5fb100",
-        "source": "internal/web/templates/ui/aspect-ratio.templ",
-        "target": "internal/web/templates/ui/aspect-ratio.templ"
-      }
-    ],
     "id": "ggg/component/aspect-ratio",
     "kind": "component",
-    "migrations": [],
     "name": "aspect-ratio",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "AspectRatio",
+    "description": "The AspectRatio renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/aspect-ratio.templ",
+        "target": "internal/web/templates/ui/aspect-ratio.templ",
+        "class": "templ",
+        "sha256": "5505aecec37d80ec4e2cc80ab60c2e61a62db518345f5fe79569e42ced5fb100",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/aspect-ratio_test.go",
+        "target": "internal/web/templates/ui/aspect-ratio_test.go",
+        "class": "test",
+        "sha256": "e719a035a04bef42282ff4ed5d7284f73db26108c34b168b503c4053fbf7ae57",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "layout",
-          "guidance": "This exists to stop layout shift: without a reserved box the page reflows the moment an image or embed arrives, moving whatever the user was about to click. RatioAuto is the honest name for declining to reserve, rather than a default that hides the cost.",
           "name": "aspect-ratio",
+          "family": "layout",
           "signature": "templ AspectRatio(o AspectRatioOpts)",
+          "summary": "Reserves the box a medium will occupy.",
+          "guidance": "This exists to stop layout shift: without a reserved box the page reflows the moment an image or embed arrives, moving whatever the user was about to click. RatioAuto is the honest name for declining to reserve, rather than a default that hides the cost.",
           "states": [
             "default"
-          ],
-          "summary": "Reserves the box a medium will occupy."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "AspectRatio"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

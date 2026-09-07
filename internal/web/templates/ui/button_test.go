@@ -40,3 +40,22 @@ func TestBusyButtonKeepsFocusAndReportsState(t *testing.T) {
 
 // A control with a destination is a link and a control that acts is a button.
 // Exactly one action renderer accepts Href, which is what keeps every anchor in
+
+// A caller may set both the dedicated HX field and Attrs.HX. Both must reach the
+// element, and when they name the same attribute the dedicated field has to win:
+// the caller who wrote HX: on this button is naming this button's request, and
+// losing to a value that arrived inside an Attrs literal is the surprise.
+func TestDedicatedHXWinsOverAttrsHX(t *testing.T) {
+	html := renderComponent(t, Button(ButtonOpts{
+		Label: "Export",
+		HX:    HX{Post: "/dedicated"},
+		Attrs: Attrs{HX: HX{Post: "/generic", Target: "#out"}},
+	}))
+
+	assert.Contains(t, html, `hx-post="/dedicated"`,
+		"the dedicated HX field must win the attributes it sets")
+	assert.NotContains(t, html, "/generic",
+		"Attrs.HX must not shadow the dedicated field")
+	assert.Contains(t, html, `hx-target="#out"`,
+		"Attrs.HX must still supply the attributes the dedicated field leaves unset")
+}

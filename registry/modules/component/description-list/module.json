@@ -1,63 +1,84 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The DescriptionList renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "af043eb308903a76e976ead7bbc12a98a4e8ef414a46398f3e2cf328e9d293e1",
-        "source": "internal/web/templates/ui/description-list.templ",
-        "target": "internal/web/templates/ui/description-list.templ"
-      }
-    ],
     "id": "ggg/component/description-list",
     "kind": "component",
-    "migrations": [],
     "name": "description-list",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "DescriptionList",
+    "description": "The DescriptionList renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/copy-button",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/copy-button"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/description-list.templ",
+        "target": "internal/web/templates/ui/description-list.templ",
+        "class": "templ",
+        "sha256": "af043eb308903a76e976ead7bbc12a98a4e8ef414a46398f3e2cf328e9d293e1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/description-list_test.go",
+        "target": "internal/web/templates/ui/description-list_test.go",
+        "class": "test",
+        "sha256": "e781891ce94d023394e7afbf1ae095ccdf35996c836663a7f889aefc94c6ddb0",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "data",
           "name": "description-list",
+          "family": "data",
           "signature": "templ DescriptionList(o DescriptionListOpts)",
+          "summary": "The read-only detail pattern (account, org).",
           "states": [
             "default"
-          ],
-          "summary": "The read-only detail pattern (account, org)."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "DescriptionList"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

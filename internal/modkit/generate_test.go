@@ -2502,8 +2502,8 @@ func TestUIComponentRegistryEmitsOwnedComponents(t *testing.T) {
 	mods := []Manifest{{
 		ID: "ggg/element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
 		Runtime: RuntimeContributions{UI: []UIContribution{
-			{Name: "badge", Family: GalleryFeedback},
-			{Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"},
+			{Signature: "templ X(o XOpts)", Name: "badge", Family: GalleryFeedback},
+			{Signature: "templ X(o XOpts)", Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"},
 		}},
 	}}
 	lock := Lock{Order: []string{"ggg/element/ui-core"}, Modules: []LockedModule{{ID: "ggg/element/ui-core"}}}
@@ -2527,9 +2527,9 @@ func TestUIComponentRegistryEmitsOwnedComponents(t *testing.T) {
 func TestUIComponentRegistryRejectsDuplicateComponent(t *testing.T) {
 	mods := []Manifest{
 		{ID: "ggg/element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
-			Runtime: RuntimeContributions{UI: []UIContribution{{Name: "badge", Family: GalleryFeedback}}}},
+			Runtime: RuntimeContributions{UI: []UIContribution{{Signature: "templ X(o XOpts)", Name: "badge", Family: GalleryFeedback}}}},
 		{ID: "ggg/component/badge-two", Kind: ModuleComponent, Name: "badge-two", Revision: 1, Contract: 1,
-			Runtime: RuntimeContributions{UI: []UIContribution{{Name: "badge", Family: GalleryFeedback}}}},
+			Runtime: RuntimeContributions{UI: []UIContribution{{Signature: "templ X(o XOpts)", Name: "badge", Family: GalleryFeedback}}}},
 	}
 	lock := Lock{Order: []string{"ggg/element/ui-core", "ggg/component/badge-two"},
 		Modules: []LockedModule{{ID: "ggg/element/ui-core"}, {ID: "ggg/component/badge-two"}}}
@@ -2550,7 +2550,7 @@ func TestAlpineFragmentRegistryListsOwnedScripts(t *testing.T) {
 			{Source: "static/ui/overlays.js", Target: "static/ui/overlays.js", Class: FileClassAsset},
 		},
 		Runtime: RuntimeContributions{
-			UI: []UIContribution{{Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"}},
+			UI: []UIContribution{{Signature: "templ X(o XOpts)", Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"}},
 			Assets: []AssetContribution{
 				{ID: "ui-overlays", Path: "static/ui/overlays.js", Kind: AssetScript},
 				{ID: "ui-sprite", Path: "static/ui/sprite.svg", Kind: AssetImage},

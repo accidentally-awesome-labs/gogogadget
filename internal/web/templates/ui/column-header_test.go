@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,59 +69,41 @@ func TestColumnHideBelowDropsColumnsOnSmallScreens(t *testing.T) {
 	assert.Contains(t, numeric, "tabular-nums")
 }
 
-// DataTable composes the surface without owning rows, and only the sorted
-// column may claim a direction.
-func TestDataTableMarksOnlyTheSortedColumn(t *testing.T) {
-	html := renderComponent(t, DataTable(DataTableOpts{
-		Caption: "Projects",
-		Columns: []Column{
-			{Key: "name", Label: "Name", Sortable: true},
-			{Key: "runs", Label: "Runs", Sortable: true},
-		},
-		SortKey: "name", SortDir: SortDesc,
-		BaseURL: "/p", Target: "#t", RowCount: 1,
+// A caller who names no target wants plain link navigation. Emitting
+// hx-target="" makes htmx intercept the click and swap into an empty selector,
+// so the request lands nowhere and the href that would have worked is skipped.
+func TestUntargetedColumnHeaderEmitsNoHTMX(t *testing.T) {
+	const name = "column header"
+	html := renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+		Column: Column{Key: "name", Label: "Name", Sortable: true}, BaseURL: "/x",
 	}))
-	assert.Equal(t, 1, strings.Count(html, "aria-sort="),
-		"passing the table's direction to every header would mark all of them sorted")
-	assert.Contains(t, html, `aria-sort="descending"`)
-	assert.Contains(t, html, "<caption")
-	assert.Contains(t, html, "Projects")
+
+	assert.NotContains(t, html, `hx-target=""`, "%s emits an empty target", name)
+	assert.NotContains(t, html, "hx-get", "%s should navigate, not swap", name)
+	// The link controls keep their href - that is the whole point of dropping
+	// the swap.
+	assert.Contains(t, html, "href=", "%s must still navigate", name)
 }
 
-// A filtered-to-nothing table must keep its toolbar and pager, or the control
-// that caused the empty result disappears with the rows.
-func TestDataTableKeepsItsControlsWhenEmpty(t *testing.T) {
-	html := renderComponent(t, DataTable(DataTableOpts{
-		Caption: "Projects", Columns: []Column{{Key: "name", Label: "Name"}},
-		RowCount: 0,
-		Empty:    EmptyState(EmptyStateOpts{Body: "No match", Variant: EmptyInline}),
-		Toolbar:  TableToolbar(TableToolbarOpts{Label: "Controls"}),
+// A declared field is only a contract if a renderer honours it. Column.Width
+// was declared, documented and populated while every renderer dropped it, so
+// ui-core's shape check on the Column type - which is all ui-core can say,
+// since it owns the type and not the renderers that read it - is what let that
+// ship. Each consumer asserts its own honouring, here and in tree-grid_test.go.
+func TestColumnHeaderHonoursTheDeclaredColumnWidth(t *testing.T) {
+	// The trailing quote is deliberately not asserted: templ's style attribute
+	// expression appends a semicolon and the attribute map does not, so the two
+	// renderers differ by one character after the value.
+	html := renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+		Column: Column{Key: "when", Label: "When", Width: "12rem"},
 	}))
-	assert.Contains(t, html, "No match")
-	assert.Contains(t, html, `data-ui="table-toolbar"`)
-	assert.NotContains(t, html, "<table", "no rows means no table to announce")
-}
+	assert.Contains(t, html, `style="width:12rem`, "ColumnHeader drops Column.Width")
 
-// The count changes as the user selects, and an unannounced count means a
-// screen-reader user cannot tell how many rows a bulk delete will affect.
-func TestSelectionBarAnnouncesTheCount(t *testing.T) {
-	html := renderComponent(t, SelectionBar(SelectionBarOpts{
-		Count: 3, CountLabel: "3 projects selected", ClearURL: "/p", Target: "#t",
+	// The width is a length, not an inline-style hook: a declaration list would
+	// let a caller reach past every rule the design system enforces on classes.
+	bogus := renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+		Column: Column{Key: "k", Label: "K", Width: "8rem;position:fixed"},
 	}))
-	assert.Contains(t, html, `role="status"`)
-	assert.Contains(t, html, "3 projects selected")
-	assert.Contains(t, html, "Clear selection")
-
-	// Nothing selected means nothing to show.
-	assert.Empty(t, renderComponent(t, SelectionBar(SelectionBarOpts{})))
-}
-
-// "Actions" repeated on forty rows gives a screen-reader user forty identical
-// menus with no way to tell which row each belongs to.
-func TestRowActionsNamesItsRow(t *testing.T) {
-	html := renderComponent(t, RowActions(RowActionsOpts{
-		Label: "Actions for Apollo", Items: []MenuItem{{Label: "Rename", Href: "/x"}},
-	}))
-	assert.Contains(t, html, "Actions for Apollo")
-	assert.Contains(t, html, "data-ui-menu-trigger")
+	assert.NotContains(t, bogus, "position:fixed",
+		"Width must carry a bare length, never a declaration list")
 }

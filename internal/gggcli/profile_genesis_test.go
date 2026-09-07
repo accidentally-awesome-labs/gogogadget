@@ -27,29 +27,66 @@ import (
 //	|----------------------------------------------------------|-------------|-------|
 //	| plan + two coherence properties over the planned bytes    | ~1.3 s      | `go test ./internal/modkit`, so `make check` |
 //	| documented table, description and slot counts             | ~0.9 s      | same |
-//	| real `ggg new`, then `sync --check --offline` in the tree  | ~22 s       | this test, CI's `profiles` job |
+//	| real `ggg new`, `sync --check --offline`, then the created |             | |
+//	| tree's own `go build ./...` and test-payload compile       | ~34 s       | this test, CI's `profiles` job |
 //
 // The first two rows are `internal/modkit/shipped_profiles_test.go`. They
 // prove everything the planner and the generators decide with no toolchain, no
 // network and no Docker, and they are deliberately the rows that fail in
 // `go test` on the commit that breaks a profile. What they cannot prove is
-// that the external tools succeed, which is what the third row is for.
+// that the external tools succeed and that the tree they wrote compiles,
+// which is what the third row is for.
+//
+// # What "a project" means, and why exit 0 is not it
+//
+// Three commands, in the order an operator runs them:
+//
+//	ggg new              the tree is written
+//	sync --check         its own engine reports no pending change and no drift
+//	go build ./...       the product code compiles
+//	go test -run …       the TEST PAYLOADS compile
+//
+// The last row is here because it shipped broken. A `ggg new --profile
+// ggg/profile/minimal` project built cleanly and `go test ./...` — plausibly
+// the first command a user runs next — did not compile: 184 type errors across
+// eleven test payloads, every one of them a payload naming a symbol another
+// module owns with no declared edge to it. `go build` cannot see it because it
+// never compiles a `_test.go`, and `sync --check` cannot see it because the
+// bytes on disk are exactly the bytes the manifests declare. The tree was
+// wrong and every gate that ran over it was green.
+//
+// `go test -run XXXNONE ./...` rather than `go vet ./...`, measured on the
+// same tree: vet reported 3 errors and the compiler reported 184. vet stops at
+// the first type error in a package, so it named one symbol per package and
+// hid the rest; `go test -run` performs exactly the build `go test ./...`
+// performs — every test binary compiled and LINKED, no test run — and reports
+// up to ten per package. It also reuses the object files `go build ./...` just
+// produced, so the second command costs the test files and the link only.
 //
 // # Cost, measured
 //
-// Apple M1 Max, warm Go module cache, `--registry directory:.`:
+// Apple M1 Max, warm Go module cache, `--registry directory:.`, one run of
+// this test:
 //
-//	profile   ggg new    sync --check   closure
-//	minimal   19.9 s     0.96 s         178
-//	web       18.2 s     1.43 s         254
-//	saas      27.2 s     1.56 s         289
-//	full      22.0 s     1.47 s         288
+//	profile   ggg new    sync --check   go build   test compile   closure
+//	minimal   14.5 s     0.9 s          1.5 s      14.4 s         159
+//	web       20.2 s     1.4 s          3.3 s      16.1 s         254
+//	saas      26.5 s     1.6 s          2.1 s      24.1 s         289
+//	full      21.0 s     1.8 s          2.7 s      24.4 s         288
 //
-// 93 s for the four, plus ~7 s to build the binary under test: ~100 s.
+// 176 s for the four plus the binary under test: 180 s wall, up from ~100 s.
+// The two compile columns are 79 s of that, and they are what makes the other
+// two mean "a project" rather than "some files": on the commit before this one
+// every profile above was green through `sync --check` and `minimal`'s test
+// compile reported 181 errors across eleven payloads.
+//
+// The build cache in each destination is cold, which is most of the 79 s. It
+// is not worth warming: a shared cache across four different module paths is
+// what would make one profile's result depend on another's.
 //
 // # Why it is not a step of `make check`
 //
-// Not the 100 s — `make check` already runs the generators and the whole Go
+// Not the 180 s — `make check` already runs the generators and the whole Go
 // suite and would absorb it. It is that genesis runs `go mod tidy` in a
 // destination outside this module's tree and installs the pinned Tailwind
 // binary, so the sweep needs the NETWORK. `ggg check` has to stay runnable
@@ -63,7 +100,13 @@ import (
 // a third convention. It is opt-in through GGG_GENESIS_SWEEP=1; CI's
 // `profiles` job sets it, and the skip everywhere else carries
 // InapplicableSkipMarker because the claim is checked once by the job that
-// owns it and paying 100 s again in the `test` job buys nothing.
+// owns it and paying 180 s again in the `test` job buys nothing.
+//
+// The four profiles stay in one job. They are four independent `t.Run`s over
+// disjoint temporary directories, so splitting them per profile would buy
+// ~110 s of wall clock at the cost of four `make setup` runs and four Go build
+// caches; the job is not the long pole in this repository's CI and a matrix
+// here would make the shortest job the one that has to warm a cache.
 //
 // # The profile list is read, not written
 //
@@ -136,8 +179,27 @@ func TestEveryShippedProfileCreatesAProjectThatIsSyncClean(t *testing.T) {
 				t.Fatalf("%s installed %d modules; its own description advertises %d",
 					profile.ID, len(lock.Modules), want)
 			}
-			t.Logf("%s: ggg new %.1fs, sync --check %.1fs, %d modules",
-				profile.ID, created.Seconds(), checked.Seconds(), len(lock.Modules))
+
+			// The tree compiles, both halves. `go build ./...` never reads a
+			// _test.go, and the test payloads are installed source too: a
+			// payload that names a symbol another module owns leaves
+			// `go test ./...` — plausibly the next command a user runs —
+			// refusing to compile in a tree every earlier gate called clean.
+			//
+			// -gcflags=-e lifts the compiler's ten-errors-per-package cap, so
+			// one run names every undeclared reference rather than the first
+			// of each package. -run XXXNONE matches no test, so this is the
+			// build and the link and nothing else.
+			started = time.Now()
+			runIn(t, dest, "go", "build", "./...")
+			built := time.Since(started)
+			started = time.Now()
+			runIn(t, dest, "go", "test", "-run", "XXXNONE", "-gcflags=-e", "./...")
+			compiled := time.Since(started)
+
+			t.Logf("%s: ggg new %.1fs, sync --check %.1fs, go build %.1fs, test compile %.1fs, %d modules",
+				profile.ID, created.Seconds(), checked.Seconds(),
+				built.Seconds(), compiled.Seconds(), len(lock.Modules))
 		})
 	}
 }
@@ -162,6 +224,21 @@ func runGGG(t *testing.T, binary, dir string, argv ...string) {
 		exit = coded.ExitCode()
 	}
 	t.Fatalf("ggg %s (in %s) = exit %d: %v\n%s", strings.Join(argv, " "), dir, exit, err, out)
+}
+
+// runIn runs one toolchain command in the created tree and fails with
+// everything it printed. The compiler's diagnostics ARE the failure here — a
+// bare "exit 1" would say a profile is broken without saying which payload
+// names which missing symbol — so both streams are kept.
+func runIn(t *testing.T, dir, binary string, argv ...string) {
+	t.Helper()
+	command := exec.CommandContext(t.Context(), binary, argv...)
+	command.Dir = dir
+	out, err := command.CombinedOutput()
+	if err == nil {
+		return
+	}
+	t.Fatalf("%s %s (in %s) = %v\n%s", binary, strings.Join(argv, " "), dir, err, out)
 }
 
 // The CI job that sets GGG_GENESIS_SWEEP is asserted in

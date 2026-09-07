@@ -143,7 +143,7 @@ func TestPanelGroupRendersDeclaredContent(t *testing.T) {
 	html := renderComponent(t, PanelGroup(PanelGroupOpts{
 		ID: "pg", PersistKey: "demo",
 		Panels: []PanelData{
-			{ID: "left", Title: "List", Size: 40, Content: Text(TextOpts{Size: SizeSM})},
+			{ID: "left", Title: "List", Size: 40, Content: CSRFField(CSRFFieldOpts{Token: "t"})},
 			{ID: "right", Title: "Detail"},
 		},
 	}))

@@ -1,82 +1,99 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The SlugInput renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
-        "source": "internal/web/templates/ui/slug-input.templ",
-        "target": "internal/web/templates/ui/slug-input.templ"
-      }
-    ],
     "id": "ggg/component/slug-input",
     "kind": "component",
-    "migrations": [],
     "name": "slug-input",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "SlugInput",
+    "description": "The SlugInput renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/field",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/field"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/component/input-addon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/input-addon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/component/input-group",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/input-group"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/slug-input.templ",
+        "target": "internal/web/templates/ui/slug-input.templ",
+        "class": "templ",
+        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/slug-input_test.go",
+        "target": "internal/web/templates/ui/slug-input_test.go",
+        "class": "test",
+        "sha256": "b8f14a059aa0e70768c9652144e3493eb4b19801303071a149149d1afa38350d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "alpine": "uiSlug",
-          "engine": "alpine",
-          "family": "forms",
-          "guidance": "It is a plain text input first: with no JavaScript the user types the slug themselves and the form works. The Alpine behaviour only stops mirroring once the user edits the slug directly, because silently overwriting what someone typed is worse than not helping at all.",
           "name": "slug-input",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiSlug",
           "native_fallback": "native input",
           "signature": "templ SlugInput(o SlugInputOpts)",
+          "summary": "Renders a text input that mirrors another field until edited.",
+          "guidance": "It is a plain text input first: with no JavaScript the user types the slug themselves and the form works. The Alpine behaviour only stops mirroring once the user edits the slug directly, because silently overwriting what someone typed is worse than not helping at all.",
           "states": [
             "default",
             "error"
-          ],
-          "summary": "Renders a text input that mirrors another field until edited."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "SlugInput"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

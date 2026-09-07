@@ -1,6 +1,9 @@
 package modkit
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"regexp"
+)
 
 // Project is the hand-owned declaration of registry intent.
 type Project struct {
@@ -845,6 +848,23 @@ type UIContribution struct {
 	// them lets the reference show every one and lets the visual matrix cover
 	// them, instead of both guessing from a fixed list that fits nothing.
 	States []string `json:"states,omitempty"`
+}
+
+// uiRendererSignature is the one shape a renderer declaration may take. The
+// options struct is named after the renderer and taken as the single argument
+// `o`, which is the uniformity the package's own contract test asserts against
+// the compiled source.
+var uiRendererSignature = regexp.MustCompile(`^templ (\w+)\(o (\w+)Opts\)$`)
+
+// Renderer returns the symbol this contribution's declared signature names.
+// It is the generated renderer registry's only input, so the false answer is
+// a manifest error rather than a component with no exercisable contract.
+func (c UIContribution) Renderer() (string, bool) {
+	match := uiRendererSignature.FindStringSubmatch(c.Signature)
+	if match == nil || match[1] != match[2] {
+		return "", false
+	}
+	return match[1], true
 }
 
 // ScenarioContribution declares one realistic product surface the dev catalog

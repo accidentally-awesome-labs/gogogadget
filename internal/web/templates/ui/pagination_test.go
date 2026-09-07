@@ -98,33 +98,17 @@ func TestPrevAndNextKeepTheirOwnAccessibleNames(t *testing.T) {
 // A caller who names no target wants plain link navigation. Emitting
 // hx-target="" makes htmx intercept the click and swap into an empty selector,
 // so the request lands nowhere and the href that would have worked is skipped.
-func TestUntargetedNavigationEmitsNoHTMX(t *testing.T) {
-	cases := map[string]string{
-		"pagination": renderComponent(t, Pagination(PaginationOpts{
-			Page: 2, TotalPages: 5, BaseURL: "/x",
-		})),
-		"column header": renderComponent(t, ColumnHeader(ColumnHeaderOpts{
-			Column: Column{Key: "name", Label: "Name", Sortable: true}, BaseURL: "/x",
-		})),
-		"search input": renderComponent(t, SearchInput(SearchInputOpts{
-			Name: "q", GetURL: "/x", AriaLabel: "Search",
-		})),
-		"cursor pagination": renderComponent(t, CursorPagination(CursorPaginationOpts{
-			NextURL: "/x?after=1", Label: "Pages",
-		})),
-	}
-	for name, html := range cases {
-		assert.NotContains(t, html, `hx-target=""`, "%s emits an empty target", name)
-		assert.NotContains(t, html, "hx-get", "%s should navigate, not swap", name)
-	}
+func TestUntargetedPaginationEmitsNoHTMX(t *testing.T) {
+	const name = "pagination"
+	html := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/x",
+	}))
+
+	assert.NotContains(t, html, `hx-target=""`, "%s emits an empty target", name)
+	assert.NotContains(t, html, "hx-get", "%s should navigate, not swap", name)
 	// The link controls keep their href - that is the whole point of dropping
-	// the swap. The search input has none to keep: it is a named field, and
-	// what must survive is the caller's ability to wrap it in a form.
-	for _, name := range []string{"pagination", "column header", "cursor pagination"} {
-		assert.Contains(t, cases[name], "href=", "%s must still navigate", name)
-	}
-	assert.Contains(t, cases["search input"], `name="q"`)
-	assert.Contains(t, cases["search input"], `type="search"`)
+	// the swap.
+	assert.Contains(t, html, "href=", "%s must still navigate", name)
 }
 
 // With a target the htmx contract is unchanged: these components are the
@@ -137,4 +121,34 @@ func TestTargetedNavigationStillSwaps(t *testing.T) {
 	assert.Contains(t, html, `hx-target="#content"`)
 	assert.Contains(t, html, "hx-get")
 	assert.Contains(t, html, `hx-swap="innerMorph"`)
+}
+
+// PagerLabels holds functions, so an omitted label used to nil-dereference and
+// take down the whole page render. A missing translation must degrade to a
+// readable fallback instead: an English arrow is a translation bug, a panic is
+// an outage.
+func TestPaginationSurvivesMissingLabels(t *testing.T) {
+	html := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
+	}))
+
+	assert.Contains(t, html, `aria-label="Pagination"`,
+		"the landmark still needs a name when no localized one is supplied")
+	assert.Contains(t, html, "Previous")
+	assert.Contains(t, html, "Next")
+	assert.Contains(t, html, "2 / 5")
+
+	// A supplied label must still win over every fallback.
+	localized := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
+		Labels: PagerLabels{
+			Aria:   func(int, int) string { return "Paginación" },
+			Prev:   func(int, int) string { return "Anterior" },
+			Next:   func(int, int) string { return "Siguiente" },
+			PageOf: func(p, n int) string { return "Página 2 de 5" },
+		},
+	}))
+	assert.Contains(t, localized, `aria-label="Paginación"`)
+	assert.Contains(t, localized, "Anterior")
+	assert.NotContains(t, localized, "Previous")
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// One input, not one box per digit: a box-per-digit widget breaks paste, breaks
+// SMS and password-manager autofill, and gives a screen reader several
 // unlabelled fields instead of one.
 func TestOTPInputIsOneAutofillableField(t *testing.T) {
 	html := renderComponent(t, OTPInput(OTPInputOpts{Name: "code", Length: 6}))
@@ -19,4 +21,11 @@ func TestOTPInputIsOneAutofillableField(t *testing.T) {
 	assert.Contains(t, renderComponent(t, OTPInput(OTPInputOpts{Name: "code"})), `maxlength="6"`)
 }
 
-// The dropzone must be reachable without a pointer: a drop target that is only
+// entire claim "progressively enhanced" makes.
+func TestOTPInputSubmitsWithoutJavaScript(t *testing.T) {
+	html := renderComponent(t, OTPInput(OTPInputOpts{Name: "code"}))
+	assert.Contains(t, html, "<input", "otp must be a real native control")
+	assert.Contains(t, html, `name="code"`, "otp must submit a named value")
+	assert.NotContains(t, html, `type="hidden"`,
+		"a widget that keeps its real value in a hidden input loses it when the script fails")
+}

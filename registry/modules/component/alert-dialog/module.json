@@ -1,70 +1,87 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The AlertDialog renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "4ae016c4e80dfdfb3fd78d1a4a568e8a6113810c08005a92a94e604163f03025",
-        "source": "internal/web/templates/ui/alert-dialog.templ",
-        "target": "internal/web/templates/ui/alert-dialog.templ"
-      }
-    ],
     "id": "ggg/component/alert-dialog",
     "kind": "component",
-    "migrations": [],
     "name": "alert-dialog",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "AlertDialog",
+    "description": "The AlertDialog renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/alert-dialog.templ",
+        "target": "internal/web/templates/ui/alert-dialog.templ",
+        "class": "templ",
+        "sha256": "4ae016c4e80dfdfb3fd78d1a4a568e8a6113810c08005a92a94e604163f03025",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/alert-dialog_test.go",
+        "target": "internal/web/templates/ui/alert-dialog_test.go",
+        "class": "test",
+        "sha256": "839d550a9ea3f19b42b9d00ee80001481b1cb0d88b8b348a254b94f9213a0481",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "alpine": "uiDialog",
-          "engine": "alpine",
-          "family": "overlays",
-          "guidance": "Both buttons submit the enclosing `form method=\"dialog\"` with a value, so the platform closes the dialog and records the choice in `returnValue`. They were once type=\"button\" with no handler, which left a keyboard or pointer user inside a modal with no way out; a destructive confirmation is the last place to depend on JavaScript having loaded. role=\"alertdialog\" with a described message is what makes a screen reader announce the consequence rather than just the title. Cancel is first in the DOM, so the platform's own initial focus lands on the safe choice. A destructive dialog that opens with Delete focused turns a stray Enter - the key the user just pressed to open it - into the deletion.",
-          "keyboard": "Escape closes the native dialog, and Cancel is first in the DOM so the platform's initial focus - and a stray Enter - lands on the safe choice.",
           "name": "alert-dialog",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
           "native_fallback": "dialog element",
           "signature": "templ AlertDialog(o AlertDialogOpts)",
+          "summary": "Renders a modal requiring an explicit confirm or cancel.",
+          "guidance": "Both buttons submit the enclosing `form method=\"dialog\"` with a value, so the platform closes the dialog and records the choice in `returnValue`. They were once type=\"button\" with no handler, which left a keyboard or pointer user inside a modal with no way out; a destructive confirmation is the last place to depend on JavaScript having loaded. role=\"alertdialog\" with a described message is what makes a screen reader announce the consequence rather than just the title. Cancel is first in the DOM, so the platform's own initial focus lands on the safe choice. A destructive dialog that opens with Delete focused turns a stray Enter - the key the user just pressed to open it - into the deletion.",
+          "keyboard": "Escape closes the native dialog, and Cancel is first in the DOM so the platform's initial focus - and a stray Enter - lands on the safe choice.",
           "states": [
             "default",
             "error",
             "success"
-          ],
-          "summary": "Renders a modal requiring an explicit confirm or cancel."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "AlertDialog"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

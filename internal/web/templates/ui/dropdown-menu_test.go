@@ -88,3 +88,85 @@ func TestPanelDisclosesWithoutScript(t *testing.T) {
 	assert.NotContains(t, html, `:aria-expanded`)
 	assert.NotContains(t, html, `x-show`)
 }
+
+// A separator is not a command: it carries no label, no href and no handler, so
+// rendering it as an item would put an empty, focusable row in the menu.
+//
+// This test used to spend its last assertion on hx-confirm - on an item with an
+// href and no request, where the attribute gates nothing - and asserted nothing
+// about the separator beyond the role. What a divider must be is the subject
+// here: an <hr> with the separator role, no accessible name, and no tab stop.
+func TestMenuSeparatorRendersAsSeparator(t *testing.T) {
+	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{
+			{Label: "Rename", Href: "/x"},
+			{Separator: true},
+			{Label: "Delete", Href: "/y", Kind: KindDanger},
+		},
+	}))
+
+	assert.Contains(t, html, `<hr role="separator"`,
+		"a divider is an hr: a div with the role is a line assistive technology reads as content")
+	assert.Equal(t, 1, strings.Count(html, `role="separator"`),
+		"one separator in, one separator out")
+	assert.Equal(t, 2, strings.Count(html, "<a "),
+		"a separator must not render as a link")
+	assert.Equal(t, 2, strings.Count(html, `class="block px-3 py-2 text-sm`),
+		"a separator must not take an item's padding, hover or text styling")
+	// The two commands survive around it, in order, so a separator between them
+	// is a divider rather than a truncation point.
+	assert.Less(t, strings.Index(html, "Rename"), strings.Index(html, `role="separator"`))
+	assert.Less(t, strings.Index(html, `role="separator"`), strings.Index(html, "Delete"))
+}
+
+// hx-confirm gates an htmx request and nothing else. On a plain link or an inert
+// button htmx never processes the activation, so the attribute promises a prompt
+// that never appears and an action that never runs - which is what the
+// Operations scenario shipped. The component refuses the combination.
+func TestMenuConfirmOnlyRidesARealRequest(t *testing.T) {
+	acting := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{{Label: "Delete", Kind: KindDanger, Confirm: "Delete this?", HX: HX{Delete: "/x"}}},
+	}))
+	assert.Contains(t, acting, `hx-confirm="Delete this?"`,
+		"an item that issues a request keeps its declared confirmation")
+
+	for name, item := range map[string]MenuItem{
+		"navigating": {Label: "Delete", Href: "/y", Confirm: "Delete this?"},
+		"inert":      {Label: "Cancel", Confirm: "Cancel this?"},
+		// Target and swap modify a request some other attribute has to declare.
+		"modifiers only": {Label: "Cancel", Confirm: "Cancel this?", HX: HX{Target: "#t", Swap: "outerHTML"}},
+	} {
+		html := renderComponent(t, DropdownMenu(DropdownMenuOpts{Label: "Actions", Items: []MenuItem{item}}))
+		assert.NotContains(t, html, "hx-confirm",
+			"a %s item cannot show a confirmation, so it must not claim one", name)
+	}
+
+	// A boosted link is the exception: htmx handles its navigation, so the
+	// prompt does gate something.
+	boosted := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{{Label: "Leave", Href: "/y", Confirm: "Discard changes?", HX: HX{Boost: true}}},
+	}))
+	assert.Contains(t, boosted, `hx-confirm="Discard changes?"`)
+}
+
+// A menu item that acts is a button; one that navigates is a link. Rendering an
+// acting item as <a href=""> makes it a link to the current page, so a click
+// before HTMX has loaded reloads the page instead of doing nothing.
+func TestActingMenuItemIsAButtonNotAnEmptyLink(t *testing.T) {
+	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{
+			{Label: "Open", Href: "/projects/1"},
+			{Label: "Delete", Kind: KindDanger, Confirm: "Sure?", HX: HX{Delete: "/projects/1"}},
+		},
+	}))
+
+	assert.NotContains(t, html, `href=""`,
+		"an empty href is a link to the current page")
+	assert.Contains(t, html, `href="/projects/1"`, "a navigating item stays a link")
+	assert.Contains(t, html, `<button type="button"`, "an acting item must be a button")
+	assert.Contains(t, html, `hx-delete="/projects/1"`)
+}

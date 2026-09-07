@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Meter renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
-        "source": "internal/web/templates/ui/meter.templ",
-        "target": "internal/web/templates/ui/meter.templ"
-      }
-    ],
     "id": "ggg/component/meter",
     "kind": "component",
-    "migrations": [],
     "name": "meter",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Meter",
+    "description": "The Meter renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/meter.templ",
+        "target": "internal/web/templates/ui/meter.templ",
+        "class": "templ",
+        "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/meter_test.go",
+        "target": "internal/web/templates/ui/meter_test.go",
+        "class": "test",
+        "sha256": "793ef8b3ed43fd0fd7bce800912785a79276e4c9be81ca096a8c00f13c241153",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "role=\"meter\" rather than the native <meter> element: the native element's rendering is controlled by vendor pseudo-elements that differ per browser, so styling it from the token layer is not possible without per-engine hacks. The role gives the same semantics with full control over presentation. It is deliberately not a progressbar. A meter is a measurement inside a range - disk used, seats filled - while a progress bar is a task advancing towards completion. Screen readers announce them differently, and calling a quota a progress bar implies it will finish.",
           "name": "meter",
+          "family": "feedback",
           "signature": "templ Meter(o MeterOpts)",
+          "summary": "Renders a quota bar with meter semantics.",
+          "guidance": "role=\"meter\" rather than the native \u003cmeter\u003e element: the native element's rendering is controlled by vendor pseudo-elements that differ per browser, so styling it from the token layer is not possible without per-engine hacks. The role gives the same semantics with full control over presentation. It is deliberately not a progressbar. A meter is a measurement inside a range - disk used, seats filled - while a progress bar is a task advancing towards completion. Screen readers announce them differently, and calling a quota a progress bar implies it will finish.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a quota bar with meter semantics."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Meter"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

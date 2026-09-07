@@ -1,63 +1,80 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Tile renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "55a6f98d82c462dc3e60f39f5a6adfab97e840cc57526da36ebb909016411cef",
-        "source": "internal/web/templates/ui/tile.templ",
-        "target": "internal/web/templates/ui/tile.templ"
-      }
-    ],
     "id": "ggg/component/tile",
     "kind": "component",
-    "migrations": [],
     "name": "tile",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Tile",
+    "description": "The Tile renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tile.templ",
+        "target": "internal/web/templates/ui/tile.templ",
+        "class": "templ",
+        "sha256": "55a6f98d82c462dc3e60f39f5a6adfab97e840cc57526da36ebb909016411cef",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/tile_test.go",
+        "target": "internal/web/templates/ui/tile_test.go",
+        "class": "test",
+        "sha256": "f6a1dd7464e15b3a850e22d819d87255eae1927790e2882f201b6a12f205a0e8",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "data",
           "name": "tile",
+          "family": "data",
           "signature": "templ Tile(o TileOpts)",
+          "summary": "Renders a compact summary, optionally as a link.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a compact summary, optionally as a link."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Tile"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

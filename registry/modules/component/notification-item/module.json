@@ -1,78 +1,82 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/notification-item",
+    "kind": "component",
+    "name": "notification-item",
+    "revision": 2,
     "contract": 1,
-    "data": [],
+    "title": "NotificationItem",
+    "description": "The NotificationItem renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/component/status-dot",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The NotificationItem renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "0e8800f4aa7401b178411837fd2e011faf9b92b461bd667aa8b584d1d9ed5f1f",
         "source": "internal/web/templates/ui/notification-item.templ",
-        "target": "internal/web/templates/ui/notification-item.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/notification-item.templ",
+        "class": "templ",
+        "sha256": "0e8800f4aa7401b178411837fd2e011faf9b92b461bd667aa8b584d1d9ed5f1f",
         "rewrite_module": true,
-        "sha256": "d08ad6402940a920cbb8137127548ce32fe9937989d989d07c02b9107918ef01",
-        "source": "internal/web/templates/ui/notification-item_test.go",
-        "target": "internal/web/templates/ui/notification-item_test.go"
-      }
-    ],
-    "id": "ggg/component/notification-item",
-    "kind": "component",
-    "migrations": [],
-    "name": "notification-item",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/status-dot"
+        "contract": true
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+        "source": "internal/web/templates/ui/notification-item_test.go",
+        "target": "internal/web/templates/ui/notification-item_test.go",
+        "class": "test",
+        "sha256": "78310a6eca9a2fb7ee0e0a9acc3c8771d6224219e1a12c301b931b44fb59e0c5",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "notification-item",
+          "family": "communication",
           "signature": "templ NotificationItem(o NotificationItemOpts)",
+          "summary": "Renders one notification.",
           "states": [
             "default",
             "error",
             "success"
-          ],
-          "summary": "Renders one notification."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "NotificationItem"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

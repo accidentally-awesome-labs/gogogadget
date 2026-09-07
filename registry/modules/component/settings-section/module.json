@@ -1,64 +1,81 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The SettingsSection renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "e369cfebf72c7a4713a77abaa81458e01466ead8627043be3d889791e7b783c4",
-        "source": "internal/web/templates/ui/settings-section.templ",
-        "target": "internal/web/templates/ui/settings-section.templ"
-      }
-    ],
     "id": "ggg/component/settings-section",
     "kind": "component",
-    "migrations": [],
     "name": "settings-section",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "SettingsSection",
+    "description": "The SettingsSection renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/settings-section.templ",
+        "target": "internal/web/templates/ui/settings-section.templ",
+        "class": "templ",
+        "sha256": "e369cfebf72c7a4713a77abaa81458e01466ead8627043be3d889791e7b783c4",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/settings-section_test.go",
+        "target": "internal/web/templates/ui/settings-section_test.go",
+        "class": "test",
+        "sha256": "1012420a35dcaaa8ee41de444a2ed5f9dce5f9b693c0a1e62d97f1d0e182be41",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
-          "guidance": "The heading and the control live in one <section> with an accessible name, so a screen-reader user can jump between settings blocks instead of tabbing through every control to find the next one.",
           "name": "settings-section",
+          "family": "communication",
           "signature": "templ SettingsSection(o SettingsSectionOpts)",
+          "summary": "Renders a titled settings block.",
+          "guidance": "The heading and the control live in one \u003csection\u003e with an accessible name, so a screen-reader user can jump between settings blocks instead of tabbing through every control to find the next one.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a titled settings block."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "SettingsSection"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

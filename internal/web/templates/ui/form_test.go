@@ -3,6 +3,7 @@ package ui
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/a-h/templ"
@@ -84,4 +85,13 @@ func TestCSRFFieldPrefersAnExplicitToken(t *testing.T) {
 
 	assert.Contains(t, html, `value="explicit"`)
 	assert.NotContains(t, html, "from-context")
+}
+
+// Server validation is authoritative, so a form must not let the browser block
+// submission before the server ever sees it - that is how a 422 fragment, and
+// the errors it carries, become unreachable.
+func TestFormsDeferValidationToTheServer(t *testing.T) {
+	html := renderComponent(t, Form(FormOpts{Method: "post", Action: "/save"}))
+	assert.Contains(t, html, "novalidate")
+	assert.Equal(t, 1, strings.Count(html, "novalidate"))
 }

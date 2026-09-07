@@ -4,7 +4,7 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 18,
+    "revision": 20,
     "contract": 2,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
@@ -510,7 +510,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "5c375cf3225fb7a85cc4c42ad7e67d5f034f58e0d1583c19245f91d5a80026b9",
+        "sha256": "7bf892c1c5b8756678808dc2475f08e488892996bf6206e43f496cf5c792a944",
         "rewrite_module": true,
         "contract": false
       },

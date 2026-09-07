@@ -1,63 +1,84 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Comment renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
-        "source": "internal/web/templates/ui/comment.templ",
-        "target": "internal/web/templates/ui/comment.templ"
-      }
-    ],
     "id": "ggg/component/comment",
     "kind": "component",
-    "migrations": [],
     "name": "comment",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Comment",
+    "description": "The Comment renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/avatar",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/avatar"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/comment.templ",
+        "target": "internal/web/templates/ui/comment.templ",
+        "class": "templ",
+        "sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/comment_test.go",
+        "target": "internal/web/templates/ui/comment_test.go",
+        "class": "test",
+        "sha256": "d5d310f269171849a542da6b386d73b718db4f28b5bf5753c7b4a94cf07c1ee4",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "comment",
+          "family": "communication",
           "signature": "templ Comment(o CommentOpts)",
+          "summary": "Renders one comment.",
           "states": [
             "default"
-          ],
-          "summary": "Renders one comment."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Comment"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -22,84 +23,89 @@ import (
 // dead call sites were production actions - a project export and an
 // organization export button that did nothing at all when clicked.
 //
-// So the type list is derived from the source rather than written down. Adding a
-// struct with an HX field and no entry below fails here, which is the only way
-// the guard cannot be silently skipped.
-func hxBearingRenders() map[string]func(HX) templ.Component {
-	return map[string]func(HX) templ.Component{
-		"ButtonOpts": func(hx HX) templ.Component {
-			return Button(ButtonOpts{Label: "Export", HX: hx})
-		},
-		"IconButtonOpts": func(hx HX) templ.Component {
-			return IconButton(IconButtonOpts{Icon: IconRefresh, Label: "Reload", HX: hx})
-		},
-		"ToggleButtonOpts": func(hx HX) templ.Component {
-			return ToggleButton(ToggleButtonOpts{Label: "Enabled", HX: hx})
-		},
-		"ComposerOpts": func(hx HX) templ.Component {
-			return Composer(ComposerOpts{Name: "body", SubmitLabel: "Send", HX: hx})
-		},
-		"ConfirmActionOpts": func(hx HX) templ.Component {
-			return ConfirmAction(ConfirmActionOpts{
-				ID: "confirm-guard", TriggerLabel: "Delete",
-				Title: "Delete this?", ConfirmLabel: "Delete", CancelLabel: "Cancel",
-				HX: hx,
-			})
-		},
-		"MenuItem": func(hx HX) templ.Component {
-			return DropdownMenu(DropdownMenuOpts{
-				ID: "menu-guard", Label: "Actions",
-				Items: []MenuItem{{Label: "Archive", HX: hx}},
-			})
-		},
-		"ToggleOption": func(hx HX) templ.Component {
-			return ToggleGroup(ToggleGroupOpts{
-				Label:   "Density",
-				Options: []ToggleOption{{Value: "compact", Label: "Compact", HX: hx}},
-			})
-		},
-	}
-}
-
+// So both halves are derived from what is installed. The HX-bearing types come
+// from the package source; the renderer that carries each one to the element is
+// found by reflecting over the generated renderer registry for an options tree
+// that reaches that type. A hand-written table of renderers here named seven
+// types owned by six other modules from ui-core's own payload, which is a
+// payload every closure installs.
 func TestEveryOptsHXFieldReachesTheElement(t *testing.T) {
 	declared := typesCarryingHX(t)
 	require.NotEmpty(t, declared, "no HX-bearing types found - the source scan is broken, not the package")
 
-	renders := hxBearingRenders()
-	for _, name := range declared {
-		render, ok := renders[name]
-		require.Truef(t, ok,
-			"%s declares an HX field but has no entry in hxBearingRenders, so nothing proves the request "+
-				"reaches the element - add one rather than leaving the field unguarded", name)
-
-		html := renderComponent(t, render(HX{Post: "/guard", Target: "#out", Swap: "none"}))
-		assert.Containsf(t, html, `hx-post="/guard"`,
-			"%s.HX was set but no hx-post reached the rendered element, so the caller's request is dropped", name)
+	probe := HX{Post: "/guard", Target: "#out", Swap: "none"}
+	reached := map[string]bool{}
+	for renderer, raw := range renderers() {
+		fn := reflect.ValueOf(raw)
+		opts := seededOpts(t, renderer, fn)
+		carriers := setEveryHX(opts, probe, map[reflect.Type]bool{})
+		if len(carriers) == 0 {
+			continue
+		}
+		html := renderComponent(t, fn.Call([]reflect.Value{opts})[0].Interface().(templ.Component))
+		if !strings.Contains(html, `hx-post="/guard"`) {
+			// Not a failure on its own: a type is only unguarded if NO
+			// installed renderer carries it, which the loop below decides.
+			continue
+		}
+		for _, carrier := range carriers {
+			reached[carrier] = true
+		}
 	}
 
-	for name := range renders {
-		assert.Containsf(t, declared, name,
-			"hxBearingRenders has an entry for %s, which no longer declares an HX field - drop the entry", name)
+	for _, name := range declared {
+		assert.Truef(t, reached[name],
+			"%s declares an HX field but no installed renderer carries it to the element, so the "+
+				"caller's request is dropped", name)
 	}
 }
 
-// A caller may set both the dedicated HX field and Attrs.HX. Both must reach the
-// element, and when they name the same attribute the dedicated field has to win:
-// the caller who wrote HX: on this button is naming this button's request, and
-// losing to a value that arrived inside an Attrs literal is the surprise.
-func TestDedicatedHXWinsOverAttrsHX(t *testing.T) {
-	html := renderComponent(t, Button(ButtonOpts{
-		Label: "Export",
-		HX:    HX{Post: "/dedicated"},
-		Attrs: Attrs{HX: HX{Post: "/generic", Target: "#out"}},
-	}))
-
-	assert.Contains(t, html, `hx-post="/dedicated"`,
-		"the dedicated HX field must win the attributes it sets")
-	assert.NotContains(t, html, "/generic",
-		"Attrs.HX must not shadow the dedicated field")
-	assert.Contains(t, html, `hx-target="#out"`,
-		"Attrs.HX must still supply the attributes the dedicated field leaves unset")
+// setEveryHX sets every HX field reachable in one options value and returns the
+// types it set them on. A slice of items is given exactly one element, with its
+// own Label and Value filled in, because a menu or a toggle group with no items
+// renders no item element for the request to reach.
+//
+// The walk is bounded by the types it has already entered: TreeNode declares
+// []TreeNode and CommandGroup declares []CommandItem which declares its own
+// children, so an unbounded walk builds an infinite value and overflows the
+// stack. Re-entering a type could not find a new HX field anyway.
+//
+// Attrs is skipped: it is the generic bundle, and
+// TestEveryHXFieldReachesTheElement already proves its emitter is complete.
+// TestDedicatedHXWinsOverAttrsHX covers the two together.
+func setEveryHX(value reflect.Value, probe HX, entered map[reflect.Type]bool) []string {
+	if value.Kind() != reflect.Struct || entered[value.Type()] {
+		return nil
+	}
+	entered[value.Type()] = true
+	var set []string
+	typ := value.Type()
+	for i := range typ.NumField() {
+		field := typ.Field(i)
+		if !field.IsExported() || field.Name == "Attrs" {
+			continue
+		}
+		target := value.Field(i)
+		switch {
+		case field.Name == "HX" && field.Type == reflect.TypeOf(HX{}):
+			target.Set(reflect.ValueOf(probe))
+			set = append(set, typ.Name())
+		case field.Type.Kind() == reflect.Slice && field.Type.Elem().Kind() == reflect.Struct:
+			item := reflect.New(field.Type.Elem()).Elem()
+			inner := setEveryHX(item, probe, entered)
+			if len(inner) == 0 {
+				continue
+			}
+			for _, name := range []string{"Label", "Value"} {
+				if seed := item.FieldByName(name); seed.IsValid() && seed.Kind() == reflect.String {
+					seed.SetString("probe-" + strings.ToLower(name))
+				}
+			}
+			target.Set(reflect.Append(reflect.MakeSlice(field.Type, 0, 1), item))
+			set = append(set, inner...)
+		}
+	}
+	return set
 }
 
 // typesCarryingHX reports every exported type in this package with a top-level

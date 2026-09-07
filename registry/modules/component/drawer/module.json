@@ -1,80 +1,97 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Drawer renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "bc1aa5cc9f9d21684c57c4b0e60b4efb4f221a8cd3ae57c7913deed0112dc8b2",
-        "source": "internal/web/templates/ui/drawer.templ",
-        "target": "internal/web/templates/ui/drawer.templ"
-      }
-    ],
     "id": "ggg/component/drawer",
     "kind": "component",
-    "migrations": [],
     "name": "drawer",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "Drawer",
+    "description": "The Drawer renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/alert-dialog",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/alert-dialog"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/drawer.templ",
+        "target": "internal/web/templates/ui/drawer.templ",
+        "class": "templ",
+        "sha256": "bc1aa5cc9f9d21684c57c4b0e60b4efb4f221a8cd3ae57c7913deed0112dc8b2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/drawer_test.go",
+        "target": "internal/web/templates/ui/drawer_test.go",
+        "class": "test",
+        "sha256": "a746e3d91659dd881d393fdbce55c6f35ebcd11b2d29610a719e04fbaf5eaeec",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "overlays",
-          "guidance": "It is a native <dialog>, exactly like Dialog, because the platform supplies the top layer, the backdrop, the focus trap and Escape-to-close. Only the geometry differs, so a drawer that reimplemented any of that would be a second, worse dialog.",
-          "keyboard": "Escape closes it: this is a native <dialog>, so the platform supplies dismissal and the focus trap.",
           "name": "drawer",
+          "family": "overlays",
           "signature": "templ Drawer(o DrawerOpts)",
+          "summary": "Renders an edge-anchored modal panel.",
+          "guidance": "It is a native \u003cdialog\u003e, exactly like Dialog, because the platform supplies the top layer, the backdrop, the focus trap and Escape-to-close. Only the geometry differs, so a drawer that reimplemented any of that would be a second, worse dialog.",
+          "keyboard": "Escape closes it: this is a native \u003cdialog\u003e, so the platform supplies dismissal and the focus trap.",
           "states": [
             "default",
             "overflow"
-          ],
-          "summary": "Renders an edge-anchored modal panel."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Drawer"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

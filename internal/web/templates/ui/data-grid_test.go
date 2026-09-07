@@ -1,9 +1,12 @@
 package ui
 
 import (
+	"context"
+	"io"
 	"strings"
 	"testing"
 
+	"github.com/a-h/templ"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -146,7 +149,13 @@ func TestGridSearchGoesToTheServer(t *testing.T) {
 func TestEmptyGridKeepsItsChrome(t *testing.T) {
 	opts := gridOpts()
 	opts.RowCount = 0
-	opts.Empty = EmptyState(EmptyStateOpts{Title: "No projects match"})
+	// The empty slot is opaque to DataGrid, so it stands in for whatever empty
+	// state the caller passes. Rendering the real EmptyState here would tie
+	// this payload to a module a project can install DataGrid without.
+	opts.Empty = templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, "No projects match")
+		return err
+	})
 	html := renderComponent(t, DataGrid(opts))
 
 	assert.Contains(t, html, "No projects match")

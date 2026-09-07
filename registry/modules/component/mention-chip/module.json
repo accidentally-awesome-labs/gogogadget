@@ -1,57 +1,74 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The MentionChip renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
-        "source": "internal/web/templates/ui/mention-chip.templ",
-        "target": "internal/web/templates/ui/mention-chip.templ"
-      }
-    ],
     "id": "ggg/component/mention-chip",
     "kind": "component",
-    "migrations": [],
     "name": "mention-chip",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "MentionChip",
+    "description": "The MentionChip renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/mention-chip.templ",
+        "target": "internal/web/templates/ui/mention-chip.templ",
+        "class": "templ",
+        "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/mention-chip_test.go",
+        "target": "internal/web/templates/ui/mention-chip_test.go",
+        "class": "test",
+        "sha256": "1335a13891755c87f14d7ee0dc72bd30365f9dc39394b1adcfd243ca1cb6600e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
-          "guidance": "The @ is decorative and hidden: a screen reader reading \"at Ada Lovelace\" inside a sentence is confusing, and the visual marker is what distinguishes a mention from ordinary text for sighted readers.",
           "name": "mention-chip",
+          "family": "communication",
           "signature": "templ MentionChip(o MentionChipOpts)",
+          "summary": "Renders an inline mention.",
+          "guidance": "The @ is decorative and hidden: a screen reader reading \"at Ada Lovelace\" inside a sentence is confusing, and the visual marker is what distinguishes a mention from ordinary text for sighted readers.",
           "states": [
             "default"
-          ],
-          "summary": "Renders an inline mention."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "MentionChip"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

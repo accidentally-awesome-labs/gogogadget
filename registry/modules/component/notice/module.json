@@ -1,59 +1,76 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Notice renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
-        "source": "internal/web/templates/ui/notice.templ",
-        "target": "internal/web/templates/ui/notice.templ"
-      }
-    ],
     "id": "ggg/component/notice",
     "kind": "component",
-    "migrations": [],
     "name": "notice",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Notice",
+    "description": "The Notice renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/notice.templ",
+        "target": "internal/web/templates/ui/notice.templ",
+        "class": "templ",
+        "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/notice_test.go",
+        "target": "internal/web/templates/ui/notice_test.go",
+        "class": "test",
+        "sha256": "43978221a5958a8cb4a75391859e7efa3a1b87635fac4d2fcc0406f43729c354",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "Live decides how the message is announced, and the component owns the mapping so a caller cannot silently downgrade an actionable failure to a status. The default is LiveOff: a notice rendered as part of the page on first paint has nothing to announce, and marking it live makes a screen reader read it again on every unrelated update.",
           "name": "notice",
+          "family": "feedback",
           "signature": "templ Notice(o NoticeOpts)",
+          "summary": "An in-page notice inside a form or card.",
+          "guidance": "Live decides how the message is announced, and the component owns the mapping so a caller cannot silently downgrade an actionable failure to a status. The default is LiveOff: a notice rendered as part of the page on first paint has nothing to announce, and marking it live makes a screen reader read it again on every unrelated update.",
           "states": [
             "default",
             "error",
             "success"
-          ],
-          "summary": "An in-page notice inside a form or card."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "Notice"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -1,66 +1,83 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The TextInput renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "228b9c7aac6db9e6c7fdce0fdab6113d070a4a12a995f722728431b13ace4cd0",
-        "source": "internal/web/templates/ui/text-input.templ",
-        "target": "internal/web/templates/ui/text-input.templ"
-      }
-    ],
     "id": "ggg/component/text-input",
     "kind": "component",
-    "migrations": [],
     "name": "text-input",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "TextInput",
+    "description": "The TextInput renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/field",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/field"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/text-input.templ",
+        "target": "internal/web/templates/ui/text-input.templ",
+        "class": "templ",
+        "sha256": "228b9c7aac6db9e6c7fdce0fdab6113d070a4a12a995f722728431b13ace4cd0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/text-input_test.go",
+        "target": "internal/web/templates/ui/text-input_test.go",
+        "class": "test",
+        "sha256": "ce2780e5c4c8642cb1555141d5b8ccb102678bbf3fe6cfca11c66150b2c88ac0",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "forms",
           "name": "text-input",
+          "family": "forms",
           "signature": "templ TextInput(o TextInputOpts)",
+          "summary": "A single-line text input.",
           "states": [
             "default",
             "disabled",
             "error",
             "readonly"
-          ],
-          "summary": "A single-line text input."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "TextInput"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

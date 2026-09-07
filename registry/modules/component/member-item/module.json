@@ -1,71 +1,88 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The MemberItem renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
-        "source": "internal/web/templates/ui/member-item.templ",
-        "target": "internal/web/templates/ui/member-item.templ"
-      }
-    ],
     "id": "ggg/component/member-item",
     "kind": "component",
-    "migrations": [],
     "name": "member-item",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "MemberItem",
+    "description": "The MemberItem renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/badge",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/badge"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/avatar",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/avatar"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/member-item.templ",
+        "target": "internal/web/templates/ui/member-item.templ",
+        "class": "templ",
+        "sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/member-item_test.go",
+        "target": "internal/web/templates/ui/member-item_test.go",
+        "class": "test",
+        "sha256": "8e92caa157b6b93ea124091ddb69039f0c227b7425d33a2b319dd9344adf411e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "member-item",
+          "family": "communication",
           "signature": "templ MemberItem(o MemberItemOpts)",
+          "summary": "Renders one member row.",
           "states": [
             "default",
             "overflow"
-          ],
-          "summary": "Renders one member row."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "MemberItem"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

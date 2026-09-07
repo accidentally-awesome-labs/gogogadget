@@ -1,64 +1,81 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ProgressCircle renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
-        "source": "internal/web/templates/ui/progress-circle.templ",
-        "target": "internal/web/templates/ui/progress-circle.templ"
-      }
-    ],
     "id": "ggg/component/progress-circle",
     "kind": "component",
-    "migrations": [],
     "name": "progress-circle",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "ProgressCircle",
+    "description": "The ProgressCircle renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/progress-bar",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/progress-bar"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/progress-circle.templ",
+        "target": "internal/web/templates/ui/progress-circle.templ",
+        "class": "templ",
+        "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/progress-circle_test.go",
+        "target": "internal/web/templates/ui/progress-circle_test.go",
+        "class": "test",
+        "sha256": "d4e78bb980382542ef9760d89e391fcf63b1f379c6db0b720ada9cdead9da21d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "The ring is drawn with an SVG stroke offset and is aria-hidden; the semantics live on the wrapper, so assistive technology gets a progressbar with a value rather than a description of two circles.",
           "name": "progress-circle",
+          "family": "feedback",
           "signature": "templ ProgressCircle(o ProgressCircleOpts)",
+          "summary": "Renders progress as a ring.",
+          "guidance": "The ring is drawn with an SVG stroke offset and is aria-hidden; the semantics live on the wrapper, so assistive technology gets a progressbar with a value rather than a description of two circles.",
           "states": [
             "default"
-          ],
-          "summary": "Renders progress as a ring."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ProgressCircle"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

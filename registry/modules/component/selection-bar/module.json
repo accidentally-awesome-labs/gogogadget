@@ -1,64 +1,81 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The SelectionBar renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "7316a14a7ecec8229e8ed2f8158f323672a452544f94580818c235c60afb7bd9",
-        "source": "internal/web/templates/ui/selection-bar.templ",
-        "target": "internal/web/templates/ui/selection-bar.templ"
-      }
-    ],
     "id": "ggg/component/selection-bar",
     "kind": "component",
-    "migrations": [],
     "name": "selection-bar",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "SelectionBar",
+    "description": "The SelectionBar renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/cursor-pagination",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/cursor-pagination"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/selection-bar.templ",
+        "target": "internal/web/templates/ui/selection-bar.templ",
+        "class": "templ",
+        "sha256": "7316a14a7ecec8229e8ed2f8158f323672a452544f94580818c235c60afb7bd9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/selection-bar_test.go",
+        "target": "internal/web/templates/ui/selection-bar_test.go",
+        "class": "test",
+        "sha256": "bec48d8736e81b7d73659244810beca6775cc4c4dc1fa65a78710947364bbe7e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "data",
-          "guidance": "role=\"status\" with a polite live region: the count changes as the user selects, and an unannounced count means a screen-reader user cannot tell how many rows a bulk delete is about to affect.",
           "name": "selection-bar",
+          "family": "data",
           "signature": "templ SelectionBar(o SelectionBarOpts)",
+          "summary": "Renders bulk actions for a selection.",
+          "guidance": "role=\"status\" with a polite live region: the count changes as the user selects, and an unannounced count means a screen-reader user cannot tell how many rows a bulk delete is about to affect.",
           "states": [
             "default"
-          ],
-          "summary": "Renders bulk actions for a selection."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "SelectionBar"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

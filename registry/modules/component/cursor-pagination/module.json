@@ -1,56 +1,73 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The CursorPagination renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "e429ef759cfb7cdbeaa9510a119598b0b006b979c16c5f5b0fcfde8e3e7ac0ae",
-        "source": "internal/web/templates/ui/cursor-pagination.templ",
-        "target": "internal/web/templates/ui/cursor-pagination.templ"
-      }
-    ],
     "id": "ggg/component/cursor-pagination",
     "kind": "component",
-    "migrations": [],
     "name": "cursor-pagination",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "CursorPagination",
+    "description": "The CursorPagination renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/cursor-pagination.templ",
+        "target": "internal/web/templates/ui/cursor-pagination.templ",
+        "class": "templ",
+        "sha256": "e429ef759cfb7cdbeaa9510a119598b0b006b979c16c5f5b0fcfde8e3e7ac0ae",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/cursor-pagination_test.go",
+        "target": "internal/web/templates/ui/cursor-pagination_test.go",
+        "class": "test",
+        "sha256": "f57022de79ca225ba4df85a359fd0a2a3ebdf9b9e0a3302b6829d0644cf0ce99",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "navigation",
           "name": "cursor-pagination",
+          "family": "navigation",
           "signature": "templ CursorPagination(o CursorPaginationOpts)",
+          "summary": "Renders previous/next controls for a keyset-paged list.",
           "states": [
             "default"
-          ],
-          "summary": "Renders previous/next controls for a keyset-paged list."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "CursorPagination"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

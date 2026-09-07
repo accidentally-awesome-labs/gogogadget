@@ -1,116 +1,116 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/panels",
+    "kind": "component",
+    "name": "panels",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "Resizable panels",
+    "description": "Stacked panels by default; on a wide screen a split with keyboard-operable role=separator handles carrying bounded aria-valuenow.",
+    "requires": [
+      {
+        "id": "ggg/element/heading",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Stacked panels by default; on a wide screen a split with keyboard-operable role=separator handles carrying bounded aria-valuenow.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "e3bac90cd912faf99405a81dd8161b7db7eb04e0ff72625599835eac4ac81330",
         "source": "internal/web/templates/ui/panels.templ",
-        "target": "internal/web/templates/ui/panels.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/panels.templ",
+        "class": "templ",
+        "sha256": "e3bac90cd912faf99405a81dd8161b7db7eb04e0ff72625599835eac4ac81330",
         "rewrite_module": true,
-        "sha256": "3eb126cdeab0a892efe0816a638047e0e69d05e4b95b0dacd3451fab0a385bad",
+        "contract": true
+      },
+      {
         "source": "internal/web/templates/ui/panels_test.go",
-        "target": "internal/web/templates/ui/panels_test.go"
+        "target": "internal/web/templates/ui/panels_test.go",
+        "class": "test",
+        "sha256": "2c10a36e2b2ad3989cf342f53e832d4cec7e386cd32f80725394dd26fcb44bc9",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "1d6d0c43fe4d89be1c07c2008d89d2c02b0d532f4bd7d1833ad9d3ed30385455",
         "source": "static/ui/panels.js",
-        "target": "static/ui/panels.js"
+        "target": "static/ui/panels.js",
+        "class": "asset",
+        "sha256": "1d6d0c43fe4d89be1c07c2008d89d2c02b0d532f4bd7d1833ad9d3ed30385455",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
-    "id": "ggg/component/panels",
-    "kind": "component",
-    "migrations": [],
-    "name": "panels",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
-      "assets": [
-        {
-          "id": "ui-panels",
-          "kind": "script",
-          "path": "static/ui/panels.js"
-        }
-      ],
       "ui": [
         {
-          "family": "advanced",
           "name": "panel",
+          "family": "advanced",
           "signature": "templ Panel(o PanelOpts)",
+          "summary": "Renders one panel.",
           "states": [
             "default",
             "overflow"
-          ],
-          "summary": "Renders one panel."
+          ]
         },
         {
-          "alpine": "uiPanels",
-          "engine": "alpine",
+          "name": "panel-group",
           "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiPanels",
+          "signature": "templ PanelGroup(o PanelGroupOpts)",
+          "summary": "Renders resizable panels.",
           "guidance": "The fallback is stacked, full-width panels: with no JavaScript the content is simply laid out one after another, which is also what a narrow screen gets. Resizing is an enhancement on a layout that already works, never the thing that makes the content reachable.",
           "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
-          "name": "panel-group",
-          "signature": "templ PanelGroup(o PanelGroupOpts)",
           "states": [
             "default"
-          ],
-          "summary": "Renders resizable panels."
+          ]
         },
         {
+          "name": "panel-handle",
           "family": "advanced",
+          "signature": "templ PanelHandle(o PanelHandleOpts)",
+          "summary": "Renders the divider between two panels.",
           "guidance": "It is a focusable role=\"separator\" with bounded aria-valuenow, which is what makes the split adjustable by keyboard. A bare styled div would be a pointer-only control, and a separator without the values reports a position of nothing.",
           "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
-          "name": "panel-handle",
-          "signature": "templ PanelHandle(o PanelHandleOpts)",
           "states": [
             "default"
-          ],
-          "summary": "Renders the divider between two panels."
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-panels",
+          "path": "static/ui/panels.js",
+          "kind": "script"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "Resizable panels"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

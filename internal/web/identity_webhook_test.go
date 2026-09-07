@@ -169,3 +169,33 @@ func TestOrgDeletedRevokeFailureMeans500(t *testing.T) {
 	_, err = s.q.GetOrgByID(ctx, "org_del2")
 	require.NoError(t, err)
 }
+
+// A lazily seeded organization carries its subject as a placeholder name,
+// because a session arrives before any webhook does. The first
+// organization.created delivery has to correct it: an organization named
+// "org_2x9f" in every heading is what the mirror looks like if this never runs.
+//
+// This claim used to sit in ggg/workflow/auth-session's auth_test.go, calling
+// orgDelivery - a fixture this payload defines - so the session module's tests
+// only compiled in a closure that also installed this one, which no shipped
+// profile does.
+func TestOrgCreatedCorrectsALazilySeededName(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedUser(t, s, "user_lazy", "lazy@example.com", "Lazy")
+	code, _, _ := serve(t, s, "GET", "/app", nil, nil, sessionCookie("user_lazy", "org_lazy", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+
+	mapping, err := s.q.GetIdentityOrganization(t.Context(),
+		sqlc.GetIdentityOrganizationParams{Provider: identity.MockProvider, Subject: "org_lazy"})
+	require.NoError(t, err)
+	org, err := s.q.GetOrgByID(t.Context(), mapping.OrgID)
+	require.NoError(t, err)
+	require.Equal(t, "org_lazy", org.Name, "the lazily seeded name is the subject")
+
+	payload, headers := orgDelivery("msg_lazy1", "organization.created", "org_lazy", "Real Name", "org_lazy")
+	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, headers)
+	require.Equal(t, http.StatusOK, code)
+	org, err = s.q.GetOrgByID(t.Context(), mapping.OrgID)
+	require.NoError(t, err)
+	assert.Equal(t, "Real Name", org.Name)
+}

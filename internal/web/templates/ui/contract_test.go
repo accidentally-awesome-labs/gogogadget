@@ -101,44 +101,6 @@ func returnsTemplComponent(fn *ast.FuncDecl) bool {
 	return ok && pkg.Name == "templ" && sel.Sel.Name == "Component"
 }
 
-// A modal must always be dismissible without JavaScript. Both alert-dialog
-// buttons submit the enclosing form method="dialog", which is what closes the
-// dialog and records the choice - they were once type="button" with no handler
-// at all, trapping the user inside a destructive confirmation.
-func TestAlertDialogIsDismissibleWithoutJavaScript(t *testing.T) {
-	html := renderComponent(t, AlertDialog(AlertDialogOpts{
-		ID: "confirm-delete", Title: "Delete project?", Message: "This cannot be undone.",
-		ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: KindDanger,
-	}))
-
-	require.Contains(t, html, `<form method="dialog"`,
-		"without a dialog-method form neither button can close the modal")
-	assert.Equal(t, 2, strings.Count(html, `type="submit"`),
-		"both choices must submit the form: a type=button with no handler is inert")
-	assert.Contains(t, html, `value="cancel"`)
-	assert.Contains(t, html, `value="confirm"`)
-	assert.NotContains(t, html, `type="button"`,
-		"a button that closes a modal must not depend on a script being loaded")
-
-	// The consequence, not just the title, has to be announced.
-	assert.Contains(t, html, `role="alertdialog"`)
-	assert.Contains(t, html, `aria-labelledby="confirm-delete-title"`)
-	assert.Contains(t, html, `aria-describedby="confirm-delete-message"`)
-	assert.Contains(t, html, `id="confirm-delete-message"`)
-}
-
-// An unset kind must still produce a real colour class. The title used to
-// compose "text-{kind}-text" at render time, which for an unset kind was
-// "text--text" - a class matching nothing - and for four of the six kinds named
-// a utility Tailwind never emitted. It now reads --ui-text from the kind matrix
-// the dialog root carries, so one rule covers every kind.
-func TestAlertDialogNormalizesItsKind(t *testing.T) {
-	html := renderComponent(t, AlertDialog(AlertDialogOpts{ID: "d", Title: "T", Message: "M"}))
-	assert.NotContains(t, html, "text--text")
-	assert.Contains(t, html, "k-neutral")
-	assert.Contains(t, html, "dialog-title")
-}
-
 // A declared TestID must reach the DOM, and a declared Class must reach the
 // component's ROOT element. Every renderer accepts Attrs, so a renderer that
 // ignores them looks configurable while silently dropping the caller's class and
@@ -149,28 +111,25 @@ func TestAlertDialogNormalizesItsKind(t *testing.T) {
 // the list was tied to the package and which only checked that the list was
 // non-empty, free of duplicates, and full of names ending in "Opts" - so three
 // quarters of the package was exempt and nothing said so. Reflection over the
-// AST-checked renderers table covers all of them, including the field's type.
+// generated renderers table covers all of them, including the field's type.
 func TestEveryRendererPropagatesItsAttrs(t *testing.T) {
 	table := renderers()
-	// The AST scan is the authority: a renderer missing from the table below
-	// would otherwise be silently exempt from this contract.
+	// The AST scan is the authority: a renderer whose module declares no
+	// runtime.ui entry would be missing from the generated table, and so
+	// silently exempt from this contract.
 	for _, name := range exportedRendererNames(t) {
 		require.Contains(t, table, name,
-			"renderer %s is not in the renderers() table, so nothing checks it", name)
+			"renderer %s is not in the generated renderers table, so nothing checks it; "+
+				"its module declares no runtime.ui entry naming it", name)
 	}
 
 	for name, raw := range table {
 		fn := reflect.ValueOf(raw)
 		t.Run(name, func(t *testing.T) {
-			fnType := fn.Type()
-			require.Equal(t, 1, fnType.NumIn(), "renderer must take exactly one options struct")
-			opts := reflect.New(fnType.In(0)).Elem()
 			// Some renderers correctly render nothing for a zero value: a
 			// single-page pager and an unnamed icon are both "no output" by
 			// design, so they need the minimum input that makes them render.
-			if seed, ok := rendererSeeds()[name]; ok {
-				opts.Set(reflect.ValueOf(seed))
-			}
+			opts := seededOpts(t, name, fn)
 			attrs := opts.FieldByName("Attrs")
 			require.True(t, attrs.IsValid(), "%sOpts has no Attrs field", name)
 			require.Equal(t, reflect.TypeOf(Attrs{}), attrs.Type(),
@@ -224,55 +183,85 @@ func classOfProbedElement(t *testing.T, html string) string {
 
 var probedClassAttr = regexp.MustCompile(`\sclass="([^"]*)"`)
 
-// rendererSeeds supplies the minimum options for renderers whose zero value
-// legitimately produces no output.
-func rendererSeeds() map[string]any {
-	return map[string]any{
-		"Pagination": PaginationOpts{Page: 1, TotalPages: 3, BaseURL: "/x", Target: "#t"},
-		"Icon":       IconOpts{Name: IconLogo},
+// rendererSeeds supplies the minimum options, BY FIELD NAME, for renderers
+// whose zero value legitimately produces no output.
+//
+// The keys are strings and the fields are set reflectively because ui-core owns
+// none of these renderers. Naming SelectionBarOpts here put a type
+// ggg/component/selection-bar owns inside ui-core's own test payload, and a
+// closure that installs ui-core without selection-bar - which `minimal` does -
+// wrote a tree where `go test ./...` did not compile. A string key for an
+// uninstalled renderer is simply never consulted.
+func rendererSeeds() map[string]map[string]any {
+	return map[string]map[string]any{
+		"Pagination": {"Page": 1, "TotalPages": 3, "BaseURL": "/x", "Target": "#t"},
+		"Icon":       {"Name": IconLogo},
+		// A renderer that draws a control or a menu needs the label it is
+		// addressed by before any request can reach an element.
+		"Button":       {"Label": "Export"},
+		"IconButton":   {"Icon": IconRefresh, "Label": "Reload"},
+		"ToggleButton": {"Label": "Enabled"},
+		"Composer":     {"Name": "body", "SubmitLabel": "Send"},
+		"ConfirmAction": {
+			"ID": "confirm-guard", "TriggerLabel": "Delete",
+			"Title": "Delete this?", "ConfirmLabel": "Delete", "CancelLabel": "Cancel",
+		},
+		"DropdownMenu": {"ID": "menu-guard", "Label": "Actions"},
+		"ToggleGroup":  {"Label": "Density"},
 		// Both ends of a keyset sequence render nothing, which is the point.
-		"CursorPagination": CursorPaginationOpts{NextURL: "/x?after=1", Target: "#t"},
+		"CursorPagination": {"NextURL": "/x?after=1", "Target": "#t"},
 		// An empty selection has no bulk actions to offer.
-		"SelectionBar": SelectionBarOpts{Count: 2, CountLabel: "2 selected"},
+		"SelectionBar": {"Count": 2, "CountLabel": "2 selected"},
 		// No request context in a unit render, so the field has no token to
 		// draw and correctly renders nothing.
-		"CSRFField": CSRFFieldOpts{Token: "probe-token"},
+		"CSRFField": {"Token": "probe-token"},
 	}
 }
 
-// renderers maps every exported renderer to its function value so reflection
-// can exercise all of them. TestEveryRendererPropagatesItsAttrs checks this
-// table against the AST scan, so it cannot fall behind the package.
-func renderers() map[string]any {
-	return map[string]any{
-		"AlertDialog": AlertDialog, "Badge": Badge, "Banner": Banner, "Card": Card,
-		"CardFooter": CardFooter, "CardHeader": CardHeader, "Checkbox": Checkbox, "Container": Container,
-		"CSRFField":       CSRFField,
-		"DescriptionList": DescriptionList, "Dialog": Dialog, "Separator": Separator, "DropdownMenu": DropdownMenu,
-		"EmptyState": EmptyState, "Field": Field, "FieldError": FieldError, "Fieldset": Fieldset,
-		"Form": Form, "Grid": Grid, "Icon": Icon, "Inline": Inline,
-		"Item": Item, "KeyValue": KeyValue, "List": List, "Meter": Meter,
-		"Metric": Metric, "NavTabs": NavTabs, "Notice": Notice, "PageHeader": PageHeader,
-		"Pagination": Pagination, "PlanCard": PlanCard, "Popover": Popover, "RadioGroup": RadioGroup,
-		"SearchInput": SearchInput, "SecretReveal": SecretReveal, "SectionHeader": SectionHeader, "Select": Select,
-		"Spinner": Spinner, "Stack": Stack, "Switch": Switch, "Table": Table,
-		"TableCard": TableCard, "TerminalPage": TerminalPage, "TextInput": TextInput,
-		"Textarea": Textarea, "Tooltip": Tooltip,
-		"Button": Button, "ButtonLink": ButtonLink, "IconButton": IconButton, "Link": Link, "VisuallyHidden": VisuallyHidden, "Heading": Heading, "Text": Text, "Code": Code, "Kbd": Kbd, "Avatar": Avatar, "AvatarGroup": AvatarGroup, "Prose": Prose, "Truncate": Truncate, "ToggleButton": ToggleButton, "ToggleGroup": ToggleGroup, "ButtonGroup": ButtonGroup, "CopyButton": CopyButton,
-		"CharCounter": CharCounter, "CheckboxGroup": CheckboxGroup, "ColorInput": ColorInput, "Combobox": Combobox, "DateField": DateField, "DateRangeField": DateRangeField, "DateTimeField": DateTimeField, "FileDropzone": FileDropzone, "FileInput": FileInput, "FormActions": FormActions, "Hint": Hint, "InputAddon": InputAddon, "InputGroup": InputGroup, "Label": Label, "MultiSelect": MultiSelect, "NumberInput": NumberInput, "OTPInput": OTPInput, "PasswordInput": PasswordInput, "RangeInput": RangeInput, "SlugInput": SlugInput, "TagsInput": TagsInput, "TimeField": TimeField,
-		"Accordion": Accordion, "BackLink": BackLink, "Breadcrumbs": Breadcrumbs, "Collapsible": Collapsible, "CursorPagination": CursorPagination, "Disclosure": Disclosure, "Menubar": Menubar, "NavigationMenu": NavigationMenu, "SkipLink": SkipLink, "Steps": Steps, "TabPanels": TabPanels, "TableOfContents": TableOfContents,
-		"ErrorState": ErrorState, "ProgressBar": ProgressBar, "ProgressCircle": ProgressCircle, "Skeleton": Skeleton, "StatusDot": StatusDot, "Toast": Toast, "ToastRegion": ToastRegion, "ThemeToggle": ThemeToggle,
-		"ConfirmAction": ConfirmAction, "ContextMenu": ContextMenu, "Drawer": Drawer, "HoverCard": HoverCard,
-		"AspectRatio": AspectRatio, "Attachment": Attachment, "Center": Center, "ColumnHeader": ColumnHeader, "DataTable": DataTable, "RowActions": RowActions, "ScrollArea": ScrollArea, "Section": Section, "SelectionBar": SelectionBar, "Split": Split, "StatGroup": StatGroup, "StickyBar": StickyBar, "TableToolbar": TableToolbar, "Tile": Tile, "Toolbar": Toolbar,
-		"NotificationItem": NotificationItem, "ActivityItem": ActivityItem, "Timeline": Timeline, "Comment": Comment, "CommentThread": CommentThread, "Composer": Composer, "ChatMessage": ChatMessage, "ChatLog": ChatLog, "MentionChip": MentionChip, "DeliveryStatus": DeliveryStatus, "UsageCard": UsageCard, "OnboardingChecklist": OnboardingChecklist, "SettingsSection": SettingsSection, "MemberItem": MemberItem,
-		"BarChart": BarChart, "LineChart": LineChart, "AreaChart": AreaChart, "DonutChart": DonutChart, "Sparkline": Sparkline, "ChartLegend": ChartLegend,
-		"MonthGrid": MonthGrid, "DatePicker": DatePicker, "DateTimePicker": DateTimePicker, "DateRangePicker": DateRangePicker, "Scheduler": Scheduler, "AvailabilityGrid": AvailabilityGrid,
-		"MarkdownEditor": MarkdownEditor, "EditorToolbar": EditorToolbar, "EditorPreview": EditorPreview, "MediaPicker": MediaPicker,
-		"DataGrid": DataGrid, "GridToolbar": GridToolbar, "ColumnPicker": ColumnPicker,
-		"Kanban": Kanban, "KanbanColumn": KanbanColumn, "KanbanCard": KanbanCard,
-		"Tree": Tree, "TreeNode": TreeNode, "TreeGrid": TreeGrid, "Carousel": Carousel, "Slide": Slide, "CarouselDots": CarouselDots, "CommandPalette": CommandPalette, "CommandGroup": CommandGroup, "CommandItem": CommandItem, "PanelGroup": PanelGroup, "Panel": Panel, "PanelHandle": PanelHandle, "Questionnaire": Questionnaire, "Question": Question, "WizardActions": WizardActions,
+// seededOpts builds the options value one renderer is exercised with: its zero
+// value, plus any declared seed, set by field name.
+func seededOpts(t *testing.T, name string, renderer reflect.Value) reflect.Value {
+	t.Helper()
+	require.Equal(t, 1, renderer.Type().NumIn(), "%s must take exactly one options struct", name)
+	opts := reflect.New(renderer.Type().In(0)).Elem()
+	setOptsFields(t, name, opts, rendererSeeds()[name])
+	return opts
+}
+
+// setOptsFields sets options fields by name. A stale seed - a field the
+// renderer no longer declares, or one whose type the declared value cannot
+// become - fails rather than being skipped, because a silently ignored seed
+// turns a rendering assertion into an assertion about empty output.
+func setOptsFields(t *testing.T, name string, opts reflect.Value, fields map[string]any) {
+	t.Helper()
+	for field, value := range fields {
+		target := opts.FieldByName(field)
+		require.Truef(t, target.IsValid(),
+			"%sOpts has no %s field, so the declared value is stale", name, field)
+		declared := reflect.ValueOf(value)
+		require.Truef(t, declared.Type().ConvertibleTo(target.Type()),
+			"%sOpts.%s is %s, which a %s cannot become", name, field, target.Type(), declared.Type())
+		target.Set(declared.Convert(target.Type()))
 	}
 }
+
+// renderers is every renderer this project installed, keyed by symbol.
+//
+// It is the generated registry - rendered from the same runtime.ui declarations
+// the component reference and the gallery are rendered from - plus CSRFField,
+// which ui-core owns itself and which declares no gallery component because it
+// renders a hidden input a reader cannot look at. It used to be a hand-written
+// table of 175 symbols owned by 144 other modules; a payload that names every
+// component only compiles in a closure containing every component.
+func renderers() map[string]any {
+	table := Renderers()
+	table["CSRFField"] = CSRFField
+	return table
+}
+
+// typeOf is reflect.TypeOf under a shorter name, for tables that compare a
+// declared field's type against the type a caller passes.
+func typeOf(v any) reflect.Type { return reflect.TypeOf(v) }
 
 // exportedRendererNames returns every exported function in the generated templ
 // output that returns a templ.Component.
@@ -297,41 +286,42 @@ func exportedRendererNames(t *testing.T) []string {
 	return out
 }
 
-// PagerLabels holds functions, so an omitted label used to nil-dereference and
-// take down the whole page render. A missing translation must degrade to a
-// readable fallback instead: an English arrow is a translation bug, a panic is
-// an outage.
-func TestPaginationSurvivesMissingLabels(t *testing.T) {
-	html := renderComponent(t, Pagination(PaginationOpts{
-		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
-	}))
-
-	assert.Contains(t, html, `aria-label="Pagination"`,
-		"the landmark still needs a name when no localized one is supplied")
-	assert.Contains(t, html, "Previous")
-	assert.Contains(t, html, "Next")
-	assert.Contains(t, html, "2 / 5")
-
-	// A supplied label must still win over every fallback.
-	localized := renderComponent(t, Pagination(PaginationOpts{
-		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
-		Labels: PagerLabels{
-			Aria:   func(int, int) string { return "Paginación" },
-			Prev:   func(int, int) string { return "Anterior" },
-			Next:   func(int, int) string { return "Siguiente" },
-			PageOf: func(p, n int) string { return "Página 2 de 5" },
-		},
-	}))
-	assert.Contains(t, localized, `aria-label="Paginación"`)
-	assert.Contains(t, localized, "Anterior")
-	assert.NotContains(t, localized, "Previous")
+// A control that acts is a button and a control that navigates is a link, and
+// the two must not be one renderer: Href on an acting control produces
+// <a href=""> or a button that navigates, and either way a middle click, a
+// Space press or a right-click "open in new tab" does the wrong thing.
+//
+// Derived over every installed renderer rather than asserted against three
+// options structs three other modules own, which is what button-link_test.go
+// used to do from inside a payload it does not own.
+func TestActingRenderersCarryNoDestination(t *testing.T) {
+	acting := 0
+	for name, raw := range renderers() {
+		fn := reflect.ValueOf(raw)
+		opts := seededOpts(t, name, fn)
+		html := renderComponent(t, fn.Call([]reflect.Value{opts})[0].Interface().(templ.Component))
+		if !strings.Contains(html, "<button") || strings.Contains(html, "<a ") {
+			continue
+		}
+		acting++
+		_, hasHref := opts.Type().FieldByName("Href")
+		assert.Falsef(t, hasHref,
+			"%sOpts accepts Href but renders a button: it acts, it does not navigate", name)
+	}
+	require.Greater(t, acting, 3,
+		"only %d acting renderers were derived; the filter has collapsed, not the catalog", acting)
 }
 
-// MenuItem and Column are data contracts shared by several renderers, so their
-// fields are fixed here rather than per consumer: DropdownMenu, ContextMenu,
-// RowActions and Kanban all read MenuItem, and Table, DataTable, DataGrid and
-// TreeGrid all read Column. A consumer that needed its own field would fork the
-// contract and break the others.
+// MenuItem and Column are data contracts ui-core owns and several renderers in
+// other modules read: DropdownMenu, ContextMenu, RowActions and Kanban all read
+// MenuItem, and Table, DataTable, DataGrid and TreeGrid all read Column. A
+// consumer that needed its own field would fork the contract and break the
+// others, so the SHAPE is fixed here, once.
+//
+// Whether a renderer honours a declared field is that renderer's contract and
+// is asserted in its own payload - Column.Width lives in column-header_test.go
+// and tree-grid_test.go. Rendering both from here named two components ui-core
+// does not own from the payload every closure installs.
 func TestSharedDataContractShapes(t *testing.T) {
 	menu := reflect.TypeOf(MenuItem{})
 	for name, want := range map[string]reflect.Kind{
@@ -362,111 +352,6 @@ func TestSharedDataContractShapes(t *testing.T) {
 	require.True(t, ok, "a column with no width cannot stop a timestamp column wrapping")
 	assert.Equal(t, reflect.String, width.Type.Kind(),
 		"Width is a CSS length, so it is a string rather than a pixel count")
-	// A declared field is only a contract if a renderer honours it. Width was
-	// declared, documented and populated while every renderer dropped it, so the
-	// shape check alone is what let that ship.
-	for name, html := range map[string]string{
-		"ColumnHeader": renderComponent(t, ColumnHeader(ColumnHeaderOpts{
-			Column: Column{Key: "when", Label: "When", Width: "12rem"},
-		})),
-		"TreeGrid": renderComponent(t, TreeGrid(TreeGridOpts{
-			ID: "effort", Label: "Effort", Columns: []Column{{Key: "when", Label: "When", Width: "12rem"}},
-		})),
-	} {
-		// The trailing quote is deliberately not asserted: templ's style
-		// attribute expression appends a semicolon and the attribute map does
-		// not, so the two renderers differ by one character after the value.
-		assert.Contains(t, html, `style="width:12rem`, "%s drops Column.Width", name)
-	}
-	// The width is a length, not an inline-style hook: a declaration list would
-	// let a caller reach past every rule the design system enforces on classes.
-	bogus := renderComponent(t, ColumnHeader(ColumnHeaderOpts{
-		Column: Column{Key: "k", Label: "K", Width: "8rem;position:fixed"},
-	}))
-	assert.NotContains(t, bogus, "position:fixed",
-		"Width must carry a bare length, never a declaration list")
-}
-
-// A separator is not a command: it carries no label, no href and no handler, so
-// rendering it as an item would put an empty, focusable row in the menu.
-//
-// This test used to spend its last assertion on hx-confirm - on an item with an
-// href and no request, where the attribute gates nothing - and asserted nothing
-// about the separator beyond the role. What a divider must be is the subject
-// here: an <hr> with the separator role, no accessible name, and no tab stop.
-func TestMenuSeparatorRendersAsSeparator(t *testing.T) {
-	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
-		Label: "Actions",
-		Items: []MenuItem{
-			{Label: "Rename", Href: "/x"},
-			{Separator: true},
-			{Label: "Delete", Href: "/y", Kind: KindDanger},
-		},
-	}))
-
-	assert.Contains(t, html, `<hr role="separator"`,
-		"a divider is an hr: a div with the role is a line assistive technology reads as content")
-	assert.Equal(t, 1, strings.Count(html, `role="separator"`),
-		"one separator in, one separator out")
-	assert.Equal(t, 2, strings.Count(html, "<a "),
-		"a separator must not render as a link")
-	assert.Equal(t, 2, strings.Count(html, `class="block px-3 py-2 text-sm`),
-		"a separator must not take an item's padding, hover or text styling")
-	// The two commands survive around it, in order, so a separator between them
-	// is a divider rather than a truncation point.
-	assert.Less(t, strings.Index(html, "Rename"), strings.Index(html, `role="separator"`))
-	assert.Less(t, strings.Index(html, `role="separator"`), strings.Index(html, "Delete"))
-}
-
-// hx-confirm gates an htmx request and nothing else. On a plain link or an inert
-// button htmx never processes the activation, so the attribute promises a prompt
-// that never appears and an action that never runs - which is what the
-// Operations scenario shipped. The component refuses the combination.
-func TestMenuConfirmOnlyRidesARealRequest(t *testing.T) {
-	acting := renderComponent(t, DropdownMenu(DropdownMenuOpts{
-		Label: "Actions",
-		Items: []MenuItem{{Label: "Delete", Kind: KindDanger, Confirm: "Delete this?", HX: HX{Delete: "/x"}}},
-	}))
-	assert.Contains(t, acting, `hx-confirm="Delete this?"`,
-		"an item that issues a request keeps its declared confirmation")
-
-	for name, item := range map[string]MenuItem{
-		"navigating": {Label: "Delete", Href: "/y", Confirm: "Delete this?"},
-		"inert":      {Label: "Cancel", Confirm: "Cancel this?"},
-		// Target and swap modify a request some other attribute has to declare.
-		"modifiers only": {Label: "Cancel", Confirm: "Cancel this?", HX: HX{Target: "#t", Swap: "outerHTML"}},
-	} {
-		html := renderComponent(t, DropdownMenu(DropdownMenuOpts{Label: "Actions", Items: []MenuItem{item}}))
-		assert.NotContains(t, html, "hx-confirm",
-			"a %s item cannot show a confirmation, so it must not claim one", name)
-	}
-
-	// A boosted link is the exception: htmx handles its navigation, so the
-	// prompt does gate something.
-	boosted := renderComponent(t, DropdownMenu(DropdownMenuOpts{
-		Label: "Actions",
-		Items: []MenuItem{{Label: "Leave", Href: "/y", Confirm: "Discard changes?", HX: HX{Boost: true}}},
-	}))
-	assert.Contains(t, boosted, `hx-confirm="Discard changes?"`)
-}
-
-// A menu item that acts is a button; one that navigates is a link. Rendering an
-// acting item as <a href=""> makes it a link to the current page, so a click
-// before HTMX has loaded reloads the page instead of doing nothing.
-func TestActingMenuItemIsAButtonNotAnEmptyLink(t *testing.T) {
-	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
-		Label: "Actions",
-		Items: []MenuItem{
-			{Label: "Open", Href: "/projects/1"},
-			{Label: "Delete", Kind: KindDanger, Confirm: "Sure?", HX: HX{Delete: "/projects/1"}},
-		},
-	}))
-
-	assert.NotContains(t, html, `href=""`,
-		"an empty href is a link to the current page")
-	assert.Contains(t, html, `href="/projects/1"`, "a navigating item stays a link")
-	assert.Contains(t, html, `<button type="button"`, "an acting item must be a button")
-	assert.Contains(t, html, `hx-delete="/projects/1"`)
 }
 
 // A form whose submission the CSRF check applies to must carry the token, and

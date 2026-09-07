@@ -1,63 +1,80 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The DeliveryStatus renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "4d9d401ed820b16a4083cea255abb3f55cd6e6d9866369ca4da27f4a7fa10bf2",
-        "source": "internal/web/templates/ui/delivery-status.templ",
-        "target": "internal/web/templates/ui/delivery-status.templ"
-      }
-    ],
     "id": "ggg/component/delivery-status",
     "kind": "component",
-    "migrations": [],
     "name": "delivery-status",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "DeliveryStatus",
+    "description": "The DeliveryStatus renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/status-dot",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/status-dot"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/delivery-status.templ",
+        "target": "internal/web/templates/ui/delivery-status.templ",
+        "class": "templ",
+        "sha256": "4d9d401ed820b16a4083cea255abb3f55cd6e6d9866369ca4da27f4a7fa10bf2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/delivery-status_test.go",
+        "target": "internal/web/templates/ui/delivery-status_test.go",
+        "class": "test",
+        "sha256": "ab63647687e1169d7bbbc8e5674748781d10e0e45bc848608362c1df5dbc4682",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "delivery-status",
+          "family": "communication",
           "signature": "templ DeliveryStatus(o DeliveryStatusOpts)",
+          "summary": "Renders a delivery outcome.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a delivery outcome."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "DeliveryStatus"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

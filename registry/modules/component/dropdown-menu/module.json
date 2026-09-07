@@ -4,7 +4,7 @@
     "id": "ggg/component/dropdown-menu",
     "kind": "component",
     "name": "dropdown-menu",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "DropdownMenu",
     "description": "The DropdownMenu renderer and its options.",
@@ -47,7 +47,15 @@
         "source": "internal/web/templates/ui/dropdown-menu_test.go",
         "target": "internal/web/templates/ui/dropdown-menu_test.go",
         "class": "test",
-        "sha256": "0d5080b4e8e6d0ef1b8f4065136a3a4198c500fd19a0106429076f226bc6cb2e",
+        "sha256": "788ae454046db293e3cd22c14b73a53f17556b2a99baf7ce261937673fa20109",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/menu-item_test.go",
+        "target": "internal/web/templates/ui/menu-item_test.go",
+        "class": "test",
+        "sha256": "552f606b66ef9931e02959ee23d7c8ef63eac5f38548a4da68e48820b119dcb6",
         "rewrite_module": true,
         "contract": false
       }

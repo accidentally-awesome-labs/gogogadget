@@ -182,3 +182,20 @@ func TestQuestionShowsItsError(t *testing.T) {
 	assert.Contains(t, html, "Pick a team size.")
 	assert.Contains(t, html, `id="size-error"`)
 }
+
+// QuestionType is a closed enum this module declares, so its normalization and
+// its declared set are exercised here rather than in ui-core's enums_test.go:
+// naming it there put a symbol ggg/component/questionnaire owns in the payload
+// every closure installs.
+//
+// A question type that normalizes to a text input is the safe default: an
+// unrecognised type must still render a control the user can answer, not
+// nothing.
+func TestDeclaredQuestionTypesRoundTrip(t *testing.T) {
+	assert.Equal(t, QuestionShortText, QuestionType("interpretive-dance").Value())
+	for _, v := range QuestionTypes {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	assertDistinct(t, "QuestionTypes", QuestionTypes)
+}

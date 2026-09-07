@@ -1,63 +1,80 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The ActivityItem renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
-        "source": "internal/web/templates/ui/activity-item.templ",
-        "target": "internal/web/templates/ui/activity-item.templ"
-      }
-    ],
     "id": "ggg/component/activity-item",
     "kind": "component",
-    "migrations": [],
     "name": "activity-item",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "ActivityItem",
+    "description": "The ActivityItem renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/activity-item.templ",
+        "target": "internal/web/templates/ui/activity-item.templ",
+        "class": "templ",
+        "sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/activity-item_test.go",
+        "target": "internal/web/templates/ui/activity-item_test.go",
+        "class": "test",
+        "sha256": "c9943a185b2657dc26af06b605d0cf8fc31e71633cbf9a9e23089d2f060c8fc0",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
           "name": "activity-item",
+          "family": "communication",
           "signature": "templ ActivityItem(o ActivityItemOpts)",
+          "summary": "Renders one activity entry.",
           "states": [
             "default"
-          ],
-          "summary": "Renders one activity entry."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "ActivityItem"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

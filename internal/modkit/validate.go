@@ -1005,11 +1005,15 @@ func validateUI(items []UIContribution, canonical bool) error {
 		if !validGalleryFamily(item.Family) {
 			return fmt.Errorf("manifest runtime ui[%d] family is invalid", i)
 		}
-		// A declared signature is the renderer's exact templ declaration. Any
-		// other shape means the manifest is describing something that is not the
-		// renderer, and the reference would publish it verbatim.
-		if item.Signature != "" && !strings.HasPrefix(item.Signature, "templ ") {
-			return fmt.Errorf("manifest runtime ui[%d] signature must start with %q", i, "templ ")
+		// The signature is the renderer's exact templ declaration, and it is
+		// what the generated renderer registry projects the symbol out of — so
+		// a component that declares none, or declares a shape that names no
+		// renderer, is a component the contract suites cannot exercise. It was
+		// optional and prefix-checked while the suites carried a hand-written
+		// table of 175 symbols instead.
+		if _, ok := item.Renderer(); !ok {
+			return fmt.Errorf("manifest runtime ui[%d] signature %q must be exactly %q",
+				i, item.Signature, "templ Name(o NameOpts)")
 		}
 		if err := validateStringSet(
 			fmt.Sprintf("manifest runtime ui[%d] states", i),

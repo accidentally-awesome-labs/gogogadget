@@ -1,71 +1,92 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The DataTable renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "fcdd05836d8bfc3ac76c087d62d909b8f1bf33ed93abfce16aa244bbdc3024bc",
-        "source": "internal/web/templates/ui/data-table.templ",
-        "target": "internal/web/templates/ui/data-table.templ"
-      }
-    ],
     "id": "ggg/component/data-table",
     "kind": "component",
-    "migrations": [],
     "name": "data-table",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "DataTable",
+    "description": "The DataTable renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/column-header",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/column-header"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/component/table",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/table"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/data-table.templ",
+        "target": "internal/web/templates/ui/data-table.templ",
+        "class": "templ",
+        "sha256": "fcdd05836d8bfc3ac76c087d62d909b8f1bf33ed93abfce16aa244bbdc3024bc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/data-table_test.go",
+        "target": "internal/web/templates/ui/data-table_test.go",
+        "class": "test",
+        "sha256": "405bec175bb69ee541b89a2940acbbc98a60a0d0177989eb71eca066498baedd",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "data",
           "name": "data-table",
+          "family": "data",
           "signature": "templ DataTable(o DataTableOpts)",
+          "summary": "Renders the full table surface.",
           "states": [
             "default",
             "empty"
-          ],
-          "summary": "Renders the full table surface."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "DataTable"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }

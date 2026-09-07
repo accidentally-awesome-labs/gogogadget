@@ -1,88 +1,88 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/empty-state",
+    "kind": "component",
+    "name": "empty-state",
+    "revision": 3,
     "contract": 1,
-    "data": [],
+    "title": "EmptyState",
+    "description": "The EmptyState renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/component/cursor-pagination",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/heading",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The EmptyState renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "c8e3ad379eb910526be1e60f3bdcae8e4d00f6fd88de75b5d303dd347035f7eb",
         "source": "internal/web/templates/ui/empty-state.templ",
-        "target": "internal/web/templates/ui/empty-state.templ"
-      },
-      {
-        "class": "test",
-        "contract": false,
+        "target": "internal/web/templates/ui/empty-state.templ",
+        "class": "templ",
+        "sha256": "c8e3ad379eb910526be1e60f3bdcae8e4d00f6fd88de75b5d303dd347035f7eb",
         "rewrite_module": true,
-        "sha256": "2bd206c01bc213e30e58237ad4be08fe9fabb3a628418de61c3b11f68605e871",
+        "contract": true
+      },
+      {
         "source": "internal/web/templates/ui/empty-state_test.go",
-        "target": "internal/web/templates/ui/empty-state_test.go"
+        "target": "internal/web/templates/ui/empty-state_test.go",
+        "class": "test",
+        "sha256": "7f0c825fe551fcc2f359f66f5dd7079e653d63ab751973e1d7ad92f5e8f7b318",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/component/empty-state",
-    "kind": "component",
-    "migrations": [],
-    "name": "empty-state",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/cursor-pagination"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 2,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
-          "guidance": "It carries no role and no live region: an empty list is not news. ErrorState is the announced counterpart for a region that failed.",
           "name": "empty-state",
+          "family": "feedback",
           "signature": "templ EmptyState(o EmptyStateOpts)",
+          "summary": "Renders the resting state of a region with no data.",
+          "guidance": "It carries no role and no live region: an empty list is not news. ErrorState is the announced counterpart for a region that failed.",
           "states": [
             "default"
-          ],
-          "summary": "Renders the resting state of a region with no data."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "EmptyState"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

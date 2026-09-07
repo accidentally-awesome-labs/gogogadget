@@ -52,17 +52,6 @@ func TestEveryEnumNormalizesInvalidValues(t *testing.T) {
 	assert.Equal(t, SideTop, Side("").Value())
 	// LiveOff is a meaningful empty: most regions are not live, and announcing
 	// every one of them would make a screen reader unusable.
-	assert.Equal(t, ChatRoleAssistant, ChatRole("").Value(),
-		"an unattributed message is the assistant's: attributing it to the user "+
-			"would put words in their mouth in a transcript")
-	assert.Equal(t, DeliveryPending, DeliveryState("").Value(),
-		"an unrecognised delivery state must never read as delivered: claiming "+
-			"a webhook arrived when nobody knows is the one wrong answer")
-	assert.Equal(t, DeliveryPending, DeliveryState("bounced").Value())
-	assert.Equal(t, EmptyCard, EmptyVariant("").Value(),
-		"an unset empty state is the standalone card: inline would render "+
-			"without the border its container expects to supply")
-	assert.Equal(t, EmptyCard, EmptyVariant("banner").Value())
 	assert.Equal(t, LiveOff, Live("").Value())
 	assert.Equal(t, LiveOff, Live("aggressive").Value(),
 		"an unrecognised urgency must not become assertive: interrupting a "+
@@ -147,26 +136,6 @@ func TestDeclaredEnumValuesRoundTrip(t *testing.T) {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())
 	}
-	for _, v := range ChatRoles {
-		assert.Equal(t, v, v.Value())
-		assert.True(t, v.Valid())
-	}
-	for _, v := range DeliveryStates {
-		assert.Equal(t, v, v.Value())
-		assert.True(t, v.Valid())
-	}
-	// A question type that normalizes to a text input is the safe default: an
-	// unrecognised type must still render a control the user can answer, not
-	// nothing.
-	assert.Equal(t, QuestionShortText, QuestionType("interpretive-dance").Value())
-	for _, v := range QuestionTypes {
-		assert.Equal(t, v, v.Value())
-		assert.True(t, v.Valid())
-	}
-	for _, v := range EmptyVariants {
-		assert.Equal(t, v, v.Value())
-		assert.True(t, v.Valid())
-	}
 	for _, v := range Lives {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())
@@ -217,8 +186,14 @@ func TestEnumSetsAreWellFormed(t *testing.T) {
 // The two tests above are hand-listed, so a newly declared enum would escape
 // both of them silently - which is exactly how a component option ends up with
 // no normalization. This scan makes the declarations authoritative: every
-// string enum in this package must carry the full contract and must appear in
-// the checks above.
+// string enum in this package must carry the full contract and must be
+// exercised by SOME test payload in the package.
+//
+// Some test payload, not this file: an enum declared in a component's own
+// .templ - ChatRole, DeliveryState, QuestionType, EmptyVariant - is exercised
+// in that component's payload, because naming it here put a symbol another
+// module owns in ui-core's payload and a closure without that component then
+// wrote a tree whose tests did not compile.
 func TestEveryDeclaredEnumIsCovered(t *testing.T) {
 	fset := token.NewFileSet()
 	pkg, err := parser.ParseDir(fset, ".", nil, parser.ParseComments)
@@ -230,16 +205,14 @@ func TestEveryDeclaredEnumIsCovered(t *testing.T) {
 	hasConsts := map[string]bool{}
 	setsFor := map[string][]string{}
 	methods := map[string]map[string]bool{}
-	var testSource string
+	var testSource strings.Builder
 
 	for _, pk := range pkg {
 		for path, file := range pk.Files {
 			if strings.HasSuffix(path, "_test.go") {
-				if strings.HasSuffix(path, "enums_test.go") {
-					body, readErr := os.ReadFile(path)
-					require.NoError(t, readErr)
-					testSource = string(body)
-				}
+				body, readErr := os.ReadFile(path)
+				require.NoError(t, readErr)
+				testSource.Write(body)
 				continue
 			}
 			for _, d := range file.Decls {
@@ -290,7 +263,8 @@ func TestEveryDeclaredEnumIsCovered(t *testing.T) {
 	}
 
 	require.NotEmpty(t, stringTypes)
-	require.NotEmpty(t, testSource, "enums_test.go must be readable to check coverage")
+	exercised := testSource.String()
+	require.NotEmpty(t, exercised, "no test payload was readable, so coverage cannot be checked")
 	checked := 0
 	for name := range stringTypes {
 		if !hasConsts[name] {
@@ -319,8 +293,8 @@ func TestEveryDeclaredEnumIsCovered(t *testing.T) {
 		}
 		assert.True(t, methods[name]["Valid"], "closed enum %s has no Valid() predicate", name)
 		for _, set := range sets {
-			assert.Contains(t, testSource, set,
-				"closed enum %s is declared but no test in this file exercises %s", name, set)
+			assert.Contains(t, exercised, set,
+				"closed enum %s is declared but no test payload in this package exercises %s", name, set)
 		}
 	}
 	assert.GreaterOrEqual(t, checked, 10, "the scan stopped finding the declared enums")

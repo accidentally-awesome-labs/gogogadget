@@ -19,7 +19,7 @@ func referenceFixture() (Lock, []Manifest) {
 		{
 			ID: "ggg/element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
 			Runtime: RuntimeContributions{UI: []UIContribution{
-				{Name: "badge", Family: GalleryFeedback},
+				{Signature: "templ X(o XOpts)", Name: "badge", Family: GalleryFeedback},
 				{
 					Name:      "dialog",
 					Family:    GalleryOverlays,
@@ -175,10 +175,14 @@ func types(expr ast.Expr) string {
 	}
 }
 
-// A component that declares no signature, summary, guidance, keyboard contract
-// or states has said something specific: it adds no key handling and has one
-// rendering state. Emitting empty strings for those would turn that statement
-// into visible blank documentation on the reference page.
+// A component that declares no summary, guidance, keyboard contract or states
+// has said something specific: it adds no key handling and has one rendering
+// state. Emitting empty strings for those would turn that statement into
+// visible blank documentation on the reference page.
+//
+// Signature is not in that set. It is required on every contribution, because
+// it is where the renderer's symbol is written down for the generated renderer
+// registry, so it is always emitted.
 func TestUIReferenceRegistryOmitsUndeclaredFields(t *testing.T) {
 	lock, mods := referenceFixture()
 	f, err := emitUIReferenceRegistry(context.Background(), "example.com/app", lock, mods)
@@ -186,7 +190,10 @@ func TestUIReferenceRegistryOmitsUndeclaredFields(t *testing.T) {
 		t.Fatalf("emit: %v", err)
 	}
 	entry := entryFor(t, f.Content, "badge")
-	for _, forbidden := range []string{"Signature:", "Summary:", "Guidance:", "Keyboard:", "States:"} {
+	if !strings.Contains(entry, "Signature:") {
+		t.Fatalf("badge entry omits the signature every contribution declares: %s", entry)
+	}
+	for _, forbidden := range []string{"Summary:", "Guidance:", "Keyboard:", "States:"} {
 		if strings.Contains(entry, forbidden) {
 			t.Fatalf("badge entry declares nothing optional but emitted %s: %s", forbidden, entry)
 		}
@@ -265,7 +272,7 @@ func TestUIReferenceRegistryIsWiredIntoGenerateAll(t *testing.T) {
 // would advertise it, the visual matrix would try to capture it, and neither
 // would find anything to render.
 func TestUIStatesRejectUnknownValue(t *testing.T) {
-	items := []UIContribution{{Name: "badge", Family: GalleryFeedback, States: []string{"disbaled"}}}
+	items := []UIContribution{{Signature: "templ Badge(o BadgeOpts)", Name: "badge", Family: GalleryFeedback, States: []string{"disbaled"}}}
 	err := validateUI(items, true)
 	if err == nil {
 		t.Fatal("validateUI accepted an unknown rendering state")
@@ -285,22 +292,26 @@ func TestUIStatesRejectUnknownValue(t *testing.T) {
 // orderings of the same states would be two different published files for one
 // identical declaration.
 func TestUIStatesMustBeSortedWhenCanonical(t *testing.T) {
-	items := []UIContribution{{Name: "badge", Family: GalleryFeedback, States: []string{"error", "default"}}}
+	items := []UIContribution{{Signature: "templ Badge(o BadgeOpts)", Name: "badge", Family: GalleryFeedback, States: []string{"error", "default"}}}
 	if err := validateUI(items, true); err == nil {
 		t.Fatal("validateUI accepted unsorted canonical states")
 	}
 	if err := validateUI(items, false); err != nil {
 		t.Fatalf("non-canonical states must not require sorting: %v", err)
 	}
-	duplicated := []UIContribution{{Name: "badge", Family: GalleryFeedback, States: []string{"default", "default"}}}
+	duplicated := []UIContribution{{Signature: "templ Badge(o BadgeOpts)", Name: "badge", Family: GalleryFeedback, States: []string{"default", "default"}}}
 	if err := validateUI(duplicated, false); err == nil {
 		t.Fatal("validateUI accepted duplicate states")
 	}
 }
 
-// A signature is published verbatim as the component's public interface. Text
-// that is not the renderer's own declaration would document a call that does
-// not compile.
+// A signature is published verbatim as the component's public interface, and
+// it is also the only place the renderer's SYMBOL is written down as data -
+// emitUIRendererRegistry projects `templ Badge(o BadgeOpts)` into the entry
+// the contract suites reflect over. Text that is not the renderer's own
+// declaration would document a call that does not compile; an absent one
+// leaves a component with no exercisable contract at all, which is what let
+// ui-core's payload carry a hand-written table of 175 symbols instead.
 func TestUISignatureMustBeATemplDeclaration(t *testing.T) {
 	items := []UIContribution{{Name: "badge", Family: GalleryFeedback, Signature: "func Badge(o BadgeOpts)"}}
 	if err := validateUI(items, true); err == nil {
@@ -310,10 +321,18 @@ func TestUISignatureMustBeATemplDeclaration(t *testing.T) {
 	if err := validateUI(items, true); err != nil {
 		t.Fatalf("validateUI rejected a valid signature: %v", err)
 	}
-	// Absent is legal: not every component has published its signature yet, and
-	// an empty string must not be read as a malformed one.
+	if symbol, ok := items[0].Renderer(); !ok || symbol != "Badge" {
+		t.Fatalf("Renderer() read %q, %v out of a valid signature", symbol, ok)
+	}
+	// The options struct is named after the renderer, so a signature that
+	// takes some other Opts type names a renderer the registry would emit
+	// against the wrong argument.
+	items[0].Signature = "templ Badge(o BannerOpts)"
+	if err := validateUI(items, true); err == nil {
+		t.Fatal("validateUI accepted a signature whose options struct is another renderer's")
+	}
 	items[0].Signature = ""
-	if err := validateUI(items, true); err != nil {
-		t.Fatalf("validateUI rejected an absent signature: %v", err)
+	if err := validateUI(items, true); err == nil {
+		t.Fatal("validateUI accepted a component that publishes no signature")
 	}
 }

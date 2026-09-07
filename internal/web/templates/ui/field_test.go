@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,10 +31,6 @@ func TestRequiredFieldIsMarked(t *testing.T) {
 // technology announces nothing, and a test asserting the description finds an
 // empty string.
 func TestFieldDescriptionReferencesOnlyRenderedElements(t *testing.T) {
-	bare := renderComponent(t, TextInput(TextInputOpts{Name: "email"}))
-	assert.NotContains(t, bare, "aria-describedby",
-		"no hint and no error means there is nothing to describe the field")
-
 	withHint := renderComponent(t, Field(FieldOpts{Name: "email", Label: "Email", Hint: "Work address"}))
 	require.Contains(t, withHint, `id="email-hint"`)
 
@@ -67,13 +62,4 @@ func TestFieldHelpersMatchWhatFieldRenders(t *testing.T) {
 	none := FieldARIA(FieldOpts{Name: "email"})
 	assert.NotContains(t, none, "aria-describedby",
 		"a field with nothing describing it must not reference a missing element")
-}
-
-// Server validation is authoritative, so a form must not let the browser block
-// submission before the server ever sees it - that is how a 422 fragment, and
-// the errors it carries, become unreachable.
-func TestFormsDeferValidationToTheServer(t *testing.T) {
-	html := renderComponent(t, Form(FormOpts{Method: "post", Action: "/save"}))
-	assert.Contains(t, html, "novalidate")
-	assert.Equal(t, 1, strings.Count(html, "novalidate"))
 }

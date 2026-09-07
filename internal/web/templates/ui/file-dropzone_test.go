@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// The dropzone must be reachable without a pointer: a drop target that is only
 // droppable excludes every keyboard user.
 func TestFileDropzoneIsKeyboardReachable(t *testing.T) {
 	html := renderComponent(t, FileDropzone(FileDropzoneOpts{Name: "files", Label: "Drop files"}))
@@ -33,4 +34,13 @@ func TestDropzoneNamesAnExternalFormOwner(t *testing.T) {
 	without := renderComponent(t, FileDropzone(FileDropzoneOpts{Name: "media", Label: "Drop files"}))
 	assert.NotContains(t, without, "form=",
 		`form="" makes the input own no form at all, which is worse than omitting the attribute`)
+}
+
+// entire claim "progressively enhanced" makes.
+func TestFileDropzoneSubmitsWithoutJavaScript(t *testing.T) {
+	html := renderComponent(t, FileDropzone(FileDropzoneOpts{Name: "files", Label: "Drop"}))
+	assert.Contains(t, html, `type="file"`, "dropzone must be a real native control")
+	assert.Contains(t, html, `name="files"`, "dropzone must submit a named value")
+	assert.NotContains(t, html, `type="hidden"`,
+		"a widget that keeps its real value in a hidden input loses it when the script fails")
 }

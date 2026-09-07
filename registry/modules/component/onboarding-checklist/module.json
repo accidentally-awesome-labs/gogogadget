@@ -1,78 +1,95 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The OnboardingChecklist renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "406f553ef21327c766727d9d6943a6137a02218a7462f6bf760238c0963af12e",
-        "source": "internal/web/templates/ui/onboarding-checklist.templ",
-        "target": "internal/web/templates/ui/onboarding-checklist.templ"
-      }
-    ],
     "id": "ggg/component/onboarding-checklist",
     "kind": "component",
-    "migrations": [],
     "name": "onboarding-checklist",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "OnboardingChecklist",
+    "description": "The OnboardingChecklist renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/progress-bar",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/progress-bar"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/onboarding-checklist.templ",
+        "target": "internal/web/templates/ui/onboarding-checklist.templ",
+        "class": "templ",
+        "sha256": "406f553ef21327c766727d9d6943a6137a02218a7462f6bf760238c0963af12e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/onboarding-checklist_test.go",
+        "target": "internal/web/templates/ui/onboarding-checklist_test.go",
+        "class": "test",
+        "sha256": "d66ba9d7491c8ec4d467ba5714826595bbda128414ba21fa25d97f2b11d52b4a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "communication",
-          "guidance": "Every step stays visible and actionable once done, rather than disappearing: a list that shrinks as you complete it hides what the product can do, and a user who wants to revisit a step has nowhere to go.",
           "name": "onboarding-checklist",
+          "family": "communication",
           "signature": "templ OnboardingChecklist(o OnboardingChecklistOpts)",
+          "summary": "Renders setup steps with progress.",
+          "guidance": "Every step stays visible and actionable once done, rather than disappearing: a list that shrinks as you complete it hides what the product can do, and a user who wants to revisit a step has nowhere to go.",
           "states": [
             "default"
-          ],
-          "summary": "Renders setup steps with progress."
+          ]
         }
       ]
     },
-    "tests": {},
-    "title": "OnboardingChecklist"
-  },
-  "schema": 2
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
 }
