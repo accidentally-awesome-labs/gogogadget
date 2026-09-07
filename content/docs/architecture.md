@@ -67,9 +67,10 @@ Resolution runs in one pass and is pure — it writes nothing:
    not a later one: a seam pulled in only because a selected feature module
    requires it declares its slot exactly as loudly as one named in the profile,
    and an installed seam with no adapter would boot a nil capability. Deriving
-   slots before the expansion is what made `ggg/profile/web` and
-   `ggg/profile/api` unable to create a project — their honest
-   `provider_defaults` looked like four extra keys.
+   slots before the expansion is what made `ggg/profile/web` unable to create a
+   project — it reaches `ggg/analytics`, `ggg/billing`, `ggg/identity` and
+   `ggg/llm` through `requires` only, so its honest `provider_defaults` looked
+   like four extra keys.
 2. Derive the exact set of provider slots that closure declares.
    `providers` must name that set exactly, with a `{adapter, target}` for
    `development`, `test` and `production`. A mismatch names both halves —

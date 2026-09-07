@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -13,11 +14,11 @@ import (
 )
 
 // Every profile the catalog advertises has to be able to produce a project, and
-// until this test existed nothing checked that. Three of the five shipped
-// profiles could not: `web` and `api` were refused by the resolver's own
-// provider-slot check, and `minimal` reached `go mod tidy` and died there
-// because `internal/web/routes.go` imports `internal/api` while no module in
-// the closure provided it.
+// until this test existed nothing checked that. Three of the five profiles
+// shipped then could not: `web` and the since-deleted `api` were refused by
+// the resolver's own provider-slot check, and `minimal` reached `go mod tidy`
+// and died there because `internal/web/routes.go` imports `internal/api`
+// while no module in the closure provided it.
 //
 // The form is deliberate. A real `ggg new` per profile is the complete proof
 // and costs minutes each — five tool installs, five templ/sqlc/Tailwind runs,
@@ -243,8 +244,8 @@ var (
 // every project, so a migration that names a table another module creates only
 // works in a closure containing that module. `0020_provider_neutral_ids`
 // renames columns on fifteen tables including `files` and `schedules`, and in
-// the `web` and `api` closures those two tables did not exist — which surfaced
-// as `sqlc generate: exit status 1` mid-genesis, three steps after the decision
+// the `web` closure those two tables did not exist — which surfaced as
+// `sqlc generate: exit status 1` mid-genesis, three steps after the decision
 // that caused it.
 //
 // This is a textual reference check over the planned migration bodies, not an
@@ -298,4 +299,80 @@ func sortedStrings[V any](values map[string]V) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+type documentedProfile struct {
+	members int
+	closure int
+	slots   int
+}
+
+var (
+	docProfileRow  = regexp.MustCompile("^\\|\\s*`([a-z][a-z-]*)`\\s*\\|\\s*(\\d+)\\s*\\|\\s*(\\d+)\\s*\\|\\s*(\\d+)\\s*\\|")
+	describedCount = regexp.MustCompile(`(\d+) modules`)
+)
+
+// A profile count that nothing asserts goes stale silently, and this one did:
+// the table in content/docs/getting-started.md said `minimal` was 150 modules
+// and `web` 223 while they resolved 178 and 254, and it advertised a fifth
+// profile — `api` — whose closure was identical to `web`'s, module for module.
+// Deleting that name only helps if the table cannot re-acquire a row the
+// catalog does not back, so this test owns both directions: every shipped
+// profile has a row, and every row has a shipped profile.
+//
+// The closure column is `len(plan.Resolved)`, which is the installed set the
+// planner resolved — the same count a real `ggg new --registry directory:.`
+// writes into the destination's lock. The manifest descriptions advertise the
+// same number in prose, so they are checked against the same source of truth
+// rather than against the table.
+func TestTheDocumentedProfileTableMatchesWhatTheProfilesResolveTo(t *testing.T) {
+	root := repoRoot(t)
+	catalog, err := modkit.LoadCatalog(os.DirFS(root))
+	require.NoError(t, err)
+	require.NotEmpty(t, catalog.Profiles)
+
+	_, stillPublished := findShippedProfile(catalog, "api")
+	require.False(t, stillPublished,
+		"ggg/profile/api is back in the catalog; it resolved to ggg/profile/web's closure module for module, "+
+			"and gggcli.retiredProfiles refuses the name on the assumption it is gone")
+
+	body, err := os.ReadFile(filepath.Join(root, "content", "docs", "getting-started.md"))
+	require.NoError(t, err)
+	documented := map[string]documentedProfile{}
+	for _, line := range strings.Split(string(body), "\n") {
+		match := docProfileRow.FindStringSubmatch(line)
+		if match == nil {
+			continue
+		}
+		documented[match[1]] = documentedProfile{
+			members: mustAtoi(t, match[2]), closure: mustAtoi(t, match[3]), slots: mustAtoi(t, match[4]),
+		}
+	}
+	require.NotEmpty(t, documented, "the profile table is gone from content/docs/getting-started.md")
+
+	for _, profile := range catalog.Profiles {
+		row, ok := documented[profile.Name]
+		require.Truef(t, ok, "profile %s has no row in the documented profile table", profile.ID)
+		delete(documented, profile.Name)
+		plan := planShippedProfile(t, root, catalog, profile, profile.ProviderDefaults)
+		require.Equalf(t, len(profile.Members), row.members,
+			"%s names %d members; the documented table says %d", profile.ID, len(profile.Members), row.members)
+		require.Equalf(t, len(plan.Resolved), row.closure,
+			"%s resolves %d modules; the documented table says %d", profile.ID, len(plan.Resolved), row.closure)
+		require.Equalf(t, len(profile.RequiredProviderSlots), row.slots,
+			"%s requires %d slots; the documented table says %d", profile.ID, len(profile.RequiredProviderSlots), row.slots)
+		stated := describedCount.FindStringSubmatch(profile.Description)
+		require.NotNilf(t, stated, "%s's description states no module count", profile.ID)
+		require.Equalf(t, len(plan.Resolved), mustAtoi(t, stated[1]),
+			"%s resolves %d modules; its own description says %s", profile.ID, len(plan.Resolved), stated[1])
+	}
+	require.Emptyf(t, documented,
+		"the documented profile table advertises profile(s) this catalog does not publish: %v", sortedStrings(documented))
+}
+
+func mustAtoi(t *testing.T, value string) int {
+	t.Helper()
+	number, err := strconv.Atoi(value)
+	require.NoError(t, err)
+	return number
 }

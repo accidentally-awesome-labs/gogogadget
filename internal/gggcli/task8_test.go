@@ -44,6 +44,101 @@ func TestNewNonInteractiveRequiresCompleteAnswers(t *testing.T) {
 	}
 }
 
+// A profile name this catalog has deleted must not come back as `unknown
+// profile %q`. `ggg/profile/api` resolved to the same closure as
+// `ggg/profile/web`, module for module — the JSON API transport it existed to
+// add is something `ggg/system/server` requires — so the name was deleted
+// rather than documented. A generic not-found would tell an operator they
+// mistyped when the truth is that the shape they asked for is not separable
+// from the web surface yet, which is the failure mode this program has spent
+// its slices removing. Same shape as `ggg test unit` naming
+// `ggg test integration` instead of aliasing to it.
+//
+// Both operand forms are exercised because the refusal scopes the operand
+// itself: `--profile api` and `--profile ggg/profile/api` are one answer.
+func TestNewRefusesTheDeletedAPIProfileByNamingItsReplacement(t *testing.T) {
+	source := genesisTree(t)
+	controller := NewController(ControllerOptions{Root: source, Version: "v1.2.3"})
+	for _, operand := range []string{"ggg/profile/api", "api"} {
+		t.Run(operand, func(t *testing.T) {
+			_, err := controller.Preview(context.Background(), NewMutation{
+				Dir: filepath.Join(t.TempDir(), "destination"), Name: "demo",
+				ModulePath: "example.com/demo", Profile: operand, Registry: "directory:.",
+			})
+			if err == nil {
+				t.Fatal("preview accepted a profile this catalog does not publish")
+			}
+			if got := ExitCode(err); got != exitUsage {
+				t.Fatalf("exit = %d, want %d (usage)", got, exitUsage)
+			}
+			for _, want := range []string{
+				"ggg/profile/api is gone",
+				"same closure as ggg/profile/web",
+				"ggg/system/server",
+				"ggg new --profile ggg/profile/web",
+			} {
+				if !strings.Contains(err.Error(), want) {
+					t.Fatalf("the refusal is missing %q: %v", want, err)
+				}
+			}
+			if strings.Contains(err.Error(), "unknown profile") {
+				t.Fatalf("the deleted name still reads as a typo: %v", err)
+			}
+		})
+	}
+}
+
+// The named-replacement path is for retired names only. An operand that was
+// never published still reads as a typo, because that is what it is — the
+// table must not become a blanket rewrite of every miss.
+func TestNewStillReportsANeverPublishedProfileAsUnknown(t *testing.T) {
+	source := genesisTree(t)
+	controller := NewController(ControllerOptions{Root: source, Version: "v1.2.3"})
+	_, err := controller.Preview(context.Background(), NewMutation{
+		Dir: filepath.Join(t.TempDir(), "destination"), Name: "demo",
+		ModulePath: "example.com/demo", Profile: "ggg/profile/nope", Registry: "directory:.",
+	})
+	if err == nil || ExitCode(err) != exitUsage {
+		t.Fatalf("preview error = %v, want a usage error", err)
+	}
+	if !strings.Contains(err.Error(), `unknown profile "ggg/profile/nope"`) {
+		t.Fatalf("refusal = %v, want the generic unknown-profile message", err)
+	}
+}
+
+// `new --profile` is not the only verb that names a catalog id: an existing
+// project reaches the same deleted name through `add` and `update`, where the
+// generic answer is the resolver's "not in the catalog". `remove` is excluded
+// deliberately — its subject is the installed graph, so it must keep its own
+// wording rather than telling an operator to install `web` instead.
+func TestAddAndUpdateNameTheDeletedAPIProfileButRemoveDoesNot(t *testing.T) {
+	controller := NewController(ControllerOptions{Root: t.TempDir(), Version: "v1.2.3"})
+	for _, kind := range []modkit.OperationKind{modkit.OpAdd, modkit.OpUpdate} {
+		t.Run(string(kind), func(t *testing.T) {
+			_, err := controller.Preview(context.Background(),
+				GraphMutation{Kind: kind, Modules: []string{"ggg/profile/api"}})
+			if err == nil || ExitCode(err) != exitUsage {
+				t.Fatalf("%s error = %v, want a usage error", kind, err)
+			}
+			for _, want := range []string{"ggg/profile/api is gone", "ggg new --profile ggg/profile/web"} {
+				if !strings.Contains(err.Error(), want) {
+					t.Fatalf("%s refusal is missing %q: %v", kind, want, err)
+				}
+			}
+		})
+	}
+	t.Run("remove", func(t *testing.T) {
+		_, err := controller.Preview(context.Background(),
+			GraphMutation{Kind: modkit.OpRemove, Modules: []string{"ggg/profile/api"}})
+		if err == nil {
+			t.Fatal("remove accepted a profile nothing installed")
+		}
+		if strings.Contains(err.Error(), "ggg/profile/api is gone") {
+			t.Fatalf("remove borrowed the install-side remedy: %v", err)
+		}
+	})
+}
+
 func TestParseProviderAnswer(t *testing.T) {
 	slot, environment, selection, err := parseProviderAnswer("ggg/mail:production=ggg/system/mail-smtp@smtp")
 	if err != nil {

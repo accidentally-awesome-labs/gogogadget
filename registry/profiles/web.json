@@ -4,10 +4,10 @@
     "id": "ggg/profile/web",
     "kind": "profile",
     "name": "web",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Web GoGoGadget",
-    "description": "Minimal plus public content, internationalization, and the discovery surfaces.",
+    "description": "Public content, internationalization and the discovery surfaces on top of minimal's floor: 254 modules. This is also what ggg/profile/api named — that profile resolved to this same closure, module for module, because the JSON API transport it existed to add is something ggg/system/server requires, so it was deleted rather than documented. The one module minimal installs and this does not is ggg/system/mail-smtp, which minimal selects for production where this selects mail-resend.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/activity-item",

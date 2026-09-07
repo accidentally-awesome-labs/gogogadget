@@ -4,10 +4,10 @@
     "id": "ggg/profile/full",
     "kind": "profile",
     "name": "full",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Full GoGoGadget",
-    "description": "Every module the GoGoGadget catalog publishes.",
+    "description": "Every product module plus the registry-publishing template: 288 modules. The name overstates it — the catalog publishes 297, and nine stay out. Six are the managed adapters this profile's provider defaults do not select (mail-smtp, feature-flags-launchdarkly, notifications-knock, search-typesense, usage-openmeter, webhooks-svix), one is the deploy module its default_deployment does not choose (deploy-fly), and two are UI modules its member list omits (ggg/component/table-empty, ggg/element/divider), which is why ggg/profile/saas resolves one module more. An adapter is a per-environment selection, not something a profile can install wholesale, so no profile can resolve all 297.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/activity-item",

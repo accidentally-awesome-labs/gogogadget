@@ -80,29 +80,75 @@ over a tree no command can run.
 
 ### The profiles
 
-| Profile | Members | Closure | Required provider slots | What it adds |
+| Profile | Members | Closure | Required provider slots | What it is |
 |---|---|---|---|---|
-| `minimal` | 117 | 150 | 18 | The smallest closure that compiles, plus every provider seam it needs |
-| `web` | 190 | 223 | 18 | Public content, internationalization, discovery surfaces |
-| `api` | 192 | 223 | 18 | The API transport and identity, named explicitly |
-| `saas` | 296 | 296 | 18 | Organizations, billing, jobs, notifications, admin, product workflows |
-| `full` | 286 | 286 | 18 | Every product module in the catalog. It is not the largest list: `saas` names the nine environment-selected adapter modules explicitly, which `full` leaves to the provider selections, and `full` also drops the two modules this repository excludes |
+| `minimal` | 117 | 178 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
+| `web` | 190 | 254 | 18 | Minimal's floor plus public content, internationalization and the discovery surfaces |
+| `saas` | 296 | 289 | 18 | Web plus organizations, billing, jobs, notifications, admin and the product workflows — the largest closure here |
+| `full` | 286 | 288 | 18 | Every product module plus the registry-publishing template. The name overstates it; see below |
 
 **Members** is what a profile names; **closure** is what installing it
-actually resolves to, members plus everything they `require`. The gap is why
-every profile requires all 18 slots: a seam pulled in transitively declares its
-slot just as loudly as one named in the list.
+actually resolves to. The two differ in both directions. Members that are
+adapter candidates do not enter the closure unless the provider selections
+choose them — which is why `saas` names 296 and installs 289 — and a seam
+pulled in only through some member's `requires` enters without being named,
+which is why `minimal` names 117 and installs 178. That second direction is
+also why every profile requires all 18 slots: a seam pulled in transitively
+declares its slot just as loudly as one named in the list.
 
-Three of these could not create a project until they were measured. `minimal`,
-`web` and `api` were hand-trimmed lists, and the source is not decomposed to
-support the trims: `internal/web/routes.go` imports `internal/api`,
-`internal/web/server.go` imports eleven more seams, migration
-`0020_provider_neutral_ids` renames columns on fifteen tables owned by nine
-modules, and several Go packages are split across modules that must therefore
-ship together. `web` and `api` now resolve to the SAME 223-module closure,
-because the API transport `api` was supposed to add is something
-`ggg/system/server` already requires; decoupling `internal/web` from
-`internal/api` is what would make them distinct again.
+The profiles are otherwise nested — `minimal ⊂ web ⊂ saas` — with exactly one
+exception, and it is a provider default rather than a member: `minimal`
+selects `mail-smtp` for production where `web` selects `mail-resend`, so
+`minimal` installs one module `web` does not.
+
+These numbers are asserted, not remembered.
+`TestTheDocumentedProfileTableMatchesWhatTheProfilesResolveTo` in
+`internal/modkit` plans every shipped profile and fails on the commit that
+moves a count without moving this table.
+
+#### Why `minimal` is 178 modules
+
+Because the floor is not a taste decision, and `minimal` is where you see it:
+
+- **`ggg/system/server`'s capability set.** It owns `internal/web/server.go`,
+  whose statically-declared capability fields name thirteen capabilities, so
+  its `requires` pull `internal/{api,audit,cache,jobs,notify,ratelimit,`
+  `realtime,search,telemetry,usage,webhooks}` into *every* closure that serves
+  HTTP. `internal/web/routes.go` dereferences the `apiSurface` that
+  `ggg/workflow/openapi-contract` declares, which is why a JSON API is not
+  optional either.
+- **The schema assertions.** Migration `0020_provider_neutral_ids` asserts a
+  fixed fifteen-table, twenty-three-column shape *before* it renames anything,
+  so no closure may omit the nine modules that create those tables. It is
+  immutable and in the lock, so the way down is a follow-on migration that
+  neutralizes the assertion, not an edit.
+
+Generating `server.go`'s capability struct from the resolved graph and
+neutralizing that assertion are what lower the floor. Until then, `minimal`
+means *the least this source can be made to boot as*, and saying otherwise
+would be advertising a shape that does not exist.
+
+#### `ggg/profile/api` is gone, and `full` is not the whole catalog
+
+**`api` was deleted.** It resolved to the same 254-module closure as `web`,
+module for module, because the JSON API transport it existed to add is
+something `ggg/system/server` requires. Two advertised names for one closure
+is a lie no documentation fixes, so the name went rather than the explanation.
+`ggg new --profile ggg/profile/api` refuses and names `web` as the
+replacement; it does not fail as an unknown profile. Decoupling
+`internal/web` from `internal/api` is what would make an API-only profile
+mean something.
+
+**`full` resolves 288 of the 297 modules the catalog publishes.** Six of the
+nine absent are managed adapters its provider defaults do not select
+(`mail-smtp`, `feature-flags-launchdarkly`, `notifications-knock`,
+`search-typesense`, `usage-openmeter`, `webhooks-svix`), one is the deploy
+module its `default_deployment` does not choose (`deploy-fly`), and two are UI
+modules its member list omits (`ggg/component/table-empty`,
+`ggg/element/divider`) — which is the only reason `saas` resolves one module
+more. An adapter is a per-environment selection, so **no** profile can resolve
+all 297; the name is the problem, not the member list, and renaming it is a
+deliberate decision rather than a passing one.
 
 A profile also carries **provider defaults** — the local adapter for
 development and test, the managed one for production — and a

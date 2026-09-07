@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 58,
+    "revision": 59,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -92,7 +92,7 @@
         "source": "internal/gggcli/controller.go",
         "target": "internal/gggcli/controller.go",
         "class": "go",
-        "sha256": "c6b1a26e243750ba6113890a3005f9d3cd8668996ef6136fee2c49224e29ede9",
+        "sha256": "efc218f59b2155f0ccb242d4a2d477350f19509494547da7e8cba5410f050c37",
         "rewrite_module": true,
         "contract": false
       },
@@ -212,7 +212,7 @@
         "source": "internal/gggcli/new_project.go",
         "target": "internal/gggcli/new_project.go",
         "class": "go",
-        "sha256": "7111024015069a8559ed41b778a064204a62a72e25a79ef7563835767ab303a6",
+        "sha256": "d9fc4b4672f561f6fb84f0e389ad2342507d4fa93a1fce656c7900bbd52500a5",
         "rewrite_module": true,
         "contract": true
       },
@@ -333,7 +333,7 @@
         "source": "internal/gggcli/task8_handlers.go",
         "target": "internal/gggcli/task8_handlers.go",
         "class": "go",
-        "sha256": "c88d6674c9d04c01edf3cf10523ae0b90a0b168c42d1c7563d139741b4adeb0a",
+        "sha256": "17f752f474ab657aebe69f4a565928674984942e8add0c9302e3eb4c9b1e144a",
         "rewrite_module": true,
         "contract": true
       },
@@ -341,7 +341,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "fbcb6042276122b5ac9d8e2ffb7f6397f8b1ee9f406621a3fbf9e5a648c42233",
+        "sha256": "54e232d9465d25ac09f9474206a7b37f82f86a70ef14d5c36912f856148885ec",
         "rewrite_module": true,
         "contract": false
       },
@@ -903,7 +903,7 @@
         "source": "internal/modkit/resolve.go",
         "target": "internal/modkit/resolve.go",
         "class": "go",
-        "sha256": "2f891279c7470ee8d28600a001102c82497e8c68e259be25dc97254930db6212",
+        "sha256": "121e461c806b15d4ff76404d08b5cc262e52dc6a74801aa8ad68ae93c4165df5",
         "rewrite_module": true,
         "contract": false
       },
@@ -952,7 +952,7 @@
         "source": "internal/modkit/shipped_profiles_test.go",
         "target": "internal/modkit/shipped_profiles_test.go",
         "class": "test",
-        "sha256": "8f1b9eb6bd12988fbbbc733f10f94b4adeeb52e56a353ff1fa0c62b046db47d1",
+        "sha256": "a8adb0bdedae857adae7d495136e596a1560964b490791ef289f0b8d9c9f3d2e",
         "rewrite_module": true,
         "contract": false,
         "self_host": true

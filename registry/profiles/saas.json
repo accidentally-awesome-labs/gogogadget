@@ -4,10 +4,10 @@
     "id": "ggg/profile/saas",
     "kind": "profile",
     "name": "saas",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Saas GoGoGadget",
-    "description": "API plus organizations, billing, jobs, notifications, admin, and product workflows.",
+    "description": "Web plus organizations, billing, jobs, notifications, admin and the product workflows: 289 modules, the largest closure this catalog resolves. It names every member web names. It resolves one module more than ggg/profile/full because it names ggg/component/table-empty and ggg/element/divider, which full's member list omits, while full names ggg/system/registry-template, which this one omits.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/activity-item",

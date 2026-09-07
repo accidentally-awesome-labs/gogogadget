@@ -133,6 +133,9 @@ func (c *Controller) previewNew(ctx context.Context, mutation NewMutation) (Plan
 	}
 	profile, ok := findProfile(catalog, mutation.Profile)
 	if !ok {
+		if message, retired := retiredProfileRefusal(mutation.Profile); retired {
+			return Plan{}, usageError(message)
+		}
 		return Plan{}, usageError(fmt.Sprintf("unknown profile %q", mutation.Profile))
 	}
 	providers := cloneProviderAnswers(profile.ProviderDefaults)
@@ -333,6 +336,35 @@ func findProfile(catalog modkit.Catalog, id string) (modkit.Profile, bool) {
 		}
 	}
 	return modkit.Profile{}, false
+}
+
+// retiredProfiles maps a profile id the core catalog used to publish to the
+// refusal an operator who still names it should read. A name this project has
+// deleted must not come back as `unknown profile %q`: that says the operator
+// mistyped, when the truth is that the shape they asked for does not exist and
+// something else covers it. Same reason `ggg test unit` names
+// `ggg test integration` instead of aliasing to it — an alias is how two names
+// stay indistinguishable, and a mute not-found is how a deleted name stays
+// unexplained.
+//
+// It is keyed by scoped id and consulted only when the resolved catalog has no
+// such profile, so `--registry github:… --ref v0.14.0` — a snapshot that still
+// publishes `ggg/profile/api` — resolves it normally rather than being refused
+// by this table.
+var retiredProfiles = map[string]string{
+	"ggg/profile/api": "ggg/profile/api is gone; it resolved to the same closure as ggg/profile/web, " +
+		"module for module, because the JSON API transport it existed to add is something ggg/system/server " +
+		"requires — internal/web/routes.go dereferences the apiSurface that ggg/workflow/openapi-contract " +
+		"declares. An API-only shape is not currently separable from the web surface, so two names described " +
+		"one thing. Run `ggg new --profile ggg/profile/web`: it installs everything ggg/profile/api did",
+}
+
+// retiredProfileRefusal reports the refusal for a retired profile operand.
+// The operand is scoped first, so a bare `--profile api` reaches the same
+// answer as the fully scoped id.
+func retiredProfileRefusal(operand string) (string, bool) {
+	message, ok := retiredProfiles[scopedProfileID(operand)]
+	return message, ok
 }
 
 func cloneProviderAnswers(source map[string]modkit.ProviderSelections) map[string]modkit.ProviderSelections {

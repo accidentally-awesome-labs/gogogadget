@@ -232,6 +232,18 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		return Plan{Command: "init"}, nil
 
 	case GraphMutation:
+		// `add`/`update` name a catalog id, so a retired profile reaches them
+		// too and would otherwise come back as the resolver's generic "not in
+		// the catalog". `remove` and `diff` are excluded on purpose: their
+		// subject is the installed graph, and "not installed" is already the
+		// right answer for a name nothing publishes.
+		if mutation.Kind == modkit.OpAdd || mutation.Kind == modkit.OpUpdate {
+			for _, id := range mutation.Modules {
+				if message, retired := retiredProfileRefusal(id); retired {
+					return Plan{}, usageError(message)
+				}
+			}
+		}
 		return c.previewOperation(ctx, "graph", mutation.operation(), mutation.DryRun)
 
 	case SyncMutation:

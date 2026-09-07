@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "707a9b791cd77a5ff867ec2af31865d473d7c89aed31b4cc9f87c24ffd7581fa"
+      "sha256": "41e743dd0ac4d15a8b5e10c91fe37d9d251cd91e43dcdcc848fbc713b6134f7e"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "964551d3a6d3ac201cf5978d6c1f8df86b6c9bff954a51655ec434281620736c"
+      "sha256": "74fea3ca3f59a905d42307deaadc0531f2bfb36aa9a8c63b302c028cece882ce"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "f6c445334538b3cade4f4ff86f29c0f653ce689a5cd1b23f5be8b84226dcecaa"
+      "sha256": "4f0b1396074c103d681e3dbb179421fceaeda7936b3f02beece05629fc485d63"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1272,27 +1272,23 @@
     },
     {
       "path": "registry/profiles.json",
-      "sha256": "7b4db695f3b908188bfd4ab59055c94da573717d6f9a3ad8d308117ce0b933e3"
-    },
-    {
-      "path": "registry/profiles/api.json",
-      "sha256": "ed52f79e2c9d245a9616aa07ddd420d7d06af653aedba5d86015770dd0ac40d4"
+      "sha256": "9045c272c2ee46e8165e22c36b61a559c98aa63df703bf3f18387d7d4c403355"
     },
     {
       "path": "registry/profiles/full.json",
-      "sha256": "81a35abf8389b77888e81402dc4d28a484ce1020d93c8583401689b1849837aa"
+      "sha256": "a1187f823c3c3959b7084a38676dcd04cf7bb4ab9fa0b8a3562c696559a67f02"
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "97406e3efb48725979ad4b8b4255b241005e6d1742564350127d598854c1ad98"
+      "sha256": "6c0fdc1d8c2b4dda674b6c7127aeee9bfaa38f886daaa22fe5d852eca524cf13"
     },
     {
       "path": "registry/profiles/saas.json",
-      "sha256": "284f4a794959a523b1d4e1e28d0faa9b371c3788bbcd6dfe1a017d90d7d39ce6"
+      "sha256": "c717bb25940158de82d3c20e431b55a5a8028ba0773e2f30b5aaa6daca892bfa"
     },
     {
       "path": "registry/profiles/web.json",
-      "sha256": "99ea16a3d5b6b4b1d5a0056182b96c5aea87687705d20a33fd398eb9fc3de9e7"
+      "sha256": "dced7d0c78758451b8b9f9c1dfc7eac4e3026e6a2646b2647e7ae7980daac80f"
     },
     {
       "path": "registry/schema/lock.schema.json",

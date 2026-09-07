@@ -13,7 +13,7 @@ updatable without ever overwriting an edit you made.
 
 The promise, in order:
 
-1. **Choose a profile** — `minimal`, `web`, `api`, `saas` or `full`.
+1. **Choose a profile** — `minimal`, `web`, `saas` or `full`.
 2. **Choose one adapter and service target per required provider slot, per
    environment** — 18 slots, each with a zero-account local option and a
    maintained managed reference.

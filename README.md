@@ -8,7 +8,7 @@ node in production.
 
 The promise, in order:
 
-1. **Choose a profile** — `minimal`, `web`, `api`, `saas`, or `full`.
+1. **Choose a profile** — `minimal`, `web`, `saas`, or `full`.
 2. **Choose one adapter and service target per required provider slot, per
    environment** — `mail-dev@filesystem` in development, `mail-resend@resend`
    in production.

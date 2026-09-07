@@ -88,7 +88,7 @@ func runNew(ctx context.Context, cc CommandContext, args []string) (Result, erro
 			answers.Module, err = readLine(cc, "Go module path: ")
 		}
 		if err == nil && answers.Profile == "" {
-			answers.Profile, err = readLine(cc, "Profile (minimal, web, api, saas, full): ")
+			answers.Profile, err = readLine(cc, "Profile (minimal, web, saas, full): ")
 		}
 		if err == nil && answers.Registry == "" {
 			answers.Registry, err = readLine(cc, "Registry (github:OWNER/REPO or directory:PATH): ")

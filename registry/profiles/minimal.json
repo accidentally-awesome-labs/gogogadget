@@ -4,10 +4,10 @@
     "id": "ggg/profile/minimal",
     "kind": "profile",
     "name": "minimal",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Minimal GoGoGadget",
-    "description": "The smallest closure that compiles: the web stack, every provider seam, and the API transport internal/web imports.",
+    "description": "The smallest closure that boots, not a small application: 178 modules. The floor is set by two things and neither is a taste decision. ggg/system/server owns internal/web/server.go, whose statically-declared capability fields name thirteen capabilities, so its requires pull internal/{api,audit,cache,jobs,notify,ratelimit,realtime,search,telemetry,usage,webhooks} into every closure that serves HTTP. And migration 0020_provider_neutral_ids asserts a fixed fifteen-table shape before it renames anything, so no closure may omit the nine modules that create those tables; it is immutable and locked, so the way down is a follow-on migration, not an edit. Generating server.go's capability struct and neutralising that assertion are what lower the floor.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/aspect-ratio",

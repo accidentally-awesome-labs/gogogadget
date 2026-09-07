@@ -4,7 +4,7 @@
     "id": "ggg/system/project-docs",
     "kind": "system",
     "name": "project-docs",
-    "revision": 10,
+    "revision": 11,
     "contract": 1,
     "title": "Project Docs",
     "description": "Project scaffold ownership for project-docs.",
@@ -51,7 +51,7 @@
         "source": "README.md",
         "target": "README.md",
         "class": "docs",
-        "sha256": "36d5dde063bd70922c4f66cbe684ddbeadcabcf48d3820730d9f8f4a4fbe2b99",
+        "sha256": "8d4bf4e5bc9ff23823dc7f0c883625fa1b6ecd4e068e1341d13a11a54ade219e",
         "rewrite_module": false,
         "contract": false
       }

@@ -249,9 +249,9 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	// module requires it declares its slot just as loudly as one named in the
 	// profile, and an installed seam with no adapter selected would boot a nil
 	// capability. Deriving slots from the un-expanded set is what made
-	// `ggg/profile/web` and `ggg/profile/api` unable to create a project —
-	// both reach ggg/analytics, ggg/billing and ggg/llm through `requires`
-	// only, so their honest provider_defaults looked like four extra keys.
+	// `ggg/profile/web` unable to create a project — it reaches ggg/analytics,
+	// ggg/billing, ggg/identity and ggg/llm through `requires` only, so its
+	// honest provider_defaults looked like four extra keys.
 	// validateProfileProviderParity has always walked `Requires` here; this
 	// loop is the same walk, so the two definitions of the word agree.
 	for _, id := range sortedKeys(selected) {
