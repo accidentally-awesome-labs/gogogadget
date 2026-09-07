@@ -84,6 +84,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"bootstrap", one(emitBootstrapRegistry)},
 		{"testhost", one(emitTestHostRegistry)},
 		{"routes", one(emitRoutesRegistry)},
+		{"route_targets", one(emitRouteTargetsRegistry)},
 		{"chrome", one(emitChromeRegistry)},
 		{"settings_nav", one(emitSettingsNavigationRegistry)},
 		{"shell_slots", one(emitShellSlotsRegistry)},
@@ -913,23 +914,35 @@ type route struct {
 func selectedRoutes(lock Lock, graph []Manifest) []route {
 	routes := make([]route, 0)
 	for _, m := range orderedModules(lock, graph) {
-		for _, r := range m.Runtime.Routes {
-			routes = append(routes, route{moduleID: m.ID, contrib: r})
-		}
-		for _, ct := range m.Runtime.ContentTypes {
-			for _, path := range ct.Paths {
-				routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
-					ID: "content." + ct.ID + ".index", Method: "GET", Pattern: path,
-					Scope: RoutePublic, Package: ct.Package, Handler: "handleContentIndex",
-				}, contentType: ct.ID})
-				if ct.Mode != ContentModePages {
-					continue
-				}
-				routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
-					ID: "content." + ct.ID + ".detail", Method: "GET", Pattern: path + "/{slug}",
-					Scope: RoutePublic, Package: ct.Package, Handler: "handleContentDetail",
-				}, contentType: ct.ID})
+		routes = append(routes, moduleRoutes(m)...)
+	}
+	return routes
+}
+
+// moduleRoutes is one module's contribution to that set. It is a separate
+// function because ValidateRouteReferences needs the same expansion over a set
+// of manifests with no lock to order them: a content type's index and detail
+// patterns are routes a template can target, and a scan that read only
+// `runtime.routes` would call `/blog/{slug}` undeclared and refuse the page
+// that links to it.
+func moduleRoutes(m Manifest) []route {
+	routes := make([]route, 0, len(m.Runtime.Routes))
+	for _, r := range m.Runtime.Routes {
+		routes = append(routes, route{moduleID: m.ID, contrib: r})
+	}
+	for _, ct := range m.Runtime.ContentTypes {
+		for _, path := range ct.Paths {
+			routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
+				ID: "content." + ct.ID + ".index", Method: "GET", Pattern: path,
+				Scope: RoutePublic, Package: ct.Package, Handler: "handleContentIndex",
+			}, contentType: ct.ID})
+			if ct.Mode != ContentModePages {
+				continue
 			}
+			routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
+				ID: "content." + ct.ID + ".detail", Method: "GET", Pattern: path + "/{slug}",
+				Scope: RoutePublic, Package: ct.Package, Handler: "handleContentDetail",
+			}, contentType: ct.ID})
 		}
 	}
 	return routes
@@ -1211,6 +1224,58 @@ func emitSettingsNavigationRegistry(ctx context.Context, modulePath string, lock
 	b.WriteString("}\n")
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/templates/settings_navigation_registry_gen.go", Content: b.String()}, nil
+}
+
+// emitRouteTargetsRegistry renders the selected route table into package
+// templates, keyed by route id.
+//
+// It exists because a control's target used to be a string literal in markup,
+// and a literal cannot know whether the route behind it is installed. Five
+// controls in this repository targeted routes owned by ggg/workflow/appearance
+// and ggg/workflow/impersonation while declaring nothing, and twenty more
+// targeted routes ggg/profile/minimal and ggg/profile/web do not install — so
+// those profiles shipped live buttons that 404. Navigation already resolved
+// hrefs through RouteID for exactly this reason (NavigationContribution.RouteID);
+// this is the same move for the controls inside a page.
+//
+// A caller asks RouteAvailable before rendering and RoutePath for the target,
+// so an uninstalled route yields no control rather than a dead one, and the
+// pattern is written down once — in the manifest the mux is built from.
+//
+// The table records DECLARATION by a selected module, which is the question
+// ValidateRouteReferences asks. It deliberately does not fold in a route's
+// Enabled gate: that is a per-environment registration decision the server
+// makes from *Server (enabledRoutes in internal/web/route.go), the shell has no
+// Server, and conflating the two would make a development-only route look
+// undeclared to every template.
+func emitRouteTargetsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	routes := selectedRoutes(lock, graph)
+	if len(routes) == 0 {
+		return nil, nil
+	}
+	patterns := make(map[string]string, len(routes))
+	ids := make([]string, 0, len(routes))
+	for _, r := range routes {
+		if _, seen := patterns[r.contrib.ID]; seen {
+			continue
+		}
+		patterns[r.contrib.ID] = r.contrib.Pattern
+		ids = append(ids, r.contrib.ID)
+	}
+	sort.Strings(ids)
+
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package templates\n\n")
+	b.WriteString("// RouteTargets maps every route id a selected module declares onto its\n")
+	b.WriteString("// pattern. Read it through RouteAvailable and RoutePath.\n")
+	b.WriteString("var RouteTargets = map[string]string{\n")
+	for _, id := range ids {
+		fmt.Fprintf(&b, "\t%s: %s,\n", goString(id), goString(patterns[id]))
+	}
+	b.WriteString("}\n")
+	_ = ctx
+	return &GeneratedFile{Path: "internal/web/templates/route_targets_registry_gen.go", Content: b.String()}, nil
 }
 
 // navEntry is one resolved navigation entry: its declaration plus the href

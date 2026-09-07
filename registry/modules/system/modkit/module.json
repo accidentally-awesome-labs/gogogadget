@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 70,
+    "revision": 72,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -617,7 +617,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "c0c327a797a8d8bd86e2fdb519f43eda8b6a1d1bfc937d762aada67ee8a9d28f",
+        "sha256": "3713536daf1dfd4a132471c76371e9dbdba97a1be4bc818d2d1dff903682774e",
         "rewrite_module": true,
         "contract": false
       },
@@ -770,7 +770,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "f944c23dcab9904f223523876a17bf4964b7c24349af227d467fc56c5d721d94",
+        "sha256": "7ff03d486cb415a82592d76cdd77ef49edc6467d6a7f6b9656686b459477c7b3",
         "rewrite_module": true,
         "contract": true
       },
@@ -933,6 +933,31 @@
         "target": "internal/modkit/rewrite.go",
         "class": "go",
         "sha256": "61fe73b5936bbbe70915f1e1aa9828c6a4556ed3e3233373e3db68edb7c4c12a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modkit/route_scan.go",
+        "target": "internal/modkit/route_scan.go",
+        "class": "go",
+        "sha256": "8bc93ba78b21820e3a95e78860a2598fbb51f8acdd1011287b0477302df3e8b2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/modkit/route_scan_selfhost_test.go",
+        "target": "internal/modkit/route_scan_selfhost_test.go",
+        "class": "test",
+        "sha256": "bd350fd94b6899bb831628110ce44700c2bc445177585ef8c5fa429bc119bb93",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/route_scan_test.go",
+        "target": "internal/modkit/route_scan_test.go",
+        "class": "test",
+        "sha256": "802a8a9d2c80d3ef9f153b28bc50cdabf7396ee5d4106e3b750e79aeabe3df58",
         "rewrite_module": true,
         "contract": false
       },

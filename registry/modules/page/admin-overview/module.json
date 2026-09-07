@@ -4,7 +4,7 @@
     "id": "ggg/page/admin-overview",
     "kind": "page",
     "name": "admin-overview",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Admin overview",
     "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
@@ -214,7 +214,7 @@
         "source": "internal/web/templates/admin.templ",
         "target": "internal/web/templates/admin.templ",
         "class": "templ",
-        "sha256": "c75a6331ade459462fae5a60e8805dcf312f3f607659f4558cc53d7310e2a3e2",
+        "sha256": "56c5c8679bd8ed29649c394cc283314e682e29bd3e5d203557308262d4746f2b",
         "rewrite_module": true,
         "contract": false
       }

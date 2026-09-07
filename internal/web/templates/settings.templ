@@ -72,41 +72,57 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 	}
 	// Level 2 throughout: these blocks sit directly under the page title, and
 	// the component's h3 default would skip a level.
-	@ui.SettingsSection(ui.SettingsSectionOpts{
-		Title:       i18n.T(ctx, "settings.appearance_title"),
-		Description: i18n.T(ctx, "settings.appearance_body"),
-		Level:       2,
-		Attrs:       ui.Attrs{Class: "max-w-lg mt-6", TestID: "appearance-card"},
-	}) {
-		// A fieldset per preference: three buttons with no group name are three
-		// unrelated commands to a screen reader, and "System" alone says
-		// nothing about what it selects.
-		@ui.Fieldset(ui.FieldsetOpts{Legend: i18n.T(ctx, "settings.theme_label")}) {
-			<div class="flex gap-2">
-				@themeChoice("system", i18n.T(ctx, "settings.theme_system"), user.Theme)
-				@themeChoice("light", i18n.T(ctx, "settings.theme_light"), user.Theme)
-				@themeChoice("dark", i18n.T(ctx, "settings.theme_dark"), user.Theme)
-			</div>
-		}
-		@ui.Fieldset(ui.FieldsetOpts{Legend: i18n.T(ctx, "settings.language_label"), Attrs: ui.Attrs{Class: "mt-6"}}) {
-			<div class="flex gap-2">
-				@localeChoice("", i18n.T(ctx, "settings.language_auto"), user.Locale)
-				for _, l := range i18n.Locales {
-					@localeChoice(l.Code, l.Label, user.Locale)
+	//
+	// Each card is gated on the route its controls target. This page is the
+	// account surface, and it stands without any of these three workflows —
+	// name, email and identity provider are above — so a workflow a project
+	// leaves out takes its own card with it rather than leaving a button that
+	// 404s. `requires` is not the mechanism here: ggg/workflow/appearance,
+	// ggg/workflow/account-export and ggg/workflow/account-delete each require
+	// this page for their own e2e specs, so every one of those edges is a cycle.
+	if RouteAvailable("appearance.set-theme") || RouteAvailable("appearance.locale") {
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       i18n.T(ctx, "settings.appearance_title"),
+			Description: i18n.T(ctx, "settings.appearance_body"),
+			Level:       2,
+			Attrs:       ui.Attrs{Class: "max-w-lg mt-6", TestID: "appearance-card"},
+		}) {
+			// A fieldset per preference: three buttons with no group name are three
+			// unrelated commands to a screen reader, and "System" alone says
+			// nothing about what it selects.
+			if RouteAvailable("appearance.set-theme") {
+				@ui.Fieldset(ui.FieldsetOpts{Legend: i18n.T(ctx, "settings.theme_label")}) {
+					<div class="flex gap-2">
+						@themeChoice("system", i18n.T(ctx, "settings.theme_system"), user.Theme)
+						@themeChoice("light", i18n.T(ctx, "settings.theme_light"), user.Theme)
+						@themeChoice("dark", i18n.T(ctx, "settings.theme_dark"), user.Theme)
+					</div>
 				}
-			</div>
+			}
+			if RouteAvailable("appearance.locale") {
+				@ui.Fieldset(ui.FieldsetOpts{Legend: i18n.T(ctx, "settings.language_label"), Attrs: ui.Attrs{Class: "mt-6"}}) {
+					<div class="flex gap-2">
+						@localeChoice("", i18n.T(ctx, "settings.language_auto"), user.Locale)
+						for _, l := range i18n.Locales {
+							@localeChoice(l.Code, l.Label, user.Locale)
+						}
+					</div>
+				}
+			}
 		}
 	}
-	@ui.SettingsSection(ui.SettingsSectionOpts{
-		Title:       i18n.T(ctx, "settings.data_title"),
-		Description: i18n.T(ctx, "settings.data_body"),
-		Level:       2,
-		Attrs:       ui.Attrs{Class: "max-w-lg mt-6"},
-	}) {
-		@ui.ButtonLink(ui.ButtonLinkOpts{
-			Label: i18n.T(ctx, "settings.data_export"), Href: "/app/settings/account/export",
-			Icon: ui.IconDownload, Attrs: ui.Attrs{TestID: "export-data"},
-		})
+	if RouteAvailable("account-export.download") {
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       i18n.T(ctx, "settings.data_title"),
+			Description: i18n.T(ctx, "settings.data_body"),
+			Level:       2,
+			Attrs:       ui.Attrs{Class: "max-w-lg mt-6"},
+		}) {
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "settings.data_export"), Href: RoutePath("account-export.download"),
+				Icon: ui.IconDownload, Attrs: ui.Attrs{TestID: "export-data"},
+			})
+		}
 	}
 	@SettingsDangerZone(user, dangerErr)
 }
@@ -121,39 +137,45 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 // `form method="dialog"` cannot be nested inside another form - the parser
 // drops it, which would make Cancel submit the deletion. hx-include carries the
 // typed address instead.
+// The whole card is gated on the deletion route. ggg/workflow/account-delete
+// owns it and requires this page for its own e2e spec, so an edge from here to
+// it is a cycle; a project without that workflow gets no card rather than a
+// Delete button with no handler.
 templ SettingsDangerZone(user sqlc.User, dangerErr string) {
-	@ui.SettingsSection(ui.SettingsSectionOpts{
-		Title:       i18n.T(ctx, "settings.danger_title"),
-		Description: i18n.T(ctx, "settings.danger_body"),
-		Danger:      true,
-		Level:       2,
-		Attrs:       ui.Attrs{ID: "danger-zone", Class: "max-w-lg mt-6"},
-	}) {
-		if dangerErr != "" {
-			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-3", TestID: "delete-account-error"}}) {
-				{ dangerErr }
+	if RouteAvailable("account-delete.submit") {
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       i18n.T(ctx, "settings.danger_title"),
+			Description: i18n.T(ctx, "settings.danger_body"),
+			Danger:      true,
+			Level:       2,
+			Attrs:       ui.Attrs{ID: "danger-zone", Class: "max-w-lg mt-6"},
+		}) {
+			if dangerErr != "" {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-3", TestID: "delete-account-error"}}) {
+					{ dangerErr }
+				}
 			}
-		}
-		@ui.Field(ui.FieldOpts{Name: "confirm_email", Label: i18n.T(ctx, "settings.danger_confirm_label")}) {
-			@ui.TextInput(ui.TextInputOpts{Name: "confirm_email", Type: ui.InputTypeEmail, Autocomplete: "email"})
-		}
-		@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
-			@ui.ConfirmAction(ui.ConfirmActionOpts{
-				ID:           "delete-account-dialog",
-				TriggerLabel: i18n.T(ctx, "settings.danger_delete"),
-				TriggerIcon:  ui.IconDelete,
-				Title:        i18n.T(ctx, "settings.danger_confirm_title"),
-				Message:      i18n.T(ctx, "settings.danger_confirm_prompt"),
-				ConfirmLabel: i18n.T(ctx, "settings.danger_confirm_cta"),
-				CancelLabel:  i18n.T(ctx, "settings.danger_confirm_cancel"),
-				Kind:         ui.KindDanger,
-				HX: ui.HX{
-					Post: "/app/settings/account/delete", Target: "#danger-zone", Swap: "outerHTML",
-					Include: "[name='confirm_email']", Indicator: "delete-account-spinner", Disable: true,
-				},
-				Attrs: ui.Attrs{TestID: "delete-account"},
-			})
-			@ui.Spinner(ui.SpinnerOpts{Attrs: ui.Attrs{ID: "delete-account-spinner"}})
+			@ui.Field(ui.FieldOpts{Name: "confirm_email", Label: i18n.T(ctx, "settings.danger_confirm_label")}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "confirm_email", Type: ui.InputTypeEmail, Autocomplete: "email"})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.ConfirmAction(ui.ConfirmActionOpts{
+					ID:           "delete-account-dialog",
+					TriggerLabel: i18n.T(ctx, "settings.danger_delete"),
+					TriggerIcon:  ui.IconDelete,
+					Title:        i18n.T(ctx, "settings.danger_confirm_title"),
+					Message:      i18n.T(ctx, "settings.danger_confirm_prompt"),
+					ConfirmLabel: i18n.T(ctx, "settings.danger_confirm_cta"),
+					CancelLabel:  i18n.T(ctx, "settings.danger_confirm_cancel"),
+					Kind:         ui.KindDanger,
+					HX: ui.HX{
+						Post: RoutePath("account-delete.submit"), Target: "#danger-zone", Swap: "outerHTML",
+						Include: "[name='confirm_email']", Indicator: "delete-account-spinner", Disable: true,
+					},
+					Attrs: ui.Attrs{TestID: "delete-account"},
+				})
+				@ui.Spinner(ui.SpinnerOpts{Attrs: ui.Attrs{ID: "delete-account-spinner"}})
+			}
 		}
 	}
 }
@@ -182,7 +204,10 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			}
 		}
 	}
-	if canExport {
+	// canExport is the viewer's entitlement; RouteAvailable is whether the
+	// workflow that serves the export is installed at all. Both have to hold:
+	// an entitled admin is still owed no button when nothing answers it.
+	if canExport && RouteAvailable("organization-export.enqueue") {
 		@ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       i18n.T(ctx, "settings.org_export_title"),
 			Description: i18n.T(ctx, "settings.org_export_body"),
@@ -191,7 +216,7 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 		}) {
 			@ui.Button(ui.ButtonOpts{
 				Label: i18n.T(ctx, "settings.org_export_button"), Icon: ui.IconDownload,
-				HX:    ui.HX{Post: "/app/settings/org/export", Swap: "none"},
+				HX:    ui.HX{Post: RoutePath("organization-export.enqueue"), Swap: "none"},
 				Attrs: ui.Attrs{TestID: "org-export"},
 			})
 		}
@@ -240,8 +265,14 @@ func choiceAction(selected bool) ui.Action {
 // server hard-redirects and the shell re-renders with the new <html> class /
 // language — HX-Redirect for htmx, a 303 to returnTo for a plain submit, so the
 // no-script path lands back on this page rather than on a bare 204.
+//
+// Both routes belong to ggg/workflow/appearance, and this page cannot require
+// it: that workflow already requires this page (its e2e spec drives this
+// card), so the edge would close a cycle. The targets therefore come from the
+// generated route table and the appearance card renders only when they are
+// there — see the gate in SettingsAccount.
 templ themeChoice(value, label, current string) {
-	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-theme"}}}) {
+	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("appearance.set-theme")}}}) {
 		<input type="hidden" name="theme" value={ value }/>
 		<input type="hidden" name="returnTo" value="/app/settings/account"/>
 		@ui.Button(ui.ButtonOpts{
@@ -252,7 +283,7 @@ templ themeChoice(value, label, current string) {
 }
 
 templ localeChoice(code, label, current string) {
-	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-locale"}}}) {
+	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("appearance.locale")}}}) {
 		<input type="hidden" name="lang" value={ code }/>
 		<input type="hidden" name="returnTo" value="/app/settings/account"/>
 		@ui.Button(ui.ButtonOpts{

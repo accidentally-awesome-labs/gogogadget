@@ -28,7 +28,23 @@
 // the request under htmx 4, and this call has no swap to perform anyway. The
 // CSRF token comes from the same body attribute every hx-post inherits, so
 // there is exactly one token in the page.
+//
+// The endpoint is read off the toggle rather than written here. The route
+// belongs to ggg/workflow/appearance and this file belongs to
+// ggg/system/static - the shell floor, which must not depend on a product
+// workflow - so the path arrives from the shell, which resolves it through the
+// generated route table. No toggle, or no route behind it, means no request to
+// make: the local flip and the localStorage copy already keep THIS browser
+// correct, and cross-device persistence is exactly the thing the workflow
+// provides.
+function themeEndpoint() {
+  var el = document.querySelector("[data-theme-endpoint]");
+  return (el && el.getAttribute("data-theme-endpoint")) || "";
+}
+
 function persistTheme(theme) {
+  var endpoint = themeEndpoint();
+  if (!endpoint) return;
   var raw = document.body.getAttribute("hx-headers:inherited") || "{}";
   var token = "";
   try {
@@ -36,7 +52,7 @@ function persistTheme(theme) {
   } catch (e) {
     token = "";
   }
-  fetch("/set-theme", {
+  fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

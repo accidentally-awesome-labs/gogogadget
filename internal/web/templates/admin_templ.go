@@ -374,7 +374,7 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if AdminWrite(ctx) {
+				if AdminWrite(ctx) && adminUserActionsAvailable() {
 					templ_7745c5c3_Var15 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 						templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 						templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -387,10 +387,10 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						if !u.DisabledAt.Valid {
+						if !u.DisabledAt.Valid && RouteAvailable("admin.users.impersonate.form") {
 							templ_7745c5c3_Err = ui.ButtonLink(ui.ButtonLinkOpts{
 								Label: i18n.T(ctx, "admin.users.impersonate"),
-								Href:  "/admin/users/" + u.UserID + "/impersonate",
+								Href:  RoutePath("admin.users.impersonate.form", u.UserID),
 								Size:  ui.SizeXS,
 								Attrs: ui.Attrs{
 									TestID: "admin-impersonate",
@@ -405,19 +405,21 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = ui.ConfirmAction(ui.ConfirmActionOpts{
-							ID:           "disable-" + u.UserID,
-							TriggerLabel: disableLabel(ctx, u),
-							Title:        disableTitle(ctx, u),
-							Message:      disableConfirm(ctx, u),
-							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
-							CancelLabel:  i18n.T(ctx, "admin.cancel"),
-							Kind:         disableKind(u),
-							HX:           ui.HX{Post: "/admin/users/" + u.UserID + "/disable"},
-							Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
-						}).Render(ctx, templ_7745c5c3_Buffer)
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
+						if RouteAvailable("admin.users.disable") {
+							templ_7745c5c3_Err = ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID:           "disable-" + u.UserID,
+								TriggerLabel: disableLabel(ctx, u),
+								Title:        disableTitle(ctx, u),
+								Message:      disableConfirm(ctx, u),
+								ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+								CancelLabel:  i18n.T(ctx, "admin.cancel"),
+								Kind:         disableKind(u),
+								HX:           ui.HX{Post: RoutePath("admin.users.disable", u.UserID)},
+								Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
+							}).Render(ctx, templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
 						}
 						return nil
 					})
@@ -433,7 +435,7 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "admin.read_only"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 130, Col: 104}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 132, Col: 104}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -508,6 +510,15 @@ func adminUsersEmpty(d AdminUsersData) templ.Component {
 		}
 		return nil
 	})
+}
+
+// adminUserActionsAvailable reports whether any row command has a route behind
+// it. Both belong to workflows this page does not require and cannot: the
+// impersonation and user-governance workflows each require this page for their
+// own e2e specs, so an edge from here closes a cycle. An empty toolbar is
+// worse than the read-only caption, so the toolbar itself is gated too.
+func adminUserActionsAvailable() bool {
+	return RouteAvailable("admin.users.impersonate.form") || RouteAvailable("admin.users.disable")
 }
 
 // disableLabel names the row in the control, not just the verb: forty buttons
@@ -598,7 +609,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("org-" + o.OrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 203, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 214, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 				if templ_7745c5c3_Err != nil {
@@ -611,7 +622,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(o.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 204, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 215, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -624,7 +635,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(o.Slug)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 205, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 216, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -637,7 +648,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(o.MemberCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 206, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 217, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -658,7 +669,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(o.CreatedAt.Time.Format("Jan 2, 2006"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 210, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 221, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -755,7 +766,7 @@ func roleBadge(role string) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "admin.users.role_none"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 228, Col: 102}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 239, Col: 102}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -800,7 +811,38 @@ func roleForm(u sqlc.User) templ.Component {
 			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		if RouteAvailable("admin.users.role") {
+			templ_7745c5c3_Err = roleFormFields(u).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+func roleFormFields(u sqlc.User) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var29 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var29 == nil {
+			templ_7745c5c3_Var29 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var30 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -812,7 +854,7 @@ func roleForm(u sqlc.User) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Var30 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Var31 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 				if !templ_7745c5c3_IsBuffer {
@@ -836,7 +878,7 @@ func roleForm(u sqlc.User) templ.Component {
 					Attrs: ui.Attrs{
 						Class:  "w-28",
 						TestID: "role-select-" + u.UserID,
-						HX:     ui.HX{Post: "/admin/users/" + u.UserID + "/role", Trigger: "change", Swap: "none"},
+						HX:     ui.HX{Post: RoutePath("admin.users.role", u.UserID), Trigger: "change", Swap: "none"},
 					},
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -849,7 +891,7 @@ func roleForm(u sqlc.User) templ.Component {
 				Name:        "role",
 				Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
 				HiddenLabel: true,
-			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
+			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var31), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -857,8 +899,8 @@ func roleForm(u sqlc.User) templ.Component {
 		})
 		templ_7745c5c3_Err = ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
 			Class: "inline-block",
-			HX:    ui.HX{Post: "/admin/users/" + u.UserID + "/role"},
-		}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
+			HX:    ui.HX{Post: RoutePath("admin.users.role", u.UserID)},
+		}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

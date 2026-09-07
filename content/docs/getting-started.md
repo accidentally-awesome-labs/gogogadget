@@ -195,8 +195,12 @@ only two of them are the appearance/impersonation hooks — `auth.go` also names
 `templates.{NotConfigured,Disabled,SelectOrg}`, `testonly_content_guide.go`
 names `s.handleContent{Index,Detail}`, and `workflow_billing_local.go` names
 `s.productPlans` and `s.captureEvent`, none of which are declared. So the
-request-pipeline kind is necessary and not sufficient; the `templates` package
-needs the reference gate the `ui` package now has. Until then, `minimal` means
+request-pipeline kind is necessary and not sufficient. The `templates` package
+now HAS the reference gate the `ui` package has, for the targets a template
+names: `ValidateRouteReferences` refuses a control whose route nothing
+installs, which is why those twenty dangling controls cannot come back. It
+says nothing about a Go symbol a payload calls, which is the residual above.
+Until that closes, `minimal` means
 *the least this source can be made to boot as*, and saying otherwise would be
 advertising a shape that does not exist.
 

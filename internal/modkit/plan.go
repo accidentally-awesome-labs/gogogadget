@@ -363,10 +363,10 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	// it needs the whole graph's source. `payloads` is not that on a targeted
 	// update: plannedModules drops the retained modules, so the file map held
 	// only the advanced closure while the validators still iterated every
-	// manifest. The split is two and ten, and the record here said four and
+	// manifest. The split is two and eleven, and the record here said four and
 	// eight until an experiment corrected it.
 	//
-	// TWO of the thirteen can refuse because a declared file is ABSENT from the
+	// TWO of the fourteen can refuse because a declared file is ABSENT from the
 	// map. Both require a declaration and fail if they never see it, the same
 	// `found := false` over every key: ValidateShellSlotRenderers, in
 	// shell_scan.go, and ValidateCSPContributionSources, in csp.go.
@@ -376,12 +376,12 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	// because the package that declares it belongs to a retained module whose
 	// bytes were absent.
 	//
-	// The other ELEVEN ran vacuously: an absent payload is a scan that never
+	// The other TWELVE ran vacuously: an absent payload is a scan that never
 	// ran, so a forbidden pattern in a retained module's bytes passed.
 	// ValidateCLIHandlerPackages, ValidateShellProviderNeutrality,
 	// ValidateNoCredentialPresenceSelectors, ValidateSeamVendorHosts,
-	// ValidateAssetReferences, ValidateUIComponentRequires and
-	// ValidateNoRecorderGoroutineHandoff each
+	// ValidateAssetReferences, ValidateUIComponentRequires,
+	// ValidateRouteReferences and ValidateNoRecorderGoroutineHandoff each
 	// spell `content, ok := files[target]; if !ok { continue }`;
 	// ValidateCoreCLIPackages, ValidatePayloadAdapterImports,
 	// ValidateConfigFieldOwnership and ValidateDerivationPackages only ever
@@ -393,7 +393,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	// its import graph reaches a package, and absent files remove edges, so
 	// fewer edges means fewer chains means it passes.
 	//
-	// Ordering is not the reassurance it looks like: SIX of the eleven run
+	// Ordering is not the reassurance it looks like: SEVEN of the twelve run
 	// BEFORE the first of the two, and the two refuse only for a closure that
 	// declares a shell slot or a CSP contribution. Measured at 1416dccd with
 	// this fix absent, 697fbf42's loop test PASSED and its targeted `update`
@@ -457,6 +457,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, err
 	}
 	if err := ValidateUIComponentRequires(graph.modules, catalog.Modules, scanFiles); err != nil {
+		return Plan{}, err
+	}
+	if err := ValidateRouteReferences(graph.modules, catalog.Modules, scanFiles); err != nil {
 		return Plan{}, err
 	}
 	if err := ValidateNoRecorderGoroutineHandoff(graph.modules, scanFiles); err != nil {

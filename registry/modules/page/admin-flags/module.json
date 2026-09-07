@@ -4,7 +4,7 @@
     "id": "ggg/page/admin-flags",
     "kind": "page",
     "name": "admin-flags",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Admin feature flags list",
     "description": "The feature-flag table showing each flag's enabled state and percentage rollout.",
@@ -223,7 +223,7 @@
         "source": "internal/web/templates/admin_flags.templ",
         "target": "internal/web/templates/admin_flags.templ",
         "class": "templ",
-        "sha256": "df628675ab3cbe3a3711dbbfe558b41ad05d40af83cfa9ff8ca33a229317f6c0",
+        "sha256": "17140e7a26dc4e1f32f56500d54aef5cf48ec81e245750ed3757c78979c51ce7",
         "rewrite_module": true,
         "contract": false
       }

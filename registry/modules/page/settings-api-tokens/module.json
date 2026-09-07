@@ -4,7 +4,7 @@
     "id": "ggg/page/settings-api-tokens",
     "kind": "page",
     "name": "settings-api-tokens",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "API token settings",
     "description": "Renders the organization's API tokens with their scope and last-used state.",
@@ -168,7 +168,7 @@
         "source": "internal/web/templates/api_tokens.templ",
         "target": "internal/web/templates/api_tokens.templ",
         "class": "templ",
-        "sha256": "30835f69e26d8ae18d79209e5a6d521806caccf97b87d644194ab5720453afc1",
+        "sha256": "425cf2b466c719dedac22a5c21f436e3960892d7298b89fa6543f29255680ebc",
         "rewrite_module": true,
         "contract": false
       }

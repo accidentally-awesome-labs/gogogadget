@@ -59,11 +59,18 @@ func meterPct(used, limit int64) int {
 // without a reload and without losing focus. The poll exists only while the
 // subscription is still incomplete; a card that kept polling after the answer
 // arrived would hammer the endpoint forever.
+//
+// The fragment, the portal and checkout all belong to
+// ggg/workflow/billing-checkout, which requires this page for its own e2e
+// spec, so every edge from here to it is a cycle and each control is gated on
+// its route instead. ggg/profile/minimal and ggg/profile/web ship this page
+// with none of those routes; the poll pointed at a 404 and retried every two
+// seconds.
 func billingCardAttrs(processing bool) ui.Attrs {
 	attrs := ui.Attrs{ID: "billing-card", Class: "mb-6 max-w-lg"}
-	if processing {
+	if processing && RouteAvailable("billing-checkout.fragment") {
 		attrs.HX = ui.HX{
-			Get: "/app/settings/billing/fragment", Trigger: "every 2s", Swap: "outerMorph",
+			Get: RoutePath("billing-checkout.fragment"), Trigger: "every 2s", Swap: "outerMorph",
 		}
 	}
 	return attrs
@@ -183,12 +190,12 @@ templ SettingsBilling(d BillingData) {
 			}
 		}
 	}
-	if d.Sub != nil {
+	if d.Sub != nil && RouteAvailable("billing-checkout.portal") {
 		// Hosted boundary: the portal is the payment provider's, so this posts
 		// for a redirect and never renders a card field of its own.
 		@ui.Form(ui.FormOpts{
 			Target: "this", Swap: "innerHTML",
-			Attrs: ui.Attrs{Class: "mt-6", HX: ui.HX{Post: "/app/billing/portal", Disable: true}},
+			Attrs: ui.Attrs{Class: "mt-6", HX: ui.HX{Post: RoutePath("billing-checkout.portal"), Disable: true}},
 		}) {
 			@ui.Button(ui.ButtonOpts{
 				Label: i18n.T(ctx, "billing.manage"), Type: ui.TypeSubmit,
@@ -209,10 +216,10 @@ templ SettingsBilling(d BillingData) {
 // because the 422/503 the server renders back is meant to land inside this
 // form; on success the handler answers with a redirect to the hosted checkout.
 templ settingsPlanAction(plan billing.Plan, current billing.Plan) {
-	if planRank(plan.Key) > planRank(current.Key) {
+	if planRank(plan.Key) > planRank(current.Key) && RouteAvailable("billing-checkout.create") {
 		@ui.Form(ui.FormOpts{
 			Target: "this", Swap: "innerHTML",
-			Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+			Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("billing-checkout.create"), Disable: true}},
 		}) {
 			<input type="hidden" name="plan" value={ plan.Key }/>
 			@ui.Button(ui.ButtonOpts{

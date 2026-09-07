@@ -165,11 +165,16 @@ templ AppLayout(page Page, content templ.Component) {
 		@documentHead(page)
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
-			if page.Impersonator != nil {
+			// The exit route belongs to ggg/workflow/impersonation, which
+			// requires this module, so the shell gates on the route rather than
+			// declaring an edge that would close a cycle. Without that workflow
+			// nothing can set page.Impersonator either, so the two conditions
+			// agree; the route check is what makes that true by construction.
+			if page.Impersonator != nil && RouteAvailable("app.impersonation.exit") {
 				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "impersonation-banner"}}) {
 					<div class="flex items-center justify-center gap-3">
 						<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
-						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{HX: ui.HX{Post: "/app/impersonation/exit", Disable: true}}}) {
+						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("app.impersonation.exit"), Disable: true}}}) {
 							<button type="submit" class="font-semibold underline cursor-pointer" data-testid="impersonation-exit">{ i18n.T(ctx, "impersonation.exit") }</button>
 						}
 					</div>

@@ -162,7 +162,12 @@ func Pricing(plans []billing.Plan, authed bool, currentPlanKey string) templ.Com
 //
 // A plan with no Polar product renders nothing at all: checkout is hosted, and
 // offering a control that cannot reach the merchant of record is worse than
-// offering none.
+// offering none. The same argument applies one level up: with no checkout route
+// installed there is no merchant of record to reach, and ggg/profile/minimal
+// and ggg/profile/web ship this page in exactly that state. The acyclic
+// `requires` edge to ggg/workflow/billing-checkout is available here and is
+// still wrong — it would put billing into the closure those profiles exist to
+// keep small, and a plan list is a legitimate marketing page on its own.
 func pricingAction(plan billing.Plan, authed bool, currentPlanKey string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -202,7 +207,7 @@ func pricingAction(plan billing.Plan, authed bool, currentPlanKey string) templ.
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if plan.ProviderProductID != "" {
+		} else if plan.ProviderProductID != "" && RouteAvailable("billing-checkout.create") {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "     ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -226,7 +231,7 @@ func pricingAction(plan billing.Plan, authed bool, currentPlanKey string) templ.
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(plan.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pricing.templ`, Line: 67, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pricing.templ`, Line: 72, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 				if templ_7745c5c3_Err != nil {
@@ -248,7 +253,7 @@ func pricingAction(plan billing.Plan, authed bool, currentPlanKey string) templ.
 			})
 			templ_7745c5c3_Err = ui.Form(ui.FormOpts{
 				Target: "this", Swap: "innerHTML",
-				Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+				Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("billing-checkout.create"), Disable: true}},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -27,9 +27,25 @@ templ logo() {
 
 // themeToggle is the shell's wrapper around ui.ThemeToggle: it resolves the
 // accessible name from the request's locale, which the ui package - markup
-// only, no i18n import - cannot do for itself.
+// only, no i18n import - cannot do for itself, and it decides whether the
+// control belongs on the page at all.
+//
+// The toggle persists the chosen theme by posting to a route
+// ggg/workflow/appearance owns, and this module cannot require that workflow:
+// the shell is the floor every project installs, and ggg/workflow/appearance
+// already requires ggg/system/server, so the edge would close a cycle. So the
+// control is GATED, the way shellMount gates a provider's mount - if nothing
+// declares the route, there is nothing to persist to and the toggle does not
+// render. The endpoint travels as a data attribute for the same reason the
+// notification stream's does: static/app.js is this module's sibling in the
+// shell and must not name a workflow's path either.
 templ themeToggle() {
-	@ui.ThemeToggle(ui.ThemeToggleOpts{Label: i18n.T(ctx, "a11y.theme")})
+	if RouteAvailable("appearance.set-theme") {
+		@ui.ThemeToggle(ui.ThemeToggleOpts{
+			Label: i18n.T(ctx, "a11y.theme"),
+			Attrs: ui.Attrs{Data: map[string]string{"theme-endpoint": RoutePath("appearance.set-theme")}},
+		})
+	}
 }
 
 // isAnchorLink reports an in-page target. Boosting these is worse than leaving

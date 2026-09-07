@@ -67,11 +67,18 @@ func meterPct(used, limit int64) int {
 // without a reload and without losing focus. The poll exists only while the
 // subscription is still incomplete; a card that kept polling after the answer
 // arrived would hammer the endpoint forever.
+//
+// The fragment, the portal and checkout all belong to
+// ggg/workflow/billing-checkout, which requires this page for its own e2e
+// spec, so every edge from here to it is a cycle and each control is gated on
+// its route instead. ggg/profile/minimal and ggg/profile/web ship this page
+// with none of those routes; the poll pointed at a 404 and retried every two
+// seconds.
 func billingCardAttrs(processing bool) ui.Attrs {
 	attrs := ui.Attrs{ID: "billing-card", Class: "mb-6 max-w-lg"}
-	if processing {
+	if processing && RouteAvailable("billing-checkout.fragment") {
 		attrs.HX = ui.HX{
-			Get: "/app/settings/billing/fragment", Trigger: "every 2s", Swap: "outerMorph",
+			Get: RoutePath("billing-checkout.fragment"), Trigger: "every 2s", Swap: "outerMorph",
 		}
 	}
 	return attrs
@@ -135,7 +142,7 @@ func BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) tem
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "billing.processing_sub"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 78, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 85, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -211,7 +218,7 @@ func BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) tem
 							var templ_7745c5c3_Var7 string
 							templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "billing.ends_on", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 100, Col: 91}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 107, Col: 91}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 							if templ_7745c5c3_Err != nil {
@@ -221,7 +228,7 @@ func BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) tem
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "billing.period_ends", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 102, Col: 95}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 109, Col: 95}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -282,7 +289,7 @@ func BillingError(msg string) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 112, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 119, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -351,7 +358,7 @@ func NotConfigured(feature, docsSlug string) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "billing.not_configured_body"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 129, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 136, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -423,7 +430,7 @@ func SettingsBilling(d BillingData) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "billing.welcome"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 143, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 150, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -523,7 +530,7 @@ func SettingsBilling(d BillingData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if d.Sub != nil {
+		if d.Sub != nil && RouteAvailable("billing-checkout.portal") {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "  ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -551,7 +558,7 @@ func SettingsBilling(d BillingData) templ.Component {
 			})
 			templ_7745c5c3_Err = ui.Form(ui.FormOpts{
 				Target: "this", Swap: "innerHTML",
-				Attrs: ui.Attrs{Class: "mt-6", HX: ui.HX{Post: "/app/billing/portal", Disable: true}},
+				Attrs: ui.Attrs{Class: "mt-6", HX: ui.HX{Post: RoutePath("billing-checkout.portal"), Disable: true}},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -592,7 +599,7 @@ func settingsPlanAction(plan billing.Plan, current billing.Plan) templ.Component
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if planRank(plan.Key) > planRank(current.Key) {
+		if planRank(plan.Key) > planRank(current.Key) && RouteAvailable("billing-checkout.create") {
 			templ_7745c5c3_Var22 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -612,7 +619,7 @@ func settingsPlanAction(plan billing.Plan, current billing.Plan) templ.Component
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(plan.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 217, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/billing.templ`, Line: 224, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 				if templ_7745c5c3_Err != nil {
@@ -634,7 +641,7 @@ func settingsPlanAction(plan billing.Plan, current billing.Plan) templ.Component
 			})
 			templ_7745c5c3_Err = ui.Form(ui.FormOpts{
 				Target: "this", Swap: "innerHTML",
-				Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+				Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("billing-checkout.create"), Disable: true}},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var22), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

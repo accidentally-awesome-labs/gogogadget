@@ -20,14 +20,25 @@ func localeAriaCurrent(current bool) string {
 }
 
 // LocaleSwitcher is the language dropdown (public footer + app sidebar).
-// Each option is a tiny ui.Form posting to /set-locale, and returnTo brings the
-// user back to the page they were on. The response is a HARD redirect because
-// the locale changes the SHELL, which boosted navigation never re-renders — and
-// that is also what makes the no-script path correct: a plain submit derives
-// method="post" action="/set-locale" from the htmx verb, carries the hidden
-// token field, and lands on a 303 back to returnTo. Plain <details> — no JS,
-// CSP-safe.
+// Each option is a tiny ui.Form posting to the locale route, and returnTo
+// brings the user back to the page they were on. The response is a HARD
+// redirect because the locale changes the SHELL, which boosted navigation never
+// re-renders — and that is also what makes the no-script path correct: a plain
+// submit derives method="post" and the action from the htmx verb, carries the
+// hidden token field, and lands on a 303 back to returnTo. Plain <details> — no
+// JS, CSP-safe.
+//
+// The route belongs to ggg/workflow/appearance, which requires this module, so
+// the switcher is gated rather than declaring an edge that closes a cycle. A
+// project with no appearance workflow keeps whatever locale the request
+// negotiates and offers no control that cannot persist a change.
 templ LocaleSwitcher(path string) {
+	if RouteAvailable("appearance.locale") {
+		@localeSwitcherMenu(path)
+	}
+}
+
+templ localeSwitcherMenu(path string) {
 	<details class="relative">
 		<summary class="flex items-center gap-1 cursor-pointer list-none text-sm text-fg-muted hover:text-fg select-none" data-testid="locale-switcher">
 			@Icon(IconGlobe, "w-4 h-4")
@@ -35,7 +46,7 @@ templ LocaleSwitcher(path string) {
 		</summary>
 		<div class="absolute left-0 mt-2 w-36 card p-2 flex flex-col gap-1 z-(--z-overlay)">
 			for _, l := range i18n.Locales {
-				@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-locale"}}}) {
+				@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("appearance.locale")}}}) {
 					<input type="hidden" name="lang" value={ l.Code }/>
 					<input type="hidden" name="returnTo" value={ path }/>
 					<button

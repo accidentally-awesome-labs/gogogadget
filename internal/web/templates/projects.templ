@@ -64,11 +64,17 @@ templ ProjectsTable(d ProjectListData) {
 				<td class="px-4 py-3 text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 				<td class="px-4 py-3">
 					<div class="card-actions">
-						@ui.ButtonLink(ui.ButtonLinkOpts{
-							Label: i18n.T(ctx, "projects.edit"),
-							Href:  fmt.Sprintf("/app/projects/%d/edit", p.ID),
-							Size:  ui.SizeXS,
-						})
+						// The edit page is its own module and the closure can
+						// leave it out: ggg/profile/minimal and ggg/profile/web
+						// ship this table without ggg/page/project-edit, and
+						// the row's Edit button 404ed.
+						if RouteAvailable("projects.edit") {
+							@ui.ButtonLink(ui.ButtonLinkOpts{
+								Label: i18n.T(ctx, "projects.edit"),
+								Href:  RoutePath("projects.edit", fmt.Sprint(p.ID)),
+								Size:  ui.SizeXS,
+							})
+						}
 						@ui.Button(ui.ButtonOpts{
 							Label: i18n.T(ctx, "projects.archive"), Size: ui.SizeXS,
 							Attrs: ui.Attrs{HX: ui.HX{Post: fmt.Sprintf("/app/projects/%d/archive", p.ID)}},

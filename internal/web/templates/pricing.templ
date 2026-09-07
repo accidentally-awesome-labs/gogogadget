@@ -40,7 +40,12 @@ templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 //
 // A plan with no Polar product renders nothing at all: checkout is hosted, and
 // offering a control that cannot reach the merchant of record is worse than
-// offering none.
+// offering none. The same argument applies one level up: with no checkout route
+// installed there is no merchant of record to reach, and ggg/profile/minimal
+// and ggg/profile/web ship this page in exactly that state. The acyclic
+// `requires` edge to ggg/workflow/billing-checkout is available here and is
+// still wrong — it would put billing into the closure those profiles exist to
+// keep small, and a plan list is a legitimate marketing page on its own.
 templ pricingAction(plan billing.Plan, authed bool, currentPlanKey string) {
 	if !authed {
 		@ui.ButtonLink(ui.ButtonLinkOpts{
@@ -54,7 +59,7 @@ templ pricingAction(plan billing.Plan, authed bool, currentPlanKey string) {
 			Disabled: true,
 			Attrs:    ui.Attrs{Class: "w-full"},
 		})
-	} else if plan.ProviderProductID != "" {
+	} else if plan.ProviderProductID != "" && RouteAvailable("billing-checkout.create") {
 		// Target and Swap restate htmx's own defaults - the form itself,
 		// innerHTML - because Form always emits hx-target, and an empty one
 		// resolves through querySelector("") and throws. On success the handler
@@ -62,7 +67,7 @@ templ pricingAction(plan billing.Plan, authed bool, currentPlanKey string) {
 		// 422 the server renders back into this form.
 		@ui.Form(ui.FormOpts{
 			Target: "this", Swap: "innerHTML",
-			Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+			Attrs: ui.Attrs{HX: ui.HX{Post: RoutePath("billing-checkout.create"), Disable: true}},
 		}) {
 			<input type="hidden" name="plan" value={ plan.Key }/>
 			@ui.Button(ui.ButtonOpts{

@@ -4413,7 +4413,7 @@ func Gallery() templ.Component {
 				Groups: []ui.CommandGroupData{
 					{Title: "Navigate", Items: []ui.CommandItemData{
 						{ID: "cmd-projects", Label: "Go to projects", Href: "/app/projects", Icon: ui.IconFolder, Shortcut: "G P"},
-						{ID: "cmd-settings", Label: "Go to settings", Href: "/app/settings", Icon: ui.IconSettings},
+						{ID: "cmd-settings", Label: "Go to settings", Href: "/app/settings/account", Icon: ui.IconSettings},
 					}},
 					{Title: "Create", Items: []ui.CommandItemData{
 						{ID: "cmd-new", Label: "New project", Href: "/app/projects", Hint: "Projects", Icon: ui.IconAdd},

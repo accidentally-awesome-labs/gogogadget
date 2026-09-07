@@ -4,7 +4,7 @@
     "id": "ggg/page/pricing",
     "kind": "page",
     "name": "pricing",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Pricing page",
     "description": "Plan comparison with the signed-in organization's current plan highlighted.",
@@ -98,7 +98,7 @@
         "source": "internal/web/templates/pricing.templ",
         "target": "internal/web/templates/pricing.templ",
         "class": "templ",
-        "sha256": "ce4d74e06ed6508d66b8d22a2d0816cbf889332fb604e781465d6a50588f1976",
+        "sha256": "18dd65426fae85f268debdf25d21ce2878d2a70db0dbea529acd7cef38f21956",
         "rewrite_module": true,
         "contract": false
       }

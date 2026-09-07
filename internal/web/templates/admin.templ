@@ -101,12 +101,12 @@ templ AdminUsersTable(d AdminUsersData) {
 						}
 					</td>
 					<td class="text-right">
-						if AdminWrite(ctx) {
+						if AdminWrite(ctx) && adminUserActionsAvailable() {
 							@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.users.row_actions_aria", string(u.Email)), Attrs: ui.Attrs{Class: "justify-end"}}) {
-								if !u.DisabledAt.Valid {
+								if !u.DisabledAt.Valid && RouteAvailable("admin.users.impersonate.form") {
 									@ui.ButtonLink(ui.ButtonLinkOpts{
 										Label: i18n.T(ctx, "admin.users.impersonate"),
-										Href:  "/admin/users/" + u.UserID + "/impersonate",
+										Href:  RoutePath("admin.users.impersonate.form", u.UserID),
 										Size:  ui.SizeXS,
 										Attrs: ui.Attrs{
 											TestID: "admin-impersonate",
@@ -114,17 +114,19 @@ templ AdminUsersTable(d AdminUsersData) {
 										},
 									})
 								}
-								@ui.ConfirmAction(ui.ConfirmActionOpts{
-									ID:           "disable-" + u.UserID,
-									TriggerLabel: disableLabel(ctx, u),
-									Title:        disableTitle(ctx, u),
-									Message:      disableConfirm(ctx, u),
-									ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
-									CancelLabel:  i18n.T(ctx, "admin.cancel"),
-									Kind:         disableKind(u),
-									HX:           ui.HX{Post: "/admin/users/" + u.UserID + "/disable"},
-									Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
-								})
+								if RouteAvailable("admin.users.disable") {
+									@ui.ConfirmAction(ui.ConfirmActionOpts{
+										ID:           "disable-" + u.UserID,
+										TriggerLabel: disableLabel(ctx, u),
+										Title:        disableTitle(ctx, u),
+										Message:      disableConfirm(ctx, u),
+										ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+										CancelLabel:  i18n.T(ctx, "admin.cancel"),
+										Kind:         disableKind(u),
+										HX:           ui.HX{Post: RoutePath("admin.users.disable", u.UserID)},
+										Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
+									})
+								}
 							}
 						} else {
 							<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
@@ -145,6 +147,15 @@ templ adminUsersEmpty(d AdminUsersData) {
 		ClearLabel: i18n.T(ctx, "admin.clear_search"),
 		Target:     "#table-container",
 	})
+}
+
+// adminUserActionsAvailable reports whether any row command has a route behind
+// it. Both belong to workflows this page does not require and cannot: the
+// impersonation and user-governance workflows each require this page for their
+// own e2e specs, so an edge from here closes a cycle. An empty toolbar is
+// worse than the read-only caption, so the toolbar itself is gated too.
+func adminUserActionsAvailable() bool {
+	return RouteAvailable("admin.users.impersonate.form") || RouteAvailable("admin.users.disable")
 }
 
 // disableLabel names the row in the control, not just the verb: forty buttons
@@ -239,9 +250,15 @@ templ roleBadge(role string) {
 // aria-label: it names the control AND gives it a click target, and it goes
 // through the same catalog every other label does.
 templ roleForm(u sqlc.User) {
+	if RouteAvailable("admin.users.role") {
+		@roleFormFields(u)
+	}
+}
+
+templ roleFormFields(u sqlc.User) {
 	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
 		Class: "inline-block",
-		HX:    ui.HX{Post: "/admin/users/" + u.UserID + "/role"},
+		HX:    ui.HX{Post: RoutePath("admin.users.role", u.UserID)},
 	}}) {
 		@ui.Field(ui.FieldOpts{
 			ID:          "role-" + u.UserID,
@@ -261,7 +278,7 @@ templ roleForm(u sqlc.User) {
 				Attrs: ui.Attrs{
 					Class:  "w-28",
 					TestID: "role-select-" + u.UserID,
-					HX:     ui.HX{Post: "/admin/users/" + u.UserID + "/role", Trigger: "change", Swap: "none"},
+					HX:     ui.HX{Post: RoutePath("admin.users.role", u.UserID), Trigger: "change", Swap: "none"},
 				},
 			})
 		}

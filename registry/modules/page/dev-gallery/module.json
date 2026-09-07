@@ -4,7 +4,7 @@
     "id": "ggg/page/dev-gallery",
     "kind": "page",
     "name": "dev-gallery",
-    "revision": 6,
+    "revision": 7,
     "contract": 1,
     "title": "Component gallery",
     "description": "The dev-only reference page that renders every design token and component variant on one URL, doubling as the visual baseline for the component layer.",
@@ -1178,7 +1178,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "b232da58d4228240566100a26c6f11f58f54f3c664fc018743c55d3bf4495712",
+        "sha256": "19033220257beec3e02e7d53148b082ad0bd424eac9c423c334cadc810afa47d",
         "rewrite_module": true,
         "contract": false
       },

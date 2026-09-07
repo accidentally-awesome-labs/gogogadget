@@ -66,20 +66,30 @@ templ Sidebar(page Page) {
 		// swaps only #content, so the stream survives page changes. app.js
 		// opens it with a native EventSource and fires a "notifications"
 		// event at the badge below.
-		<div data-notification-stream="/app/notifications/stream">
-			<a href="/app/notifications" data-testid="notifications-bell" aria-label={ i18n.T(ctx, "notifications.title") }
-				hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
-				class="relative inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
-				@Icon(IconBell, "w-5 h-5")
-				{ i18n.T(ctx, "sidebar.notifications") }
-				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, notifications" data-testid="notifications-badge">
-					// Placeholder until the count arrives, so the bell does not
-					// jump sideways on every page load. Replaced wholesale by
-					// the fragment (hx-swap defaults to innerHTML here).
-					<span class="skeleton inline-block h-4 w-4 align-middle" aria-hidden="true"></span>
-				</span>
-			</a>
-		</div>
+		//
+		// All three targets - inbox page, badge fragment, stream - belong to
+		// modules the shell does not require and cannot: ggg/page/notifications
+		// and ggg/workflow/notification-inbox both require ggg/system/server, so
+		// either edge closes a cycle. ggg/profile/minimal and ggg/profile/web
+		// install neither, and shipped a bell that 404ed in both.
+		if RouteAvailable("notifications.index") {
+			<div data-notification-stream={ RoutePath("notifications.stream") }>
+				<a href={ templ.SafeURL(RoutePath("notifications.index")) } data-testid="notifications-bell" aria-label={ i18n.T(ctx, "notifications.title") }
+					hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
+					class="relative inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
+					@Icon(IconBell, "w-5 h-5")
+					{ i18n.T(ctx, "sidebar.notifications") }
+					if RouteAvailable("notifications.badge") {
+						<span id="notif-badge" hx-get={ RoutePath("notifications.badge") } hx-trigger="load, notifications" data-testid="notifications-badge">
+							// Placeholder until the count arrives, so the bell does not
+							// jump sideways on every page load. Replaced wholesale by
+							// the fragment (hx-swap defaults to innerHTML here).
+							<span class="skeleton inline-block h-4 w-4 align-middle" aria-hidden="true"></span>
+						</span>
+					}
+				</a>
+			</div>
+		}
 		@appNavSections(page, "sidebar")
 		<div class="mt-auto pt-4 border-t border-border">
 			@LocaleSwitcher(page.Path)

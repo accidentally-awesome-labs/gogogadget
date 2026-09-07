@@ -4,7 +4,7 @@
     "id": "ggg/page/projects",
     "kind": "page",
     "name": "projects",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Projects list",
     "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
@@ -216,7 +216,7 @@
         "source": "internal/web/templates/projects.templ",
         "target": "internal/web/templates/projects.templ",
         "class": "templ",
-        "sha256": "cf9510729255b2843b4144ab98a244fda0f282ee30f3662189bd93c6163fe75f",
+        "sha256": "efa7382bf8cc37b09323157987a8cf4faf86a40584d7ecd3d30237ae3a6c52e5",
         "rewrite_module": true,
         "contract": false
       }

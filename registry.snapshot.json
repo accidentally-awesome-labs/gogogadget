@@ -696,7 +696,7 @@
     },
     {
       "path": "registry/modules/page/admin-flags/module.json",
-      "sha256": "ba06ba21c355f082fde67dbd6783cfe62c1432366312503198ae44e679114cb7"
+      "sha256": "fc3aef055563b7b68ce0e8808645a0c59f4ab0130b5f526b61ac24904a309052"
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
@@ -712,7 +712,7 @@
     },
     {
       "path": "registry/modules/page/admin-overview/module.json",
-      "sha256": "5a792b8a6e06d07afddf8b9cf478ef96c5674f00fed3c0cab01c3ee000539f48"
+      "sha256": "7484ac85d2e388f79dc7d26f0018b72fa4b2c3b0c0857eaf3efc6d0ccf52a729"
     },
     {
       "path": "registry/modules/page/admin-schedules/module.json",
@@ -736,7 +736,7 @@
     },
     {
       "path": "registry/modules/page/dev-gallery/module.json",
-      "sha256": "ddd1662024c654bf41e5d05446700a3fbe2ed9154479e633074a54b26a0e91eb"
+      "sha256": "430685037c4dcfd2c34e3b88fc8eac282f191642a0ee423494b8b4f2ab8d75f0"
     },
     {
       "path": "registry/modules/page/docs-index/module.json",
@@ -764,7 +764,7 @@
     },
     {
       "path": "registry/modules/page/pricing/module.json",
-      "sha256": "e7466c92df387bd1cf80b3dd2e6341f115b52031a24510276ec734866fc02513"
+      "sha256": "a3ba438161cd4e1de25ac1b09f826d6bfde70ec6341ec5046384af315d1ec2ae"
     },
     {
       "path": "registry/modules/page/privacy/module.json",
@@ -780,19 +780,19 @@
     },
     {
       "path": "registry/modules/page/projects/module.json",
-      "sha256": "7d102db8b409ea2116eddeaa4f3489dd5846874ebc4a415752b66eaefaafd3d0"
+      "sha256": "f3c5c102d815945849b571de145368b24de4efb437f5ba3c35b67dfaf94cf085"
     },
     {
       "path": "registry/modules/page/settings-account/module.json",
-      "sha256": "4fc01129164fe800837db6aa58fa6eeab945685fda45a00f05822018be081af6"
+      "sha256": "02783ebb52917ae6503b7106f07dbc63bed2e26af2ec5e682e86afb19d86ebcc"
     },
     {
       "path": "registry/modules/page/settings-api-tokens/module.json",
-      "sha256": "b2d73c8e786a5b38f3d742b1b415446a8bfb490d11ff819252faf2ff08b94f2d"
+      "sha256": "ac125f9fa071a6771881d6c95942553fc1723dc363e30962fd06782ac9411fac"
     },
     {
       "path": "registry/modules/page/settings-billing/module.json",
-      "sha256": "320db8c9054464ae50b193c050337be28c35497a6fc99f2ec1d50396d4a89f07"
+      "sha256": "a32c380eed2ff14636f7366b6fe5c880ba0b904071359a4b09e0a0451c4fad8c"
     },
     {
       "path": "registry/modules/page/settings-notifications/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "516a3ab153b3cf4b0f6a4e85e7bcb92150d70f47ad86770776aa75f53c623e07"
+      "sha256": "ecf41e88e036434ee10b3a36a0c39d5ed1b09a0fb77e56b8ef200f06af22cc7d"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -940,7 +940,7 @@
     },
     {
       "path": "registry/modules/system/i18n/module.json",
-      "sha256": "531d3e2a16f52f8e9d19e6379123ef24f0a613236efed2b691230fc7e92102a5"
+      "sha256": "ad3c126a646b848ddeef2f69e65d1c551ee6862da6268dc63f55895b04e55024"
     },
     {
       "path": "registry/modules/system/identity-clerk/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "0d16459b551c6d8c30df4820bb586554a6305f88851edf669d5a7e31e856b5e4"
+      "sha256": "bba1dfd0f22e1fc9e822f7d02074adf7d0eaf39f0b6082c1d34fdc305b317c87"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1096,11 +1096,11 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "dd9d9b786245a3a860072cf8dceb654b7057cec129f7aad53753422b3ef0cf50"
+      "sha256": "4e07c83181f89e3c5cbf8dc8c1b52d4a7f0562ea26db8946f56a9288e962e372"
     },
     {
       "path": "registry/modules/system/static/module.json",
-      "sha256": "db4932af34830f26a5d9282858d5b6e966112e7647bf31731a1571895bf247bd"
+      "sha256": "983cd8626a71d28bd7a0329bed3a5006b0b88df32608eb06f7c5ce16b5fc62c9"
     },
     {
       "path": "registry/modules/system/storage-filesystem/module.json",
@@ -1280,7 +1280,7 @@
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "09ad34aac1da62770f45ac57a2a418d4175d290ceba52a8eb2843b3bd573c48c"
+      "sha256": "7fc200c3d604ceb91f8b10270ed4b0dcd68aa85fc268ac2128bfdac2627ddbcc"
     },
     {
       "path": "registry/profiles/saas.json",

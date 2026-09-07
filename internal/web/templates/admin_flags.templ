@@ -100,14 +100,24 @@ templ adminFlagsTable(d FlagsData) {
 		for _, f := range d.Flags {
 			<tr id={ "flag-row-" + f.Key } data-testid="flag-row">
 				<td>
-					@ui.Link(ui.LinkOpts{Label: f.Key, Href: "/admin/flags/" + f.Key, Attrs: ui.Attrs{Class: "font-medium"}})
+					// The key links to the flag detail page when that page is
+					// installed, and is plain text when it is not:
+					// ggg/profile/minimal and ggg/profile/web ship this list
+					// without ggg/page/admin-flag-detail, and the link 404ed.
+					// The edge is acyclic but wrong — requiring the detail page
+					// would pull it into the closure those profiles keep small.
+					if RouteAvailable("admin.flags.show") {
+						@ui.Link(ui.LinkOpts{Label: f.Key, Href: RoutePath("admin.flags.show", f.Key), Attrs: ui.Attrs{Class: "font-medium"}})
+					} else {
+						<span class="font-medium">{ f.Key }</span>
+					}
 				</td>
 				<td class="text-fg-muted text-xs">{ f.Description }</td>
 				<td>
-					if AdminWrite(ctx) {
+					if AdminWrite(ctx) && RouteAvailable("admin.flags.toggle") {
 						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{
 							Class: "inline",
-							HX:    ui.HX{Post: fmt.Sprintf("/admin/flags/%s/toggle", f.Key), Disable: true},
+							HX:    ui.HX{Post: RoutePath("admin.flags.toggle", f.Key), Disable: true},
 						}}) {
 							@ui.ToggleButton(ui.ToggleButtonOpts{
 								Label: onOffLabel(ctx, f.Enabled),
@@ -121,10 +131,10 @@ templ adminFlagsTable(d FlagsData) {
 					}
 				</td>
 				<td>
-					if AdminWrite(ctx) {
+					if AdminWrite(ctx) && RouteAvailable("admin.flags.rollout") {
 						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{
 							Class: "flex items-center gap-2",
-							HX:    ui.HX{Post: fmt.Sprintf("/admin/flags/%s/rollout", f.Key), Disable: true},
+							HX:    ui.HX{Post: RoutePath("admin.flags.rollout", f.Key), Disable: true},
 						}}) {
 							// Name stays "rollout" for every row because that is what
 							// the handler reads, so the element id comes from ID.
@@ -148,7 +158,7 @@ templ adminFlagsTable(d FlagsData) {
 					}
 				</td>
 				<td class="text-right">
-					if AdminWrite(ctx) {
+					if AdminWrite(ctx) && RouteAvailable("admin.flags.delete") {
 						@ui.ConfirmAction(ui.ConfirmActionOpts{
 							ID:           "flag-delete-dialog-" + f.Key,
 							TriggerLabel: i18n.T(ctx, "flags.delete_row", f.Key),
@@ -157,7 +167,7 @@ templ adminFlagsTable(d FlagsData) {
 							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 							CancelLabel:  i18n.T(ctx, "admin.cancel"),
 							Kind:         ui.KindDanger,
-							HX:           ui.HX{Post: fmt.Sprintf("/admin/flags/%s/delete", f.Key)},
+							HX:           ui.HX{Post: RoutePath("admin.flags.delete", f.Key)},
 							Attrs:        ui.Attrs{TestID: "flag-delete-" + f.Key},
 						})
 					}
@@ -220,7 +230,7 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 					}
 				</td>
 				<td class="text-right">
-					if AdminWrite(ctx) {
+					if AdminWrite(ctx) && RouteAvailable("admin.flags.override_delete") {
 						@ui.ConfirmAction(ui.ConfirmActionOpts{
 							ID:           "flag-override-delete-dialog-" + o.OrgID,
 							TriggerLabel: i18n.T(ctx, "flags.override_delete_row", o.Name),
@@ -229,7 +239,7 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 							CancelLabel:  i18n.T(ctx, "admin.cancel"),
 							Kind:         ui.KindDanger,
-							HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.OrgID + "/delete"},
+							HX:           ui.HX{Post: RoutePath("admin.flags.override_delete", flag.Key, o.OrgID)},
 							Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.OrgID},
 						})
 					}
@@ -237,12 +247,16 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 			</tr>
 		}
 	}
-	if AdminWrite(ctx) {
+	// AdminWrite is the viewer's permission; RouteAvailable is whether
+	// ggg/workflow/admin-flags is installed to serve the write at all. That
+	// workflow requires this page for its own e2e spec, so the edge would be a
+	// cycle and the control is gated instead.
+	if AdminWrite(ctx) && RouteAvailable("admin.flags.override_set") {
 		@ui.Form(ui.FormOpts{
 			Swap: "none",
 			Attrs: ui.Attrs{
 				Class: "card max-w-3xl space-y-4", TestID: "flag-override-form",
-				HX: ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides", Disable: true},
+				HX: ui.HX{Post: RoutePath("admin.flags.override_set", flag.Key), Disable: true},
 			},
 		}) {
 			<div class="grid sm:grid-cols-3 gap-4 items-end">

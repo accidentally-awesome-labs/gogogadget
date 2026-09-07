@@ -233,13 +233,15 @@ func ProjectsTable(d ProjectListData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = ui.ButtonLink(ui.ButtonLinkOpts{
-					Label: i18n.T(ctx, "projects.edit"),
-					Href:  fmt.Sprintf("/app/projects/%d/edit", p.ID),
-					Size:  ui.SizeXS,
-				}).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
+				if RouteAvailable("projects.edit") {
+					templ_7745c5c3_Err = ui.ButtonLink(ui.ButtonLinkOpts{
+						Label: i18n.T(ctx, "projects.edit"),
+						Href:  RoutePath("projects.edit", fmt.Sprint(p.ID)),
+						Size:  ui.SizeXS,
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 				}
 				templ_7745c5c3_Err = ui.Button(ui.ButtonOpts{
 					Label: i18n.T(ctx, "projects.archive"), Size: ui.SizeXS,
@@ -448,7 +450,7 @@ func ProjectForm(d ProjectFormData) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/projects.templ`, Line: 163, Col: 84}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/projects.templ`, Line: 169, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -481,7 +483,7 @@ func ProjectForm(d ProjectFormData) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "projects.fix_error"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/projects.templ`, Line: 169, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/projects.templ`, Line: 175, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
