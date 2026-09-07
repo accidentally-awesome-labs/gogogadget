@@ -33,8 +33,14 @@ import (
 // What it does not prove is that the external tools succeed: templ, sqlc and
 // Tailwind never run here, so a payload that parses as Go but fails templ, or
 // a query sqlc rejects for a reason other than a missing table, is out of
-// scope. The five real `ggg new` runs stay the release measurement; this is
-// the gate that fails in `go test` on the commit that breaks a profile.
+// scope.
+//
+// That row exists and is named:
+// gggcli.TestEveryShippedProfileCreatesAProjectThatIsSyncClean runs the real
+// `ggg new` per profile and then `sync --check --offline` in the created
+// tree, ~22 s each, in CI's `profiles` job. Its header carries the whole
+// matrix and the reason it is not a `make check` step. This is still the row
+// that fails in `go test` on the commit that breaks a profile.
 func TestEveryShippedProfileResolvesIntoACoherentProject(t *testing.T) {
 	root := repoRoot(t)
 	catalog, err := modkit.LoadCatalog(os.DirFS(root))

@@ -29,6 +29,28 @@
 // Scanning also covers content htmx inserts, which an Alpine-only adapter would
 // have missed on any fragment swap.
 function scan(root) {
+  // The registry is a DEFERRED script and this scan is not guaranteed to run
+  // after it. htmx 4 initialises with
+  // `"loading" === document.readyState ? addEventListener("DOMContentLoaded", t)
+  // : setTimeout(t)`, a deferred script runs with readyState already
+  // `interactive`, and the shell loads htmx before static/ui-engines.js — so
+  // htmx's `htmx:after:process`, one of the three events below, can fire
+  // while the script that defines window.__gggEngines is still pending.
+  //
+  // Scanning then is not merely early, it is PERMANENT: every root would be
+  // marked requested and handed the registry-miss rejection, which loadEngine
+  // caches and never evicts because there is no request to retry. Nothing on
+  // the page would ever enhance again, and only a fresh document recovered
+  // it — which is why it showed up as a test that passed on retry.
+  //
+  // So an absent registry is not an answer, it is "not yet". The object, not
+  // its keys, is the signal: the emitter writes
+  // `window.__gggEngines = window.__gggEngines || {}` unconditionally, so a
+  // project that installs no engine still has the object, and a root naming
+  // an engine the registry does not declare still fails loudly below.
+  // DOMContentLoaded and alpine:initialized both fire after every deferred
+  // script, so the roots left here are picked up with the real registry.
+  if (!window.__gggEngines) return;
   const scope = root && root.querySelectorAll ? root : document;
   scope.querySelectorAll("[data-ui-engine]").forEach((el) => {
     const name = el.dataset.uiEngine;

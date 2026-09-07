@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -544,8 +545,16 @@ func TestVisualTaskRunsContainerHarness(t *testing.T) {
 // the repository still green. The runner records every argv, so assert the
 // whole set.
 //
-// Mutation, both directions: put "unit" back in the "all" list and the suite
-// argv appears twice; drop any one of the four and its mode reports 0.
+// The list of layers is DERIVED from `tasks.go`'s testAllModes rather than
+// restated here, which was the third gap: the map below was hand-maintained
+// beside the slice with nothing tying them together, so a fifth layer added
+// to the slice was invisible to a test named "every mode". Both directions
+// are now closed — a layer with no identifying argv fails, and an argv for a
+// layer nothing runs fails.
+//
+// Mutation, three directions: put "unit" back in testAllModes and the suite
+// argv appears twice; drop any one of the four and its mode reports 0; add a
+// fifth name to testAllModes and this test names it as unidentifiable.
 func TestTestAllRunsEveryModeExactlyOnce(t *testing.T) {
 	root := t.TempDir()
 	runner := &generatingRunner{root: root}
@@ -561,13 +570,23 @@ func TestTestAllRunsEveryModeExactlyOnce(t *testing.T) {
 	// invocation, and the two harness scripts. Compose `up` is deliberately
 	// not one of them — e2e and visual both issue it, so it identifies
 	// neither.
-	modes := map[string]string{
+	identifying := map[string]string{
 		"integration": "go test -json -count=1 ./...",
 		"e2e":         "npx playwright test",
 		"visual":      filepath.Join("scripts", "visual.sh"),
 		"smoke":       filepath.Join("scripts", "smoke.sh"),
 	}
-	for mode, want := range modes {
+	for mode := range identifying {
+		if !slices.Contains(testAllModes, mode) {
+			t.Fatalf("this test identifies %q but `ggg test all` does not run it", mode)
+		}
+	}
+	for _, mode := range testAllModes {
+		want, ok := identifying[mode]
+		if !ok {
+			t.Fatalf("`ggg test all` runs %q and nothing here can identify its argv, "+
+				"so this test cannot say whether it ran; give it one", mode)
+		}
 		runs := 0
 		for _, argv := range runner.argvs {
 			if strings.Join(argv, " ") == want {
@@ -576,6 +595,58 @@ func TestTestAllRunsEveryModeExactlyOnce(t *testing.T) {
 		}
 		if runs != 1 {
 			t.Fatalf("test all ran %s %d time(s), want exactly 1: %v", mode, runs, runner.argvs)
+		}
+	}
+}
+
+// `ggg test all --race` accepted the flag and then handed goTestFlags{} to
+// every child, so the race detector was dropped before the one layer that
+// can run it: `--race` on the aggregate mode was accepted and ignored, which
+// reads in CI as race coverage nobody has. Accepted-and-ignored is the one
+// outcome that is worse than either honouring it or refusing it.
+//
+// The other half of the property is that it reaches the go layer ONLY.
+// `--race` is not a flag `npx playwright test` or a shell script understands,
+// and runTestTask's own guard makes a non-zero flag set on those modes a
+// usage error — so passing `flags` to every child would trade a silent drop
+// for a refusal in the middle of a four-layer run.
+//
+// Mutation: hand `flags` to every child and the "unchanged" loop fails on
+// e2e; hand goTestFlags{} to every child, which is what shipped, and the
+// first assertion fails.
+func TestTestAllHandsRaceAndCoverToTheGoLayerOnly(t *testing.T) {
+	root := t.TempDir()
+	runner := &generatingRunner{root: root}
+	controller := NewController(ControllerOptions{Root: root, TaskRunner: runner})
+	plan, err := controller.Preview(context.Background(),
+		TaskMutation{Task: "test", Action: "all", Race: true, Cover: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := controller.Apply(context.Background(), plan); err != nil {
+		t.Fatal(err)
+	}
+
+	argvs := make([]string, 0, len(runner.argvs))
+	for _, argv := range runner.argvs {
+		argvs = append(argvs, strings.Join(argv, " "))
+	}
+	want := strings.Join(goTestFlags{Race: true, Cover: true}.argv(), " ")
+	if !slices.Contains(argvs, want) {
+		t.Fatalf("`ggg test all --race --cover` never issued %q: %v", want, argvs)
+	}
+	// And the plain form is gone: the go layer ran once, with the flags.
+	if plain := strings.Join(goTestFlags{}.argv(), " "); slices.Contains(argvs, plain) {
+		t.Fatalf("the go layer also ran unflagged as %q: %v", plain, argvs)
+	}
+	// Every other layer's argv is exactly what it is without the flags.
+	for _, unchanged := range []string{
+		"npx playwright test",
+		filepath.Join("scripts", "visual.sh"),
+		filepath.Join("scripts", "smoke.sh"),
+	} {
+		if !slices.Contains(argvs, unchanged) {
+			t.Fatalf("--race changed or refused a non-go layer; %q is absent: %v", unchanged, argvs)
 		}
 	}
 }

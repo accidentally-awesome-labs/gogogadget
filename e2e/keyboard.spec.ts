@@ -13,7 +13,36 @@ const GALLERY = '/dev/gallery';
 declare global {
   interface Window {
     htmx: { trigger: (element: Element, name: string) => void };
+    // Engine load outcomes, recorded so a failed reveal can name its cause.
+    // See waitForCalendarTrigger.
+    __engineEvents?: string[];
   }
+}
+
+// captureEngineEvents must run BEFORE the page's own scripts, because the
+// events it collects fire once, early, and are not replayed. addInitScript is
+// the only hook early enough.
+//
+// The listeners are registered in the CAPTURE phase on `document`: the engine
+// loader dispatches with `bubbles: false` on the widget root, so a bubbling
+// listener would never see them, while capture propagates from the root down
+// to the target regardless.
+async function captureEngineEvents(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    window.__engineEvents = [];
+    for (const name of ['ui:engine-ready', 'ui:engine-failed']) {
+      document.addEventListener(
+        name,
+        (event) => {
+          const detail = (event as CustomEvent<{ engine?: string; error?: string }>).detail ?? {};
+          window.__engineEvents!.push(
+            `${name}(${detail.engine ?? '?'}${detail.error ? ': ' + detail.error : ''})`,
+          );
+        },
+        true,
+      );
+    }
+  });
 }
 
 // Alpine registers every controller on `alpine:init`, and uiTree.init is what
@@ -766,11 +795,69 @@ test.describe('date navigation', () => {
     { component: 'date-range-picker', root: '[data-ui=date-range-picker]', value: '2026-02-01' },
   ];
 
+  // waitForCalendarTrigger waits for the lazily loaded engine to reveal the
+  // trigger, and — this is the point of it — says WHICH of two very
+  // different things went wrong when it does not appear.
+  //
+  // This test had been observed passing only on retry, with the reason
+  // recorded as latency: "the fetch is same-origin over HTTP/1.1 and this
+  // suite runs many contexts in parallel, each holding an eternal SSE
+  // connection, against one host with six connection slots, so a queued
+  // module script can sit pending for tens of seconds". Measured, and it is
+  // not what is happening on this hardware. Time from `boot` to the trigger
+  // becoming visible, instrumented in place:
+  //
+  //   isolated, one worker      26 ms / 37 ms / 48 ms  (the three pickers)
+  //   inside the full suite     19 ms / 34 ms / 42 ms  (672 tests, 4 workers)
+  //
+  // Three orders of magnitude under the 40 s budget, and no slower under
+  // load than alone. So the budget is not measured; it is inherited, and the
+  // sentence that justified it was folklore. It is left at 40 s rather than
+  // lowered because nothing here measured CI's hardware, and a budget cut on
+  // one laptop's numbers is how a green gate becomes a red one for everybody
+  // else.
+  //
+  // What the numbers leave standing is the OTHER mechanism, and it is
+  // reachable by construction rather than by luck. `loadEngine` announces a
+  // rejected fetch as `ui:engine-failed`, and `uiCalendar.init` registers
+  // only for `ui:engine-ready`, `{ once: true }`, with no retry — the
+  // adapter's own comment says so ("On failure there is nothing to do"). One
+  // transient failure therefore hides the trigger for the whole life of that
+  // page, and the only thing that recovers it is a fresh document, which is
+  // exactly what a Playwright retry supplies. A 40 s timeout reports both
+  // cases identically as "element is not visible", which is why the reason
+  // had to be guessed at in the first place.
+  //
+  // So the two are separated at the point of failure: the elapsed time
+  // distinguishes a slow load from one that never resolved, and the captured
+  // engine events distinguish both from one that was refused. The events are
+  // dispatched with `bubbles: false` on the widget root, so they are
+  // collected in the CAPTURE phase from the document, which reaches a
+  // non-bubbling event on the way down.
+  async function waitForCalendarTrigger(page: Page, trigger: Locator, component: string): Promise<void> {
+    const started = Date.now();
+    try {
+      await expect(trigger).toBeVisible({ timeout: 40_000 });
+    } catch {
+      const events = await page.evaluate(() => window.__engineEvents ?? []);
+      const seen = events.length === 0 ? 'none' : events.join(', ');
+      throw new Error(
+        `${component}: [data-calendar-trigger] never appeared after ${Date.now() - started}ms. ` +
+          `Engine events on this page: ${seen}. ` +
+          'No event means the module script never settled, which is latency; a ui:engine-failed ' +
+          'entry means loadEngine rejected, and uiCalendar listens for ui:engine-ready once and ' +
+          'never retries, so this page can no longer reveal the trigger at all and only a reload ' +
+          'recovers it.',
+      );
+    }
+  }
+
   for (const picker of pickers) {
     test(`${picker.component} opens by keyboard and Escape returns focus`, async ({ page }) => {
-      // The engine wait below can legitimately take tens of seconds under a
-      // full parallel suite, which the default 30s test budget cannot hold.
+      // The engine wait is budgeted at 40 s (see waitForCalendarTrigger),
+      // which the default 30 s test budget cannot hold.
       test.setTimeout(75_000);
+      await captureEngineEvents(page);
       await boot(page);
       const root = page.locator(picker.root);
       const trigger = root.locator('[data-calendar-trigger]');
@@ -779,13 +866,9 @@ test.describe('date navigation', () => {
 
       await expect(input).toHaveValue(picker.value);
       // Revealed only once the engine landed: a button that opens nothing is
-      // worse than no button. The budget here is the engine landing, not a UI
-      // transition. The fetch is same-origin over HTTP/1.1 and this suite runs
-      // many contexts in parallel - each holding an eternal SSE connection -
-      // against one host with six connection slots, so a queued module script
-      // can sit pending for tens of seconds with nothing failing. The contract
-      // under test is the keyboard interaction after the reveal, not latency.
-      await expect(trigger).toBeVisible({ timeout: 40_000 });
+      // worse than no button. The contract under test is the keyboard
+      // interaction after the reveal, not the latency of the reveal.
+      await waitForCalendarTrigger(page, trigger, picker.component);
 
       await trigger.focus();
       await page.keyboard.press('Enter');

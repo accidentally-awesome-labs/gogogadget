@@ -377,9 +377,50 @@ ends: a fresh `ggg new --profile ggg/profile/saas` exits 0 on its first
 `sync --check --offline` and its first `sync --offline`, with zero
 `generated_unowned` and `compose.yaml` carrying the banner from that first
 sync; and a tree holding the three pre-banner files this layer taught to carry
-one reports exit 4 drift, not exit 3 refusal, and re-renders clean. So the only
-case the refusal ever fires on is the one case where the operator has a file
-they care about — which is why the message has to name a move that works.
+one reports exit 4 drift, not exit 3 refusal, and re-renders clean.
+
+That discharged three of the explicitly listed names and left the rest
+unexamined, which made the reassurance incomplete rather than wrong: a name
+that is only *sometimes* rendered is a name the refusal can reach after an
+upgrade. Checked by derivation rather than by reading the emitters —
+`GenerateAll` is run over this repository's installed graph and over the
+smallest graph that generates at all, and the difference is the answer.
+**Every explicitly listed name is rendered on every graph except three.** The
+three, and what each waits for:
+
+| Conditional output | Rendered only when |
+|---|---|
+| `e2e/generated/personas.ts` | some installed module declares a persona |
+| `e2e/generated/surfaces.ts` | some installed module declares a scenario **or** a visual page |
+| `internal/web/templates/scenarios_gen.go` | some installed module declares a scenario |
+
+`static/ui-components.js`, `static/ui-engines.js`, `.env.example`,
+`compose.yaml`, `compose.test.yaml`, the three `content/docs/*-reference.md`
+pages, `e2e/generated/database.ts`, `e2e/generated/inventory.ts` and
+`internal/web/templates/ui/reference_gen.go` all come from emitters that
+return a file even when that file lists nothing, so the sweep never sees them.
+`TestOnlyThreeExplicitRegistryOwnedNamesAreConditionallyRendered` computes the
+split and requires this table to match it, in both directions.
+
+**What that means for an upgrade that stops rendering one of the three.**
+Removing the last module that declares a persona, a scenario or a visual page
+makes the render stop producing that path, and then the table above decides:
+with the banner it is a named `delete`/`generated` change, journalled and
+rolled back with everything else, which is the sweep doing the job it exists
+for — `e2e/helpers.ts` imports from `personas.ts`, so a stale one left behind
+is an e2e project compiling against personas no module declares. Without the
+banner it is exit 3, and reaching that state means either an operator stripped
+the banner or the file predates the emitter. Both are someone holding bytes
+they care about, which is the same conclusion as before — it now covers every
+explicitly listed name instead of three of them. The residual is also the
+narrower half of the set: all three are generated harness data under
+`e2e/generated/` and `internal/web/templates/`, not names like `compose.yaml`
+or `.env.example` that an operator plausibly writes by hand, and those two are
+in the unconditional group.
+
+So the only case the refusal ever fires on is the one case where the operator
+has a file they care about — which is why the message has to name a move that
+works.
 
 One consequence worth stating plainly: a **hand-edited generated file that
 still carries the marker is treated as generated**, and is swept when its

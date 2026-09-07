@@ -197,6 +197,86 @@ func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	}
 }
 
+// ciGenesisSweepTest is the one test the `profiles` job exists to run, and
+// the reason that job needs asserting at all: the sweep skips itself as
+// [inapplicable] unless GGG_GENESIS_SWEEP is set, and this job is the only
+// place that sets it. Delete the job and the only end-to-end profile gate
+// goes green-by-skip in every environment without one test turning red.
+//
+// That is not hypothetical. Until the matrix existed, `saas` was the only
+// profile ever created end to end, and three profiles that could not produce
+// a project at all shipped for a release.
+const ciGenesisSweepTest = "TestEveryShippedProfileCreatesAProjectThatIsSyncClean"
+
+// The `profiles` job must run the genesis sweep, with the environment
+// variable that un-skips it, as a command that can fail the build.
+//
+// Mutation: drop the env block, wrap the command in an echo, add an `if:`,
+// point `-run` at another test, drop `-count=1`, or delete the job, and this
+// fails naming what it found.
+func TestCIProfilesJobRunsTheGenesisSweep(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	workflow, goVersion := readCIWorkflow(t, root)
+	job, ok := workflow.Jobs["profiles"]
+	if !ok {
+		t.Fatalf("%s has no profiles job, so nothing sets GGG_GENESIS_SWEEP and %s never runs anywhere",
+			ciWorkflowPath, ciGenesisSweepTest)
+	}
+	assertCIJobIsARealGate(t, "profiles", job, goVersion)
+	if got := job.Env["GGG_GENESIS_SWEEP"]; got != "1" {
+		t.Fatalf("the profiles job sets GGG_GENESIS_SWEEP=%q, want \"1\"; without it %s skips itself",
+			got, ciGenesisSweepTest)
+	}
+
+	var found []string
+	setupIndex, sweepIndex := -1, -1
+	for index, step := range job.Steps {
+		if isMakeSetupStep(step) {
+			setupIndex = index
+		}
+		for line := range strings.SplitSeq(step.Run, "\n") {
+			fields := strings.Fields(strings.TrimSpace(line))
+			// Matched as a COMMAND by its own first words, the standard the
+			// rest of this file sets: `echo "go test -run ..."` runs no test
+			// and must not satisfy the assertion.
+			if len(fields) < 2 || fields[0] != "go" || fields[1] != "test" {
+				continue
+			}
+			if step.If != "" || step.ContinueOnError {
+				t.Fatalf("the sweep step is exempt from failing the build (if: %q, continue-on-error: %v)",
+					step.If, step.ContinueOnError)
+			}
+			if strings.ContainsAny(strings.TrimSpace(step.Run), "\n|;&>") || strings.Contains(step.Run, "set +e") {
+				t.Fatalf("the sweep step wraps the command in shell that can hide its exit status: %q", step.Run)
+			}
+			found = append(found, strings.Join(fields, " "))
+			sweepIndex = index
+		}
+	}
+	if len(found) != 1 {
+		t.Fatalf("the profiles job runs `go test` %d time(s): %q; want exactly one sweep", len(found), found)
+	}
+	fields := strings.Fields(found[0])
+	at := slices.Index(fields, "-run")
+	if at < 0 || at+1 >= len(fields) || fields[at+1] != ciGenesisSweepTest {
+		t.Fatalf("the sweep command %q does not select %s", found[0], ciGenesisSweepTest)
+	}
+	// -count=1 for the reason the accounted suite pins it: this test's inputs
+	// are the whole registry tree, which `go test` cannot observe, so a
+	// cached verdict is a report on a run that did not happen.
+	for _, want := range []string{"-count=1", "./internal/gggcli"} {
+		if !slices.Contains(fields, want) {
+			t.Fatalf("the sweep command %q is missing %s", found[0], want)
+		}
+	}
+	if setupIndex < 0 || setupIndex > sweepIndex {
+		t.Fatal("the profiles job runs the sweep before `make setup`, so the pinned tools are absent")
+	}
+}
+
 // parseCISuiteCommand returns the arguments after a recognised `ggg test`
 // invocation. The command's own first words must BE the invocation, so an
 // `echo` or any other wrapper fails to parse rather than matching.
@@ -434,11 +514,12 @@ type ciWorkflow struct {
 }
 
 type ciJob struct {
-	Needs           ciStringList `yaml:"needs"`
-	RunsOn          string       `yaml:"runs-on"`
-	If              string       `yaml:"if"`
-	ContinueOnError bool         `yaml:"continue-on-error"`
-	Steps           []ciStep     `yaml:"steps"`
+	Needs           ciStringList      `yaml:"needs"`
+	RunsOn          string            `yaml:"runs-on"`
+	If              string            `yaml:"if"`
+	ContinueOnError bool              `yaml:"continue-on-error"`
+	Env             map[string]string `yaml:"env"`
+	Steps           []ciStep          `yaml:"steps"`
 }
 
 type ciStep struct {

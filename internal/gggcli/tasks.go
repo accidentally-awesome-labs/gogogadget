@@ -705,12 +705,26 @@ func (c *Controller) runCheck(ctx context.Context, root string, run func(string,
 	return run(root, "go", "build", "./...")
 }
 
+// goTestLayer is the one `ggg test` mode that runs the Go suite, and so the
+// only mode `--race` and `--cover` can reach.
+const goTestLayer = "integration"
+
+// testAllModes is the layer list `ggg test all` walks, in order.
+//
+// It is a named identifier rather than a literal inside the "all" case
+// because the test that guards it derives from THIS slice. A hand-maintained
+// copy beside it is invisible to a test called "every mode": a fifth layer
+// added here used to be a layer nothing demanded evidence for. Now adding one
+// fails TestTestAllRunsEveryModeExactlyOnce by name until it has an
+// identifying argv.
+var testAllModes = []string{goTestLayer, "e2e", "visual", "smoke"}
+
 func (c *Controller) runTestTask(ctx context.Context, run func(string, ...string) error, root, mode string, flags goTestFlags) error {
-	if flags != (goTestFlags{}) && mode != "integration" && mode != "all" {
-		return usageError("--race and --cover apply to the go test layer (integration)")
+	if flags != (goTestFlags{}) && mode != goTestLayer && mode != "all" {
+		return usageError("--race and --cover apply to the go test layer (" + goTestLayer + ")")
 	}
 	switch mode {
-	case "integration":
+	case goTestLayer:
 		return c.runAccountedGoTest(ctx, root, flags)
 	case "e2e":
 		// The Playwright harness starts its own server on the host, so the
@@ -740,8 +754,19 @@ func (c *Controller) runTestTask(ctx context.Context, run func(string, ...string
 		// One entry per mode, and `unit` used to be the first of them: `ggg
 		// test all` ran the whole Go suite twice, about two minutes wasted per
 		// invocation, because the same behaviour was listed under both names.
-		for _, item := range []string{"integration", "e2e", "visual", "smoke"} {
-			if err := c.runTestTask(ctx, run, root, item, goTestFlags{}); err != nil {
+		for _, item := range testAllModes {
+			// `--race`/`--cover` belong to the Go layer and only the Go
+			// layer accepts them — handing a non-zero set to e2e, visual or
+			// smoke is the usage error at the top of this function. This
+			// loop passed goTestFlags{} to every child, so the parent
+			// accepted `ggg test all --race` and then dropped the detector
+			// before the one child that could run it: a flag accepted and
+			// ignored, which reads as coverage nobody has.
+			child := goTestFlags{}
+			if item == goTestLayer {
+				child = flags
+			}
+			if err := c.runTestTask(ctx, run, root, item, child); err != nil {
 				return err
 			}
 		}

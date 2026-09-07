@@ -660,7 +660,7 @@
     },
     {
       "path": "registry/modules/element/ui-core/module.json",
-      "sha256": "9eb5922824a1f5a6f65a3eb8082aeec85b97389f3169f16ef2837226245fed53"
+      "sha256": "7e796ed1f70e17e34e963a3ea94b282edba7e67758e99b8c990adc26279fc4c0"
     },
     {
       "path": "registry/modules/element/visually-hidden/module.json",
@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "9ccd279f00ea84a6caa80a7e9d66dda49dae144aed8a1507b88536b3e4e5743d"
+      "sha256": "7248ee9b59d8fc5826896a7a66664188194cf3cc19b52f07289848ce9cf07588"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "41e743dd0ac4d15a8b5e10c91fe37d9d251cd91e43dcdcc848fbc713b6134f7e"
+      "sha256": "7530e904d3b2a6ec09327b00fb630ba73902b0d570b34a8b8a73af478eb7d7f4"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/e2e-sweeps/module.json",
-      "sha256": "0a6356c870a2678c3950b06fbfb8e5317761a1eec189c8516aea0ae40bb4f195"
+      "sha256": "74a546757fbbee3e639c10bc681d6e81bf55fefda738f86d30d60833a1a8aa35"
     },
     {
       "path": "registry/modules/system/e2e/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "74fea3ca3f59a905d42307deaadc0531f2bfb36aa9a8c63b302c028cece882ce"
+      "sha256": "5a1a4e43c4f588d3ce73f4a8cc82a3af138c99d846da3f37e71e334487ad7b8f"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

@@ -161,7 +161,7 @@
         "class": "asset",
         "contract": false,
         "rewrite_module": false,
-        "sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
+        "sha256": "63006da6f6bb19de093ace6e0283271a501c1e9128db7e83a58dddc86c31fb8f",
         "source": "static/ui/engines.js",
         "target": "static/ui/engines.js"
       },
@@ -196,7 +196,7 @@
     "name": "ui-core",
     "removal_policy": "replacement-required",
     "requires": [],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "assets": [
         {

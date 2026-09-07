@@ -368,8 +368,8 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	//
 	// TWO of the twelve can refuse because a declared file is ABSENT from the
 	// map. Both require a declaration and fail if they never see it, the same
-	// `found := false` over every key: ValidateShellSlotRenderers
-	// (shell_scan.go:122) and ValidateCSPContributionSources (csp.go:240).
+	// `found := false` over every key: ValidateShellSlotRenderers, in
+	// shell_scan.go, and ValidateCSPContributionSources, in csp.go.
 	// Those over-reported, and they are the false refusal — `ggg update
 	// ggg/element/avatar` reported that `ggg/system/analytics-posthog`'s shell
 	// slot named a renderer "no installed payload in that package declares",

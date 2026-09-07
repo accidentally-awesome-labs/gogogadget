@@ -74,6 +74,14 @@ instead of its own bare `go test`. The run is always `-count=1`: Go's test
 cache keys on inputs it can observe, and a database that stopped answering is
 not one, so a cached entry replays a previous run's skip count.
 
+Both flags belong to the Go layer and reach only it. `ggg test all --race`
+hands them to the `integration` child and leaves the e2e, visual and smoke
+argv untouched — `--race` is not a flag `npx playwright test` or a shell
+script understands. It used to be accepted by `all` and then dropped before
+the one child that could honour it, which reads as race coverage nobody has;
+naming a flag and ignoring it is worse than refusing it. On any other single
+mode a non-zero flag set is still a usage error naming `integration`.
+
 #### Declaring a skip inapplicable {#inapplicable}
 
 A skip is sometimes correct and permanent. `internal/config`'s derivation
@@ -527,7 +535,7 @@ visual and e2e harnesses both set.
 
 ## CI
 
-Seven jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
+Eight jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →
 `make generate` → `git diff --exit-code -- ':!gogogadget.lock.json'`
 (generated code is committed and fresh, which is also what proves no registry
 drift) → `go vet` → `govulncheck` → `bin/ggg test integration --race --cover`
@@ -535,7 +543,8 @@ drift) → `go vet` → `govulncheck` → `bin/ggg test integration --race --cov
 bare `go test -race -cover ./...` for one reason: `ggg` reads the event stream
 and **refuses a nonzero skip count**, and this is the job where nothing can
 legitimately be absent.
-`e2e`, `visual`, `smoke`, `docker`, `registry-core` and `registry-external`
+`e2e`, `visual`, `smoke`, `docker`, `registry-core`, `registry-external` and
+`profiles`
 all depend on `test`: `e2e` installs Chromium and runs `make e2e`; `visual`
 runs `make visual`, which owns its own seeding and host server — do not add
 seed or start-server steps beside it, because a second process cannot bind
@@ -562,6 +571,39 @@ the two runs never share a work directory, a warm build cache, or the pid lock
 that refuses a second concurrent run. `TestCIExercisesEveryClosureFamilyForReal`
 asserts both jobs exist, are not gated or continue-on-error, and still have
 closures to exercise.
+
+`profiles` is the third row of the profile gate matrix, and the only one that
+runs a real `ggg new`. Every shipped profile is created from the repository as
+a directory registry and the created tree is then checked with
+`sync --check --offline`, because exit 0 from genesis is not the claim: the
+first thing an operator does in a new tree is a sync, and a genesis whose own
+engine reports drift over the tree it just wrote has not produced a project.
+It also compares the installed module count against the number that profile's
+own description advertises, which is the number
+`TestTheDocumentedProfileTableMatchesWhatTheProfilesResolveTo` checks against
+the *planner* — so the cheap row and the expensive row are one claim.
+
+Measured at ~22 s per profile, ~100 s for the four including the binary
+build. It is a separate job for the same reason the two registry-validate
+jobs are, and it is not the clock: genesis runs `go mod tidy` in a
+destination outside this module's tree and installs the pinned Tailwind
+binary, so the sweep needs the network, and `make check` has to stay runnable
+offline. The test therefore skips as `[inapplicable]` unless
+`GGG_GENESIS_SWEEP=1`, which only this job sets, and
+`TestTheProfileSweepCIJobRunsThisTest` parses the workflow so that deleting
+the job cannot leave the sweep green-by-skip everywhere.
+
+The other two rows are in `go test` and therefore in `make check`:
+`TestEveryShippedProfileResolvesIntoACoherentProject` plans each profile and
+asserts two coherence properties over the planned bytes — every package a
+planned payload imports from the project's own module path is a directory
+something in the plan writes, and every table a planned migration alters or
+references is created by some planned migration — and
+`TestTheDocumentedProfileTableMatchesWhatTheProfilesResolveTo` pins the
+documented table, the descriptions and the slot counts. All three rows walk
+`catalog.Profiles`, so a fifth profile is covered without an edit. Only
+`saas` was ever exercised end to end before this matrix existed, which is how
+three profiles that could not create a project shipped for a release.
 
 See [Database](/docs/database) for `TEST_DATABASE_URL` mechanics and
 [Frontend](/docs/frontend) for the `data-testid` contract.

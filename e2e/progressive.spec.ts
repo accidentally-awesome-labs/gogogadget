@@ -881,3 +881,97 @@ test.describe('reduced motion', () => {
     }
   });
 });
+
+declare global {
+  interface Window {
+    // What the FIRST engine scan of a page saw. Recorded from an init script
+    // because the moment is over before any Playwright call can observe it.
+    __firstEngineScan?: { registryPresent: boolean } | null;
+    // Installed by page.exposeFunction: releases the held engine registry.
+    __afReleaseEngineRegistry?: () => Promise<void>;
+  }
+}
+
+test.describe('the lazy engine loader', () => {
+  // A widget must still enhance when the engine registry lands after the
+  // first scan, and until this test it did not.
+  //
+  // The shell loads htmx (position 2) before `static/ui-engines.js` (position
+  // 5), and that fifth script is the one that defines `window.__gggEngines`.
+  // htmx 4.0.0-beta6 initialises with
+  // `"loading" === document.readyState ? addEventListener("DOMContentLoaded", t)
+  // : setTimeout(t)` — and a DEFERRED script runs with readyState already
+  // `interactive`, so htmx takes the setTimeout branch. That timer task can
+  // be serviced while the later deferred scripts are still pending, and its
+  // `process(document.body)` fires `htmx:after:process`, which is one of the
+  // three events `static/ui/engines.js` scans on.
+  //
+  // If that scan wins, every `[data-ui-engine]` root on the page is marked
+  // `requested` and handed the registry-miss rejection, which loadEngine
+  // caches and never evicts because "the registry is a generated object
+  // already in the page, so there is no request to retry". Nothing on that
+  // page ever enhances again, for the life of the document — and the only
+  // recovery is a fresh document, which is exactly what a test retry
+  // supplies.
+  //
+  // Measured before the fix: keyboard.spec.ts's three date pickers failed
+  // this way once in seven runs of that file, and the failure was reported
+  // only as `[data-calendar-trigger]` "not visible" after 40 s, with no hint
+  // of the cause. Under the full 672-test suite the engine reveal takes
+  // 19-48 ms, so the 40 s budget was never the thing that was short.
+  //
+  // Reproduced rather than sampled: holding the registry's own response makes
+  // the losing order certain. The precondition is asserted, so a run in which
+  // the race did not happen fails instead of passing quietly.
+  test('a widget still enhances when the engine registry lands after the first scan', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    try {
+      let release: () => void = () => {};
+      const held = new Promise<void>((r) => (release = r));
+      await page.route('**/static/ui-engines.js', async (route) => {
+        await held;
+        await route.continue();
+      });
+
+      // The release is driven from INSIDE the page, by the very event whose
+      // ordering is under test. Polling for it from here instead races the
+      // navigation itself — `page.evaluate` against a document that is being
+      // replaced throws "execution context was destroyed" — and a fixed wait
+      // would make the reproduction a coin toss again.
+      await page.exposeFunction('__afReleaseEngineRegistry', () => release());
+      await page.addInitScript(() => {
+        window.__firstEngineScan = null;
+        document.addEventListener(
+          'htmx:after:process',
+          () => {
+            if (window.__firstEngineScan != null) return;
+            window.__firstEngineScan = { registryPresent: !!window.__gggEngines };
+            void window.__afReleaseEngineRegistry?.();
+          },
+          true,
+        );
+      });
+
+      await page.goto('/dev/gallery');
+
+      const scan = await page.evaluate(() => window.__firstEngineScan!);
+      expect(
+        scan.registryPresent,
+        'the held registry still arrived before the first scan, so this run reproduced nothing',
+      ).toBe(false);
+
+      // The engine landed late; the widget must still be usable. Cally is the
+      // calendar engine, and the trigger is revealed only by a successful
+      // load — a button that opens nothing is worse than no button, so its
+      // appearance is the whole claim.
+      const root = page.locator('[data-ui=date-picker]:has(input[name="starts_on"])');
+      await expect(root.locator('[data-calendar-trigger]')).toBeVisible({ timeout: 20_000 });
+      await expect(root.locator('[data-calendar-popover] calendar-date')).toHaveCount(1);
+    } finally {
+      await context.close();
+    }
+  });
+});

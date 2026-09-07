@@ -152,6 +152,43 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 	})
 }
 
+// The two names the generated-name tests below plant bytes at, and the one
+// place the guards that keep them meaningful live.
+//
+// They were spelled by copy at three sites — a `const target` in each of the
+// two tests and a local `renamed` in the rename subtest — so a change to
+// either predicate needed reflecting in three places to keep both tests
+// honest, and a copy that fell behind would leave a green test standing over
+// a name the pipeline no longer generates.
+//
+// probeGeneratedName is any registry-owned name; this one carries the
+// `_registry_gen.` infix and sits in a directory the fixture already installs
+// into. probeAuthoredName is the rename remedy's destination and has to
+// satisfy NEITHER predicate, or renaming would clear nothing.
+const (
+	probeGeneratedName = "internal/modules/aa_probe_registry_gen.go"
+	probeAuthoredName  = "internal/modules/aa_probe_authored.go"
+)
+
+// assertProbeNamesStillDivide fails if widening either predicate has made the
+// two names indistinguishable, which is the way these tests would stop
+// meaning anything without failing.
+//
+// The rename target is checked against IsGeneratedOutputPath, the SUPERSET —
+// IsRegistryOwnedOutputPath ORed with the external-tool outputs — rather than
+// against the narrower predicate the planted name is checked with. A
+// predicate widened to cover aa_probe_authored.go would otherwise leave the
+// rename remedy passing while proving nothing.
+func assertProbeNamesStillDivide(t *testing.T) {
+	t.Helper()
+	if !modkit.IsRegistryOwnedOutputPath(probeGeneratedName) {
+		t.Fatalf("%s is not a registry-owned output; pick a name the pipeline generates", probeGeneratedName)
+	}
+	if modkit.IsGeneratedOutputPath(probeAuthoredName) {
+		t.Fatalf("%s is now a generated name; the rename remedy would not clear anything", probeAuthoredName)
+	}
+}
+
 // No byte leaves the tree without being named, and a file the tool did not
 // write is never removed.
 //
@@ -170,12 +207,8 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 // Mutation: stop classifying unrendered outputs in Engine.Plan, and the marked
 // case loses its change while the authored case is deleted at exit 0.
 func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *testing.T) {
-	// Any registry-owned name works; this one is a `_registry_gen.` infix in
-	// a directory the fixture already installs into.
-	const target = "internal/modules/aa_probe_registry_gen.go"
-	if !modkit.IsRegistryOwnedOutputPath(target) {
-		t.Fatalf("%s is not a registry-owned output; pick a name the pipeline generates", target)
-	}
+	const target = probeGeneratedName
+	assertProbeNamesStillDivide(t)
 	marked := []byte("// Code generated " + modkit.GeneratedOutputMarker + ".\n//\n// index: 0\n\npackage modules\n")
 	authored := []byte("package modules\n\n// A human wrote this and happened to like the name.\nconst AAProbe = \"authored\"\n")
 
@@ -411,7 +444,8 @@ func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *te
 // file in a module's `files`" back as a remedy and the last subtest is the
 // standing proof it is false.
 func TestCLIRefusalNamesOnlyRemediesThatWork(t *testing.T) {
-	const target = "internal/modules/aa_probe_registry_gen.go"
+	const target = probeGeneratedName
+	assertProbeNamesStillDivide(t)
 	authored := []byte("package modules\n\n// A human wrote this and happened to like the name.\nconst AAProbe = \"authored\"\n")
 
 	// refused installs the fixture, plants the authored bytes, and proves the
@@ -444,10 +478,7 @@ func TestCLIRefusalNamesOnlyRemediesThatWork(t *testing.T) {
 
 	t.Run("rename it to a name this pipeline does not generate", func(t *testing.T) {
 		root, engine := refused(t)
-		const renamed = "internal/modules/aa_probe_authored.go"
-		if modkit.IsGeneratedOutputPath(renamed) {
-			t.Fatalf("%s is still a generated name; the remedy would not clear anything", renamed)
-		}
+		const renamed = probeAuthoredName
 		if err := os.Rename(filepath.Join(root, target), filepath.Join(root, renamed)); err != nil {
 			t.Fatal(err)
 		}

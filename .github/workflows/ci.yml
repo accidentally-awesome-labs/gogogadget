@@ -302,3 +302,43 @@ jobs:
 
       - name: Validate external registry template closures
         run: bin/ggg registry validate --closures external
+
+  # The one gate that runs a real `ggg new` per shipped profile and then
+  # `sync --check --offline` inside the created tree. It is its own job for
+  # the same reason the two registry-validate jobs are: it needs the network
+  # (genesis runs `go mod tidy` in a destination outside this module's tree
+  # and installs the pinned Tailwind binary), and `make check` has to stay
+  # runnable offline.
+  #
+  # It costs ~100 s for the four profiles — 93 s of sweep plus the binary
+  # build — against a `test` job measured in minutes, so the split is about
+  # the network dependency and not about the clock.
+  #
+  # The profile list is not written here. The test walks catalog.Profiles, so
+  # a fifth profile is swept without touching this workflow; only ONE profile
+  # was ever exercised end to end before this job existed, which is how three
+  # profiles that could not create a project shipped for a release.
+  #
+  # No Postgres service: genesis writes and generates a tree and never opens a
+  # database.
+  profiles:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      GGG_GENESIS_SWEEP: "1"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      # -count=1 for the reason the accounted suite uses it: a cached verdict
+      # is a report on a run that did not happen, and this test's inputs — the
+      # whole registry tree — are not inputs `go test` can observe.
+      - name: Every shipped profile creates a sync-clean project
+        run: go test -count=1 -run TestEveryShippedProfileCreatesAProjectThatIsSyncClean ./internal/gggcli -v

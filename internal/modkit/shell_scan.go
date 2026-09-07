@@ -107,7 +107,7 @@ const shellSlotRendererSignature = "func(context.Context, map[string]string) tem
 // the module that owns the slot mechanism, and that is structural rather than
 // stylistic: a slot contributor CANNOT declare a requirement on
 // ggg/system/server. resolveRuntimeOrders turns every literal requires into a
-// runtime CONSTRUCTION edge (resolve.go:472-479), and the shell consumes
+// runtime CONSTRUCTION edge, and the shell consumes
 // identity.verifier and analytics.capturer, so the capability edge already
 // orders server after those adapters — the reverse edge is a boot cycle in
 // production. A contract range therefore cannot express "my code compiles
