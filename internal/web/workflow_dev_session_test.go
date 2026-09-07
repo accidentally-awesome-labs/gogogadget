@@ -163,3 +163,133 @@ func TestSyntheticMinterDoesNotBypassTheProductionRefusal(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "DEV_AUTH_BYPASS=true is refused when APP_ENV=production")
 }
+
+// devSessionCookie reads the session cookie back the way a client would:
+// through the Set-Cookie parser, which unquotes a value http.SetCookie
+// quoted. Splitting the raw header on ';' — what the older tests here do —
+// cannot see that round trip, and the round trip is the claim below.
+func devSessionCookie(t *testing.T, header http.Header) *http.Cookie {
+	t.Helper()
+	for _, c := range (&http.Response{Header: header}).Cookies() {
+		if c.Name == sessionCookieName {
+			return c
+		}
+	}
+	return nil
+}
+
+// The route is a GET, so CSRF cannot reach it — nosurf is method-gated — and
+// SameSite=Lax permits a cookie to be SET on a top-level navigation. Until
+// the guard this test pins, a link on any page a developer clicked planted a
+// session here for a subject the linking site chose: measured 204 with a
+// Set-Cookie under `Origin: https://evil.example` and
+// `Sec-Fetch-Site: cross-site`. The comment above the handler claimed the
+// route was "strictly narrower" than the client-side path it replaced, which
+// required script already executing on this origin. It was wider.
+//
+// The three allowed cases matter as much as the refusals. A browser navigating
+// from this application sends `same-origin`; one with no initiator sends
+// `none`; and the e2e harness sends none of the three headers, because
+// Playwright's context.request is not a browser — which is why this guard
+// costs the suite nothing.
+func TestDevSessionRefusesACrossSiteRequest(t *testing.T) {
+	s := integrationServer(t, nil)
+	const target = "/dev/session?user=user_xs&org=org_xs&role=org:admin"
+
+	for _, tc := range []struct {
+		name    string
+		headers http.Header
+		refused string
+	}{
+		{name: "no headers at all is the harness", headers: nil},
+		{name: "same-origin navigation", headers: http.Header{"Sec-Fetch-Site": {"same-origin"}}},
+		{name: "no initiator", headers: http.Header{"Sec-Fetch-Site": {"none"}}},
+		{name: "own origin", headers: http.Header{"Origin": {"http://example.com"}}},
+		{name: "own referer", headers: http.Header{"Referer": {"http://example.com/dev/gallery"}}},
+		{
+			name:    "cross-site navigation",
+			headers: http.Header{"Sec-Fetch-Site": {"cross-site"}, "Sec-Fetch-Mode": {"navigate"}},
+			refused: "Sec-Fetch-Site: cross-site",
+		},
+		{
+			name:    "same-site but not same-origin",
+			headers: http.Header{"Sec-Fetch-Site": {"same-site"}},
+			refused: "Sec-Fetch-Site: same-site",
+		},
+		{
+			name:    "foreign origin without fetch metadata",
+			headers: http.Header{"Origin": {"https://evil.example"}},
+			refused: "Origin: https://evil.example",
+		},
+		{
+			name:    "opaque origin",
+			headers: http.Header{"Origin": {"null"}},
+			refused: "Origin: null",
+		},
+		{
+			name:    "foreign referer without fetch metadata",
+			headers: http.Header{"Referer": {"https://evil.example/click-me"}},
+			refused: "Referer: https://evil.example/click-me",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			code, header, body := serve(t, s, "GET", target, nil, tc.headers)
+			if tc.refused == "" {
+				require.Equal(t, http.StatusNoContent, code, "a first-party caller must still get a session")
+				require.NotNil(t, devSessionCookie(t, header), "the route's whole output is the cookie")
+				return
+			}
+			require.Equal(t, http.StatusForbidden, code,
+				"a caller that did not originate here must not be handed a session")
+			assert.Nil(t, devSessionCookie(t, header), "no cookie for a cross-site caller")
+			assert.Contains(t, body, tc.refused, "the refusal names the header it read")
+		})
+	}
+}
+
+// MintSession bans the grammar's separator, and that was the whole of the
+// validation. http.SetCookie does not refuse a value it cannot represent: it
+// DROPS the offending bytes, logs "dropping invalid bytes" and sends what is
+// left. So the route answered 204 for `role=admin%3Bfoo` with a session whose
+// role was `adminfoo`, and for `user=user_%0A` with one for `user_` — "here
+// is your session", for a different subject or role than was asked for. That
+// is the validate-here/mutate-there asymmetry this workflow exists to remove,
+// reproduced across the transport boundary instead of the Go/TypeScript one.
+func TestDevSessionRefusesBytesTheSessionCookieCannotCarry(t *testing.T) {
+	s := integrationServer(t, nil)
+
+	for _, tc := range []struct {
+		name  string
+		query string
+		byte  string
+	}{
+		{name: "semicolon in role ends the cookie", query: "user=user_b&org=org_b&role=admin%3Bfoo", byte: `0x3b (";")`},
+		{name: "newline in user", query: "user=user_%0A&org=org_b&role=org:admin", byte: `0x0a ("\n")`},
+		{name: "quote in org", query: "user=user_b&org=org%22b&role=org:admin", byte: `0x22 ("\"")`},
+		{name: "backslash in role", query: "user=user_b&org=org_b&role=org%3Aadmin%5C", byte: `0x5c ("\\")`},
+		{name: "non-ascii in org", query: "user=user_b&org=org_b%C3%A9&role=org:admin", byte: `0xc3 ("\xc3")`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			code, header, body := serve(t, s, "GET", "/dev/session?"+tc.query, nil, nil)
+			require.Equal(t, http.StatusBadRequest, code,
+				"a triple the cookie cannot carry is the caller's error, like the separator")
+			assert.Contains(t, body, tc.byte, "the refusal names the byte the cookie would have dropped")
+			assert.Nil(t, devSessionCookie(t, header), "no cookie that says something else than was asked for")
+		})
+	}
+
+	// Space and comma are NOT in that set, and must not be refused: Go quotes
+	// a value containing either and unquotes it symmetrically on the way back
+	// in, so the round trip is exact. Asserted through the cookie parser and
+	// then spent on a guarded page, because a value that survives and a value
+	// that authenticates are not the same claim.
+	code, header, _ := serve(t, s, "GET", "/dev/session?user=user_qt&org=org_qt&role=org%3Aadmin%2C%20dev", nil, nil)
+	require.Equal(t, http.StatusNoContent, code, "quoting is not corruption")
+	got := devSessionCookie(t, header)
+	require.NotNil(t, got)
+	want, mintErr := identity.MockVerifier{}.MintSession("user_qt", "org_qt", "org:admin, dev")
+	require.NoError(t, mintErr)
+	assert.Equal(t, want, got.Value, "the cookie carries exactly what the adapter minted")
+	code, _, _ = serve(t, s, "GET", "/app", nil, nil, &http.Cookie{Name: sessionCookieName, Value: got.Value})
+	assert.Equal(t, http.StatusOK, code, "a quoted cookie still authenticates")
+}

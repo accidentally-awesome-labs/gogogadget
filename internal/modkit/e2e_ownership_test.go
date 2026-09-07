@@ -185,9 +185,14 @@ func TestEveryE2ESpecOnDiskHasExactlyOneOwner(t *testing.T) {
 //
 // The route half is checked too, because "ask the server" is only true while
 // the server offers it — and the gate on it must never regress: the mint
-// route carries the same dev scope, policy and `Enabled: devAuthBypass`
-// predicate /dev/login does, and that predicate's key is a boot refusal under
-// APP_ENV=production.
+// route carries the `Enabled: devAuthBypass` predicate and the `dev` scope,
+// and that predicate's key is a boot refusal under APP_ENV=production.
+//
+// Both are asserted by VALUE and then against /dev/login's, because equality
+// alone detects divergence and not joint weakening: this test used to compare
+// the two routes and never name `devAuthBypass`, so blanking both routes'
+// `enabled` passed it. On the one route that hands out authenticated
+// sessions, the assertion has to be absolute.
 func TestNoTypeScriptCanBuildASessionToken(t *testing.T) {
 	root := specRepoRoot(t)
 
@@ -257,6 +262,12 @@ func TestNoTypeScriptCanBuildASessionToken(t *testing.T) {
 	}
 	if login == nil {
 		t.Fatal("no module declares /dev/login")
+	}
+	if mint.Enabled != "devAuthBypass" || mint.Scope != "dev" {
+		t.Errorf("/dev/session is gated %q in scope %q: the mint route hands an authenticated session "+
+			"to any caller that reaches it, so it must be registered only under the devAuthBypass "+
+			"predicate — whose key is a boot refusal under APP_ENV=production — and in the dev scope",
+			mint.Enabled, mint.Scope)
 	}
 	if mint.Enabled != login.Enabled || mint.Scope != login.Scope {
 		t.Errorf("/dev/session is gated %q in scope %q but /dev/login is gated %q in scope %q: "+

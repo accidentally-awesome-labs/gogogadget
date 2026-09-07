@@ -4,7 +4,7 @@
     "id": "ggg/workflow/dev-session",
     "kind": "workflow",
     "name": "dev-session",
-    "revision": 4,
+    "revision": 5,
     "contract": 2,
     "title": "Zero-account dev session",
     "description": "Sets and rewrites the synthetic session cookie in DEV_AUTH_BYPASS mode — for the seeded demo user, for a chosen organization, and for any persona triple the e2e harness asks for — and owns the predicate that gates every dev-only route.",
@@ -53,7 +53,7 @@
         "source": "internal/web/workflow_dev_session.go",
         "target": "internal/web/workflow_dev_session.go",
         "class": "go",
-        "sha256": "53505661bcccc43265b62a71cb1f283f16a5132924528dbdf87e6be50f7cef81",
+        "sha256": "6bf85ca8052f8252ac541aebc9a21f51d59386ea8b99c6a2233e36f7f34ff79b",
         "rewrite_module": true,
         "contract": true
       },
@@ -61,7 +61,7 @@
         "source": "internal/web/workflow_dev_session_test.go",
         "target": "internal/web/workflow_dev_session_test.go",
         "class": "test",
-        "sha256": "111b47c9dda0aa64df874a36a6c48698e93207649a4a8a7765abb267e1c7197a",
+        "sha256": "20c25271ddd2427a5c37044d271620eee2e27ed9e237503b4b56a460d11be45c",
         "rewrite_module": true,
         "contract": false
       }

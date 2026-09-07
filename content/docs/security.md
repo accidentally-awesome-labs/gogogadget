@@ -313,14 +313,48 @@ escape hatch physically cannot reach production. The dev-only routes
 plainly here: it mints a session for **any** user, org and role and returns it
 as a cookie, so it hands an authenticated session to any caller that can reach
 it. It exists because the e2e harness must not know the token's grammar — that
-belongs to the selected identity adapter and is written in Go alone — and it is
-strictly narrower than what it replaced, where the harness minted any triple
-it liked with no server involvement at all. It carries exactly the gate
-`/dev/login` carries: the same `dev` scope, the same route policy, the same
-`DEV_AUTH_BYPASS` predicate behind the same production boot refusal. It adds
-no configuration key and no token lifetime of its own, and
-`TestNoTypeScriptCanBuildASessionToken` refuses a plan in which its gate
-drifts from `/dev/login`'s. See [Authentication](/docs/authentication).
+belongs to the selected identity adapter and is written in Go alone. It
+carries exactly the gate `/dev/login` carries: the same `dev` scope, the same
+route policy, the same `DEV_AUTH_BYPASS` predicate behind the same production
+boot refusal. It adds no configuration key and no token lifetime of its own,
+and `TestNoTypeScriptCanBuildASessionToken` pins its gate by value —
+`devAuthBypass`, scope `dev` — as well as against `/dev/login`'s, so joint
+weakening fails the plan and not only divergence.
+
+It answers **400** for a triple the session cookie cannot carry, naming the
+byte. `http.SetCookie` does not refuse a value it cannot represent — it drops
+the offending bytes and sends what is left — so `role=admin%3Bfoo` used to
+answer 204 with a session whose role was `adminfoo`. A route that says "here
+is your session" must not hand back a session for a different subject or role
+than was asked for. Space and comma are fine: Go quotes and unquotes them
+symmetrically.
+
+Three more things about it that are easy to get wrong, and one of them was:
+
+- **It is not "narrower" than the client-side path it replaced.** The old
+  path was Playwright's `context.addCookies`, which needed script already
+  executing on this origin. This is a `GET`, and a `GET` is exempt from CSRF
+  by construction — nosurf is method-gated — while `SameSite=Lax` permits a
+  cookie to be **set** on a top-level navigation. Measured before the guard:
+  `Origin: https://evil.example` with `Sec-Fetch-Site: cross-site` answered
+  **204** with a `Set-Cookie`. So the handler now refuses any request whose
+  `Sec-Fetch-Site`, `Origin` or `Referer` says it did not originate here
+  (**403**, naming the header). A browser cannot lie in those three; the e2e
+  harness sends none of them, because `context.request` is not a browser,
+  which is why the guard costs the suite nothing.
+- **Spending the cookie writes rows.** The reply is empty, but the first
+  guarded page runs `identity.SessionLoader`, which for an unknown subject
+  **creates the user, creates the org and grants the requested role as a
+  membership**. `/dev/login` and `/dev/switch-org` inherit the same write
+  path but cannot choose the subject.
+- **The escalation is `user`, not `role`.** `role` tops out at `org:admin`
+  because `/admin` is keyed on `users.admin_role` rather than on claims. But
+  a newly created user whose email matches `ADMIN_EMAIL` is promoted to
+  platform admin on creation, and the zero-account fetcher derives that email
+  as `<subject>@gogogadget.dev` — so with `ADMIN_EMAIL` set, one request can
+  choose the subject that gets it.
+
+See [Authentication](/docs/authentication).
 
 ## Data export and account deletion (GDPR self-serve)
 

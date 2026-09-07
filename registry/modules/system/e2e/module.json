@@ -4,7 +4,7 @@
     "id": "ggg/system/e2e",
     "kind": "system",
     "name": "e2e",
-    "revision": 6,
+    "revision": 7,
     "contract": 1,
     "title": "E2E harness",
     "description": "Playwright harness: config, global setup, the helper that mints each persona's session through the dev-session route, and the pinned node dependencies every declared spec imports.",
@@ -42,7 +42,7 @@
         "source": "e2e/helpers.ts",
         "target": "e2e/helpers.ts",
         "class": "asset",
-        "sha256": "13e93058d99190253fb33d2d3e2dd1064f1436f3f043f2400b8f6bd8c9845696",
+        "sha256": "e399c6b19e24b43e2e57fa713d37ad68a2fb8e2d6b4e7016ae08d382e2bf71f3",
         "rewrite_module": false,
         "contract": false
       },

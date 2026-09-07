@@ -4,6 +4,13 @@ import { personas, type PersonaId } from './generated/personas';
 // The actor list is generated from module persona declarations, so a spec and
 // a fixture cannot disagree about who an actor is. The session token is minted
 // by the server, so nothing here can invent one.
+//
+// Spec files own disjoint users/orgs — no cross-file shared-row mutation, so
+// the suite is parallel-safe. That is now a CALLER obligation rather than a
+// structural one: the route below mints whatever triple it is handed, and
+// spending the cookie creates the user, the org and the membership. Passing a
+// persona's user with another persona's org grants a real membership across
+// them, so pass a generated persona and let the generated data decide.
 export type TestUser = PersonaId;
 
 // mintSession asks ggg/workflow/dev-session for this persona's cookie.
