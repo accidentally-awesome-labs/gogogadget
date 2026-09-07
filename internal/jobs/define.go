@@ -79,3 +79,14 @@ func DefineWithAttempt[P any](kind string, schedulable bool, maxAttempts int,
 		},
 	}
 }
+
+// DefineForKind is Define for one body shared by several kinds, which is what
+// the transactional emails are: same send, different declaration. The handler
+// receives the kind it was dispatched as, so the six kinds stay six
+// declarations — a module owns a kind, and removing billing's dunning must not
+// remove the welcome mail — without six wrappers naming one function.
+func DefineForKind[P any](kind string, schedulable bool, maxAttempts int,
+	h func(context.Context, string, P) error) Definition {
+	return DefineWithAttempt(kind, schedulable, maxAttempts,
+		func(ctx context.Context, payload P, _ Attempt) error { return h(ctx, kind, payload) })
+}

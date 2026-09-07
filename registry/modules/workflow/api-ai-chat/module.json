@@ -1,98 +1,60 @@
 {
-  "schema": 2,
   "module": {
-    "id": "ggg/workflow/api-ai-chat",
-    "kind": "workflow",
-    "name": "api-ai-chat",
-    "revision": 1,
-    "contract": 1,
-    "title": "AI chat API",
-    "description": "The JSON API for model completions, behind bearer-token auth.",
-    "requires": [
-      {
-        "id": "ggg/system/api",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "ggg/system/llm",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "ggg/system/server",
-        "contract": {
-          "min": 1,
-          "max": 2
-        }
-      },
-      {
-        "id": "ggg/workflow/openapi-contract",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      }
-    ],
-    "dependencies": {
-      "go": [
-        {
-          "module": "github.com/stretchr/testify",
-          "version": "v1.11.1"
-        }
-      ],
-      "tools": [],
-      "containers": []
-    },
-    "files": [
-      {
-        "source": "internal/web/ai_test.go",
-        "target": "internal/web/ai_test.go",
-        "class": "test",
-        "sha256": "44193b75cc2a8904984b72ffad5a94931b5cf96131e272ce3b07443d46241c3f",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "api.ai.chat"
       ]
     },
-    "runtime": {
-      "routes": [
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [
         {
-          "id": "api.ai.chat",
-          "method": "POST",
-          "pattern": "/api/v1/ai/chat",
-          "scope": "api-write",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 131072,
-            "idempotent": true,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAPIAIChat"
-        }
-      ]
-    },
-    "migrations": [],
-    "environment": [],
-    "openapi": {
-      "tags": [
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
         {
-          "name": "ai",
-          "description": "Metered LLM chat (usage counts against the plan's ai_tokens meter)."
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
+      "tools": []
+    },
+    "description": "The JSON API for model completions, behind bearer-token auth.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "9f2f5ccb6f6a8cba6294125b85b8ca36f5fe1da88aee2b9ef4d67c6f3f095f3b",
+        "source": "internal/api/ai.go",
+        "target": "internal/api/ai.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "44193b75cc2a8904984b72ffad5a94931b5cf96131e272ce3b07443d46241c3f",
+        "source": "internal/web/ai_test.go",
+        "target": "internal/web/ai_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "ce5dd1d3730712e34956aad7c12bb942f8223b874df84e4a53587449055dec1c",
+        "source": "internal/web/api_ai.go",
+        "target": "internal/web/api_ai.go"
+      }
+    ],
+    "id": "ggg/workflow/api-ai-chat",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "api-ai-chat",
+    "openapi": {
       "components": {
         "schemas": {
           "ChatMessage": {
@@ -120,13 +82,8 @@
       },
       "operations": [
         {
-          "route_id": "api.ai.chat",
-          "operation_id": "chatCompletion",
-          "summary": "Chat completion, metered against the plan.",
           "description": "Requires the `write` scope. Token usage is recorded per organization\nand counted against the plan's `ai_tokens` meter; crossing the cap\nfails with 402 `plan_limit`. With no LLM backend configured the\nendpoint answers 503 `not_configured` instead of pretending.\n",
-          "tags": [
-            "ai"
-          ],
+          "operation_id": "chatCompletion",
           "request_body": {
             "content": {
               "application/json": {
@@ -237,17 +194,115 @@
               },
               "description": "No AI backend configured (`not_configured`)."
             }
-          }
+          },
+          "route_id": "api.ai.chat",
+          "summary": "Chat completion, metered against the plan.",
+          "tags": [
+            "ai"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "description": "Metered LLM chat (usage counts against the plan's ai_tokens meter).",
+          "name": "ai"
         }
       ]
     },
-    "docs": [],
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/api"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/billing"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 2,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/llm"
+      },
+      {
+        "contract": {
+          "max": 2,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/usage"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/openapi-contract"
+      }
+    ],
+    "revision": 2,
+    "runtime": {
+      "routes": [
+        {
+          "handler": "handleAPIAIChat",
+          "id": "api.ai.chat",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/api/v1/ai/chat",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "idempotent": true,
+            "maintenance_exempt": false,
+            "max_body_bytes": 131072,
+            "rate_exempt": false
+          },
+          "scope": "api-write"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "AI chat API"
+  },
+  "schema": 2
 }

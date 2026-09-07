@@ -122,7 +122,9 @@ type Worker struct {
 	// definitions is the dispatch table, keyed by kind.
 	// OnDeadLetter reports exhausted jobs (wired to Sentry when enabled).
 	OnDeadLetter func(kind string, err error)
-	// Webhook delivery policy hooks — strict by default; tests swap these.
+	// Webhook delivery policy overrides. Nil is the strict default, resolved by
+	// the module that owns the delivery — the queue core never names its guard,
+	// so a project can install the worker without an outbound-webhook sender.
 	WebhookGuard     func(ctx context.Context, rawURL string) error
 	WebhookTransport *http.Transport
 	// Billing is the usage-flush target: nil (unconfigured) → flush no-ops
@@ -169,8 +171,7 @@ func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
 }
 
 func NewWorkerWithEnvironment(q *sqlc.Queries, sender mail.Sender, log *slog.Logger, environment string) *Worker {
-	w := &Worker{Environment: environment, q: q, sender: sender, log: log, poll: 2 * time.Second,
-		WebhookGuard: guardWebhookURL, WebhookTransport: guardedTransport()}
+	w := &Worker{Environment: environment, q: q, sender: sender, log: log, poll: 2 * time.Second}
 	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
 	for _, d := range workerDefinitions(w) {
 		if d.ProviderActive != nil && !d.ProviderActive() {

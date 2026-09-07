@@ -49,7 +49,7 @@
         "class": "go",
         "contract": false,
         "rewrite_module": true,
-        "sha256": "59a573cbba4e718d16d113459e61a7317fca560dba3e3f4177887ecb5447172b",
+        "sha256": "257ac92976d5c4c9b1ba2c3a22a1a653f08d0d45bd94a04afa7ff660d7a95c15",
         "source": "registry/modules/workflow/example-ping/example_ping.go",
         "target": "internal/jobs/example_ping.go"
       },
@@ -97,11 +97,11 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "jobs": [
         {
-          "handler": "defineExamplePing",
+          "handler": "runExamplePing",
           "kind": "example.ping",
           "max_attempts": 3,
           "package": "internal/jobs",

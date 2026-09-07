@@ -187,38 +187,54 @@ exists for the queue exactly when a module declares it.
 
 1. Add a `Kind<Name> = "<domain>.<action>"` constant, and a payload struct with
    JSON tags (or reuse one). The payload must be self-contained.
-2. Write the handler as `func(context.Context, P) error` and wrap it in a
-   declaration constructor beside the other ones in
-   `internal/jobs/definitions.go` (or in your module's own file):
+2. Write the handler as a method on `*Worker` in a payload the module owns:
 
    ```go
-   func (w *Worker) defineMetricsRollup() Definition {
-       return Define(KindMetricsRollup, true, 0, w.rollupMetrics)
+   func (w *Worker) rollupMetrics(ctx context.Context, p MetricsRollupPayload) error {
+       return nil
    }
    ```
 
-   `Define` is generic over the payload, so dispatch stays data while the
-   handler stays typed. The three arguments after the kind are the contract:
-   `schedulable` decides whether a `schedules` row may reference the kind
-   (`SchedulableKinds` is derived from it, because a schedule pointing at a
-   one-shot handler would fire it forever), and `maxAttempts` is the retry
-   budget — `0` means "unspecified" and normalizes to
-   `jobs.DefaultMaxAttempts` (**8**), never "never retry". Use
-   `DefineWithAttempt` when the handler needs to know it is on its last
-   attempt, as webhook delivery does to mark the delivery row dead exactly when
-   the queue gives up.
-3. Declare it in the owning module's manifest under `runtime.jobs`:
+   That is the whole module side. There is no declaration constructor to
+   write: `Define` is generic over the payload, so the generated table calls
+   it with your method and dispatch stays data while the handler stays typed.
+3. Declare it in the owning module's manifest — a `claims.jobs` entry for the
+   kind and a `runtime.jobs` entry naming the handler:
 
    ```json
-   { "kind": "metrics.rollup", "package": "internal/jobs",
-     "handler": "defineMetricsRollup", "schedulable": true, "max_attempts": 0 }
+   "claims": { "jobs": ["metrics.rollup"] },
+   "runtime": { "jobs": [
+     { "kind": "metrics.rollup", "package": "internal/jobs",
+       "handler": "rollupMetrics", "schedulable": true, "max_attempts": 0 }
+   ]}
    ```
+
+   The declaration is where the job's policy lives, and the only place:
+   `schedulable` decides whether a `schedules` row may reference the kind
+   (`SchedulableKinds` is derived from it, because a schedule pointing at a
+   one-shot handler would fire it forever), and `max_attempts` is the retry
+   budget — `0` means "unspecified" and normalizes to
+   `jobs.DefaultMaxAttempts` (**8**), never "never retry".
+
+   `handler_form` names what the handler receives besides its payload, and is
+   a closed set. Omit it for `func(context.Context, P) error`. Use
+   `"attempt"` for `func(context.Context, P, Attempt) error` when the handler
+   must know it is on its last attempt, as webhook delivery does to mark the
+   delivery row dead exactly when the queue gives up. Use `"kind"` for
+   `func(context.Context, string, P) error` when one body serves several
+   kinds, as the six transactional emails do — each is its own declaration,
+   because a module owns a kind and removing billing's dunning must not remove
+   the welcome mail.
 4. Run `make generate` (or `go run ./cmd/ggg sync --offline`). That regenerates
    `internal/jobs/jobs_registry_gen.go`: the `workerDefinitions` table, the
    `SchedulableKinds` list, and `declaredAttempts` — the map the enqueue helpers
-   write onto each new row. A manifest naming a constructor that does not exist
-   is a compile error on a named generated line; a constructor with no manifest
-   entry is never dispatched, and its persisted rows dead-letter as
+   write onto each new row. A manifest naming a handler that does not exist
+   is a compile error on a named generated line. The two halves of the
+   declaration are checked against each other, so a `claims.jobs` entry whose
+   `runtime.jobs` entry was deleted is refused by name rather than leaving a
+   handler nothing dispatches — an unreferenced method is legal Go, so nothing
+   downstream would have noticed. A handler with no declaration at all is
+   never dispatched, and its persisted rows dead-letter as
    `module_uninstalled`.
 5. Enqueue from the event source with `jobs.Enqueue` / `jobs.EnqueueAt`. The
    declared budget is written into the row's `max_attempts` at enqueue time, and

@@ -82,7 +82,7 @@ over a tree no command can run.
 
 | Profile | Members | Closure | Required provider slots | What it is |
 |---|---|---|---|---|
-| `minimal` | 50 | 167 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
+| `minimal` | 48 | 159 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
 | `web` | 190 | 254 | 18 | Minimal's floor plus public content, internationalization and the discovery surfaces |
 | `saas` | 296 | 289 | 18 | Web plus organizations, billing, jobs, notifications, admin and the product workflows — the largest closure here |
 | `full` | 286 | 288 | 18 | Every product module plus the registry-publishing template. The name overstates it; see below |
@@ -92,7 +92,7 @@ actually resolves to. The two differ in both directions. Members that are
 adapter candidates do not enter the closure unless the provider selections
 choose them — which is why `saas` names 296 and installs 289 — and a seam
 pulled in only through some member's `requires` enters without being named,
-which is why `minimal` names 50 and installs 167. That second direction is
+which is why `minimal` names 48 and installs 159. That second direction is
 also why every profile requires all 18 slots: a seam pulled in transitively
 declares its slot just as loudly as one named in the list.
 
@@ -106,7 +106,7 @@ These numbers are asserted, not remembered.
 `internal/modkit` plans every shipped profile and fails on the commit that
 moves a count without moving this table.
 
-#### Why `minimal` is 167 modules
+#### Why `minimal` is 159 modules
 
 Because the floor is not a taste decision, and `minimal` is where you see it.
 What it no longer contains is a hand-curated component list: every page,
@@ -115,28 +115,62 @@ renders, derived with `go/types` and held by
 `TestTheDeclaredUIEdgesAreTheOnesTheCodeReferences`, so a profile installs the
 UI its own pages reach and nothing else. `minimal` named 67 UI modules and
 installed 77 when that list was maintained by hand; it now names **none** and
-installs **66**, and `ValidateUIComponentRequires` refuses at plan time when a
+installs **61**, and `ValidateUIComponentRequires` refuses at plan time when a
 payload renders a component its module has no declared path to — the failure
 that silence used to hide until the compiler found it.
 
-What remains is not the UI graph. It is four seams that name product symbols
-in their own payloads, and the pages those drag in:
+What remains is not the UI graph. It is seams that name product symbols in
+their own payloads, and the pages those drag in. Two of them are fixed:
 
-- **`ggg/system/server`.** It owns `internal/web/server.go`, whose
+- **`ggg/system/jobs` no longer names a workflow's handler.** The dispatch
+  table is generated from the `runtime.jobs` declarations, and the generated
+  call passes the declared kind, schedulability and attempt budget to `Define`
+  — so a module contributes a job by declaring one and writing one typed
+  method, and there is no hand-written constructor table left to disagree with
+  the `SchedulableKinds` and `declaredAttempts` derived beside it. The
+  outbound-webhook SSRF guard and its pinned transport are resolved by the
+  module that owns the delivery rather than by the queue's constructor, and
+  the `webhook.deliver` enqueue contract sits with the emitter that writes it.
+  A job kind is now two halves of one declaration — a `claims.jobs` entry and
+  a `runtime.jobs` entry — and dropping either is refused by name.
+- **`ggg/system/api` no longer reaches a product resource.** The projects and
+  chat JSON transports moved to `ggg/workflow/api-projects` and
+  `ggg/workflow/api-ai-chat`, the modules that already declared those routes,
+  and they now declare the resources they compile against. The transport core
+  keeps what is genuinely transport: bearer-token auth, the rate limiter, the
+  envelope and error shape, cursor pagination, the idempotency middleware and
+  the OpenAPI document. `RoutePolicy.Idempotent` is applied at registration
+  from the declaration the OpenAPI `Idempotency-Key` parameter is derived
+  from, so a route cannot document a retry contract the transport does not
+  enforce. Declaring `ggg/system/api → ggg/workflow/projects` instead was
+  never available: it closes **15** requires cycles, starting with the direct
+  one, because the projects resource requires the transport for the name rule
+  both transports share.
+
+Three floors remain:
+
+- **`ggg/system/server` and `ggg/system/security`.** `server.go`'s
   statically-declared capability fields name thirteen capabilities, so its
   `requires` pull `internal/{api,audit,cache,jobs,notify,ratelimit,`
   `realtime,search,telemetry,usage,webhooks}` into *every* closure that serves
-  HTTP. `internal/web/routes.go` dereferences the `apiSurface` that
-  `ggg/workflow/openapi-contract` declares, and `auth.go` and `htmx.go` call
-  `applyStoredAppearance`, `applyImpersonation` and `resolveTheme`, which
-  `ggg/workflow/appearance` and `ggg/workflow/impersonation` own — so a shell
-  cannot be installed without a theme picker and an impersonation banner.
-- **`ggg/system/jobs`.** `internal/jobs/definitions.go` names `deliverWebhook`,
-  `exportProjectsCSV` and `exportOrgJSON`, owned by
-  `ggg/workflow/{outbound-webhooks,project-export,organization-export}`.
-- **`ggg/system/api`.** `internal/api/projects.go` compiles against
-  `ggg/workflow/projects`' sqlc queries, so a JSON API implies a projects
-  resource.
+  HTTP. `auth.go` calls `applyStoredAppearance` and `applyImpersonation` and
+  `htmx.go` calls `resolveTheme`, which `ggg/workflow/appearance` and
+  `ggg/workflow/impersonation` own — so a shell cannot be installed without a
+  theme picker and an impersonation banner. Those two hooks are middleware,
+  not a payload in the wrong module, so the fix is a request-pipeline
+  contribution kind that does not exist yet. Measured, it is worth **six**
+  modules (159 → 153: `workflow/{appearance,impersonation}`,
+  `system/impersonation`, `page/{admin-overview,admin-users}` and
+  `component/toolbar`) and taking them needs one more change, because the
+  admin sidebar's `after` chain has no matching `requires`: with those two
+  workflows gone, generation refuses with `nav.admin.orgs declares after
+  nav.admin.users, which is not in this area`.
+- **`ggg/workflow/projects` is a data module and a UI workflow in one.** It
+  owns `internal/db/queries/projects.sql`, and `ggg/page/dashboard` and
+  `ggg/page/projects` read `CountProjectsByOrg` and `ListProjectsByOrg` from
+  it while declaring nothing. Declaring that edge would close
+  `page/dashboard → workflow/projects → page/projects → page/dashboard`, so
+  the way down is splitting the table out of the workflow, not a `requires`.
 - **The schema assertions.** Migration `0020_provider_neutral_ids` asserts a
   fixed fifteen-table, twenty-three-column shape *before* it renames anything,
   so no closure may omit the nine modules that create those tables. It is
@@ -146,21 +180,25 @@ in their own payloads, and the pages those drag in:
 Each of those pulls a page, and **navigation is a total order**: a
 `runtime.navigation` entry may declare `after` another entry, generation
 refuses an `after` naming an entry its area does not contain, and so each page
-in a chain declares a hard `requires` on its predecessor. The settings sidebar
-(`account → org → billing → api → webhooks`), the admin sidebar
+in a chain has to be entered whole. The settings sidebar
+(`account → org → billing → api`), the admin sidebar
 (`overview → users → orgs → flags`), the app sidebar
 (`dashboard → projects → files`) and two footer chains are entered whole.
-That, and not the component catalog, is why `minimal` installs twenty pages.
+That, and not the component catalog, is why `minimal` installs nineteen pages.
 
 A profile whose member list drops those pages plans cleanly and then fails
 `go build` in the created project, which is what CI's `profiles` job exists to
-catch: measured, a `minimal` that names five pages resolves to 131 modules and
-49 UI modules and does not compile. Generating `server.go`'s capability struct,
-deriving `definitions.go` from the installed job set, moving
-`internal/api/projects.go` to the module whose queries it uses, and
-neutralizing the migration assertion are what lower the floor for real. Until
-then, `minimal` means *the least this source can be made to boot as*, and
-saying otherwise would be advertising a shape that does not exist.
+catch. Measured after the two fixes above: a `minimal` naming only the thirty
+seams plus `workflow/{projects,files,openapi-contract}` resolves to 123
+modules with **five** pages and does not compile. Six references block it, and
+only two of them are the appearance/impersonation hooks — `auth.go` also names
+`templates.{NotConfigured,Disabled,SelectOrg}`, `testonly_content_guide.go`
+names `s.handleContent{Index,Detail}`, and `workflow_billing_local.go` names
+`s.productPlans` and `s.captureEvent`, none of which are declared. So the
+request-pipeline kind is necessary and not sufficient; the `templates` package
+needs the reference gate the `ui` package now has. Until then, `minimal` means
+*the least this source can be made to boot as*, and saying otherwise would be
+advertising a shape that does not exist.
 
 #### `ggg/profile/api` is gone, and `full` is not the whole catalog
 

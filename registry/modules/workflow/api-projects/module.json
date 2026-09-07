@@ -1,117 +1,73 @@
 {
-  "schema": 2,
   "module": {
-    "id": "ggg/workflow/api-projects",
-    "kind": "workflow",
-    "name": "api-projects",
-    "revision": 1,
-    "contract": 1,
-    "title": "Projects API",
-    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
-    "requires": [
-      {
-        "id": "ggg/system/api",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "ggg/system/server",
-        "contract": {
-          "min": 1,
-          "max": 2
-        }
-      },
-      {
-        "id": "ggg/workflow/openapi-contract",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      }
-    ],
-    "dependencies": {
-      "go": [
-        {
-          "module": "github.com/stretchr/testify",
-          "version": "v1.11.1"
-        }
-      ],
-      "tools": [],
-      "containers": []
-    },
-    "files": [
-      {
-        "source": "internal/web/api_test.go",
-        "target": "internal/web/api_test.go",
-        "class": "test",
-        "sha256": "e27f5f218ac1a52243b72f7622e95d934bb0a3dfe507ac4a44f1e7686a0dc8f0",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "api.projects.create",
         "api.projects.list"
       ]
     },
-    "runtime": {
-      "routes": [
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [
         {
-          "id": "api.projects.create",
-          "method": "POST",
-          "pattern": "/api/v1/projects",
-          "scope": "api-write",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 65536,
-            "idempotent": true,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAPICreateProject"
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
         },
         {
-          "id": "api.projects.list",
-          "method": "GET",
-          "pattern": "/api/v1/projects",
-          "scope": "api-read",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAPIListProjects"
-        }
-      ]
-    },
-    "migrations": [],
-    "environment": [],
-    "openapi": {
-      "tags": [
-        {
-          "name": "projects",
-          "description": "The canonical CRUD resource."
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
+      "tools": []
+    },
+    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "eb5e0bed57bcaebbe3972e8ddefcccff815a2e05d8c8ff7be86cccbf2d3e368d",
+        "source": "internal/api/projects.go",
+        "target": "internal/api/projects.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "25ba7b6572f786e14eeb7a4a5c7fd31791c0dfe986acb5d5171918c7a239830f",
+        "source": "internal/web/api_projects.go",
+        "target": "internal/web/api_projects.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e27f5f218ac1a52243b72f7622e95d934bb0a3dfe507ac4a44f1e7686a0dc8f0",
+        "source": "internal/web/api_test.go",
+        "target": "internal/web/api_test.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "31c3b70ef0b893bad56188e26b2fd55a4c5e0b6943cbb1008c99e786d34dcf89",
+        "source": "internal/web/idempotency_test.go",
+        "target": "internal/web/idempotency_test.go"
+      }
+    ],
+    "id": "ggg/workflow/api-projects",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "api-projects",
+    "openapi": {
       "components": {
         "schemas": {
           "Project": {
             "properties": {
-              "org_id": {
-                "description": "The organization the token belongs to.",
-                "type": "string"
-              },
               "created_at": {
                 "format": "date-time",
                 "type": "string"
@@ -121,6 +77,10 @@
                 "type": "integer"
               },
               "name": {
+                "type": "string"
+              },
+              "org_id": {
+                "description": "The organization the token belongs to.",
                 "type": "string"
               },
               "status": {
@@ -149,13 +109,8 @@
       },
       "operations": [
         {
-          "route_id": "api.projects.list",
-          "operation_id": "listProjects",
-          "summary": "List projects for the token's organization.",
           "description": "Newest first. Two pagination modes share one response shape:\n\n- **`cursor` (preferred)** — keyset paging. Follow `next_cursor` from\n  the previous response. Stable under concurrent writes: a cursor\n  names a row, so projects created while you page do not shift rows\n  across page boundaries, and depth costs nothing server-side.\n- **`offset` (legacy)** — the original contract, still honoured. It\n  repeats or drops rows when the set changes mid-walk.\n\n`next_cursor` is `null` on the last page. Cursors are opaque: echo\nthem back verbatim, never parse or construct them.\n",
-          "tags": [
-            "projects"
-          ],
+          "operation_id": "listProjects",
           "parameters": [
             {
               "description": "Page size. Values outside 1–100 fall back to the default.",
@@ -265,16 +220,16 @@
             "500": {
               "$ref": "#/components/responses/InternalError"
             }
-          }
-        },
-        {
-          "route_id": "api.projects.create",
-          "operation_id": "createProject",
-          "summary": "Create a project.",
-          "description": "Enforces the same plan limit as the UI: at the cap the call fails with\n402 `plan_limit` rather than silently succeeding.\n",
+          },
+          "route_id": "api.projects.list",
+          "summary": "List projects for the token's organization.",
           "tags": [
             "projects"
-          ],
+          ]
+        },
+        {
+          "description": "Enforces the same plan limit as the UI: at the cap the call fails with\n402 `plan_limit` rather than silently succeeding.\n",
+          "operation_id": "createProject",
           "request_body": {
             "content": {
               "application/json": {
@@ -333,17 +288,125 @@
             "500": {
               "$ref": "#/components/responses/InternalError"
             }
-          }
+          },
+          "route_id": "api.projects.create",
+          "summary": "Create a project.",
+          "tags": [
+            "projects"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "description": "The canonical CRUD resource.",
+          "name": "projects"
         }
       ]
     },
-    "docs": [],
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/api"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/billing"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 2,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 2,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/openapi-contract"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/projects"
+      }
+    ],
+    "revision": 2,
+    "runtime": {
+      "routes": [
+        {
+          "handler": "handleAPICreateProject",
+          "id": "api.projects.create",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/api/v1/projects",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "idempotent": true,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "rate_exempt": false
+          },
+          "scope": "api-write"
+        },
+        {
+          "handler": "handleAPIListProjects",
+          "id": "api.projects.list",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/api/v1/projects",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "api-read"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Projects API"
+  },
+  "schema": 2
 }

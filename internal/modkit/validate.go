@@ -360,6 +360,20 @@ func validateManifest(m Manifest, canonical bool) error {
 			return fmt.Errorf("manifest runtime cli %q requires a claims.cli entry", command.Name)
 		}
 	}
+	// A job kind is a namespace claim and a runtime declaration, and neither
+	// half means anything alone. The claim without the declaration is the case
+	// worth refusing by name: dropping a runtime.jobs entry leaves a handler
+	// nothing dispatches, and every command before the compiler would pass.
+	for _, job := range m.Runtime.Jobs {
+		if !slices.Contains(m.Claims.Jobs, job.Kind) {
+			return fmt.Errorf("manifest runtime jobs %q requires a claims.jobs entry", job.Kind)
+		}
+	}
+	for _, kind := range m.Claims.Jobs {
+		if !slices.ContainsFunc(m.Runtime.Jobs, func(job JobContribution) bool { return job.Kind == kind }) {
+			return fmt.Errorf("manifest claims.jobs %q has no runtime.jobs declaration", kind)
+		}
+	}
 	// A derivation runs inside generated config code, so the function has to
 	// leave with the module that declared the key. Requiring the package to be
 	// one this manifest claims is what makes that true: claims.packages is
@@ -842,6 +856,9 @@ func validateJobs(jobs []JobContribution, canonical bool) error {
 		}
 		if !validIdentifier(job.Handler) {
 			return fmt.Errorf("manifest runtime jobs[%d] handler is invalid", i)
+		}
+		if !validJobHandlerForm(job.HandlerForm) {
+			return fmt.Errorf("manifest runtime jobs[%d] handler_form %q is invalid", i, job.HandlerForm)
 		}
 		if job.MaxAttempts < 0 {
 			return fmt.Errorf("manifest runtime jobs[%d] max_attempts is negative", i)

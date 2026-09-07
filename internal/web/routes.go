@@ -61,6 +61,7 @@ func (s *Server) routes() error {
 		apiWrap: func(scope string, h http.Handler) http.Handler {
 			return s.api.middleware.RequireAPIToken(scope, h)
 		},
+		apiIdempotent: s.apiIdempotent,
 	}); err != nil {
 		return err
 	}

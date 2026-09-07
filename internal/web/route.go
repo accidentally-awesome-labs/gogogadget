@@ -76,28 +76,39 @@ type scopeTargets struct {
 	// apiWrap wraps an API handler in its token guard. The read/write split is
 	// the declared scope, so the caller cannot forget which one a route needs.
 	apiWrap func(scope string, h http.Handler) http.Handler
+	// apiIdempotent wraps an API handler in the idempotency-key middleware. It
+	// is applied from RoutePolicy.Idempotent — the same declaration the
+	// generated OpenAPI document derives the Idempotency-Key parameter from, so
+	// a route cannot document a retry contract the transport does not enforce,
+	// or enforce one it does not document.
+	apiIdempotent func(h http.Handler) http.Handler
 }
 
 // target resolves the mux and any scope-specific wrapping for one route.
-func (t scopeTargets) target(scope Scope) (*http.ServeMux, func(http.Handler) http.Handler, bool) {
+func (t scopeTargets) target(route Route) (*http.ServeMux, func(http.Handler) http.Handler, bool) {
 	identity := func(h http.Handler) http.Handler { return h }
-	switch scope {
+	switch route.Scope {
 	case ScopePublic, ScopeProbe, ScopeStatic, ScopeWebhook, ScopeDev:
 		return t.public, identity, t.public != nil
 	case ScopeApp:
 		return t.app, identity, t.app != nil
 	case ScopeAdmin:
 		return t.admin, identity, t.admin != nil
-	case ScopeAPIRead:
-		if t.public == nil || t.apiWrap == nil {
+	case ScopeAPIRead, ScopeAPIWrite:
+		if t.public == nil || t.apiWrap == nil || t.apiIdempotent == nil {
 			return nil, nil, false
 		}
-		return t.public, func(h http.Handler) http.Handler { return t.apiWrap("read", h) }, true
-	case ScopeAPIWrite:
-		if t.public == nil || t.apiWrap == nil {
-			return nil, nil, false
+		tokenScope := "read"
+		if route.Scope == ScopeAPIWrite {
+			tokenScope = "write"
 		}
-		return t.public, func(h http.Handler) http.Handler { return t.apiWrap("write", h) }, true
+		idempotent := route.Policy.Idempotent
+		return t.public, func(h http.Handler) http.Handler {
+			if idempotent {
+				h = t.apiIdempotent(h)
+			}
+			return t.apiWrap(tokenScope, h)
+		}, true
 	}
 	return nil, nil, false
 }
@@ -127,7 +138,7 @@ func enabledRoutes(s *Server, registry []Route) []Route {
 // cannot install a gated route by accident.
 func registerRoutes(s *Server, registry []Route, targets scopeTargets) error {
 	for _, route := range enabledRoutes(s, registry) {
-		mux, wrap, ok := targets.target(route.Scope)
+		mux, wrap, ok := targets.target(route)
 		if !ok {
 			return fmt.Errorf("route %s: scope %q has no registration target", route.ID, route.Scope)
 		}

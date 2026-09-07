@@ -4,7 +4,7 @@
     "id": "ggg/system/notifications",
     "kind": "system",
     "name": "notifications",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "In-app notifications",
     "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
@@ -116,6 +116,9 @@
       "packages": [
         "internal/notify"
       ],
+      "jobs": [
+        "email.digest"
+      ],
       "queries": [
         "notification_preferences",
         "notifications"
@@ -125,11 +128,23 @@
       ]
     },
     "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/notifications",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "notifications.notifier",
+              "type": "notifications.Notifier"
+            }
+          ]
+        }
+      ],
       "jobs": [
         {
           "kind": "email.digest",
           "package": "internal/jobs",
-          "handler": "defineEmailDigest",
+          "handler": "sendDigests",
           "schedulable": true
         }
       ],
@@ -178,18 +193,6 @@
           "name": "UpsertNotificationPreference",
           "table": "notification_preferences"
         }
-      ],
-      "provider_slots": [
-        {
-          "id": "ggg/notifications",
-          "critical": false,
-          "capabilities": [
-            {
-              "capability": "notifications.notifier",
-              "type": "notifications.Notifier"
-            }
-          ]
-        }
       ]
     },
     "migrations": [
@@ -223,10 +226,10 @@
       },
       "es": {
         "email.digest.cta": "Ver todas las notificaciones:",
-        "email.digest.intro": "Un resumen de tus notificaciones desde el \u00faltimo env\u00edo.",
+        "email.digest.intro": "Un resumen de tus notificaciones desde el último envío.",
         "email.digest.manage": "Cambia la frecuencia de estos correos:",
         "email.digest.subject": "Tu resumen de GoGoGadget",
-        "email.digest.title": "Esto es lo que pas\u00f3%s"
+        "email.digest.title": "Esto es lo que pasó%s"
       }
     },
     "docs": [],

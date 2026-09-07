@@ -4,7 +4,7 @@
     "id": "ggg/workflow/openapi-contract",
     "kind": "workflow",
     "name": "openapi-contract",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "OpenAPI description",
     "description": "Serves the generated OpenAPI description of the JSON API.",
@@ -40,10 +40,10 @@
     },
     "files": [
       {
-        "source": "internal/web/api_transport.go",
-        "target": "internal/web/api_transport.go",
+        "source": "internal/web/api_openapi.go",
+        "target": "internal/web/api_openapi.go",
         "class": "go",
-        "sha256": "210cd01ce692904250230172c4d6b1327963288609084df0da6b22858a1c0b40",
+        "sha256": "8e92a2fd0c9ec9f806958de843aaadc0e61ed4734bcf0ea41effacca279b3740",
         "rewrite_module": true,
         "contract": false
       },

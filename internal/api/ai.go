@@ -31,7 +31,7 @@ type chatRequest struct {
 }
 
 // Chat handles POST /api/v1/ai/chat (scope write).
-func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
+func (h AI) Chat(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 

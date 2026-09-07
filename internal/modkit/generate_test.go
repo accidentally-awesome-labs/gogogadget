@@ -1142,16 +1142,22 @@ func TestSmokeCasesCoverRequestablePublicGetRoutes(t *testing.T) {
 // The dispatch table is generated from job declarations so an uninstalled
 // module's kind is simply absent, which is what turns a stale queued row into an
 // immediate dead-letter instead of a retried handler that cannot exist.
+//
+// It also carries the policy: the generated call passes the declared kind,
+// schedulability and attempt budget to Define, so the only place a job's policy
+// is written is the manifest. A hand-written constructor repeating them could
+// disagree with the SchedulableKinds and declaredAttempts derived beside it.
 func TestJobsRegistryEmitsDispatchTableAndSchedulables(t *testing.T) {
 	module := Manifest{
 		ID: "ggg/workflow/digest", Kind: ModuleWorkflow, Name: "digest",
 		Revision: 1, Contract: 1, Title: "Digest", Description: "Digest workflow.",
 		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Claims: NamespaceClaims{Jobs: []string{"email.digest", "webhook.deliver"}},
 		Runtime: RuntimeContributions{Jobs: []JobContribution{
-			{Kind: "email.digest", Package: "internal/jobs", Handler: "defineEmailDigest",
+			{Kind: "email.digest", Package: "internal/jobs", Handler: "sendDigests",
 				Schedulable: true, MaxAttempts: 0},
-			{Kind: "webhook.deliver", Package: "internal/jobs", Handler: "defineWebhookDeliver",
-				Schedulable: false, MaxAttempts: 5},
+			{Kind: "webhook.deliver", Package: "internal/jobs", Handler: "deliverWebhook",
+				HandlerForm: JobHandlerAttempt, Schedulable: false, MaxAttempts: 5},
 		}},
 	}
 	lock := Lock{
@@ -1178,21 +1184,80 @@ func TestJobsRegistryEmitsDispatchTableAndSchedulables(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		// The table names the declaration constructors; it never knows a payload type.
+		// The table names the module's own typed handler; it never knows a payload type.
 		"func workerDefinitions(w *Worker) []Definition",
-		"w.defineEmailDigest()",
-		"w.defineWebhookDeliver()",
+		`d0 := Define("email.digest", true, 0, w.sendDigests)`,
+		// An attempt-aware handler says so in the declaration, and gets the
+		// constructor that passes it its retry state.
+		`d1 := DefineWithAttempt("webhook.deliver", false, 5, w.deliverWebhook)`,
 		// The schedulable catalog is derived, not hand-listed.
 		`var SchedulableKinds = []string{ "email.digest",`,
+		// So is the attempt budget the enqueue path stamps on the row.
+		`declaredAttempts = map[string]int{ "email.digest": 8, "webhook.deliver": 5,`,
 	} {
 		if !strings.Contains(registry, want) {
 			t.Fatalf("jobs registry missing %s:\n%s", want, registry)
 		}
 	}
 	// webhook.deliver is not schedulable, so it must not appear in the catalog.
-	catalog := registry[strings.Index(registry, "SchedulableKinds"):]
+	catalog := registry[strings.Index(registry, "var SchedulableKinds = []string{"):]
 	if strings.Contains(catalog[:strings.Index(catalog, "}")], "webhook.deliver") {
 		t.Fatalf("non-schedulable kind leaked into the catalog:\n%s", catalog)
+	}
+
+	// Mutating the declaration moves the generated table, and nothing else has
+	// to be edited for it to follow: this is the property that makes the
+	// hand-written constructor table unnecessary.
+	module.Runtime.Jobs[0].Handler = "sendRollups"
+	module.Runtime.Jobs[0].Schedulable = false
+	module.Runtime.Jobs[0].MaxAttempts = 2
+	lock.Modules[0].Manifest = module
+	files, err = GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err != nil {
+		t.Fatalf("GenerateAll after mutation: %v", err)
+	}
+	registry = ""
+	for _, file := range files {
+		if file.Path == "internal/jobs/jobs_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if !strings.Contains(registry, `d0 := Define("email.digest", false, 2, w.sendRollups)`) {
+		t.Fatalf("mutated declaration did not reach the generated table:\n%s", registry)
+	}
+	catalog = registry[strings.Index(registry, "var SchedulableKinds = []string{"):]
+	if strings.Contains(catalog[:strings.Index(catalog, "}")], "email.digest") {
+		t.Fatalf("a kind that stopped being schedulable stayed in the catalog:\n%s", catalog)
+	}
+}
+
+// The handler shape is a closed set, because it selects the constructor the
+// generated table calls. An unknown one must refuse rather than emit a call to
+// a function that does not exist.
+func TestJobsRegistryRejectsAnUnknownHandlerForm(t *testing.T) {
+	module := Manifest{
+		ID: "ggg/workflow/digest", Kind: ModuleWorkflow, Name: "digest",
+		Revision: 1, Contract: 1, Title: "Digest", Description: "Digest workflow.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Claims: NamespaceClaims{Jobs: []string{"email.digest"}},
+		Runtime: RuntimeContributions{Jobs: []JobContribution{
+			{Kind: "email.digest", Package: "internal/jobs", Handler: "sendDigests", HandlerForm: "row"},
+		}},
+	}
+	lock := Lock{
+		Schema: 2, RegistryCommit: testCommitA, Order: []string{"ggg/workflow/digest"},
+		Modules: []LockedModule{{
+			ID: "ggg/workflow/digest", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+	_, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err == nil {
+		t.Fatal("GenerateAll accepted an unknown job handler_form")
+	}
+	if !strings.Contains(err.Error(), "email.digest") || !strings.Contains(err.Error(), "row") {
+		t.Fatalf("error must name the kind and the bad form: %v", err)
 	}
 }
 

@@ -821,12 +821,15 @@ is a boot error naming the collision, not a plan that silently shadows another.
 2. **Builder** — an `XMessage(locale, appURL, to, …) (mail.Message, error)`
    constructor in `internal/mail/mail.go`, next to `WelcomeMessage`. Bodies
    render to strings at enqueue time; workers never touch templates.
-3. **Job kind** — a `Kind…` const plus a `jobs.Define` registration, and a
-   `runtime.jobs` record on `ggg/system/mail`'s manifest:
-   `{"kind": "email.x", "package": "internal/jobs", "handler": "defineEmailX",
-   "schedulable": false, "max_attempts": 0}`. The generated dispatcher and
-   typed enqueue helper come from that record — there is no `dispatch` switch
-   to edit any more.
+3. **Job kind** — a `Kind…` const, a `claims.jobs` entry and a `runtime.jobs`
+   record on `ggg/system/mail`'s manifest:
+   `{"kind": "email.x", "package": "internal/jobs", "handler":
+   "sendTransactionalEmail", "handler_form": "kind", "schedulable": false,
+   "max_attempts": 0}`. The generated dispatcher and typed enqueue helper come
+   from that record — there is no `dispatch` switch to edit and no
+   registration constructor to write. `handler_form: "kind"` is what lets all
+   six transactional kinds share one send body while staying six
+   declarations.
 4. **Enqueue** at the trigger site with `jobs.EnqueueEmail(ctx, q, jobs.KindX,
    msg, orgID, runAt)`. Billing-triggered? Extend the `billing.EmailSink`
    interface and its implementation in `internal/web/email_sink.go` — billing
@@ -836,9 +839,11 @@ is a boot error naming the collision, not a plan that silently shadows another.
 
 ## Add a job kind
 
-1. `jobs.Define[P](kind, schedulable, maxAttempts, handler)` in the owning
-   module's package, with a typed payload struct. `maxAttempts == 0`
-   normalizes to 8.
+1. One typed method on `*jobs.Worker` in the owning module's payload:
+   `func (w *Worker) runX(ctx context.Context, p XPayload) error`. Nothing
+   else — the generated table calls `jobs.Define` with the declared kind,
+   schedulability and attempt budget, so the policy is written once, in the
+   manifest. `max_attempts == 0` normalizes to 8.
 2. Declare it in that module's `runtime.jobs`. The dispatcher, the typed
    enqueue helper, the schedulable catalog and the admin choices are all
    generated from the declaration, so an undeclared kind simply is not

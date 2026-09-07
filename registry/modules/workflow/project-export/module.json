@@ -4,7 +4,7 @@
     "id": "ggg/workflow/project-export",
     "kind": "workflow",
     "name": "project-export",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Project CSV export",
     "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
@@ -120,6 +120,9 @@
     "claims": {
       "routes": [
         "projects.export"
+      ],
+      "jobs": [
+        "export.projects_csv"
       ]
     },
     "runtime": {
@@ -146,7 +149,7 @@
         {
           "kind": "export.projects_csv",
           "package": "internal/jobs",
-          "handler": "defineExportProjectsCSV"
+          "handler": "exportProjectsCSV"
         }
       ]
     },

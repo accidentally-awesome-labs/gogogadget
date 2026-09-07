@@ -426,3 +426,85 @@ func TestMarshalLockStampsThisEnginesContract(t *testing.T) {
 		t.Fatalf("round-tripped EngineContract = %d, want %d", reparsed.EngineContract, EngineContract)
 	}
 }
+
+// A job kind is two halves of one declaration: a claims.jobs namespace claim
+// and a runtime.jobs entry naming the handler. Neither half means anything
+// alone, and the claim without the declaration is the dangerous direction —
+// deleting the runtime entry leaves a handler nothing dispatches, and every
+// command before the compiler would pass, because an unreferenced method is
+// legal Go.
+func TestAJobKindNeedsBothItsClaimAndItsDeclaration(t *testing.T) {
+	base := func() Manifest {
+		return Manifest{
+			ID: "ggg/workflow/pinger", Kind: ModuleWorkflow, Name: "pinger",
+			Revision: 1, Contract: 1, Title: "Pinger", Description: "Pings things.",
+			Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+			Migrations: []ManifestMigration{}, Environment: []EnvironmentVariable{},
+			Docs: []DocumentationRef{}, Data: []DataDeclaration{},
+			Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+			Claims:       NamespaceClaims{Jobs: []string{"example.ping"}},
+			Runtime: RuntimeContributions{Jobs: []JobContribution{
+				{Kind: "example.ping", Package: "internal/jobs", Handler: "runExamplePing"},
+			}},
+		}
+	}
+	if err := ValidateManifest(base()); err != nil {
+		t.Fatalf("a matched claim and declaration must validate: %v", err)
+	}
+
+	// Delete the declaration: the refusal has to name the kind, because the
+	// handler it pointed at is still installed and still compiles.
+	orphanClaim := base()
+	orphanClaim.Runtime.Jobs = nil
+	err := ValidateManifest(orphanClaim)
+	if err == nil {
+		t.Fatal("a claims.jobs entry with no runtime.jobs declaration was accepted")
+	}
+	if !strings.Contains(err.Error(), "example.ping") {
+		t.Fatalf("refusal must name the deleted kind: %v", err)
+	}
+
+	// And the other direction: an undeclared kind could collide with another
+	// module's, which is what the claim exists to prevent.
+	orphanDeclaration := base()
+	orphanDeclaration.Claims.Jobs = nil
+	err = ValidateManifest(orphanDeclaration)
+	if err == nil {
+		t.Fatal("a runtime.jobs declaration with no claims.jobs entry was accepted")
+	}
+	if !strings.Contains(err.Error(), "example.ping") {
+		t.Fatalf("refusal must name the unclaimed kind: %v", err)
+	}
+}
+
+// handler_form selects which Define constructor the generated dispatch table
+// calls, so it is a closed set: an unknown value would emit a call to a
+// function that does not exist.
+func TestAJobHandlerFormMustBeOneOfTheThreeShapes(t *testing.T) {
+	manifest := Manifest{
+		ID: "ggg/workflow/pinger", Kind: ModuleWorkflow, Name: "pinger",
+		Revision: 1, Contract: 1, Title: "Pinger", Description: "Pings things.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Migrations: []ManifestMigration{}, Environment: []EnvironmentVariable{},
+		Docs: []DocumentationRef{}, Data: []DataDeclaration{},
+		Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		Claims:       NamespaceClaims{Jobs: []string{"example.ping"}},
+		Runtime: RuntimeContributions{Jobs: []JobContribution{
+			{Kind: "example.ping", Package: "internal/jobs", Handler: "runExamplePing"},
+		}},
+	}
+	for _, form := range []string{JobHandlerPayload, JobHandlerAttempt, JobHandlerKind} {
+		manifest.Runtime.Jobs[0].HandlerForm = form
+		if err := ValidateManifest(manifest); err != nil {
+			t.Fatalf("handler_form %q must validate: %v", form, err)
+		}
+	}
+	manifest.Runtime.Jobs[0].HandlerForm = "row"
+	err := ValidateManifest(manifest)
+	if err == nil {
+		t.Fatal("an unknown handler_form was accepted")
+	}
+	if !strings.Contains(err.Error(), "row") {
+		t.Fatalf("refusal must name the bad form: %v", err)
+	}
+}

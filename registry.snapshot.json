@@ -828,7 +828,7 @@
     },
     {
       "path": "registry/modules/system/api/module.json",
-      "sha256": "d45a61f3d911b8c411a09294578b86ca623bc2193ae1357b11e2931d850e17a5"
+      "sha256": "88ba0e29ccdf93413d363b6d816ceecd451bec348c227074e1c90bd192a29690"
     },
     {
       "path": "registry/modules/system/apphost/module.json",
@@ -860,7 +860,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "98768663b6d0126f740b4af19d455483075206da670743b6ea3e394de73c16bb"
+      "sha256": "ef3bd45a7856289bc20f6c4cc47820821092a3960bdb821a10fc4daf2af4d4bd"
     },
     {
       "path": "registry/modules/system/cache-memory/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "ed7e52b50fa4d9ab4451fb14329ccd3fde695c343a8e00ce4d5a2d3d4d8e150d"
+      "sha256": "516a3ab153b3cf4b0f6a4e85e7bcb92150d70f47ad86770776aa75f53c623e07"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -964,7 +964,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "5f70dd796f86f7c2e5ee129124a6a05104e29be199c946a9a80bee1535912ea7"
+      "sha256": "8eac6627d4d8cadc1fe75adcd9cc51f832c47218030a8009880467606c20736d"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
@@ -992,7 +992,7 @@
     },
     {
       "path": "registry/modules/system/mail/module.json",
-      "sha256": "bd0ffe2485b65529e53015257caf1bbac2ad13f3d2ee3475bfb8658cdff94b9a"
+      "sha256": "d78499801e6ea32d5846b371f7fb010e4af1f0fe32f918cd347840b15e1f4cce"
     },
     {
       "path": "registry/modules/system/metrics/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "4397a01544dbb02ec2839f65a3e7dd88b77befd02f3be160b6b5c923571211c9"
+      "sha256": "83b6f4514f4c20d60f44ba39e6a2217a8d3e75e98f96e5778a3d0b553e74d5f0"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1012,7 +1012,7 @@
     },
     {
       "path": "registry/modules/system/notifications/module.json",
-      "sha256": "3ec2be22ab1d243001501182315ba4085cfc3f465be561cb72e1f907e7b86e1f"
+      "sha256": "7dc503621dee296e55df321682d4e84c6b49d8fe47b56a90742e0b6ed9b97aab"
     },
     {
       "path": "registry/modules/system/observability-log/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "50dda8bcc4a7bb91b14749908bcbcaa643cb91df481f4acb53f9436fdc8e488b"
+      "sha256": "d9670b3d856b72c61351e3413422d80fbab680c68ebfe94c2a40796f749dfa42"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1140,7 +1140,7 @@
     },
     {
       "path": "registry/modules/system/usage/module.json",
-      "sha256": "fe60150ed233194ce37694ab25228bb23ba2174848b859b54ee47b5400a7488a"
+      "sha256": "b124744eb9b6f7e8d01b3ff286165356d630581e8c030cf1cefa982298877a45"
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
@@ -1152,7 +1152,7 @@
     },
     {
       "path": "registry/modules/system/webhooks/module.json",
-      "sha256": "f5667518d7ae3ef3c863bfb6cf37bca755ab221edc58cd02b25980674777ba16"
+      "sha256": "2d8f96516204ca6ba857edd719aa9824c485010e13d0b05dc1a1e427578cc08a"
     },
     {
       "path": "registry/modules/workflow/account-delete/module.json",
@@ -1192,11 +1192,11 @@
     },
     {
       "path": "registry/modules/workflow/api-ai-chat/module.json",
-      "sha256": "d17ced5dd05e55b4b5152e5c1da2822ad18e70489769c534814d8d5c1448b7de"
+      "sha256": "bf190d2c2cd3e6449fa56507c91f9904253263776a655d69f12d8e4f5f5e1ce3"
     },
     {
       "path": "registry/modules/workflow/api-projects/module.json",
-      "sha256": "e8e11519ab7a6773045aaa03ad88fbb0c9f0a254de6711d87d578507023eca8b"
+      "sha256": "2984b2bf86b91604c93b4c574c6e9e396717ba13f259dfca4921822f60f8e92d"
     },
     {
       "path": "registry/modules/workflow/api-token-lifecycle/module.json",
@@ -1244,23 +1244,23 @@
     },
     {
       "path": "registry/modules/workflow/openapi-contract/module.json",
-      "sha256": "b4bb0a384b29e31f8b13326305d899071c64bb2072dfed35e43197b8188db41b"
+      "sha256": "a0f8e189b9d6ac10e538a9695c4a3812c44f884f84c9f849f57da8a8a69609b0"
     },
     {
       "path": "registry/modules/workflow/organization-export/module.json",
-      "sha256": "3e5d93afb472c16aa256a6d8195b188ea1c23821f646d6b75be9642e89ae0250"
+      "sha256": "879ee843000ab1be59f05541a0fc902a90c63a3040cb08c52b67fc06d6bf5be1"
     },
     {
       "path": "registry/modules/workflow/outbound-webhooks/module.json",
-      "sha256": "6d2a8a365ca8a82aa19a50e4030fb476bbf9b1d3858a128bd3335f310291d4ae"
+      "sha256": "b0ccbd5ac13f0ecafe724a1f69c0cbd7557de0b848a49753e021297f9bb80ebb"
     },
     {
       "path": "registry/modules/workflow/project-export/module.json",
-      "sha256": "e4d08df61fba8152d51978ebf86d2e54d969452a449f2beb6f7ae37b9bb13531"
+      "sha256": "99bbf0fc4a2a6bf86b56930aa253467a05a5f3ff4c87e189bdf16bd7b5760014"
     },
     {
       "path": "registry/modules/workflow/projects/module.json",
-      "sha256": "eb7031a291da6f42124e0aea5a7b3f1af36eab91fdfe29499a65448c4eaede6e"
+      "sha256": "22ffd718f6cb93a72b58130cbf50f7d6de529d71368da02be2ca41e4ac392f29"
     },
     {
       "path": "registry/modules/workflow/seo-discovery/module.json",
@@ -1280,7 +1280,7 @@
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "6d983f6aad0b9d3e1dbccb2df4a33495e9526969d4fc02d4d43b354e958c5642"
+      "sha256": "09ad34aac1da62770f45ac57a2a418d4175d290ceba52a8eb2843b3bd573c48c"
     },
     {
       "path": "registry/profiles/saas.json",
@@ -1296,7 +1296,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "e67d2d7039162e4d02f78c6751ecb647cba7cd2588a56b36a9c24f39b3bc8bce"
+      "sha256": "6f4de2969367f62b6d07f013d8cf495b34ca3e3e24a2eeadd22bd579ae94e371"
     },
     {
       "path": "registry/schema/project.schema.json",
@@ -1520,7 +1520,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-ping/example_ping.go",
-      "sha256": "59a573cbba4e718d16d113459e61a7317fca560dba3e3f4177887ecb5447172b"
+      "sha256": "257ac92976d5c4c9b1ba2c3a22a1a653f08d0d45bd94a04afa7ff660d7a95c15"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-ping/example_ping_events.migration.sql",
@@ -1532,7 +1532,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-ping/module.json",
-      "sha256": "c98a3d9cb239e83be073bf300146526b33af479ee09bfe2c890b420d712f0624"
+      "sha256": "851d113d4ae2fbbd6c4d4c11f18e67684e326923538e0a91dc0028b288dff5d7"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-ping/workflow_example_ping.go",

@@ -170,10 +170,19 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 			mutation.MaxAttempts = 10
 		}
 		target := "internal/jobs/" + snake(slug) + ".go"
-		payloads[target] = []byte("package jobs\n\nimport \"context\"\n\nfunc Handle" + exported(name) + "(context.Context, []byte) error { return nil }\n")
+		handler := "run" + exported(name)
+		payload := exported(name) + "Payload"
+		// The scaffold is a typed handler METHOD and nothing else. Kind,
+		// schedulability and attempt budget belong to the declaration below;
+		// the generated dispatcher applies them, so the payload never repeats
+		// them and cannot disagree.
+		payloads[target] = []byte("package jobs\n\nimport \"context\"\n\n// " + payload +
+			" is the enqueue contract for the " + slug + " job kind.\ntype " + payload +
+			" struct{}\n\nfunc (w *Worker) " + handler + "(ctx context.Context, p " + payload +
+			") error {\n\treturn nil\n}\n")
 		manifest.Claims.Packages = []string{"internal/jobs"}
 		manifest.Claims.Jobs = []string{slug}
-		manifest.Runtime.Jobs = []modkit.JobContribution{{Kind: slug, Package: "internal/jobs", Handler: "Handle" + exported(name), Schedulable: mutation.Schedulable, MaxAttempts: mutation.MaxAttempts}}
+		manifest.Runtime.Jobs = []modkit.JobContribution{{Kind: slug, Package: "internal/jobs", Handler: handler, Schedulable: mutation.Schedulable, MaxAttempts: mutation.MaxAttempts}}
 	case "provider":
 		providerManifest, providerPayloads, err := c.buildProviderManifest(ctx, registry, manifest, mutation)
 		if err != nil {

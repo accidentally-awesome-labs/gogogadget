@@ -4,7 +4,7 @@
     "id": "ggg/system/jobs",
     "kind": "system",
     "name": "jobs",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Background job queue",
     "description": "The Postgres-backed worker: SKIP LOCKED claiming, a visibility timeout, exponential backoff, dead-lettering, the scheduler pass, and the janitors.",
@@ -90,15 +90,7 @@
         "source": "internal/jobs/define.go",
         "target": "internal/jobs/define.go",
         "class": "go",
-        "sha256": "5e5eda9f7c9fcc28ab08c6330f39d702ccf9426d5081a099739aaeb9c6f4a9ea",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/definitions.go",
-        "target": "internal/jobs/definitions.go",
-        "class": "go",
-        "sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+        "sha256": "712fdaf94687c7069673f4a5e1febc0b850538e6ba992f60ddc0af0b7fcfa13d",
         "rewrite_module": true,
         "contract": false
       },
@@ -114,7 +106,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "fabbd61d8ad32cd9c1b273d5574d910060288fdc53544e77a63a7416b7fd36fb",
+        "sha256": "0798cbdb5ada1635b0eed2e16569aa4111b7a8e1403ff1737697ca3a971065eb",
         "rewrite_module": true,
         "contract": true
       },

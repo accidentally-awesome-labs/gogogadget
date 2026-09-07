@@ -4027,12 +4027,30 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package jobs\n\n")
 
+	b.WriteString("// workerDefinitions is the dispatch table: one entry per declared kind,\n")
+	b.WriteString("// wired to the typed handler its module declared. Kind, schedulability and\n")
+	b.WriteString("// attempt budget are read off the declaration rather than repeated in a\n")
+	b.WriteString("// hand-written constructor, so a payload cannot disagree with the manifest\n")
+	b.WriteString("// SchedulableKinds and declaredAttempts below are derived from.\n")
 	b.WriteString("func workerDefinitions(w *Worker) []Definition {\n")
 	for i, j := range jobs {
 		if !validIdentifier(j.contrib.Handler) {
 			return nil, fmt.Errorf("job %s: handler %q is not a Go identifier", j.contrib.Kind, j.contrib.Handler)
 		}
-		fmt.Fprintf(&b, "\td%d := w.%s()\n", i, j.contrib.Handler)
+		constructor := ""
+		switch j.contrib.HandlerForm {
+		case JobHandlerPayload:
+			constructor = "Define"
+		case JobHandlerAttempt:
+			constructor = "DefineWithAttempt"
+		case JobHandlerKind:
+			constructor = "DefineForKind"
+		default:
+			return nil, fmt.Errorf("job %s: handler_form %q is not one of %q, %q, %q",
+				j.contrib.Kind, j.contrib.HandlerForm, JobHandlerPayload, JobHandlerAttempt, JobHandlerKind)
+		}
+		fmt.Fprintf(&b, "\td%d := %s(%s, %t, %d, w.%s)\n", i, constructor,
+			goString(j.contrib.Kind), j.contrib.Schedulable, j.contrib.MaxAttempts, j.contrib.Handler)
 		gate := providerGateLiteral(j.moduleID, graph, "w.Environment")
 		if gate != "nil" {
 			fmt.Fprintf(&b, "\td%d.ProviderActive = %s\n", i, gate)

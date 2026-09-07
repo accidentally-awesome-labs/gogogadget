@@ -4,7 +4,7 @@
     "id": "ggg/workflow/outbound-webhooks",
     "kind": "workflow",
     "name": "outbound-webhooks",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Outbound webhook management",
     "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
@@ -83,7 +83,7 @@
         "source": "internal/jobs/webhooks_deliver.go",
         "target": "internal/jobs/webhooks_deliver.go",
         "class": "go",
-        "sha256": "77314c5d2e1c6f5c3822f1e6a9b0403ed2b21b50d4d3ed0ff25c743de00690ab",
+        "sha256": "570a3073fac3e5539e113fd39a32344ea4538886a959ec3c9ee3dda5ccea8ae6",
         "rewrite_module": true,
         "contract": false
       },
@@ -103,6 +103,9 @@
         "webhooks.endpoint.disable",
         "webhooks.endpoint.enable",
         "webhooks.endpoint.rotate"
+      ],
+      "jobs": [
+        "webhook.deliver"
       ]
     },
     "runtime": {
@@ -197,7 +200,8 @@
         {
           "kind": "webhook.deliver",
           "package": "internal/jobs",
-          "handler": "defineWebhookDeliver"
+          "handler": "deliverWebhook",
+          "handler_form": "attempt"
         }
       ]
     },

@@ -4,7 +4,7 @@
     "id": "ggg/workflow/projects",
     "kind": "workflow",
     "name": "projects",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Project create, update, archive and delete",
     "description": "Project mutations for the app UI: validated create with plan-limit enforcement, rename, archive, and delete, each emitting audit, webhook, and analytics effects.",
@@ -127,6 +127,14 @@
         "sha256": "5e058cfb7962be4e4e8b5022aae2d3482678844f94468d4bfabd14071d2bcd34",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/api/project_name.go",
+        "target": "internal/api/project_name.go",
+        "class": "go",
+        "sha256": "bcec8e76345ddc9f8af4991dfaee7a23a82e347f12a784f55de90351761fd492",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/db/queries/projects.sql",

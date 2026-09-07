@@ -4,7 +4,7 @@
     "id": "ggg/system/mail",
     "kind": "system",
     "name": "mail",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Transactional mail seam",
     "description": "Provider-neutral Sender port, message renderers, and email jobs.",
@@ -88,6 +88,9 @@
       "packages": [
         "internal/mail"
       ],
+      "jobs": [
+        "email.welcome"
+      ],
       "provider_slots": [
         "ggg/mail"
       ]
@@ -109,7 +112,8 @@
         {
           "kind": "email.welcome",
           "package": "internal/jobs",
-          "handler": "defineEmailWelcome"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         }
       ]
     },
@@ -120,7 +124,7 @@
         "field": "EmailFrom",
         "type": "string",
         "description": "From header on outbound mail",
-        "default": "GoGoGadget <hello@example.com>"
+        "default": "GoGoGadget \u003chello@example.com\u003e"
       }
     ],
     "locales": {

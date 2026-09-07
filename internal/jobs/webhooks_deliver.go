@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -20,14 +21,27 @@ import (
 	standardwebhooks "github.com/standard-webhooks/standard-webhooks/libraries/go"
 )
 
-// WebhookRotationGrace is how long a rotated-out secret keeps signing
-// alongside the new one, so receivers can roll over without dropped
-// deliveries. The janitor clears previous secrets past this window.
-const WebhookRotationGrace = 24 * time.Hour
+// webhookGuard and webhookTransport resolve the delivery policy. The Worker
+// fields exist for tests to swap; the strict default is resolved HERE, in the
+// module that owns the delivery, so the queue core's constructor never names
+// an SSRF guard it would stop compiling without.
+//
+// The transport is built once for the process: an http.Transport owns a
+// connection pool, so resolving a fresh one per delivery would leak sockets.
+var defaultWebhookTransport = sync.OnceValue(guardedTransport)
 
-// WebhookDeliverPayload is the enqueue contract for webhook.deliver.
-type WebhookDeliverPayload struct {
-	DeliveryID int64 `json:"delivery_id"`
+func (w *Worker) webhookGuard() func(context.Context, string) error {
+	if w.WebhookGuard != nil {
+		return w.WebhookGuard
+	}
+	return guardWebhookURL
+}
+
+func (w *Worker) webhookTransport() *http.Transport {
+	if w.WebhookTransport != nil {
+		return w.WebhookTransport
+	}
+	return defaultWebhookTransport()
 }
 
 // deliverWebhook POSTs the stored payload to the endpoint URL, signed with
@@ -98,7 +112,7 @@ func signingSecrets(ep sqlc.WebhookEndpoint, now time.Time) []string {
 // claim produces two POSTs of one delivery, and a stable id is what lets the
 // receiver collapse them.
 func (w *Worker) postWebhook(ctx context.Context, rawURL string, msgID string, secrets []string, payload []byte) (int32, error) {
-	if err := w.WebhookGuard(ctx, rawURL); err != nil {
+	if err := w.webhookGuard()(ctx, rawURL); err != nil {
 		return 0, err
 	}
 	ts := time.Now()
@@ -127,7 +141,7 @@ func (w *Worker) postWebhook(ctx context.Context, rawURL string, msgID string, s
 
 	client := &http.Client{
 		Timeout:   10 * time.Second,
-		Transport: w.WebhookTransport,
+		Transport: w.webhookTransport(),
 		// A delivery is a signed POST to one declared endpoint, not a fetch.
 		// Following a redirect would let a customer endpoint send that signed
 		// payload somewhere the guard never classified — including back to

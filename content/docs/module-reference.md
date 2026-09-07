@@ -232,8 +232,8 @@ itself.
 | `ggg/workflow/admin-media` | `ggg` | 1 | Admin media mutations | `ggg/page/admin-media` [1,1] `ggg/system/audit` [1,1] `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/storage` [1,1] `ggg/workflow/admin-content` [1,1] | `free` |
 | `ggg/workflow/admin-schedules` | `ggg` | 1 | Admin schedule mutations | `ggg/page/admin-schedules` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/jobs` [1,1] `ggg/system/schedules` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/admin-user-governance` | `ggg` | 1 | Admin user governance | `ggg/page/admin-audit` [1,1] `ggg/page/admin-flags` [1,1] `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/workflow/api-ai-chat` | `ggg` | 1 | AI chat API | `ggg/system/api` [1,1] `ggg/system/llm` [1,1] `ggg/system/server` [1,2] `ggg/workflow/openapi-contract` [1,1] | `free` |
-| `ggg/workflow/api-projects` | `ggg` | 1 | Projects API | `ggg/system/api` [1,1] `ggg/system/server` [1,2] `ggg/workflow/openapi-contract` [1,1] | `free` |
+| `ggg/workflow/api-ai-chat` | `ggg` | 1 | AI chat API | `ggg/system/api` [1,1] `ggg/system/audit` [1,1] `ggg/system/billing` [1,1] `ggg/system/database` [1,1] `ggg/system/identity` [1,2] `ggg/system/llm` [1,1] `ggg/system/server` [1,2] `ggg/system/usage` [1,1] `ggg/workflow/openapi-contract` [1,1] | `free` |
+| `ggg/workflow/api-projects` | `ggg` | 1 | Projects API | `ggg/system/api` [1,1] `ggg/system/audit` [1,1] `ggg/system/billing` [1,1] `ggg/system/database` [1,1] `ggg/system/identity` [1,2] `ggg/system/server` [1,2] `ggg/workflow/openapi-contract` [1,1] `ggg/workflow/projects` [1,1] | `free` |
 | `ggg/workflow/api-token-lifecycle` | `ggg` | 1 | API token creation and revocation | `ggg/page/settings-api-tokens` [1,1] `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `retain-data` |
 | `ggg/workflow/appearance` | `ggg` | 1 | Theme preference | `ggg/page/dashboard` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/settings-account` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/workflow/auth-session` | `ggg` | 1 | Sign-in, sign-up and sign-out | `ggg/page/dashboard` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
@@ -333,7 +333,7 @@ itself.
 | `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/usage` | `ggg` | 1 | Usage metering | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/usage-postgres` | `ggg` | 1 | Usage Postgres | `ggg/system/usage` [1,1] | `free` |
-| `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/webhooks-postgres` | `ggg` | 1 | Webhooks Postgres | `ggg/system/webhooks` [1,1] | `free` |
 
 ## Provider slots (18)
@@ -547,8 +547,8 @@ drops the requirement again unless the project already had it.
 | `ggg/workflow/admin-content` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/admin-schedules` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/admin-user-governance` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
-| `ggg/workflow/api-ai-chat` | `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/workflow/api-projects` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/api-ai-chat` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/api-projects` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/api-token-lifecycle` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/appearance` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/auth-session` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |

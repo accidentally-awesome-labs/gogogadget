@@ -1,30 +1,45 @@
 {
-  "schema": 2,
   "module": {
-    "id": "ggg/system/webhooks",
-    "kind": "system",
-    "name": "webhooks",
-    "revision": 2,
+    "claims": {
+      "packages": [
+        "internal/webhooks"
+      ],
+      "provider_slots": [
+        "ggg/webhooks"
+      ],
+      "queries": [
+        "webhook_deliveries",
+        "webhook_endpoints",
+        "webhook_events"
+      ]
+    },
     "contract": 1,
-    "title": "Outbound webhooks",
-    "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
-    "requires": [
+    "data": [
       {
-        "id": "ggg/system/database",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "table": "webhook_deliveries"
       },
       {
-        "id": "ggg/system/organizations",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
+        "account_delete": "retain",
+        "export": true,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "secret_redaction_owner": "system/webhooks",
+        "table": "webhook_endpoints"
+      },
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "retain",
+        "scope": "platform",
+        "table": "webhook_events"
       }
     ],
     "dependencies": {
+      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -35,91 +50,148 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": [],
-      "containers": []
+      "tools": []
     },
+    "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/db/queries/webhook_deliveries.sql",
-        "target": "internal/db/queries/webhook_deliveries.sql",
         "class": "query",
+        "contract": false,
+        "rewrite_module": false,
         "sha256": "355e758e109caa017166d09cd27dfb00dffa88680c87c4e650e978fde7652273",
-        "rewrite_module": false,
-        "contract": false
+        "source": "internal/db/queries/webhook_deliveries.sql",
+        "target": "internal/db/queries/webhook_deliveries.sql"
       },
       {
-        "source": "internal/db/queries/webhook_endpoints.sql",
-        "target": "internal/db/queries/webhook_endpoints.sql",
         "class": "query",
+        "contract": false,
+        "rewrite_module": false,
         "sha256": "6b4bd4ca20d2705e17478f829b81b9a6d2d30483ea8454c2cbfb7b9abff08f4c",
-        "rewrite_module": false,
-        "contract": false
+        "source": "internal/db/queries/webhook_endpoints.sql",
+        "target": "internal/db/queries/webhook_endpoints.sql"
       },
       {
-        "source": "internal/db/queries/webhook_events.sql",
-        "target": "internal/db/queries/webhook_events.sql",
         "class": "query",
-        "sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+        "contract": false,
         "rewrite_module": false,
-        "contract": false
+        "sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+        "source": "internal/db/queries/webhook_events.sql",
+        "target": "internal/db/queries/webhook_events.sql"
       },
       {
-        "source": "internal/jobs/janitor_webhooks.go",
-        "target": "internal/jobs/janitor_webhooks.go",
         "class": "go",
+        "contract": false,
+        "rewrite_module": true,
         "sha256": "590c93b8533a4a52718f9bf52cad5a65af5a677045e75c4c6fbfc5101ee17e35",
-        "rewrite_module": true,
-        "contract": false
+        "source": "internal/jobs/janitor_webhooks.go",
+        "target": "internal/jobs/janitor_webhooks.go"
       },
       {
-        "source": "internal/webhooks/contract.go",
-        "target": "internal/webhooks/contract.go",
         "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "6fd2d959d428744377cd2c3c3a98b9b79624ae32ed9fca78fd056c887213690d",
+        "source": "internal/jobs/webhooks.go",
+        "target": "internal/jobs/webhooks.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
         "sha256": "72b16352af0a9e2f6be95160624ed9c442b7ef5a42a810d55ac42107fc762f88",
-        "rewrite_module": true,
-        "contract": true
+        "source": "internal/webhooks/contract.go",
+        "target": "internal/webhooks/contract.go"
       },
       {
-        "source": "internal/webhooks/webhooks.go",
-        "target": "internal/webhooks/webhooks.go",
         "class": "go",
-        "sha256": "321a25b895ce60897d29a0f173395fe48ee9fa3eda4e80fece6a3ef31bef174f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "321a25b895ce60897d29a0f173395fe48ee9fa3eda4e80fece6a3ef31bef174f",
+        "source": "internal/webhooks/webhooks.go",
+        "target": "internal/webhooks/webhooks.go"
       },
       {
-        "source": "internal/webhooks/webhooks_test.go",
-        "target": "internal/webhooks/webhooks_test.go",
         "class": "test",
-        "sha256": "66f6c1292a69dd6db48e1ee85574b409aabef1d3e618df85b2f4cea2940157e8",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "66f6c1292a69dd6db48e1ee85574b409aabef1d3e618df85b2f4cea2940157e8",
+        "source": "internal/webhooks/webhooks_test.go",
+        "target": "internal/webhooks/webhooks_test.go"
       }
     ],
-    "claims": {
-      "packages": [
-        "internal/webhooks"
-      ],
-      "queries": [
-        "webhook_deliveries",
-        "webhook_endpoints",
-        "webhook_events"
-      ],
-      "provider_slots": [
-        "ggg/webhooks"
-      ]
-    },
+    "id": "ggg/system/webhooks",
+    "kind": "system",
+    "migrations": [
+      {
+        "id": "0006_webhooks_out",
+        "kind": "immutable",
+        "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b",
+        "source": "internal/db/migrations/0006_webhooks_out.sql"
+      },
+      {
+        "id": "0013_webhook_secret_rotation",
+        "kind": "immutable",
+        "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4",
+        "source": "internal/db/migrations/0013_webhook_secret_rotation.sql"
+      },
+      {
+        "id": "0027_webhook_events_provider_open",
+        "kind": "immutable",
+        "sha256": "a75a43c4415c23566c26e330c837fcd9820709bd317d86e4b1731a92d0f48714",
+        "source": "internal/db/migrations/0027_webhook_events_provider_open.sql"
+      }
+    ],
+    "name": "webhooks",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/jobs"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      }
+    ],
+    "revision": 3,
     "runtime": {
       "janitors": [
         {
+          "handler": "janitorWebhookEvents",
           "name": "webhook_events",
-          "package": "internal/jobs",
-          "handler": "janitorWebhookEvents"
+          "package": "internal/jobs"
         },
         {
+          "handler": "janitorWebhookSecrets",
           "name": "webhook_secrets",
-          "package": "internal/jobs",
-          "handler": "janitorWebhookSecrets"
+          "package": "internal/jobs"
+        }
+      ],
+      "provider_slots": [
+        {
+          "capabilities": [
+            {
+              "capability": "webhooks.emitter",
+              "type": "webhooks.Emitter"
+            }
+          ],
+          "critical": false,
+          "id": "ggg/webhooks"
         }
       ],
       "queries": [
@@ -187,71 +259,14 @@
           "name": "SetWebhookEndpointDisabled",
           "table": "webhook_endpoints"
         }
-      ],
-      "provider_slots": [
-        {
-          "id": "ggg/webhooks",
-          "critical": false,
-          "capabilities": [
-            {
-              "capability": "webhooks.emitter",
-              "type": "webhooks.Emitter"
-            }
-          ]
-        }
       ]
     },
-    "migrations": [
-      {
-        "id": "0006_webhooks_out",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0006_webhooks_out.sql",
-        "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b"
-      },
-      {
-        "id": "0013_webhook_secret_rotation",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0013_webhook_secret_rotation.sql",
-        "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
-      },
-      {
-        "id": "0027_webhook_events_provider_open",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0027_webhook_events_provider_open.sql",
-        "sha256": "a75a43c4415c23566c26e330c837fcd9820709bd317d86e4b1731a92d0f48714"
-      }
-    ],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/webhooks"
       ]
     },
-    "data": [
-      {
-        "table": "webhook_deliveries",
-        "scope": "org",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      },
-      {
-        "table": "webhook_endpoints",
-        "scope": "org",
-        "export": true,
-        "secret_redaction_owner": "system/webhooks",
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      },
-      {
-        "table": "webhook_events",
-        "scope": "platform",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "retain"
-      }
-    ],
-    "removal_policy": "retain-data"
-  }
+    "title": "Outbound webhooks"
+  },
+  "schema": 2
 }

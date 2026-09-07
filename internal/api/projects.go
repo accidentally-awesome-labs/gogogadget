@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/audit"
@@ -14,19 +13,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// ValidateProjectName is the project name rule shared by both transports
-// (HTML form and JSON API): required, ≤80 chars after trimming.
-func ValidateProjectName(name string) (string, string) {
-	name = strings.TrimSpace(name)
-	switch {
-	case name == "":
-		return name, "Name is required."
-	case len(name) > 80:
-		return name, "Name must be 80 characters or fewer."
-	default:
-		return name, ""
-	}
-}
+// The JSON transport for the projects resource: the DTO, the two handlers and
+// the route-facing struct. It lives with the resource rather than with the
+// transport core, because it compiles against the resource's own queries —
+// ggg/system/api cannot declare a dependency on a product workflow without
+// closing a requires cycle through the shell.
 
 // projectResponse is the public shape of a project. Explicit DTO, not the
 // sqlc row: the row carries search_tsv (an internal FTS column) which has no
@@ -49,6 +40,9 @@ func newProjectResponse(p sqlc.Project) projectResponse {
 	}
 }
 
+// Projects carries the handles the two handlers read. Handler methods take it
+// by VALUE and nothing stores it, so the route adapter can build one per
+// request on the stack instead of the server pre-composing a heap instance.
 type Projects struct {
 	Q       *sqlc.Queries
 	Catalog billing.PlanCatalog
@@ -63,7 +57,7 @@ type Projects struct {
 // it stays fast at depth (no rows skipped server-side). `offset` is the
 // original contract, still honoured; every response carries next_cursor, so
 // an offset client can switch to cursors mid-stream without a flag day.
-func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
+func (h Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if limit <= 0 || limit > 100 {
@@ -128,7 +122,7 @@ type createProjectRequest struct {
 
 // CreateProject handles POST /api/v1/projects (scope write). Plan limit →
 // 402 with code plan_limit.
-func (h *Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
+func (h Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 

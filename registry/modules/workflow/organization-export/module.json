@@ -4,7 +4,7 @@
     "id": "ggg/workflow/organization-export",
     "kind": "workflow",
     "name": "organization-export",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Organization data export",
     "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
@@ -102,6 +102,9 @@
     "claims": {
       "routes": [
         "organization-export.enqueue"
+      ],
+      "jobs": [
+        "export.org_json"
       ]
     },
     "runtime": {
@@ -128,7 +131,7 @@
         {
           "kind": "export.org_json",
           "package": "internal/jobs",
-          "handler": "defineExportOrgJSON"
+          "handler": "exportOrgJSON"
         }
       ]
     },

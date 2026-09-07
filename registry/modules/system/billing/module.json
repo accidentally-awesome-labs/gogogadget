@@ -4,7 +4,7 @@
     "id": "ggg/system/billing",
     "kind": "system",
     "name": "billing",
-    "revision": 6,
+    "revision": 7,
     "contract": 1,
     "title": "Billing",
     "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
@@ -180,6 +180,13 @@
       "packages": [
         "internal/billing"
       ],
+      "jobs": [
+        "email.dunning_final",
+        "email.dunning_reminder",
+        "email.payment_failed",
+        "email.subscription_canceled",
+        "email.trial_ending"
+      ],
       "provider_slots": [
         "ggg/billing"
       ]
@@ -209,27 +216,32 @@
         {
           "kind": "email.dunning_final",
           "package": "internal/jobs",
-          "handler": "defineEmailDunningFinal"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         },
         {
           "kind": "email.dunning_reminder",
           "package": "internal/jobs",
-          "handler": "defineEmailDunningReminder"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         },
         {
           "kind": "email.payment_failed",
           "package": "internal/jobs",
-          "handler": "defineEmailPaymentFailed"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         },
         {
           "kind": "email.subscription_canceled",
           "package": "internal/jobs",
-          "handler": "defineEmailSubscriptionCanceled"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         },
         {
           "kind": "email.trial_ending",
           "package": "internal/jobs",
-          "handler": "defineEmailTrialEnding"
+          "handler": "sendTransactionalEmail",
+          "handler_form": "kind"
         }
       ],
       "queries": [

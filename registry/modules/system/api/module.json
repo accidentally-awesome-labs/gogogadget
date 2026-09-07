@@ -4,7 +4,7 @@
     "id": "ggg/system/api",
     "kind": "system",
     "name": "api",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "JSON API",
     "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
@@ -47,14 +47,6 @@
     },
     "files": [
       {
-        "source": "internal/api/ai.go",
-        "target": "internal/api/ai.go",
-        "class": "go",
-        "sha256": "be1082b97e619ef5124bc8f5f65628ed6b6c30019bb4a8a00f07bb038b3c0fd0",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/api/cursor.go",
         "target": "internal/api/cursor.go",
         "class": "go",
@@ -85,14 +77,6 @@
         "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
         "rewrite_module": true,
         "contract": true
-      },
-      {
-        "source": "internal/api/projects.go",
-        "target": "internal/api/projects.go",
-        "class": "go",
-        "sha256": "247c71867a4fb5780174d700bc140b042c5c1f2ee59d9a3e14fe7e4ca349f996",
-        "rewrite_module": true,
-        "contract": false
       },
       {
         "source": "internal/api/tokens.go",
@@ -131,14 +115,6 @@
         "target": "internal/jobs/janitor_api.go",
         "class": "go",
         "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/idempotency_test.go",
-        "target": "internal/web/idempotency_test.go",
-        "class": "test",
-        "sha256": "31c3b70ef0b893bad56188e26b2fd55a4c5e0b6943cbb1008c99e786d34dcf89",
         "rewrite_module": true,
         "contract": false
       }

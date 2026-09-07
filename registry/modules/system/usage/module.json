@@ -4,7 +4,7 @@
     "id": "ggg/system/usage",
     "kind": "system",
     "name": "usage",
-    "revision": 2,
+    "revision": 3,
     "contract": 1,
     "title": "Usage metering",
     "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
@@ -92,6 +92,9 @@
       "packages": [
         "internal/usage"
       ],
+      "jobs": [
+        "usage.flush"
+      ],
       "queries": [
         "usage_events"
       ],
@@ -100,11 +103,23 @@
       ]
     },
     "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/usage",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "usage.recorder",
+              "type": "usage.Recorder"
+            }
+          ]
+        }
+      ],
       "jobs": [
         {
           "kind": "usage.flush",
           "package": "internal/jobs",
-          "handler": "defineUsageFlush",
+          "handler": "flushUsage",
           "schedulable": true
         }
       ],
@@ -128,18 +143,6 @@
         {
           "name": "UnflushUsageBatch",
           "table": "usage_events"
-        }
-      ],
-      "provider_slots": [
-        {
-          "id": "ggg/usage",
-          "critical": false,
-          "capabilities": [
-            {
-              "capability": "usage.recorder",
-              "type": "usage.Recorder"
-            }
-          ]
         }
       ]
     },

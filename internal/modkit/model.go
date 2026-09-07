@@ -603,13 +603,45 @@ type RoutePolicy struct {
 	AdminWrite   bool  `json:"admin_write"`
 }
 
-// JobContribution declares one typed generated job definition.
+// JobContribution declares one typed generated job definition. Handler names
+// the module's own handler METHOD on *jobs.Worker, not a constructor that
+// wraps it: the generated dispatcher applies Kind, Schedulable and MaxAttempts
+// itself, so a payload cannot state an attempt budget or a schedulability the
+// manifest disagrees with.
 type JobContribution struct {
-	Kind        string `json:"kind"`
-	Package     string `json:"package"`
-	Handler     string `json:"handler"`
+	Kind    string `json:"kind"`
+	Package string `json:"package"`
+	Handler string `json:"handler"`
+	// HandlerForm names what the handler receives besides the payload, which
+	// decides which Define constructor the generated table calls. Empty is
+	// func(context.Context, P) error.
+	HandlerForm string `json:"handler_form,omitempty"`
 	Schedulable bool   `json:"schedulable,omitempty"`
 	MaxAttempts int    `json:"max_attempts,omitempty"`
+}
+
+// The closed set of job handler shapes. A handler that needs its retry state
+// or the kind it was dispatched as says so in the declaration, so the
+// generated table can call the matching constructor without knowing a
+// payload type.
+const (
+	// JobHandlerPayload is func(context.Context, P) error.
+	JobHandlerPayload = ""
+	// JobHandlerAttempt is func(context.Context, P, jobs.Attempt) error, for a
+	// handler that must record a terminal outcome on its last attempt.
+	JobHandlerAttempt = "attempt"
+	// JobHandlerKind is func(context.Context, string, P) error, for one body
+	// shared by several kinds that differ only by which one they are.
+	JobHandlerKind = "kind"
+)
+
+// validJobHandlerForm reports whether form is one of the three shapes.
+func validJobHandlerForm(form string) bool {
+	switch form {
+	case JobHandlerPayload, JobHandlerAttempt, JobHandlerKind:
+		return true
+	}
+	return false
 }
 
 // JanitorContribution declares one recurring cleanup sweep. Each sweep deletes
