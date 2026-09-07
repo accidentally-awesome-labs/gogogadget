@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "d55629c066ea69e07205dc45d45ee1c6b5ecb847ed609b3bffd0e2ede526e670"
+      "sha256": "cee355f34b5cc15d881137929ebf32976d56c7e3d62e8dcf31f952098e4d03b5"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "28a5404db8289f94b8597726c18a8b49687c55060fc2bf5d1d20ad08bb364ea2"
+      "sha256": "67c0b794e71e69069fb2d023bf73a4f9261f7f7300484fd8e42ffadbc01dc995"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "415ab5574b39e82c2fc7260da4465b3dee96a541b2ed2f84124c3ed45ce65d35"
+      "sha256": "0e58ecdde938b052649dc8bb09b2c9c2c6f87b336459057162dd07ad26467fab"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",

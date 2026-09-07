@@ -19,6 +19,7 @@ import (
 
 const (
 	testCommitA = "0123456789abcdef0123456789abcdef01234567"
+	testCommitB = "89abcdef0123456789abcdef0123456789abcdef"
 	testDigestA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	testKeyA    = "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="
 )
@@ -37,6 +38,15 @@ func writeTestFile(t *testing.T, root, name string, data []byte) {
 	if err := os.WriteFile(full, data, 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func readTestFile(t *testing.T, root, name string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(name)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
 }
 
 func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
@@ -167,6 +177,127 @@ func cliProject(t *testing.T) (string, *modkit.Engine) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
 	return root, modkit.New(modkit.Options{Source: source, Generator: modkit.RegistryGenerator{}})
+}
+
+func cloneFixtureFS(source fstest.MapFS) fstest.MapFS {
+	clone := make(fstest.MapFS, len(source))
+	for name, file := range source {
+		copied := *file
+		copied.Data = append([]byte(nil), file.Data...)
+		clone[name] = &copied
+	}
+	return clone
+}
+
+func mutateFixtureModule(t *testing.T, files fstest.MapFS, manifestPath string, mutate func(*modkit.Manifest)) {
+	t.Helper()
+	file, ok := files[manifestPath]
+	if !ok {
+		t.Fatalf("fixture has no manifest at %s", manifestPath)
+	}
+	var document modkit.ModuleDocument
+	if err := json.Unmarshal(file.Data, &document); err != nil {
+		t.Fatal(err)
+	}
+	mutate(&document.Module)
+	putJSON(t, files, manifestPath, document)
+}
+
+// cliConflictProject leaves a project with one STAGED conflict, which is the
+// only state `ggg resolve` runs in. Everything the resolve path touches — a
+// local edit, an upstream that moved under it, a candidate staged rather than
+// applied — has to be real, so the fixture builds it the way an operator
+// reaches it: install from one snapshot, edit the installed file, advance the
+// ref to a snapshot that changed the same file.
+//
+// It returns the root, the engine, and the conflicted target.
+func cliConflictProject(t *testing.T) (string, *modkit.Engine, string) {
+	t.Helper()
+	first := fixtureRegistry(t)
+	second := cloneFixtureFS(first)
+	buttonV2 := []byte("package button\n\nconst ButtonVersion = 2\n")
+	second["registry/modules/element/button/button.go"].Data = buttonV2
+	mutateFixtureModule(t, second, "registry/modules/element/button/module.json", func(module *modkit.Manifest) {
+		module.Revision = 2
+		module.Files[0].SHA256 = sha256Hex(buttonV2)
+	})
+	source := refSource{snapshots: map[string]modkit.Snapshot{
+		"main": {Commit: testCommitA, FS: first}, testCommitA: {Commit: testCommitA, FS: first},
+		"v2": {Commit: testCommitB, FS: second}, testCommitB: {Commit: testCommitB, FS: second},
+	}}
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	engine := modkit.New(modkit.Options{Source: source, Generator: modkit.RegistryGenerator{}})
+
+	// The intent is written directly rather than through `init --adopt`,
+	// which pins an injected engine to a directory registry — and a directory
+	// registry has no ref to advance, so there is no way to move upstream
+	// under a local edit.
+	intent, err := modkit.MarshalProject(modkit.Project{
+		Schema: 2,
+		Registries: []modkit.ProjectRegistry{{
+			Namespace: "ggg", Source: "github",
+			Repository: "local/registry", Ref: "main", PublicKey: testKeyA,
+		}},
+		Modules: []string{"ggg/element/button"}, Exclude: []string{},
+		Providers: map[string]modkit.ProviderSelections{}, Deployment: "",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, modkit.ProjectFileName, intent)
+	if _, _, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+		t.Fatalf("sync: %v", err)
+	}
+	const target = "internal/modules/button.go"
+	writeTestFile(t, root, target, []byte("package button\n\nconst ButtonVersion = 1 // edited locally\n"))
+	out, errOut, updateErr := runApp(t, root, engine, "update", "--registry", "ggg", "--ref", "v2")
+	if updateErr == nil || exitOf(t, updateErr) != 4 {
+		t.Fatalf("update over a locally modified file = %v, want exit 4 with a staged conflict\n%s%s", updateErr, out, errOut)
+	}
+
+	// READ THIS BEFORE DELETING THE BLOCK BELOW. `Plan.Staged` has no
+	// production writer at all: reconcile builds the candidate and diff,
+	// Apply journals and writes `plan.Changes` plus the lock, and nothing in
+	// internal/modkit or internal/gggcli ever puts those bytes on disk —
+	// `grep '\.Staged' | grep -v _test.go` returns nothing. ResolveConflict
+	// then refuses at resolve_conflict.go:69-81 for EVERY resolution mode, so
+	// `ggg resolve` cannot succeed on any real conflict and `ggg update`'s
+	// exit-4 "run `ggg resolve`" is a dead end.
+	//
+	// So this block is not a convenience: it stands in for a production step
+	// that does not exist, and removing it removes the only reason the resolve
+	// tests pass. Do not read them as evidence that the resolver works — they
+	// measure the unrendered-output verdict on the resolve plan path, nothing
+	// more. That defect is its own slice.
+	//
+	// The digest is pinned against the lock's record so a silent change in the
+	// staged bytes fails here rather than downstream.
+	lock, err := modkit.ParseLock(readTestFile(t, root, modkit.LockFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	staged := 0
+	for _, module := range lock.Modules {
+		if module.Pending == nil {
+			continue
+		}
+		for _, conflict := range module.Pending.Conflicts {
+			if conflict.Path != target {
+				continue
+			}
+			if got := sha256Hex(buttonV2); got != conflict.CandidateSHA256 {
+				t.Fatalf("candidate digest = %q, want the recorded %q", got, conflict.CandidateSHA256)
+			}
+			writeTestFile(t, root, conflict.CandidatePath, buttonV2)
+			writeTestFile(t, root, conflict.DiffPath, []byte("--- local\n+++ upstream\n"))
+			staged++
+		}
+	}
+	if staged != 1 {
+		t.Fatalf("the lock records %d pending conflict(s) for %s, want exactly 1", staged, target)
+	}
+	return root, engine, target
 }
 
 // exitOf extracts the exit code a CLI error carries.

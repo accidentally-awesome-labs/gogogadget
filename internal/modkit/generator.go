@@ -266,13 +266,29 @@ func unrenderedOutputChanges(root string, rendered []GeneratedFile, existing []C
 
 // UnownedGeneratedOutputError refuses a tree holding authored bytes at a
 // registry-owned name. It carries the declared refusal code because nothing
-// was planned and nothing written, and it names both remedies: the file is
-// either a module's payload, in which case declare it in that module's
-// `files`, or it is nobody's, in which case delete it.
+// was planned and nothing written, and it names only remedies that work:
+// delete the file, move it to a name outside IsRegistryOwnedOutputPath, or —
+// if ggg really did write it and the header was lost — restore the marker,
+// which puts the file back in the swept class.
 //
-// This is the same verdict ValidateRegistryTreeOwnership reaches one directory
-// over for the same question about the registry tree. Two answers to one
-// question is how a project ends up deleting work.
+// Declaring the file in a module's `files` is NOT one of them, and the message
+// says so, because the guidance that said it was survived a review. It cannot
+// work for ANY path this error can print: the Unowned set is filtered by
+// IsRegistryOwnedOutputPath, IsGeneratedOutputPath is that predicate ORed with
+// the external-tool outputs, and reconcilePlannedState refuses every payload
+// whose target satisfies it — "generated outputs are tool-owned and cannot be
+// authored" — before any lock-state branching. So declaring trades this
+// refusal for that one, at the same exit 3, with the file still on disk.
+// `--claim` does not reach it either: a claim adopts a divergent file against
+// a DECLARED target, and declaring is what is refused.
+//
+// snapshot_ownership.go had already written this down for the registry tree.
+// It was re-derived wrongly anyway, which is why it now lives in the sentence
+// the operator actually reads rather than only in a comment.
+//
+// The refusal itself is the same verdict ValidateRegistryTreeOwnership reaches
+// one directory over for the same question about the registry tree. Two
+// answers to one question is how a project ends up deleting work.
 type UnownedGeneratedOutputError struct {
 	Paths []string
 }
@@ -280,7 +296,9 @@ type UnownedGeneratedOutputError struct {
 func (e UnownedGeneratedOutputError) Error() string {
 	return fmt.Sprintf(
 		"%s sits at a name this pipeline generates but carries no %q marker, so ggg cannot prove it wrote it. "+
-			"Declare the file in a module's `files` if it is a payload, or delete it, then re-run",
+			"Delete it, rename it to a name this pipeline does not generate, or restore the marker in its header "+
+			"if ggg wrote it, then re-run. Declaring it in a module's `files` does NOT clear this: a manifest "+
+			"target at a generated path is refused as tool-owned",
 		strings.Join(e.Paths, ", "), GeneratedOutputMarker)
 }
 
@@ -294,7 +312,7 @@ func (e UnownedGeneratedOutputError) Diagnostics() []Diagnostic {
 	for _, path := range e.Paths {
 		diagnostics = append(diagnostics, Diagnostic{
 			Code: "generated_unowned", Severity: "error", Path: path,
-			Message: "a file at this generated name carries no ggg provenance marker; declare it in a module's files or delete it",
+			Message: "a file at this generated name carries no ggg provenance marker; delete it, rename it off the generated name, or restore the marker if ggg wrote it. Declaring it in a module's files does NOT clear this: generated outputs are tool-owned and cannot be authored",
 		})
 	}
 	return diagnostics

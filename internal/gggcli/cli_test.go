@@ -325,6 +325,200 @@ func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *te
 			t.Fatalf("remove deleted authored bytes: %v", statErr)
 		}
 	})
+
+	// `resolve` is the tenth command form and the only one absent from the
+	// evidence, which is backwards: it is the verb that runs over a tree the
+	// operator has been hand-editing, so it is the likeliest of them all to
+	// meet an unmarked file. It also builds its plan on its own path — the
+	// same shape that made `remove` answer exit 5 where `sync` answered exit
+	// 3 — so the shared verdict has to be measured here, not inferred.
+	//
+	// What these do NOT show is that `ggg resolve` works: nothing in
+	// production writes `Plan.Staged`, so cliConflictProject has to
+	// materialize the candidate itself. See the comment there before reading
+	// a green run as coverage of the resolver.
+	t.Run("resolve reaches the same verdict as every other plan producer", func(t *testing.T) {
+		t.Run("a marked aggregate is a named delete", func(t *testing.T) {
+			root, engine, conflicted := cliConflictProject(t)
+			writeTestFile(t, root, target, marked)
+
+			out, errOut, err := runApp(t, root, engine,
+				"resolve", "ggg/element/button", "--path", conflicted, "--accept-upstream")
+			if err != nil {
+				t.Fatalf("resolve over a stale aggregate = %v\n%s%s", err, out, errOut)
+			}
+			if !strings.Contains(out, target) {
+				t.Fatalf("resolve swept the aggregate without naming it:\n%s", out)
+			}
+			if _, statErr := os.Stat(filepath.Join(root, target)); !errors.Is(statErr, fs.ErrNotExist) {
+				t.Fatalf("the stale aggregate survived resolve: %v", statErr)
+			}
+		})
+
+		t.Run("authored bytes refuse, are named, and stay on disk", func(t *testing.T) {
+			root, engine, conflicted := cliConflictProject(t)
+			writeTestFile(t, root, target, authored)
+			lockBefore, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			out, errOut, err := runApp(t, root, engine,
+				"resolve", "ggg/element/button", "--path", conflicted, "--accept-upstream")
+			if err == nil || exitOf(t, err) != 3 {
+				t.Fatalf("resolve over authored bytes = %v, want exit 3\n%s%s", err, out, errOut)
+			}
+			if !strings.Contains(out+errOut, target) {
+				t.Fatalf("resolve refused without naming the path:\n%s%s", out, errOut)
+			}
+			if _, statErr := os.Stat(filepath.Join(root, target)); statErr != nil {
+				t.Fatalf("resolve deleted authored bytes: %v", statErr)
+			}
+			lockAfter, err := os.ReadFile(filepath.Join(root, modkit.LockFileName))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(lockBefore, lockAfter) {
+				t.Fatal("the refused resolve wrote the lock")
+			}
+		})
+	})
+}
+
+// A refusal is only as good as the move it names, and this one named a move
+// that cannot work. The message said "Declare the file in a module's `files`
+// if it is a payload, or delete it" — and declaring is refused for EVERY path
+// the refusal can print: the Unowned set is filtered by
+// IsRegistryOwnedOutputPath, IsGeneratedOutputPath is that predicate ORed with
+// the external-tool outputs, and reconcilePlannedState refuses any payload
+// whose target satisfies it. So half the guidance was a dead end, `--claim`
+// does not reach it either, and the two moves that DO work — rename, restore
+// the banner — went unmentioned.
+//
+// Nothing caught it because nothing followed the advice. This test does: each
+// remedy the message names is executed and asserted to clear the refusal, and
+// the one it forbids is asserted to be refused. Mutation: put "declare the
+// file in a module's `files`" back as a remedy and the last subtest is the
+// standing proof it is false.
+func TestCLIRefusalNamesOnlyRemediesThatWork(t *testing.T) {
+	const target = "internal/modules/aa_probe_registry_gen.go"
+	authored := []byte("package modules\n\n// A human wrote this and happened to like the name.\nconst AAProbe = \"authored\"\n")
+
+	// refused installs the fixture, plants the authored bytes, and proves the
+	// tree is in the refusing state before any remedy is applied.
+	refused := func(t *testing.T) (string, *modkit.Engine) {
+		t.Helper()
+		root, engine := cliProject(t)
+		if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		if _, _, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+			t.Fatalf("sync: %v", err)
+		}
+		writeTestFile(t, root, target, authored)
+		if _, _, err := runApp(t, root, engine, "sync", "--offline"); err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("the fixture is not in the refusing state: %v", err)
+		}
+		return root, engine
+	}
+
+	t.Run("delete it", func(t *testing.T) {
+		root, engine := refused(t)
+		if err := os.Remove(filepath.Join(root, target)); err != nil {
+			t.Fatal(err)
+		}
+		if _, errOut, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+			t.Fatalf("deleting the file did not clear the refusal: %v\n%s", err, errOut)
+		}
+	})
+
+	t.Run("rename it to a name this pipeline does not generate", func(t *testing.T) {
+		root, engine := refused(t)
+		const renamed = "internal/modules/aa_probe_authored.go"
+		if modkit.IsGeneratedOutputPath(renamed) {
+			t.Fatalf("%s is still a generated name; the remedy would not clear anything", renamed)
+		}
+		if err := os.Rename(filepath.Join(root, target), filepath.Join(root, renamed)); err != nil {
+			t.Fatal(err)
+		}
+		if _, errOut, err := runApp(t, root, engine, "sync", "--offline"); err != nil {
+			t.Fatalf("renaming off the generated name did not clear the refusal: %v\n%s", err, errOut)
+		}
+		// The whole point of renaming rather than deleting: the bytes survive.
+		if got := readTestFile(t, root, renamed); !bytes.Equal(got, authored) {
+			t.Fatalf("the renamed file was not left alone:\n%s", got)
+		}
+	})
+
+	t.Run("restore the marker if ggg wrote it", func(t *testing.T) {
+		root, engine := refused(t)
+		restored := append([]byte("// Code generated "+modkit.GeneratedOutputMarker+".\n\n"), authored...)
+		writeTestFile(t, root, target, restored)
+		out, errOut, err := runApp(t, root, engine, "sync", "--offline")
+		if err != nil {
+			t.Fatalf("restoring the marker did not clear the refusal: %v\n%s", err, errOut)
+		}
+		// Restoring the banner is a claim of authorship, so the file rejoins
+		// the swept class — named, then removed.
+		if !strings.Contains(out, target) {
+			t.Fatalf("the re-marked aggregate was swept without being named:\n%s", out)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, target)); !errors.Is(statErr, fs.ErrNotExist) {
+			t.Fatalf("the re-marked aggregate was not swept: %v", statErr)
+		}
+	})
+
+	// The remedy the message used to lead with. It trades one exit 3 for
+	// another and leaves the file exactly where it was.
+	t.Run("declaring it in a module's files is refused, not a remedy", func(t *testing.T) {
+		files := fixtureRegistry(t)
+		payload := []byte("package modules\n\nconst AAProbe = \"declared\"\n")
+		probe := baseModule("ggg/element/probe", "element", "probe")
+		probe.Files = []modkit.ManifestFile{{
+			Source: "registry/modules/element/probe/probe.go", Target: target,
+			Class: modkit.FileClassGo, SHA256: sha256Hex(payload), Contract: true,
+		}}
+		putJSON(t, files, "registry/modules/element/probe/module.json", modkit.ModuleDocument{Schema: 2, Module: probe})
+		files["registry/modules/element/probe/probe.go"] = &fstest.MapFile{Data: payload}
+		putJSON(t, files, "registry/elements.json", modkit.CatalogIndex{Schema: 2, Kind: modkit.CatalogElement, Items: []string{
+			"registry/modules/element/button/module.json", "registry/modules/element/probe/module.json",
+		}})
+		source := refSource{snapshots: map[string]modkit.Snapshot{
+			"main": {Commit: testCommitA, FS: files}, testCommitA: {Commit: testCommitA, FS: files},
+		}}
+		root := t.TempDir()
+		writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+		engine := modkit.New(modkit.Options{Source: source, Generator: modkit.RegistryGenerator{}})
+		if _, _, err := runApp(t, root, engine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		writeTestFile(t, root, target, authored)
+
+		out, errOut, err := runApp(t, root, engine, "add", "ggg/element/probe")
+		if err == nil {
+			t.Fatalf("a module declared a generated target and it was accepted:\n%s%s", out, errOut)
+		}
+		if !strings.Contains(out+errOut, "generated outputs are tool-owned and cannot be authored") {
+			t.Fatalf("the declare path refused for some other reason:\n%s%s", out, errOut)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, target)); statErr != nil {
+			t.Fatalf("the refused declare removed the file: %v", statErr)
+		}
+	})
+
+	// `--claim` is the tool's one mechanism for adopting a pre-existing file,
+	// and it does not reach this either: a claim adopts a divergent file
+	// against a DECLARED target, and declaring is what is refused.
+	t.Run("--claim does not adopt it either", func(t *testing.T) {
+		root, engine := refused(t)
+		out, errOut, err := runApp(t, root, engine, "sync", "--offline", "--claim", target)
+		if err == nil || exitOf(t, err) != 3 {
+			t.Fatalf("--claim over a generated name = %v, want the same exit 3\n%s%s", err, out, errOut)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, target)); statErr != nil {
+			t.Fatalf("the refused claim removed the file: %v", statErr)
+		}
+	})
 }
 
 // dry-run must never touch the tree: zero writes before apply.

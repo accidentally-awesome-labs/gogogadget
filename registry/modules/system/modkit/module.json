@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 49,
+    "revision": 51,
     "contract": 5,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -60,7 +60,7 @@
         "source": "internal/gggcli/cli_test.go",
         "target": "internal/gggcli/cli_test.go",
         "class": "test",
-        "sha256": "eea3f10936c2360b8b30cd1ee4de52ba1af9a5c1cd90e58e52b03a12125bada7",
+        "sha256": "933da5fae667943be7f36fcf7a3c5423c13f183c20e31e752ffd760cd6e6a9a7",
         "rewrite_module": true,
         "contract": false
       },
@@ -156,7 +156,7 @@
         "source": "internal/gggcli/fixture_test.go",
         "target": "internal/gggcli/fixture_test.go",
         "class": "test",
-        "sha256": "0db4addaedbe42ea0c867b2adb061b4ba87b0fd4fd9e9759d46e2c2ece81465d",
+        "sha256": "191b63f49988d68eb7dbc51643ae6a6562dd1dd5cf84494ff0a2ab0970b04569",
         "rewrite_module": true,
         "contract": false
       },
@@ -333,7 +333,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "38d856d5988b45fda86d6971d3d8a47c73e150b3654578b2ccfa71c7f877f8bc",
+        "sha256": "fbcb6042276122b5ac9d8e2ffb7f6397f8b1ee9f406621a3fbf9e5a648c42233",
         "rewrite_module": true,
         "contract": false
       },
@@ -620,7 +620,7 @@
         "source": "internal/modkit/generator.go",
         "target": "internal/modkit/generator.go",
         "class": "go",
-        "sha256": "dd497531f0ad292490cbd98cb3d242e8aa7b3ce7e1deb311135d8230e0476ea0",
+        "sha256": "b35165376be36df48c555f2d97c7e45ea8fc6557294839c38bef323e836e9167",
         "rewrite_module": true,
         "contract": false
       },

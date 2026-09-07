@@ -435,14 +435,23 @@ func TestVisualTaskRunsContainerHarness(t *testing.T) {
 	}
 }
 
-// `ggg test unit` and `ggg test integration` ran the identical argv over the
-// identical packages, and `runTestTask`'s "all" case listed both — so
-// `ggg test all` ran the whole Go suite twice, at 1929 tests across 91
-// packages, before it got to e2e.
+// `ggg test all` must run each layer exactly once — no more, and no fewer.
 //
-// Mutation: put "unit" back in the "all" list and the suite argv appears
-// twice.
-func TestTestAllRunsTheGoSuiteExactlyOnce(t *testing.T) {
+// The "no more" half: `ggg test unit` and `ggg test integration` ran the
+// identical argv over the identical packages, and `runTestTask`'s "all" case
+// listed both, so `ggg test all` ran the whole Go suite twice, at 1929 tests
+// across 91 packages, before it got to e2e.
+//
+// The "no fewer" half is the one this test used to miss. It counted the Go
+// suite alone, while the commit that collapsed `unit` was editing exactly the
+// slice that decides which layers run: deleting `"smoke"` or `"e2e"` from it
+// would have left `ggg test all` silently skipping a gate with every test in
+// the repository still green. The runner records every argv, so assert the
+// whole set.
+//
+// Mutation, both directions: put "unit" back in the "all" list and the suite
+// argv appears twice; drop any one of the four and its mode reports 0.
+func TestTestAllRunsEveryModeExactlyOnce(t *testing.T) {
 	root := t.TempDir()
 	runner := &generatingRunner{root: root}
 	controller := NewController(ControllerOptions{Root: root, TaskRunner: runner})
@@ -453,14 +462,26 @@ func TestTestAllRunsTheGoSuiteExactlyOnce(t *testing.T) {
 	if _, err := controller.Apply(context.Background(), plan); err != nil {
 		t.Fatal(err)
 	}
-	suites := 0
-	for _, argv := range runner.argvs {
-		if strings.Join(argv, " ") == "go test -json -count=1 ./..." {
-			suites++
-		}
+	// One identifying argv per mode: the accounted Go suite, the Playwright
+	// invocation, and the two harness scripts. Compose `up` is deliberately
+	// not one of them — e2e and visual both issue it, so it identifies
+	// neither.
+	modes := map[string]string{
+		"integration": "go test -json -count=1 ./...",
+		"e2e":         "npx playwright test",
+		"visual":      filepath.Join("scripts", "visual.sh"),
+		"smoke":       filepath.Join("scripts", "smoke.sh"),
 	}
-	if suites != 1 {
-		t.Fatalf("the go suite ran %d times: %v", suites, runner.argvs)
+	for mode, want := range modes {
+		runs := 0
+		for _, argv := range runner.argvs {
+			if strings.Join(argv, " ") == want {
+				runs++
+			}
+		}
+		if runs != 1 {
+			t.Fatalf("test all ran %s %d time(s), want exactly 1: %v", mode, runs, runner.argvs)
+		}
 	}
 }
 
