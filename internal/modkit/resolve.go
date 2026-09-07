@@ -244,14 +244,29 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	}
 	// Provider choices are resolved only after the explicit/profile closure is
 	// known. This prevents adapters from silently introducing optional seams.
+	//
+	// "Closure" is transitive: a seam pulled in because a selected feature
+	// module requires it declares its slot just as loudly as one named in the
+	// profile, and an installed seam with no adapter selected would boot a nil
+	// capability. Deriving slots from the un-expanded set is what made
+	// `ggg/profile/web` and `ggg/profile/api` unable to create a project —
+	// both reach ggg/analytics, ggg/billing and ggg/llm through `requires`
+	// only, so their honest provider_defaults looked like four extra keys.
+	// validateProfileProviderParity has always walked `Requires` here; this
+	// loop is the same walk, so the two definitions of the word agree.
+	for _, id := range sortedKeys(selected) {
+		if err := expand(id); err != nil {
+			return selectedGraph{}, err
+		}
+	}
 	slots := map[string]struct{}{}
 	for id := range selected {
 		for _, slot := range moduleByID[id].Runtime.ProviderSlots {
 			slots[slot.ID] = struct{}{}
 		}
 	}
-	if len(slots) != len(project.Providers) {
-		return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots")
+	if missing, extra := slotDifference(slots, project.Providers); len(missing) != 0 || len(extra) != 0 {
+		return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots: missing %v, unselected %v", missing, extra)
 	}
 	adapterByID := map[string]Manifest{}
 	for _, id := range sortedKeys(moduleByID) {
@@ -337,7 +352,9 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	if project.Deployment != "" && len(deployments) == 1 && deployments[0] != project.Deployment {
 		return selectedGraph{}, fmt.Errorf("deployment module %s conflicts with selected deployment %s", deployments[0], project.Deployment)
 	}
-	for id := range selected {
+	// The base closure is already expanded; this pass covers the adapters the
+	// provider choices selected and the deployment module.
+	for _, id := range sortedKeys(selected) {
 		if err := expand(id); err != nil {
 			return selectedGraph{}, err
 		}
@@ -351,6 +368,26 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		modules = append(modules, moduleByID[id])
 	}
 	return selectedGraph{modules: modules, order: order, reasons: reasons}, nil
+}
+
+// slotDifference names both halves of a provider mismatch. The refusal used to
+// compare two lengths and print neither set, so an operator was told the keys
+// were wrong without being told which — and a count comparison also passed a
+// project that had one wrong key and one missing one.
+func slotDifference(slots map[string]struct{}, providers map[string]ProviderSelections) (missing, extra []string) {
+	for slot := range slots {
+		if _, ok := providers[slot]; !ok {
+			missing = append(missing, slot)
+		}
+	}
+	for slot := range providers {
+		if _, ok := slots[slot]; !ok {
+			extra = append(extra, slot)
+		}
+	}
+	sort.Strings(missing)
+	sort.Strings(extra)
+	return missing, extra
 }
 func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, modules map[string]Manifest) ([]string, error) {
 

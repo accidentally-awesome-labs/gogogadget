@@ -47,14 +47,86 @@ type osTaskRunner struct {
 	err io.Writer
 }
 
+// taskOutputTailLines and taskOutputTailBytes bound what a failed subprocess
+// contributes to the error. A `go build ./...` over three hundred packages can
+// emit thousands of lines; the cause is at the end, and the whole point is a
+// message an operator can read.
+const (
+	taskOutputTailLines = 20
+	taskOutputTailBytes = 16 << 10
+)
+
+// tailWriter forwards every byte to the stream the runner was given and keeps
+// a bounded tail for the error path. os/exec copies stdout and stderr on
+// separate goroutines once the destination is not an *os.File, so the mutex is
+// load-bearing rather than defensive.
+type tailWriter struct {
+	mu   sync.Mutex
+	sink io.Writer
+	tail []byte
+}
+
+func (w *tailWriter) Write(p []byte) (int, error) {
+	w.mu.Lock()
+	w.tail = append(w.tail, p...)
+	if len(w.tail) > taskOutputTailBytes {
+		w.tail = append([]byte(nil), w.tail[len(w.tail)-taskOutputTailBytes:]...)
+	}
+	w.mu.Unlock()
+	if w.sink == nil {
+		return len(p), nil
+	}
+	return w.sink.Write(p)
+}
+
+// lines returns the last taskOutputTailLines non-empty lines, oldest first.
+func (w *tailWriter) lines() []string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	var kept []string
+	for _, line := range strings.Split(string(w.tail), "\n") {
+		trimmed := strings.TrimRight(line, "\r \t")
+		if strings.TrimSpace(trimmed) == "" {
+			continue
+		}
+		kept = append(kept, trimmed)
+	}
+	if len(kept) > taskOutputTailLines {
+		kept = kept[len(kept)-taskOutputTailLines:]
+	}
+	return kept
+}
+
+// Run executes one trusted task. A failure carries the tail of what the child
+// printed, because the exit status alone is not a diagnosis: `ggg new
+// --profile ggg/profile/minimal` reported `go mod tidy: exit status 1;
+// nothing was kept, fix the cause and re-run ggg new` over a destination it
+// had already removed, and the cause — a payload importing a package no
+// selected module provided — was only in the child's stderr. Every trusted
+// task shells out, so the capture belongs here rather than at one call site.
+//
+// The bytes still stream to the runner's writer as they arrive, so a live run
+// is unchanged; the tail is a second copy kept for the error. It passes
+// through the same secret redactor as every other rendered surface, because
+// App wraps a failed command's error in redactedError before stderr sees it.
 func (r osTaskRunner) Run(ctx context.Context, root string, argv []string, env map[string]string) error {
 	if len(argv) == 0 {
 		return fmt.Errorf("empty task argv")
 	}
 	command := exec.CommandContext(ctx, argv[0], argv[1:]...)
 	command.Dir = root
-	command.Stdout = r.out
-	command.Stderr = r.err
+	// One tail per invocation when both streams go to the same place, which is
+	// every trusted task: the interleaving an operator saw is the interleaving
+	// the error reports. RunOutput is the exception — it hands stdout to a
+	// caller that parses it — so there the tail is stderr only, which is where
+	// a tool puts its diagnosis anyway.
+	captured := &tailWriter{sink: r.err}
+	command.Stderr = captured
+	if r.err == r.out {
+		command.Stdout = captured
+	} else {
+		command.Stdout = r.out
+	}
 	command.Stdin = os.Stdin
 	if len(env) > 0 {
 		// Injected values are appended after the inherited environment, and
@@ -66,7 +138,16 @@ func (r osTaskRunner) Run(ctx context.Context, root string, argv []string, env m
 			command.Env = append(command.Env, key+"="+env[key])
 		}
 	}
-	return command.Run()
+	err := command.Run()
+	if err == nil {
+		return nil
+	}
+	lines := captured.lines()
+	if len(lines) == 0 {
+		return fmt.Errorf("%w (it printed nothing)", err)
+	}
+	return fmt.Errorf("%w; its last %d line(s) of output:\n\t%s",
+		err, len(lines), strings.Join(lines, "\n\t"))
 }
 
 // runner executes trusted tasks. Subprocess output goes to stderr, never

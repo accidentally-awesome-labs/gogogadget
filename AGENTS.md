@@ -26,13 +26,17 @@ registry-owned outputs the selected graph no longer renders — as NAMED
 decides by reading the bytes, because a name is not authorship. A file at one of
 those names carrying no banner is authored work, and every command REFUSES it
 (exit 3, `generated_unowned`, naming the path). Delete it, rename it to a name
-the pipeline does not generate, or restore the banner if `ggg` wrote it.
+the pipeline does not generate, or restore the banner if `ggg` wrote it —
+restoring it returns the file to the swept class, so the first run that does not
+render it names a `delete`/`generated` change and REMOVES the bytes.
 DECLARING it in a module's `files` does NOT clear the refusal —
-`reconcilePlannedState` refuses any manifest target at a generated path as
-tool-owned — and `sync --claim` does not reach it either, because a claim
-adopts a file against a declared target. A hand-edited generated file that
-still carries the banner is still generated, and is swept when nothing renders
-it — which is the rule above, enforced.
+`reconcilePlannedState` refuses every payload at a generated path as tool-owned,
+and a payload that declares itself `class:"generated"` skips that guard only to
+reach the plan-time unowned-generated check against the TREE, which reads the
+bytes and never asks what class a manifest claims — and `sync --claim` does not
+reach it either, because a claim adopts a file against a declared target. A
+hand-edited generated file that still carries the banner is still generated, and
+is swept when nothing renders it — which is the rule above, enforced.
 
 Declarations live in `registry/modules/<kind>/<name>/module.json`: `files`
 (exclusive ownership + sha256), `requires`, `runtime.{routes,jobs,navigation,

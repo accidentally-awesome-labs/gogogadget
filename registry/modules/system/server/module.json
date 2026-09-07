@@ -4,13 +4,27 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 14,
+    "revision": 16,
     "contract": 2,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/analytics",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/api",
         "contract": {
           "min": 1,
           "max": 1
@@ -24,7 +38,21 @@
         }
       },
       {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/cache",
         "contract": {
           "min": 1,
           "max": 1
@@ -59,6 +87,13 @@
         }
       },
       {
+        "id": "ggg/system/dev-tools",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/feature-flags",
         "contract": {
           "min": 1,
@@ -87,10 +122,31 @@
         }
       },
       {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/llm",
         "contract": {
           "min": 1,
           "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/mail",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/modkit",
+        "contract": {
+          "min": 6,
+          "max": 6
         }
       },
       {
@@ -101,7 +157,56 @@
         }
       },
       {
+        "id": "ggg/system/rate-limit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/realtime",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/search",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/storage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/telemetry",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/testdb",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/usage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/webhooks",
         "contract": {
           "min": 1,
           "max": 1

@@ -352,6 +352,16 @@ func TestCLISyncNamesStaleDeletionsAndRefusesAuthoredBytesAtAGeneratedName(t *te
 			if _, statErr := os.Stat(filepath.Join(root, target)); !errors.Is(statErr, fs.ErrNotExist) {
 				t.Fatalf("the stale aggregate survived resolve: %v", statErr)
 			}
+			// exit 0 says the command ran; this says the verb did its job.
+			// Without it the subtest is satisfied by a resolve that clears the
+			// conflict and leaves the local bytes in place, which is
+			// `--keep-local` wearing the other flag's name. It matters more
+			// now than when the assertion was skipped: the fixture no longer
+			// stages the candidate itself, so these bytes come from the
+			// production path.
+			if got := readTestFile(t, root, conflicted); !bytes.Equal(got, fixture.upstream) {
+				t.Fatalf("--accept-upstream did not land the upstream bytes in %s:\n%s", conflicted, got)
+			}
 		})
 
 		t.Run("authored bytes refuse, are named, and stay on disk", func(t *testing.T) {
@@ -509,14 +519,40 @@ func TestCLIRefusalNamesOnlyRemediesThatWork(t *testing.T) {
 	// `--claim` is the tool's one mechanism for adopting a pre-existing file,
 	// and it does not reach this either: a claim adopts a divergent file
 	// against a DECLARED target, and declaring is what is refused.
+	//
+	// Exit 3 alone proves nothing here. It is ExitRefusal, shared by every
+	// refusal in the tool, and `refused(t)` has already put the tree in a
+	// refusing state — so this subtest passed identically with `--claim`
+	// pointed at an unrelated non-generated path, which is to say it could not
+	// tell an honoured flag from an unparsed one. The string assertion is what
+	// pins the unowned-generated refusal, exactly as the sibling declare
+	// subtest pins its own.
 	t.Run("--claim does not adopt it either", func(t *testing.T) {
 		root, engine := refused(t)
 		out, errOut, err := runApp(t, root, engine, "sync", "--offline", "--claim", target)
 		if err == nil || exitOf(t, err) != 3 {
 			t.Fatalf("--claim over a generated name = %v, want the same exit 3\n%s%s", err, out, errOut)
 		}
+		if !strings.Contains(out+errOut, "sits at a name this pipeline generates") {
+			t.Fatalf("--claim was refused by something other than the unowned-generated check:\n%s%s", out, errOut)
+		}
 		if _, statErr := os.Stat(filepath.Join(root, target)); statErr != nil {
 			t.Fatalf("the refused claim removed the file: %v", statErr)
+		}
+
+		// And the flag's own effect, observed rather than shadowed: over a
+		// tree where nothing is pending, the same `--claim` naming the same
+		// generated path is a no-op. So the exit 3 above is the tree's state
+		// speaking, and the claim never had anything to adopt.
+		clean, cleanEngine := cliProject(t)
+		if _, _, err := runApp(t, clean, cleanEngine, "init", "--adopt"); err != nil {
+			t.Fatalf("init: %v", err)
+		}
+		if _, _, err := runApp(t, clean, cleanEngine, "sync", "--offline"); err != nil {
+			t.Fatalf("sync: %v", err)
+		}
+		if out, errOut, err := runApp(t, clean, cleanEngine, "sync", "--offline", "--claim", target); err != nil {
+			t.Fatalf("--claim over an absent generated name = %v, want a no-op\n%s%s", err, out, errOut)
 		}
 	})
 }

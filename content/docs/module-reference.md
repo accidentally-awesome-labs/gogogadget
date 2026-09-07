@@ -203,14 +203,14 @@ itself.
 | `ggg/page/docs` | `ggg` | 1 | Documentation page | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-index` | `ggg` | 1 | Documentation index | `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-search` | `ggg` | 1 | Documentation search | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/files` | `ggg` | 1 | Files list | `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/files` | `ggg` | 1 | Files list | `ggg/page/projects` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/home` | `ggg` | 1 | Home page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/notifications` | `ggg` | 1 | Notifications list | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/pricing` | `ggg` | 1 | Pricing page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/privacy` | `ggg` | 1 | Privacy policy | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/project-edit` | `ggg` | 1 | Edit project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/projects` [1,1] | `free` |
 | `ggg/page/project-new` | `ggg` | 1 | New project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/projects` | `ggg` | 1 | Projects list | `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/projects` | `ggg` | 1 | Projects list | `ggg/page/dashboard` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/settings-account` | `ggg` | 1 | Account settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/auth-session` [1,1] | `free` |
 | `ggg/page/settings-api-tokens` | `ggg` | 1 | API token settings | `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/settings-billing` | `ggg` | 1 | Billing settings | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/usage` [1,1] | `free` |
@@ -262,11 +262,11 @@ itself.
 | `ggg/system/announcements` | `ggg` | 1 | Product announcements | `ggg/system/database` [1,1] | `retain-data` |
 | `ggg/system/api` | `ggg` | 1 | JSON API | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] | `major-version-only` |
 | `ggg/system/apphost` | `ggg` | 1 | Application host seam | — | `replacement-required` |
-| `ggg/system/audit` | `ggg` | 1 | Audit log | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/audit` | `ggg` | 1 | Audit log | `ggg/system/audit-export` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/audit-export` | `ggg` | 1 | Audit Export | — | `replacement-required` |
 | `ggg/system/audit-export-noop` | `ggg` | 1 | Audit Export Noop | `ggg/system/audit-export` [1,1] | `free` |
 | `ggg/system/audit-export-otlp` | `ggg` | 1 | Audit Export Otlp | `ggg/system/audit-export` [1,1] | `free` |
-| `ggg/system/billing` | `ggg` | 1 | Billing | `ggg/system/organizations` [1,1] | `major-version-only` |
+| `ggg/system/billing` | `ggg` | 1 | Billing | `ggg/system/notifications` [1,1] `ggg/system/organizations` [1,1] | `major-version-only` |
 | `ggg/system/billing-local` | `ggg` | 1 | Local billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/billing-polar` | `ggg` | 1 | Polar billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/cache` | `ggg` | 1 | Cache | — | `replacement-required` |
@@ -277,7 +277,7 @@ itself.
 | `ggg/system/config` | `ggg` | 2 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/content-assets` | `ggg` | 1 | Embedded content corpus | `ggg/system/content` [1,1] | `free` |
-| `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `replacement-required` |
+| `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/dev-tools` [1,1] | `replacement-required` |
 | `ggg/system/database-postgres` | `ggg` | 1 | Database Postgres | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/deploy-fly` | `ggg` | 1 | Deploy Fly | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/dev-tools` | `ggg` | 1 | Dev Tools | `ggg/system/project-base` [1,1] | `free` |
@@ -292,7 +292,7 @@ itself.
 | `ggg/system/identity-dev` | `ggg` | 1 | Development identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/identity` [2,2] | `free` |
 | `ggg/system/identity-session` | `ggg` | 1 | Identity sessions | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] `ggg/system/identity` [1,2] | `free` |
 | `ggg/system/impersonation` | `ggg` | 1 | Support impersonation | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
-| `ggg/system/jobs` | `ggg` | 1 | Background job queue | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] `ggg/system/mail` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `drain-required` |
+| `ggg/system/jobs` | `ggg` | 1 | Background job queue | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] `ggg/system/mail` [1,1] `ggg/system/notifications` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `drain-required` |
 | `ggg/system/llm` | `ggg` | 1 | Language model | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/llm-fake` | `ggg` | 1 | llm-fake | `ggg/system/llm` [1,1] | `free` |
 | `ggg/system/llm-openai-compatible` | `ggg` | 1 | llm-openai-compatible | `ggg/system/llm` [1,1] | `free` |
@@ -306,7 +306,7 @@ itself.
 | `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/observability-log` | `ggg` | 1 | observability-log | `ggg/system/observability` [1,1] | `free` |
 | `ggg/system/observability-sentry` | `ggg` | 1 | observability-sentry | `ggg/system/observability` [1,1] | `free` |
-| `ggg/system/organizations` | `ggg` | 1 | Users, organizations, and membership | `ggg/system/database` [1,1] | `replacement-required` |
+| `ggg/system/organizations` | `ggg` | 1 | Users, organizations, and membership | `ggg/system/database` [1,1] `ggg/system/schedules` [1,1] | `replacement-required` |
 | `ggg/system/project-base` | `ggg` | 1 | Project Base | — | `free` |
 | `ggg/system/project-docs` | `ggg` | 1 | Project Docs | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/rate-limit` | `ggg` | 1 | Request rate limiting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `major-version-only` |
@@ -322,8 +322,8 @@ itself.
 | `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/system/identity` [2,2] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
 | `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] `ggg/system/static` [1,1] | `free` |
-| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/system/analytics` [1,1] `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/identity-session` [1,1] `ggg/system/llm` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `replacement-required` |
-| `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/server` [1,2] | `replacement-required` |
+| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/element/ui-core` [1,1] `ggg/system/analytics` [1,1] `ggg/system/api` [1,1] `ggg/system/apphost` [1,1] `ggg/system/audit` [1,1] `ggg/system/billing` [1,1] `ggg/system/cache` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/dev-tools` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/identity-session` [1,1] `ggg/system/jobs` [1,1] `ggg/system/llm` [1,1] `ggg/system/mail` [1,1] `ggg/system/modkit` [6,6] `ggg/system/observability` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/realtime` [1,1] `ggg/system/search` [1,1] `ggg/system/storage` [1,1] `ggg/system/telemetry` [1,1] `ggg/system/testdb` [1,1] `ggg/system/usage` [1,1] `ggg/system/webhooks` [1,1] | `replacement-required` |
+| `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/dev-tools` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `retain-data` |
 | `ggg/system/storage-filesystem` | `ggg` | 1 | Filesystem storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/storage` [1,1] | `free` |
 | `ggg/system/storage-s3` | `ggg` | 1 | S3-compatible storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/storage` [1,1] | `retain-data` |

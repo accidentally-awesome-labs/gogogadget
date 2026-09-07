@@ -722,9 +722,7 @@ func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 	result, err := engine.Apply(ctx, *plan.Local)
 	if err != nil {
 		cleanup()
-		env := planEnvelope(*plan.Local, "new", exitRollback)
-		env.OK = false
-		return Result{Envelope: env}, rollbackError(err)
+		return Result{Envelope: rolledBackEnvelope(*plan.Local, err)}, rollbackError(err)
 	}
 	// The tree the apply installed is source only. Finish the transaction by
 	// producing the tool outputs compilation needs and proving the result
@@ -751,15 +749,29 @@ func (c *Controller) applyNew(ctx context.Context, plan Plan) (Result, error) {
 			created = append(created, newlyGenerated...)
 		}
 		cleanup()
-		env := planEnvelope(*plan.Local, "new", exitRollback)
-		env.OK = false
 		remedy := fmt.Errorf("%w; nothing was kept, fix the cause and re-run `ggg new`", buildErr)
 		if !createdRoot {
 			remedy = fmt.Errorf("%w; installed source and the lock were removed, but go.sum, the generated tool outputs and bin/ remain: delete them and re-run", buildErr)
 		}
-		return Result{Envelope: env}, rollbackError(remedy)
+		return Result{Envelope: rolledBackEnvelope(*plan.Local, remedy)}, rollbackError(remedy)
 	}
 	env := planEnvelope(*plan.Local, "new", exitOK)
 	env.Generated = appendUnique(env.Generated, result.Written...)
 	return Result{Envelope: env, Payload: map[string]any{"root": state.target}}, nil
+}
+
+// rolledBackEnvelope is the envelope a rolled-back genesis emits. It carries
+// the cause as a `command_failed` diagnostic for the same reason
+// failureEnvelope does: a `--json` consumer that reads `ok:false, exit:5` and
+// an empty diagnostics array has been told the run failed and nothing about
+// why. The rollback path was the one refusal in the tool that emitted the
+// envelope by hand and left the array empty, so `go mod tidy: exit status 1`
+// reached stderr and nothing reached a log collector.
+func rolledBackEnvelope(plan modkit.Plan, cause error) modkit.Envelope {
+	env := planEnvelope(plan, "new", exitRollback)
+	env.OK = false
+	env.Diagnostics = append(env.Diagnostics, modkit.Diagnostic{
+		Code: "command_failed", Severity: "error", Message: cause.Error(),
+	})
+	return env
 }

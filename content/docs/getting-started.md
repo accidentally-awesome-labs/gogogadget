@@ -80,13 +80,29 @@ over a tree no command can run.
 
 ### The profiles
 
-| Profile | Members | Required provider slots | What it adds |
-|---|---|---|---|
-| `minimal` | 34 | 18 | The smallest compilable application plus every provider seam it needs |
-| `web` | 167 | 9 | Public content, internationalization, discovery surfaces |
-| `api` | 170 | 10 | Identity and the JSON API transport |
-| `saas` | 296 | 18 | Organizations, billing, jobs, notifications, admin, product workflows |
-| `full` | 286 | 18 | Every product module in the catalog. It is not the largest list: `saas` names the nine environment-selected adapter modules explicitly, which `full` leaves to the provider selections, and `full` also drops the two modules this repository excludes |
+| Profile | Members | Closure | Required provider slots | What it adds |
+|---|---|---|---|---|
+| `minimal` | 117 | 150 | 18 | The smallest closure that compiles, plus every provider seam it needs |
+| `web` | 190 | 223 | 18 | Public content, internationalization, discovery surfaces |
+| `api` | 192 | 223 | 18 | The API transport and identity, named explicitly |
+| `saas` | 296 | 296 | 18 | Organizations, billing, jobs, notifications, admin, product workflows |
+| `full` | 286 | 286 | 18 | Every product module in the catalog. It is not the largest list: `saas` names the nine environment-selected adapter modules explicitly, which `full` leaves to the provider selections, and `full` also drops the two modules this repository excludes |
+
+**Members** is what a profile names; **closure** is what installing it
+actually resolves to, members plus everything they `require`. The gap is why
+every profile requires all 18 slots: a seam pulled in transitively declares its
+slot just as loudly as one named in the list.
+
+Three of these could not create a project until they were measured. `minimal`,
+`web` and `api` were hand-trimmed lists, and the source is not decomposed to
+support the trims: `internal/web/routes.go` imports `internal/api`,
+`internal/web/server.go` imports eleven more seams, migration
+`0020_provider_neutral_ids` renames columns on fifteen tables owned by nine
+modules, and several Go packages are split across modules that must therefore
+ship together. `web` and `api` now resolve to the SAME 223-module closure,
+because the API transport `api` was supposed to add is something
+`ggg/system/server` already requires; decoupling `internal/web` from
+`internal/api` is what would make them distinct again.
 
 A profile also carries **provider defaults** — the local adapter for
 development and test, the managed one for production — and a

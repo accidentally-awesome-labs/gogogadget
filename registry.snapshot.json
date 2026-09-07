@@ -752,7 +752,7 @@
     },
     {
       "path": "registry/modules/page/files/module.json",
-      "sha256": "296bc2275d7ca00cb7a9b64d9a05695ef02531453d3a116166b41b08bbc4d2b8"
+      "sha256": "d2a9c08391f1508050e8fb3e4e84b85e162a8c3d8c7296f0ee925d0064b020d0"
     },
     {
       "path": "registry/modules/page/home/module.json",
@@ -780,7 +780,7 @@
     },
     {
       "path": "registry/modules/page/projects/module.json",
-      "sha256": "efe5fca1f5be28d2273f6c3bc9bdd42cf5ebd1d4cc055c7360394962a7913647"
+      "sha256": "24ab872acfd939bee07b5ee6af3f88b0dce24eb66b3d9ad1a217f0fb956dbeb5"
     },
     {
       "path": "registry/modules/page/settings-account/module.json",
@@ -848,7 +848,7 @@
     },
     {
       "path": "registry/modules/system/audit/module.json",
-      "sha256": "6a58d662103ebf0d23f152ad53538b81a93f9eecb34c2793c18599e7e47b47bb"
+      "sha256": "5fab7ee31483ad86c7edb045d511f0dee71054b4cd17da63054437a833ea6876"
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
@@ -860,7 +860,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "9fe81a7d376971ae58df448c6930a421c9dc149dc514bb9ee9477f03d8ccca79"
+      "sha256": "98768663b6d0126f740b4af19d455483075206da670743b6ea3e394de73c16bb"
     },
     {
       "path": "registry/modules/system/cache-memory/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "565e2e517fa2c9b9c8572c34a97d24997ac2b1a572a48ec7de1779601f9cf745"
+      "sha256": "707a9b791cd77a5ff867ec2af31865d473d7c89aed31b4cc9f87c24ffd7581fa"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -900,7 +900,7 @@
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "579cc6389c65083b88618b3584fbc5f56a66aef0a47503c31bfd041e9de0b971"
+      "sha256": "18702ba904e95f9a9ae92fe021a823556efe410f4075a951d4e86ee93ceb883e"
     },
     {
       "path": "registry/modules/system/deploy-docker/module.json",
@@ -964,7 +964,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "3e32283bbe6978db3ae102610cc0d6e35f0612b229a5ae6ba473a7d191feb867"
+      "sha256": "5f70dd796f86f7c2e5ee129124a6a05104e29be199c946a9a80bee1535912ea7"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "e071e84c878b381aa6a2381ca5391890ada4a64281eab49b775199f8609c7b32"
+      "sha256": "964551d3a6d3ac201cf5978d6c1f8df86b6c9bff954a51655ec434281620736c"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/organizations/module.json",
-      "sha256": "6b860db8c9b5ccfa303027b8f8066f7adb32e31773f42887b95120d05c87c836"
+      "sha256": "55926dbe9f87fc4f5bb3d1d7808899f681a04e1e9ea8c4f9984c5374fdbb79f7"
     },
     {
       "path": "registry/modules/system/project-base/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "0e58ecdde938b052649dc8bb09b2c9c2c6f87b336459057162dd07ad26467fab"
+      "sha256": "f6c445334538b3cade4f4ff86f29c0f653ce689a5cd1b23f5be8b84226dcecaa"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1096,11 +1096,11 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "703849d083c7c715c571673f073b58d6e6245aab4314208cc27a07f980b45449"
+      "sha256": "11babe74b1e80cca4a6f74f776b5a5dcd440512b16630488a7d5ede71c7b435f"
     },
     {
       "path": "registry/modules/system/static/module.json",
-      "sha256": "b7aa49626e9aa76abbabf14bbc19f17191f7c1521eee0af3e7ed97eb567722a1"
+      "sha256": "db4932af34830f26a5d9282858d5b6e966112e7647bf31731a1571895bf247bd"
     },
     {
       "path": "registry/modules/system/storage-filesystem/module.json",
@@ -1224,7 +1224,7 @@
     },
     {
       "path": "registry/modules/workflow/files/module.json",
-      "sha256": "92ad2e37c3a014c2c4abbcf1c44c59c42be9693f39f0812a9b993d537ae0768f"
+      "sha256": "ee10df33efc6215318932b980d3f34bba3666d115d445ddaa5ba5d22ec2aa384"
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
@@ -1276,7 +1276,7 @@
     },
     {
       "path": "registry/profiles/api.json",
-      "sha256": "2c2763cc38e283f0c688c07613496a9d1445ad03a75e9aadc9bf112ccbf0d604"
+      "sha256": "ed52f79e2c9d245a9616aa07ddd420d7d06af653aedba5d86015770dd0ac40d4"
     },
     {
       "path": "registry/profiles/full.json",
@@ -1284,7 +1284,7 @@
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "1669f3e7b04f1994ab9a9fa563140ed0fe38aea467a30c322365889207c16c53"
+      "sha256": "97406e3efb48725979ad4b8b4255b241005e6d1742564350127d598854c1ad98"
     },
     {
       "path": "registry/profiles/saas.json",
@@ -1292,7 +1292,7 @@
     },
     {
       "path": "registry/profiles/web.json",
-      "sha256": "6aed670cb7df48b07725ba4743b6aba6b6118c11a14c2c61514426d3bece6137"
+      "sha256": "99ea16a3d5b6b4b1d5a0056182b96c5aea87687705d20a33fd398eb9fc3de9e7"
     },
     {
       "path": "registry/schema/lock.schema.json",

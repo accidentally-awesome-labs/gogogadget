@@ -4,7 +4,7 @@
     "id": "ggg/workflow/files",
     "kind": "workflow",
     "name": "files",
-    "revision": 3,
+    "revision": 5,
     "contract": 1,
     "title": "File upload, download and delete",
     "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",

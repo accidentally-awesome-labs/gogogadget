@@ -1,6 +1,7 @@
 package gggcli
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -519,6 +520,64 @@ func TestBothTaskRunnersSendSubprocessOutputToStderr(t *testing.T) {
 		if backed.out != os.Stderr || backed.err != os.Stderr {
 			t.Fatalf("%s does not route both subprocess streams to stderr", name)
 		}
+	}
+}
+
+// A failed trusted task names its cause. `ggg new --profile ggg/profile/minimal`
+// reported `go mod tidy: exit status 1; nothing was kept, fix the cause and
+// re-run ggg new` and nothing else: the destination had already been removed,
+// so the operator was told to fix a cause the tool had just thrown away. Every
+// trusted task shells out, so this is asserted on the runner rather than on
+// genesis — the next mute failure will be a different command.
+//
+// Mutation: drop the tail from osTaskRunner.Run's error and both assertions
+// fail; keep the tail but stop streaming and the third fails.
+func TestFailedTaskRunnerErrorCarriesTheSubprocessOutput(t *testing.T) {
+	root := t.TempDir()
+	streamed := &bytes.Buffer{}
+	runner := osTaskRunner{out: streamed, err: streamed}
+	err := runner.Run(context.Background(), root,
+		[]string{"sh", "-c", "echo first-line >&2; echo the-actual-cause >&2; exit 3"}, nil)
+	if err == nil {
+		t.Fatal("a failing subprocess returned no error")
+	}
+	if !strings.Contains(err.Error(), "the-actual-cause") {
+		t.Fatalf("error does not carry the subprocess output: %q", err.Error())
+	}
+	if !strings.Contains(err.Error(), "exit status 3") {
+		t.Fatalf("error lost the exit status: %q", err.Error())
+	}
+	// The tail is a second copy, not a replacement: a live run still sees the
+	// bytes as they arrive.
+	if !strings.Contains(streamed.String(), "the-actual-cause") {
+		t.Fatalf("subprocess output stopped reaching the stream: %q", streamed.String())
+	}
+
+	// The tail is bounded, and it is the END that is kept: a `go build ./...`
+	// over three hundred packages puts the cause last.
+	long := &bytes.Buffer{}
+	err = osTaskRunner{out: long, err: long}.Run(context.Background(), root,
+		[]string{"sh", "-c", "for i in $(seq 1 400); do echo line-$i >&2; done; exit 1"}, nil)
+	if err == nil {
+		t.Fatal("a failing subprocess returned no error")
+	}
+	if !strings.Contains(err.Error(), "line-400") {
+		t.Fatalf("error dropped the last line: %q", err.Error())
+	}
+	if strings.Contains(err.Error(), "line-1\n") {
+		t.Fatalf("error is not bounded to a tail: %q", err.Error())
+	}
+	if got := strings.Count(err.Error(), "line-"); got != taskOutputTailLines {
+		t.Fatalf("error carries %d lines, want %d", got, taskOutputTailLines)
+	}
+
+	// A child that fails silently says so, rather than trailing an empty
+	// "output:" header.
+	quiet := &bytes.Buffer{}
+	err = osTaskRunner{out: quiet, err: quiet}.Run(context.Background(), root,
+		[]string{"sh", "-c", "exit 4"}, nil)
+	if err == nil || !strings.Contains(err.Error(), "printed nothing") {
+		t.Fatalf("silent failure error = %v", err)
 	}
 }
 

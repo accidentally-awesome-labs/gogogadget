@@ -62,11 +62,21 @@ catalog is parsed.
 
 Resolution runs in one pass and is pure — it writes nothing:
 
-1. Resolve explicitly selected modules and profiles into a base closure.
+1. Resolve explicitly selected modules and profiles, then expand that set
+   through `requires` into the base closure. The expansion is part of step 1,
+   not a later one: a seam pulled in only because a selected feature module
+   requires it declares its slot exactly as loudly as one named in the profile,
+   and an installed seam with no adapter would boot a nil capability. Deriving
+   slots before the expansion is what made `ggg/profile/web` and
+   `ggg/profile/api` unable to create a project — their honest
+   `provider_defaults` looked like four extra keys.
 2. Derive the exact set of provider slots that closure declares.
    `providers` must name that set exactly, with a `{adapter, target}` for
-   `development`, `test` and `production`. Selected adapters enter the graph
-   with reason `provider`; the deployment module with reason `deployment`.
+   `development`, `test` and `production`. A mismatch names both halves —
+   which slots have no selection, and which selections no slot declares.
+   Selected adapters enter the graph with reason `provider`, AFTER the slots
+   are known, so an adapter can never introduce a slot of its own; the
+   deployment module enters with reason `deployment`.
 3. Refuse, before any byte is written: a missing dependency, an out-of-range
    contract, a duplicate claim, a cycle, an unknown slot, a wrong-slot adapter,
    an unknown target, a target not allowed in that environment, and a

@@ -4,7 +4,7 @@
     "id": "ggg/system/database",
     "kind": "system",
     "name": "database",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Database",
     "description": "The Postgres connection pool, the embedded migration runner, and the generated query layer's configuration. Owns the pool lifecycle: opening, migrating, and closing.",
@@ -21,6 +21,13 @@
         "contract": {
           "min": 1,
           "max": 2
+        }
+      },
+      {
+        "id": "ggg/system/dev-tools",
+        "contract": {
+          "min": 1,
+          "max": 1
         }
       }
     ],

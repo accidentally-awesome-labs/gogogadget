@@ -297,8 +297,11 @@ func (e UnownedGeneratedOutputError) Error() string {
 	return fmt.Sprintf(
 		"%s sits at a name this pipeline generates but carries no %q marker, so ggg cannot prove it wrote it. "+
 			"Delete it, rename it to a name this pipeline does not generate, or restore the marker in its header "+
-			"if ggg wrote it, then re-run. Declaring it in a module's `files` does NOT clear this: a manifest "+
-			"target at a generated path is refused as tool-owned",
+			"if ggg wrote it — that returns the file to the swept class, so the first run that does not render it "+
+			"names a `delete`/`generated` change and REMOVES the bytes. Declaring it in a module's `files` does "+
+			"NOT clear this: every payload at a generated path is refused as tool-owned, and a payload declaring "+
+			"itself generated skips that guard only to reach this one, which reads the tree and never asks what "+
+			"class a manifest claims",
 		strings.Join(e.Paths, ", "), GeneratedOutputMarker)
 }
 
@@ -312,7 +315,7 @@ func (e UnownedGeneratedOutputError) Diagnostics() []Diagnostic {
 	for _, path := range e.Paths {
 		diagnostics = append(diagnostics, Diagnostic{
 			Code: "generated_unowned", Severity: "error", Path: path,
-			Message: "a file at this generated name carries no ggg provenance marker; delete it, rename it off the generated name, or restore the marker if ggg wrote it. Declaring it in a module's files does NOT clear this: generated outputs are tool-owned and cannot be authored",
+			Message: "a file at this generated name carries no ggg provenance marker; delete it, rename it off the generated name, or restore the marker if ggg wrote it — restoring it returns the file to the swept class, so the next run that does not render it names a delete and removes the bytes. Declaring it in a module's files does NOT clear this: generated outputs are tool-owned and cannot be authored",
 		})
 	}
 	return diagnostics

@@ -4,10 +4,10 @@
     "id": "ggg/profile/api",
     "kind": "profile",
     "name": "api",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Api GoGoGadget",
-    "description": "Web plus identity and the JSON API transport.",
+    "description": "Web with the API transport and identity named explicitly; the same closure as web while internal/web imports internal/api.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/activity-item",
@@ -156,6 +156,18 @@
       "ggg/element/truncate",
       "ggg/element/ui-core",
       "ggg/element/visually-hidden",
+      "ggg/page/activity",
+      "ggg/page/admin-flags",
+      "ggg/page/admin-organizations",
+      "ggg/page/blog",
+      "ggg/page/changelog",
+      "ggg/page/docs",
+      "ggg/page/docs-index",
+      "ggg/page/settings-account",
+      "ggg/page/settings-api-tokens",
+      "ggg/page/settings-billing",
+      "ggg/page/settings-organization",
+      "ggg/system/announcements",
       "ggg/system/api",
       "ggg/system/apphost",
       "ggg/system/ci-github",
@@ -171,6 +183,7 @@
       "ggg/system/identity",
       "ggg/system/identity-session",
       "ggg/system/mail",
+      "ggg/system/metrics",
       "ggg/system/modkit",
       "ggg/system/observability",
       "ggg/system/project-base",
@@ -178,19 +191,36 @@
       "ggg/system/seo",
       "ggg/system/server",
       "ggg/system/static",
-      "ggg/system/storage"
+      "ggg/system/storage",
+      "ggg/workflow/appearance",
+      "ggg/workflow/billing-webhook",
+      "ggg/workflow/files",
+      "ggg/workflow/impersonation",
+      "ggg/workflow/openapi-contract",
+      "ggg/workflow/organization-export",
+      "ggg/workflow/outbound-webhooks",
+      "ggg/workflow/project-export",
+      "ggg/workflow/projects"
     ],
     "required_provider_slots": [
       "ggg/analytics",
+      "ggg/audit-export",
       "ggg/billing",
+      "ggg/cache",
       "ggg/database",
       "ggg/feature-flags",
       "ggg/identity",
       "ggg/llm",
       "ggg/mail",
+      "ggg/notifications",
       "ggg/observability",
       "ggg/rate-limit",
-      "ggg/storage"
+      "ggg/realtime",
+      "ggg/search",
+      "ggg/storage",
+      "ggg/telemetry",
+      "ggg/usage",
+      "ggg/webhooks"
     ],
     "provider_defaults": {
       "ggg/analytics": {
@@ -207,6 +237,20 @@
           "target": "posthog"
         }
       },
+      "ggg/audit-export": {
+        "development": {
+          "adapter": "ggg/system/audit-export-noop",
+          "target": "noop"
+        },
+        "test": {
+          "adapter": "ggg/system/audit-export-noop",
+          "target": "noop"
+        },
+        "production": {
+          "adapter": "ggg/system/audit-export-otlp",
+          "target": "otlp"
+        }
+      },
       "ggg/billing": {
         "development": {
           "adapter": "ggg/system/billing-local",
@@ -219,6 +263,20 @@
         "production": {
           "adapter": "ggg/system/billing-polar",
           "target": "polar"
+        }
+      },
+      "ggg/cache": {
+        "development": {
+          "adapter": "ggg/system/cache-memory",
+          "target": "memory"
+        },
+        "test": {
+          "adapter": "ggg/system/cache-memory",
+          "target": "memory"
+        },
+        "production": {
+          "adapter": "ggg/system/cache-redis",
+          "target": "upstash"
         }
       },
       "ggg/database": {
@@ -291,6 +349,20 @@
           "target": "resend"
         }
       },
+      "ggg/notifications": {
+        "development": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        }
+      },
       "ggg/observability": {
         "development": {
           "adapter": "ggg/system/observability-log",
@@ -319,6 +391,34 @@
           "target": "upstash"
         }
       },
+      "ggg/realtime": {
+        "development": {
+          "adapter": "ggg/system/realtime-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/realtime-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/realtime-ably",
+          "target": "ably"
+        }
+      },
+      "ggg/search": {
+        "development": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/search-postgres",
+          "target": "postgres"
+        }
+      },
       "ggg/storage": {
         "development": {
           "adapter": "ggg/system/storage-filesystem",
@@ -331,6 +431,48 @@
         "production": {
           "adapter": "ggg/system/storage-s3",
           "target": "r2"
+        }
+      },
+      "ggg/telemetry": {
+        "development": {
+          "adapter": "ggg/system/telemetry-noop",
+          "target": "stdout"
+        },
+        "test": {
+          "adapter": "ggg/system/telemetry-noop",
+          "target": "stdout"
+        },
+        "production": {
+          "adapter": "ggg/system/telemetry-otlp",
+          "target": "otlp"
+        }
+      },
+      "ggg/usage": {
+        "development": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/usage-postgres",
+          "target": "postgres"
+        }
+      },
+      "ggg/webhooks": {
+        "development": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/webhooks-postgres",
+          "target": "postgres"
         }
       }
     },

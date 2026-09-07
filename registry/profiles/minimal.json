@@ -4,20 +4,92 @@
     "id": "ggg/profile/minimal",
     "kind": "profile",
     "name": "minimal",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Minimal GoGoGadget",
-    "description": "The smallest compilable GoGoGadget web application and required provider seams.",
+    "description": "The smallest closure that compiles: the web stack, every provider seam, and the API transport internal/web imports.",
     "members": [
+      "ggg/component/accordion",
+      "ggg/component/aspect-ratio",
+      "ggg/component/back-link",
+      "ggg/component/badge",
       "ggg/component/banner",
+      "ggg/component/card",
+      "ggg/component/checkbox",
+      "ggg/component/checkbox-group",
+      "ggg/component/command",
+      "ggg/component/confirm-action",
+      "ggg/component/cursor-pagination",
+      "ggg/component/data-grid",
+      "ggg/component/data-table",
+      "ggg/component/delivery-status",
+      "ggg/component/description-list",
+      "ggg/component/disclosure",
+      "ggg/component/dropdown-menu",
+      "ggg/component/empty-state",
       "ggg/component/field",
+      "ggg/component/field-error",
+      "ggg/component/fieldset",
+      "ggg/component/file-dropzone",
       "ggg/component/form",
+      "ggg/component/form-actions",
+      "ggg/component/grid",
+      "ggg/component/hint",
+      "ggg/component/inline",
+      "ggg/component/input-addon",
+      "ggg/component/kanban",
+      "ggg/component/label",
+      "ggg/component/list",
+      "ggg/component/metric",
+      "ggg/component/nav-tabs",
+      "ggg/component/number-input",
+      "ggg/component/onboarding-checklist",
+      "ggg/component/page-header",
+      "ggg/component/pagination",
+      "ggg/component/plan-card",
+      "ggg/component/search-input",
+      "ggg/component/secret-reveal",
+      "ggg/component/section-header",
+      "ggg/component/select",
+      "ggg/component/settings-section",
+      "ggg/component/stat-group",
+      "ggg/component/table",
+      "ggg/component/table-toolbar",
       "ggg/component/terminal-page",
       "ggg/component/text-input",
       "ggg/component/theme-toggle",
+      "ggg/component/tile",
+      "ggg/component/toast",
       "ggg/component/toast-region",
+      "ggg/component/toolbar",
+      "ggg/component/tooltip",
+      "ggg/component/usage-card",
+      "ggg/element/avatar",
+      "ggg/element/button-link",
+      "ggg/element/code",
+      "ggg/element/copy-button",
+      "ggg/element/heading",
+      "ggg/element/link",
+      "ggg/element/prose",
+      "ggg/element/spinner",
+      "ggg/element/text",
+      "ggg/element/toggle-button",
+      "ggg/element/truncate",
       "ggg/element/ui-core",
+      "ggg/page/activity",
+      "ggg/page/admin-flags",
+      "ggg/page/admin-organizations",
+      "ggg/page/blog",
+      "ggg/page/changelog",
+      "ggg/page/docs",
+      "ggg/page/docs-index",
+      "ggg/page/settings-account",
+      "ggg/page/settings-api-tokens",
+      "ggg/page/settings-billing",
+      "ggg/page/settings-organization",
       "ggg/system/analytics",
+      "ggg/system/announcements",
+      "ggg/system/api",
       "ggg/system/apphost",
       "ggg/system/audit-export",
       "ggg/system/billing",
@@ -30,6 +102,7 @@
       "ggg/system/identity-session",
       "ggg/system/llm",
       "ggg/system/mail",
+      "ggg/system/metrics",
       "ggg/system/modkit",
       "ggg/system/notifications",
       "ggg/system/observability",
@@ -37,12 +110,22 @@
       "ggg/system/rate-limit",
       "ggg/system/realtime",
       "ggg/system/search",
+      "ggg/system/seo",
       "ggg/system/server",
       "ggg/system/static",
       "ggg/system/storage",
       "ggg/system/telemetry",
       "ggg/system/usage",
-      "ggg/system/webhooks"
+      "ggg/system/webhooks",
+      "ggg/workflow/appearance",
+      "ggg/workflow/billing-webhook",
+      "ggg/workflow/files",
+      "ggg/workflow/impersonation",
+      "ggg/workflow/openapi-contract",
+      "ggg/workflow/organization-export",
+      "ggg/workflow/outbound-webhooks",
+      "ggg/workflow/project-export",
+      "ggg/workflow/projects"
     ],
     "required_provider_slots": [
       "ggg/analytics",
@@ -191,6 +274,20 @@
           "target": "smtp"
         }
       },
+      "ggg/notifications": {
+        "development": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/notifications-postgres",
+          "target": "postgres"
+        }
+      },
       "ggg/observability": {
         "development": {
           "adapter": "ggg/system/observability-log",
@@ -300,20 +397,6 @@
         },
         "production": {
           "adapter": "ggg/system/webhooks-postgres",
-          "target": "postgres"
-        }
-      },
-      "ggg/notifications": {
-        "development": {
-          "adapter": "ggg/system/notifications-postgres",
-          "target": "postgres"
-        },
-        "test": {
-          "adapter": "ggg/system/notifications-postgres",
-          "target": "postgres"
-        },
-        "production": {
-          "adapter": "ggg/system/notifications-postgres",
           "target": "postgres"
         }
       }

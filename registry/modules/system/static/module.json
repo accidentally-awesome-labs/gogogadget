@@ -4,11 +4,18 @@
     "id": "ggg/system/static",
     "kind": "system",
     "name": "static",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Static asset serving",
     "description": "The embedded static file set — built CSS, client JavaScript, fonts, icons, and the vendored browser assets — served with content-addressed caching.",
     "requires": [
+      {
+        "id": "ggg/system/dev-tools",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/server",
         "contract": {
