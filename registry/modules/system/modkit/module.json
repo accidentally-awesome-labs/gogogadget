@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 60,
+    "revision": 63,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -116,7 +116,7 @@
         "source": "internal/gggcli/create_resource.go",
         "target": "internal/gggcli/create_resource.go",
         "class": "go",
-        "sha256": "a6d7eef78ed8e74d8eae0c966f554c166a009d08c6c97fdd57abeca2ee1d8a9a",
+        "sha256": "db4ba65aa15de97086fd49f50f3154ecf14bee7b4b82aee10f3fc3ae6d4b89c1",
         "rewrite_module": true,
         "contract": true
       },
@@ -132,7 +132,7 @@
         "source": "internal/gggcli/create_resource_test.go",
         "target": "internal/gggcli/create_resource_test.go",
         "class": "test",
-        "sha256": "c8ccf0115d9dd05aedf06d8a2823e7d8ebec289bd6f898a20b092fa82ceb4c68",
+        "sha256": "dc7cc0ff96f77982750a5ae23c32aa25909c2d6b7645ff566951b9f3a5678c1f",
         "rewrite_module": true,
         "contract": true
       },
@@ -766,7 +766,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "efbe5e851a8b086f4d85c8f7dd43e6907836af3764c20238cf0632fdf1019c4a",
+        "sha256": "f944c23dcab9904f223523876a17bf4964b7c24349af227d467fc56c5d721d94",
         "rewrite_module": true,
         "contract": true
       },
@@ -1125,6 +1125,40 @@
         "target": "internal/modkit/test_scan_test.go",
         "class": "test",
         "sha256": "faa591d0496d9c85a998f7ae17313d456b58a069409621cac8684c078a954878",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modkit/ui_derive_selfhost_test.go",
+        "target": "internal/modkit/ui_derive_selfhost_test.go",
+        "class": "test",
+        "sha256": "97e71b2337a5e74ccdb0654bfb5915e8b423306c67df8ccb73bba380f683903f",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/ui_scan.go",
+        "target": "internal/modkit/ui_scan.go",
+        "class": "go",
+        "sha256": "ec32158015fb5442a4b250dbedfe307f518c70e3e64d4a97fabb035302aea400",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/modkit/ui_scan_selfhost_test.go",
+        "target": "internal/modkit/ui_scan_selfhost_test.go",
+        "class": "test",
+        "sha256": "5375641da454f8bc5ac9107c72569e082a3f7c565d5e22f34131c7f617d0c5d4",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/ui_scan_test.go",
+        "target": "internal/modkit/ui_scan_test.go",
+        "class": "test",
+        "sha256": "f8cbd9d9653c1dfb3a6a17f7f482e7d756a2d32b7ac09eb4e7c842ad3d9f7917",
         "rewrite_module": true,
         "contract": false
       },

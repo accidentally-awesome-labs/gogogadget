@@ -4,11 +4,60 @@
     "id": "ggg/page/activity",
     "kind": "page",
     "name": "activity",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Activity feed",
     "description": "The organization's audit trail rendered for members, with search and pagination.",
     "requires": [
+      {
+        "id": "ggg/component/badge",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/data-table",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/disclosure",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/empty-state",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/page-header",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/pagination",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/audit",
         "contract": {

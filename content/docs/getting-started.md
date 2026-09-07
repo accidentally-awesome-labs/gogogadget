@@ -82,7 +82,7 @@ over a tree no command can run.
 
 | Profile | Members | Closure | Required provider slots | What it is |
 |---|---|---|---|---|
-| `minimal` | 117 | 178 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
+| `minimal` | 50 | 167 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
 | `web` | 190 | 254 | 18 | Minimal's floor plus public content, internationalization and the discovery surfaces |
 | `saas` | 296 | 289 | 18 | Web plus organizations, billing, jobs, notifications, admin and the product workflows — the largest closure here |
 | `full` | 286 | 288 | 18 | Every product module plus the registry-publishing template. The name overstates it; see below |
@@ -92,7 +92,7 @@ actually resolves to. The two differ in both directions. Members that are
 adapter candidates do not enter the closure unless the provider selections
 choose them — which is why `saas` names 296 and installs 289 — and a seam
 pulled in only through some member's `requires` enters without being named,
-which is why `minimal` names 117 and installs 178. That second direction is
+which is why `minimal` names 50 and installs 167. That second direction is
 also why every profile requires all 18 slots: a seam pulled in transitively
 declares its slot just as loudly as one named in the list.
 
@@ -106,27 +106,61 @@ These numbers are asserted, not remembered.
 `internal/modkit` plans every shipped profile and fails on the commit that
 moves a count without moving this table.
 
-#### Why `minimal` is 178 modules
+#### Why `minimal` is 167 modules
 
-Because the floor is not a taste decision, and `minimal` is where you see it:
+Because the floor is not a taste decision, and `minimal` is where you see it.
+What it no longer contains is a hand-curated component list: every page,
+workflow and seam now declares the components and elements it actually
+renders, derived with `go/types` and held by
+`TestTheDeclaredUIEdgesAreTheOnesTheCodeReferences`, so a profile installs the
+UI its own pages reach and nothing else. `minimal` named 67 UI modules and
+installed 77 when that list was maintained by hand; it now names **none** and
+installs **66**, and `ValidateUIComponentRequires` refuses at plan time when a
+payload renders a component its module has no declared path to — the failure
+that silence used to hide until the compiler found it.
 
-- **`ggg/system/server`'s capability set.** It owns `internal/web/server.go`,
-  whose statically-declared capability fields name thirteen capabilities, so
-  its `requires` pull `internal/{api,audit,cache,jobs,notify,ratelimit,`
+What remains is not the UI graph. It is four seams that name product symbols
+in their own payloads, and the pages those drag in:
+
+- **`ggg/system/server`.** It owns `internal/web/server.go`, whose
+  statically-declared capability fields name thirteen capabilities, so its
+  `requires` pull `internal/{api,audit,cache,jobs,notify,ratelimit,`
   `realtime,search,telemetry,usage,webhooks}` into *every* closure that serves
   HTTP. `internal/web/routes.go` dereferences the `apiSurface` that
-  `ggg/workflow/openapi-contract` declares, which is why a JSON API is not
-  optional either.
+  `ggg/workflow/openapi-contract` declares, and `auth.go` and `htmx.go` call
+  `applyStoredAppearance`, `applyImpersonation` and `resolveTheme`, which
+  `ggg/workflow/appearance` and `ggg/workflow/impersonation` own — so a shell
+  cannot be installed without a theme picker and an impersonation banner.
+- **`ggg/system/jobs`.** `internal/jobs/definitions.go` names `deliverWebhook`,
+  `exportProjectsCSV` and `exportOrgJSON`, owned by
+  `ggg/workflow/{outbound-webhooks,project-export,organization-export}`.
+- **`ggg/system/api`.** `internal/api/projects.go` compiles against
+  `ggg/workflow/projects`' sqlc queries, so a JSON API implies a projects
+  resource.
 - **The schema assertions.** Migration `0020_provider_neutral_ids` asserts a
   fixed fifteen-table, twenty-three-column shape *before* it renames anything,
   so no closure may omit the nine modules that create those tables. It is
   immutable and in the lock, so the way down is a follow-on migration that
   neutralizes the assertion, not an edit.
 
-Generating `server.go`'s capability struct from the resolved graph and
-neutralizing that assertion are what lower the floor. Until then, `minimal`
-means *the least this source can be made to boot as*, and saying otherwise
-would be advertising a shape that does not exist.
+Each of those pulls a page, and **navigation is a total order**: a
+`runtime.navigation` entry may declare `after` another entry, generation
+refuses an `after` naming an entry its area does not contain, and so each page
+in a chain declares a hard `requires` on its predecessor. The settings sidebar
+(`account → org → billing → api → webhooks`), the admin sidebar
+(`overview → users → orgs → flags`), the app sidebar
+(`dashboard → projects → files`) and two footer chains are entered whole.
+That, and not the component catalog, is why `minimal` installs twenty pages.
+
+A profile whose member list drops those pages plans cleanly and then fails
+`go build` in the created project, which is what CI's `profiles` job exists to
+catch: measured, a `minimal` that names five pages resolves to 131 modules and
+49 UI modules and does not compile. Generating `server.go`'s capability struct,
+deriving `definitions.go` from the installed job set, moving
+`internal/api/projects.go` to the module whose queries it uses, and
+neutralizing the migration assertion are what lower the floor for real. Until
+then, `minimal` means *the least this source can be made to boot as*, and
+saying otherwise would be advertising a shape that does not exist.
 
 #### `ggg/profile/api` is gone, and `full` is not the whole catalog
 

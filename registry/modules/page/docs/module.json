@@ -59,6 +59,69 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/component/badge"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/cursor-pagination"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/empty-state"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/list"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/heading"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/link"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/prose"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/text"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/page/docs-index"
       },
       {
@@ -76,7 +139,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "routes": [
         {

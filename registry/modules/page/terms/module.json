@@ -56,6 +56,20 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/element/heading"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/prose"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/system/i18n"
       },
       {
@@ -66,7 +80,7 @@
         "id": "ggg/system/server"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "navigation": [
         {

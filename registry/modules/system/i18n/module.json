@@ -78,10 +78,24 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/component/form"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/system/apphost"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {},
     "tests": {
       "go_packages": [

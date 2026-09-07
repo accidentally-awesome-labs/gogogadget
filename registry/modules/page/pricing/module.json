@@ -4,11 +4,67 @@
     "id": "ggg/page/pricing",
     "kind": "page",
     "name": "pricing",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Pricing page",
     "description": "Plan comparison with the signed-in organization's current plan highlighted.",
     "requires": [
+      {
+        "id": "ggg/component/form",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/grid",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/component/plan-card",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/button",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/button-link",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/heading",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/text",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
       {
         "id": "ggg/system/i18n",
         "contract": {

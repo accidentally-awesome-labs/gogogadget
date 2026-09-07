@@ -39,6 +39,13 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/component/form"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/component/form-actions"
       },
       {
@@ -63,7 +70,7 @@
         "id": "ggg/element/ui-core"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "ui": [
         {

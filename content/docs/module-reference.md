@@ -28,23 +28,23 @@ itself.
 | Module | Source | Contract | Title | Requires | Removal |
 |---|---|---|---|---|---|
 | `ggg/element/avatar` | `ggg` | 1 | Avatar | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/avatar-group` | `ggg` | 1 | AvatarGroup | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/button` | `ggg` | 1 | Button | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/avatar-group` | `ggg` | 1 | AvatarGroup | `ggg/element/avatar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/button` | `ggg` | 1 | Button | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/button-group` | `ggg` | 1 | ButtonGroup | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/button-link` | `ggg` | 1 | ButtonLink | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/button-link` | `ggg` | 1 | ButtonLink | `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/code` | `ggg` | 1 | Code | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/copy-button` | `ggg` | 1 | CopyButton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/copy-button` | `ggg` | 1 | CopyButton | `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/heading` | `ggg` | 1 | Heading | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/icon` | `ggg` | 1 | Icon | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/icon-button` | `ggg` | 1 | IconButton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/icon-button` | `ggg` | 1 | IconButton | `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/kbd` | `ggg` | 1 | Kbd | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/link` | `ggg` | 1 | Link | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/link` | `ggg` | 1 | Link | `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/prose` | `ggg` | 1 | Prose | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/separator` | `ggg` | 1 | Separator | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/spinner` | `ggg` | 1 | Spinner | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/separator` | `ggg` | 1 | Separator | `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/spinner` | `ggg` | 1 | Spinner | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/text` | `ggg` | 1 | Text | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/toggle-button` | `ggg` | 1 | ToggleButton | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/element/toggle-group` | `ggg` | 1 | ToggleGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/toggle-button` | `ggg` | 1 | ToggleButton | `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/toggle-group` | `ggg` | 1 | ToggleGroup | `ggg/element/icon` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/truncate` | `ggg` | 1 | Truncate | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/element/ui-core` | `ggg` | 1 | UI core | — | `replacement-required` |
 | `ggg/element/visually-hidden` | `ggg` | 1 | VisuallyHidden | `ggg/element/ui-core` [1,1] | `free` |
@@ -55,169 +55,169 @@ itself.
 |---|---|---|---|---|---|
 | `ggg/component/accordion` | `ggg` | 1 | Accordion | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/activity-item` | `ggg` | 1 | ActivityItem | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/alert-dialog` | `ggg` | 1 | AlertDialog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/alert-dialog` | `ggg` | 1 | AlertDialog | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/aspect-ratio` | `ggg` | 1 | AspectRatio | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/attachment` | `ggg` | 1 | Attachment | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/back-link` | `ggg` | 1 | BackLink | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/badge` | `ggg` | 1 | Badge | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/banner` | `ggg` | 1 | Banner | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/breadcrumbs` | `ggg` | 1 | Breadcrumbs | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/calendar` | `ggg` | 1 | Calendar and date pickers | `ggg/component/date-field` [1,1] `ggg/component/date-range-field` [1,1] `ggg/component/date-time-field` [1,1] `ggg/component/status-dot` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/card` | `ggg` | 1 | Card | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/calendar` | `ggg` | 1 | Calendar and date pickers | `ggg/component/date-field` [1,1] `ggg/component/date-range-field` [1,1] `ggg/component/date-time-field` [1,1] `ggg/component/status-dot` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/card` | `ggg` | 1 | Card | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/carousel` | `ggg` | 1 | Carousel | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/center` | `ggg` | 1 | Center | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/char-counter` | `ggg` | 1 | CharCounter | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/chart` | `ggg` | 1 | Charts | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/chat-log` | `ggg` | 1 | ChatLog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/chat-log` | `ggg` | 1 | ChatLog | `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/chat-message` | `ggg` | 1 | ChatMessage | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/checkbox` | `ggg` | 1 | Checkbox | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/checkbox-group` | `ggg` | 1 | CheckboxGroup | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/collapsible` | `ggg` | 1 | Collapsible | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/color-input` | `ggg` | 1 | ColorInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/checkbox-group` | `ggg` | 1 | CheckboxGroup | `ggg/component/checkbox` [1,1] `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/collapsible` | `ggg` | 1 | Collapsible | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/color-input` | `ggg` | 1 | ColorInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/column-header` | `ggg` | 1 | ColumnHeader | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/combobox` | `ggg` | 1 | Combobox | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/combobox` | `ggg` | 1 | Combobox | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/command` | `ggg` | 1 | Command palette | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/comment` | `ggg` | 1 | Comment | `ggg/element/avatar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/comment-thread` | `ggg` | 1 | CommentThread | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/composer` | `ggg` | 1 | Composer | `ggg/component/field-error` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/textarea` [1,1] `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/confirm-action` | `ggg` | 1 | ConfirmAction | `ggg/component/alert-dialog` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/composer` | `ggg` | 1 | Composer | `ggg/component/field-error` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/textarea` [1,1] `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/confirm-action` | `ggg` | 1 | ConfirmAction | `ggg/component/alert-dialog` [1,1] `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/container` | `ggg` | 1 | Container | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/context-menu` | `ggg` | 1 | ContextMenu | `ggg/component/dropdown-menu` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/context-menu` | `ggg` | 1 | ContextMenu | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/cursor-pagination` | `ggg` | 1 | CursorPagination | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/data-grid` | `ggg` | 1 | Data grid | `ggg/component/column-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/data-table` | `ggg` | 1 | DataTable | `ggg/component/column-header` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/date-field` | `ggg` | 1 | DateField | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/date-range-field` | `ggg` | 1 | DateRangeField | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/date-time-field` | `ggg` | 1 | DateTimeField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/data-table` | `ggg` | 1 | DataTable | `ggg/component/column-header` [1,1] `ggg/component/table` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-field` | `ggg` | 1 | DateField | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-range-field` | `ggg` | 1 | DateRangeField | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-time-field` | `ggg` | 1 | DateTimeField | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/delivery-status` | `ggg` | 1 | DeliveryStatus | `ggg/component/status-dot` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/description-list` | `ggg` | 1 | DescriptionList | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/dialog` | `ggg` | 1 | Dialog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/description-list` | `ggg` | 1 | DescriptionList | `ggg/element/copy-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/dialog` | `ggg` | 1 | Dialog | `ggg/component/alert-dialog` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/disclosure` | `ggg` | 1 | Disclosure | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/drawer` | `ggg` | 1 | Drawer | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/dropdown-menu` | `ggg` | 1 | DropdownMenu | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/empty-state` | `ggg` | 1 | EmptyState | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/error-state` | `ggg` | 1 | ErrorState | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/field` | `ggg` | 1 | Field | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/drawer` | `ggg` | 1 | Drawer | `ggg/component/alert-dialog` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/dropdown-menu` | `ggg` | 1 | DropdownMenu | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/empty-state` | `ggg` | 1 | EmptyState | `ggg/component/cursor-pagination` [1,1] `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/error-state` | `ggg` | 1 | ErrorState | `ggg/component/cursor-pagination` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/field` | `ggg` | 1 | Field | `ggg/component/field-error` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/field-error` | `ggg` | 1 | FieldError | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/fieldset` | `ggg` | 1 | Fieldset | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/file-dropzone` | `ggg` | 1 | FileDropzone | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/file-input` | `ggg` | 1 | FileInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/file-dropzone` | `ggg` | 1 | FileDropzone | `ggg/component/field` [1,1] `ggg/component/field-error` [1,1] `ggg/component/hint` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/file-input` | `ggg` | 1 | FileInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/form` | `ggg` | 1 | Form | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/form-actions` | `ggg` | 1 | FormActions | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/grid` | `ggg` | 1 | Grid | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/hint` | `ggg` | 1 | Hint | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/hover-card` | `ggg` | 1 | HoverCard | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/hint` | `ggg` | 1 | Hint | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/hover-card` | `ggg` | 1 | HoverCard | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/inline` | `ggg` | 1 | Inline | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/input-addon` | `ggg` | 1 | InputAddon | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/input-group` | `ggg` | 1 | InputGroup | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/kanban` | `ggg` | 1 | Kanban board | `ggg/component/badge` [1,1] `ggg/component/dropdown-menu` [1,1] `ggg/component/notice` [1,1] `ggg/element/avatar-group` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/kanban` | `ggg` | 1 | Kanban board | `ggg/component/badge` [1,1] `ggg/component/dropdown-menu` [1,1] `ggg/component/notice` [1,1] `ggg/element/avatar` [1,1] `ggg/element/avatar-group` [1,1] `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/key-value` | `ggg` | 1 | KeyValue | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/label` | `ggg` | 1 | Label | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/list` | `ggg` | 1 | List | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/markdown-editor` | `ggg` | 1 | Markdown editor | `ggg/component/char-counter` [1,1] `ggg/component/field-error` [1,1] `ggg/component/file-dropzone` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/markdown-editor` | `ggg` | 1 | Markdown editor | `ggg/component/char-counter` [1,1] `ggg/component/field` [1,1] `ggg/component/field-error` [1,1] `ggg/component/file-dropzone` [1,1] `ggg/component/label` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/member-item` | `ggg` | 1 | MemberItem | `ggg/component/badge` [1,1] `ggg/element/avatar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/mention-chip` | `ggg` | 1 | MentionChip | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/menubar` | `ggg` | 1 | Menubar | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/meter` | `ggg` | 1 | Meter | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/metric` | `ggg` | 1 | Metric | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/multi-select` | `ggg` | 1 | MultiSelect | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/multi-select` | `ggg` | 1 | MultiSelect | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/nav-tabs` | `ggg` | 1 | NavTabs | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/navigation-menu` | `ggg` | 1 | NavigationMenu | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/navigation-menu` | `ggg` | 1 | NavigationMenu | `ggg/component/nav-tabs` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/notice` | `ggg` | 1 | Notice | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/notification-item` | `ggg` | 1 | NotificationItem | `ggg/component/status-dot` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/number-input` | `ggg` | 1 | NumberInput | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/onboarding-checklist` | `ggg` | 1 | OnboardingChecklist | `ggg/component/progress-bar` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/otp-input` | `ggg` | 1 | OTPInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/number-input` | `ggg` | 1 | NumberInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/onboarding-checklist` | `ggg` | 1 | OnboardingChecklist | `ggg/component/progress-bar` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/otp-input` | `ggg` | 1 | OTPInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/page-header` | `ggg` | 1 | PageHeader | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/pagination` | `ggg` | 1 | Pagination | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/panels` | `ggg` | 1 | Resizable panels | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/password-input` | `ggg` | 1 | PasswordInput | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/plan-card` | `ggg` | 1 | PlanCard | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/popover` | `ggg` | 1 | Popover | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/panels` | `ggg` | 1 | Resizable panels | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/password-input` | `ggg` | 1 | PasswordInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/plan-card` | `ggg` | 1 | PlanCard | `ggg/component/badge` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/popover` | `ggg` | 1 | Popover | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/progress-bar` | `ggg` | 1 | ProgressBar | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/progress-circle` | `ggg` | 1 | ProgressCircle | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/questionnaire` | `ggg` | 1 | Questionnaire | `ggg/component/field` [1,1] `ggg/component/select` [1,1] `ggg/component/steps` [1,1] `ggg/component/text-input` [1,1] `ggg/component/textarea` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/progress-circle` | `ggg` | 1 | ProgressCircle | `ggg/component/progress-bar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/questionnaire` | `ggg` | 1 | Questionnaire | `ggg/component/field` [1,1] `ggg/component/field-error` [1,1] `ggg/component/select` [1,1] `ggg/component/steps` [1,1] `ggg/component/text-input` [1,1] `ggg/component/textarea` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/radio-group` | `ggg` | 1 | RadioGroup | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/range-input` | `ggg` | 1 | RangeInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/range-input` | `ggg` | 1 | RangeInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/row-actions` | `ggg` | 1 | RowActions | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/scroll-area` | `ggg` | 1 | ScrollArea | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/search-input` | `ggg` | 1 | SearchInput | `ggg/element/button` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/secret-reveal` | `ggg` | 1 | SecretReveal | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/section` | `ggg` | 1 | Section | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/section-header` | `ggg` | 1 | SectionHeader | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/section-header` | `ggg` | 1 | SectionHeader | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/select` | `ggg` | 1 | Select | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/selection-bar` | `ggg` | 1 | SelectionBar | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/settings-section` | `ggg` | 1 | SettingsSection | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/selection-bar` | `ggg` | 1 | SelectionBar | `ggg/component/cursor-pagination` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/settings-section` | `ggg` | 1 | SettingsSection | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/skeleton` | `ggg` | 1 | Skeleton | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/skip-link` | `ggg` | 1 | SkipLink | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/slug-input` | `ggg` | 1 | SlugInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/slug-input` | `ggg` | 1 | SlugInput | `ggg/component/field` [1,1] `ggg/component/input-addon` [1,1] `ggg/component/input-group` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/split` | `ggg` | 1 | Split | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/stack` | `ggg` | 1 | Stack | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/stat-group` | `ggg` | 1 | StatGroup | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/status-dot` | `ggg` | 1 | StatusDot | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/steps` | `ggg` | 1 | Steps | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/steps` | `ggg` | 1 | Steps | `ggg/component/cursor-pagination` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/sticky-bar` | `ggg` | 1 | StickyBar | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/switch` | `ggg` | 1 | Switch | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/tab-panels` | `ggg` | 1 | TabPanels | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/table` | `ggg` | 1 | Table | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/table-card` | `ggg` | 1 | TableCard | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/table-of-contents` | `ggg` | 1 | TableOfContents | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/table-toolbar` | `ggg` | 1 | TableToolbar | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/tags-input` | `ggg` | 1 | TagsInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table-of-contents` | `ggg` | 1 | TableOfContents | `ggg/component/cursor-pagination` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table-toolbar` | `ggg` | 1 | TableToolbar | `ggg/component/cursor-pagination` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tags-input` | `ggg` | 1 | TagsInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/terminal-page` | `ggg` | 1 | TerminalPage | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/text-input` | `ggg` | 1 | TextInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/text-input` | `ggg` | 1 | TextInput | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/textarea` | `ggg` | 1 | Textarea | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/theme-toggle` | `ggg` | 1 | Theme toggle | `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/theme-toggle` | `ggg` | 1 | Theme toggle | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/tile` | `ggg` | 1 | Tile | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/time-field` | `ggg` | 1 | TimeField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/time-field` | `ggg` | 1 | TimeField | `ggg/component/field` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/timeline` | `ggg` | 1 | Timeline | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/toast` | `ggg` | 1 | Toast | `ggg/element/icon` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/toast-region` | `ggg` | 1 | Toast region | `ggg/component/toast` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/toast` | `ggg` | 1 | Toast | `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/toast-region` | `ggg` | 1 | Toast region | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/toolbar` | `ggg` | 1 | Toolbar | `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/tooltip` | `ggg` | 1 | Tooltip | `ggg/element/ui-core` [1,1] | `free` |
-| `ggg/component/tree` | `ggg` | 1 | Tree | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tree` | `ggg` | 1 | Tree | `ggg/component/column-header` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 | `ggg/component/usage-card` | `ggg` | 1 | UsageCard | `ggg/component/meter` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 
 ## Pages (36)
 
 | Module | Source | Contract | Title | Requires | Removal |
 |---|---|---|---|---|---|
-| `ggg/page/activity` | `ggg` | 1 | Activity feed | `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-announcements` | `ggg` | 1 | Admin announcements list | `ggg/system/announcements` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-audit` | `ggg` | 1 | Admin audit log | `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-content` | `ggg` | 1 | Admin content list | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/activity` | `ggg` | 1 | Activity feed | `ggg/component/badge` [1,1] `ggg/component/data-table` [1,1] `ggg/component/disclosure` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-announcements` | `ggg` | 1 | Admin announcements list | `ggg/component/badge` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/status-dot` [1,1] `ggg/component/text-input` [1,1] `ggg/component/toolbar` [1,1] `ggg/element/button` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/truncate` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/announcements` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-audit` | `ggg` | 1 | Admin audit log | `ggg/component/badge` [1,1] `ggg/component/data-table` [1,1] `ggg/component/disclosure` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-content` | `ggg` | 1 | Admin content list | `ggg/component/back-link` [1,1] `ggg/component/badge` [1,1] `ggg/component/calendar` [1,1] `ggg/component/card` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/date-time-field` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/file-input` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/grid` [1,1] `ggg/component/list` [1,1] `ggg/component/markdown-editor` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/panels` [1,1] `ggg/component/search-input` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/text-input` [1,1] `ggg/component/textarea` [1,1] `ggg/component/toolbar` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/copy-button` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/admin-content-editor` | `ggg` | 1 | Admin content editor | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/admin-content` [1,1] | `free` |
 | `ggg/page/admin-content-preview` | `ggg` | 1 | Admin content preview | `ggg/system/content` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/admin-content` [1,1] | `free` |
 | `ggg/page/admin-flag-detail` | `ggg` | 1 | Admin feature flag detail | `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-flags` | `ggg` | 1 | Admin feature flags list | `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-jobs` | `ggg` | 1 | Admin job queue | `ggg/system/e2e` [1,1] `ggg/system/jobs` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-flags` | `ggg` | 1 | Admin feature flags list | `ggg/component/back-link` [1,1] `ggg/component/badge` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/description-list` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/grid` [1,1] `ggg/component/notice` [1,1] `ggg/component/number-input` [1,1] `ggg/component/page-header` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/text-input` [1,1] `ggg/element/button` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/toggle-button` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-jobs` | `ggg` | 1 | Admin job queue | `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/component/status-dot` [1,1] `ggg/element/truncate` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/e2e` [1,1] `ggg/system/jobs` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/admin-media` | `ggg` | 1 | Admin media library | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/admin-organizations` | `ggg` | 1 | Admin organizations list | `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-overview` | `ggg` | 1 | Admin overview | `ggg/system/billing` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/admin-schedules` | `ggg` | 1 | Admin schedules list | `ggg/system/i18n` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] `ggg/system/schedules` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-overview` | `ggg` | 1 | Admin overview | `ggg/component/badge` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/metric` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/stat-group` [1,1] `ggg/component/toolbar` [1,1] `ggg/element/button-link` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/billing` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/admin-schedules` | `ggg` | 1 | Admin schedules list | `ggg/component/badge` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/grid` [1,1] `ggg/component/notice` [1,1] `ggg/component/number-input` [1,1] `ggg/component/page-header` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/text-input` [1,1] `ggg/component/toolbar` [1,1] `ggg/element/button` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/toggle-button` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] `ggg/system/schedules` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/admin-users` | `ggg` | 1 | Admin users list | `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/blog` | `ggg` | 1 | Blog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
-| `ggg/page/changelog` | `ggg` | 1 | Changelog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
-| `ggg/page/dashboard` | `ggg` | 1 | App dashboard | `ggg/system/audit` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/dev-gallery` | `ggg` | 1 | Component gallery | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/dev-session` [1,2] | `free` |
-| `ggg/page/docs` | `ggg` | 1 | Documentation page | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/blog` | `ggg` | 1 | Blog | `ggg/component/empty-state` [1,1] `ggg/element/heading` [1,1] `ggg/element/link` [1,1] `ggg/element/prose` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
+| `ggg/page/changelog` | `ggg` | 1 | Changelog | `ggg/element/heading` [1,1] `ggg/element/link` [1,1] `ggg/element/prose` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
+| `ggg/page/dashboard` | `ggg` | 1 | App dashboard | `ggg/component/badge` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/metric` [1,1] `ggg/component/onboarding-checklist` [1,1] `ggg/component/page-header` [1,1] `ggg/component/section-header` [1,1] `ggg/component/stat-group` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] `ggg/page/activity` [1,1] `ggg/system/audit` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/dev-gallery` | `ggg` | 1 | Component gallery | `ggg/component/accordion` [1,1] `ggg/component/activity-item` [1,1] `ggg/component/alert-dialog` [1,1] `ggg/component/aspect-ratio` [1,1] `ggg/component/attachment` [1,1] `ggg/component/back-link` [1,1] `ggg/component/badge` [1,1] `ggg/component/banner` [1,1] `ggg/component/breadcrumbs` [1,1] `ggg/component/calendar` [1,1] `ggg/component/card` [1,1] `ggg/component/carousel` [1,1] `ggg/component/center` [1,1] `ggg/component/char-counter` [1,1] `ggg/component/chart` [1,1] `ggg/component/chat-log` [1,1] `ggg/component/chat-message` [1,1] `ggg/component/checkbox` [1,1] `ggg/component/checkbox-group` [1,1] `ggg/component/collapsible` [1,1] `ggg/component/color-input` [1,1] `ggg/component/combobox` [1,1] `ggg/component/command` [1,1] `ggg/component/comment` [1,1] `ggg/component/comment-thread` [1,1] `ggg/component/composer` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/container` [1,1] `ggg/component/context-menu` [1,1] `ggg/component/cursor-pagination` [1,1] `ggg/component/data-grid` [1,1] `ggg/component/data-table` [1,1] `ggg/component/date-field` [1,1] `ggg/component/date-range-field` [1,1] `ggg/component/date-time-field` [1,1] `ggg/component/delivery-status` [1,1] `ggg/component/description-list` [1,1] `ggg/component/dialog` [1,1] `ggg/component/disclosure` [1,1] `ggg/component/drawer` [1,1] `ggg/component/dropdown-menu` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/error-state` [1,1] `ggg/component/field` [1,1] `ggg/component/fieldset` [1,1] `ggg/component/file-dropzone` [1,1] `ggg/component/file-input` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/grid` [1,1] `ggg/component/hint` [1,1] `ggg/component/hover-card` [1,1] `ggg/component/inline` [1,1] `ggg/component/input-addon` [1,1] `ggg/component/input-group` [1,1] `ggg/component/kanban` [1,1] `ggg/component/key-value` [1,1] `ggg/component/label` [1,1] `ggg/component/list` [1,1] `ggg/component/markdown-editor` [1,1] `ggg/component/member-item` [1,1] `ggg/component/mention-chip` [1,1] `ggg/component/menubar` [1,1] `ggg/component/meter` [1,1] `ggg/component/metric` [1,1] `ggg/component/multi-select` [1,1] `ggg/component/nav-tabs` [1,1] `ggg/component/navigation-menu` [1,1] `ggg/component/notice` [1,1] `ggg/component/notification-item` [1,1] `ggg/component/number-input` [1,1] `ggg/component/onboarding-checklist` [1,1] `ggg/component/otp-input` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/panels` [1,1] `ggg/component/password-input` [1,1] `ggg/component/plan-card` [1,1] `ggg/component/popover` [1,1] `ggg/component/progress-bar` [1,1] `ggg/component/progress-circle` [1,1] `ggg/component/questionnaire` [1,1] `ggg/component/radio-group` [1,1] `ggg/component/range-input` [1,1] `ggg/component/row-actions` [1,1] `ggg/component/scroll-area` [1,1] `ggg/component/search-input` [1,1] `ggg/component/secret-reveal` [1,1] `ggg/component/section` [1,1] `ggg/component/section-header` [1,1] `ggg/component/select` [1,1] `ggg/component/selection-bar` [1,1] `ggg/component/settings-section` [1,1] `ggg/component/skeleton` [1,1] `ggg/component/skip-link` [1,1] `ggg/component/slug-input` [1,1] `ggg/component/split` [1,1] `ggg/component/stack` [1,1] `ggg/component/stat-group` [1,1] `ggg/component/status-dot` [1,1] `ggg/component/steps` [1,1] `ggg/component/sticky-bar` [1,1] `ggg/component/switch` [1,1] `ggg/component/tab-panels` [1,1] `ggg/component/table` [1,1] `ggg/component/table-card` [1,1] `ggg/component/table-of-contents` [1,1] `ggg/component/table-toolbar` [1,1] `ggg/component/tags-input` [1,1] `ggg/component/terminal-page` [1,1] `ggg/component/text-input` [1,1] `ggg/component/textarea` [1,1] `ggg/component/theme-toggle` [1,1] `ggg/component/tile` [1,1] `ggg/component/time-field` [1,1] `ggg/component/timeline` [1,1] `ggg/component/toast` [1,1] `ggg/component/toast-region` [1,1] `ggg/component/toolbar` [1,1] `ggg/component/tooltip` [1,1] `ggg/component/tree` [1,1] `ggg/component/usage-card` [1,1] `ggg/element/avatar` [1,1] `ggg/element/avatar-group` [1,1] `ggg/element/button` [1,1] `ggg/element/button-group` [1,1] `ggg/element/button-link` [1,1] `ggg/element/code` [1,1] `ggg/element/copy-button` [1,1] `ggg/element/heading` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/kbd` [1,1] `ggg/element/link` [1,1] `ggg/element/prose` [1,1] `ggg/element/separator` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/toggle-button` [1,1] `ggg/element/toggle-group` [1,1] `ggg/element/truncate` [1,1] `ggg/element/ui-core` [1,1] `ggg/element/visually-hidden` [1,1] `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/dev-session` [1,2] | `free` |
+| `ggg/page/docs` | `ggg` | 1 | Documentation page | `ggg/component/badge` [1,1] `ggg/component/cursor-pagination` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/list` [1,1] `ggg/element/heading` [1,1] `ggg/element/link` [1,1] `ggg/element/prose` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-index` | `ggg` | 1 | Documentation index | `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-search` | `ggg` | 1 | Documentation search | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/files` | `ggg` | 1 | Files list | `ggg/page/projects` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/home` | `ggg` | 1 | Home page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/notifications` | `ggg` | 1 | Notifications list | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/pricing` | `ggg` | 1 | Pricing page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/privacy` | `ggg` | 1 | Privacy policy | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/files` | `ggg` | 1 | Files list | `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/file-dropzone` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/usage-card` [1,1] `ggg/element/button` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] `ggg/page/projects` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/home` | `ggg` | 1 | Home page | `ggg/component/accordion` [1,1] `ggg/component/aspect-ratio` [1,1] `ggg/component/grid` [1,1] `ggg/component/inline` [1,1] `ggg/component/plan-card` [1,1] `ggg/component/tile` [1,1] `ggg/element/button-link` [1,1] `ggg/element/heading` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/notifications` | `ggg` | 1 | Notifications list | `ggg/component/empty-state` [1,1] `ggg/component/inline` [1,1] `ggg/component/list` [1,1] `ggg/component/notification-item` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/table-card` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/pricing` | `ggg` | 1 | Pricing page | `ggg/component/form` [1,1] `ggg/component/grid` [1,1] `ggg/component/plan-card` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/heading` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/privacy` | `ggg` | 1 | Privacy policy | `ggg/element/heading` [1,1] `ggg/element/prose` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/project-edit` | `ggg` | 1 | Edit project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/projects` [1,1] | `free` |
 | `ggg/page/project-new` | `ggg` | 1 | New project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/projects` | `ggg` | 1 | Projects list | `ggg/page/dashboard` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/settings-account` | `ggg` | 1 | Account settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/auth-session` [1,1] | `free` |
-| `ggg/page/settings-api-tokens` | `ggg` | 1 | API token settings | `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/settings-billing` | `ggg` | 1 | Billing settings | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/usage` [1,1] | `free` |
-| `ggg/page/settings-notifications` | `ggg` | 1 | Notification settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/projects` | `ggg` | 1 | Projects list | `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/inline` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/component/table-toolbar` [1,1] `ggg/component/text-input` [1,1] `ggg/component/usage-card` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] `ggg/page/dashboard` [1,1] `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/settings-account` | `ggg` | 1 | Account settings | `ggg/component/badge` [1,1] `ggg/component/card` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/description-list` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/fieldset` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/nav-tabs` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/section-header` [1,1] `ggg/component/settings-section` [1,1] `ggg/component/text-input` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/auth-session` [1,1] | `free` |
+| `ggg/page/settings-api-tokens` | `ggg` | 1 | API token settings | `ggg/component/badge` [1,1] `ggg/component/card` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/page-header` [1,1] `ggg/component/secret-reveal` [1,1] `ggg/component/select` [1,1] `ggg/component/text-input` [1,1] `ggg/element/button` [1,1] `ggg/element/heading` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/settings-billing` | `ggg` | 1 | Billing settings | `ggg/component/badge` [1,1] `ggg/component/card` [1,1] `ggg/component/form` [1,1] `ggg/component/grid` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/plan-card` [1,1] `ggg/component/progress-bar` [1,1] `ggg/component/section-header` [1,1] `ggg/component/usage-card` [1,1] `ggg/element/button` [1,1] `ggg/element/button-link` [1,1] `ggg/element/heading` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/usage` [1,1] | `free` |
+| `ggg/page/settings-notifications` | `ggg` | 1 | Notification settings | `ggg/component/checkbox` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/page-header` [1,1] `ggg/component/select` [1,1] `ggg/element/button` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/settings-organization` | `ggg` | 1 | Organization settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/auth-session` [1,1] `ggg/workflow/organization-export` [1,1] | `free` |
-| `ggg/page/settings-webhooks` | `ggg` | 1 | Webhook settings | `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/webhooks` [1,1] | `free` |
-| `ggg/page/terms` | `ggg` | 1 | Terms of service | `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/page/settings-webhooks` | `ggg` | 1 | Webhook settings | `ggg/component/badge` [1,1] `ggg/component/card` [1,1] `ggg/component/checkbox-group` [1,1] `ggg/component/confirm-action` [1,1] `ggg/component/data-table` [1,1] `ggg/component/delivery-status` [1,1] `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/hint` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/secret-reveal` [1,1] `ggg/component/section-header` [1,1] `ggg/component/text-input` [1,1] `ggg/element/button` [1,1] `ggg/element/code` [1,1] `ggg/element/heading` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/webhooks` [1,1] | `free` |
+| `ggg/page/terms` | `ggg` | 1 | Terms of service | `ggg/element/heading` [1,1] `ggg/element/prose` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 
 ## Workflows (28)
 
@@ -242,7 +242,7 @@ itself.
 | `ggg/workflow/dev-session` | `ggg` | 2 | Zero-account dev session | `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/files` | `ggg` | 1 | File upload, download and delete | `ggg/page/files` [1,1] `ggg/system/audit` [1,1] `ggg/system/database` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/storage` [1,1] | `free` |
 | `ggg/workflow/identity-webhook-sync` | `ggg` | 1 | Identity provider sync | `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/workflow/impersonation` | `ggg` | 1 | Administrator impersonation | `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/impersonation` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/workflow/impersonation` | `ggg` | 1 | Administrator impersonation | `ggg/component/empty-state` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/notice` [1,1] `ggg/component/page-header` [1,1] `ggg/component/select` [1,1] `ggg/component/text-input` [1,1] `ggg/element/button` [1,1] `ggg/element/link` [1,1] `ggg/element/spinner` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/page/admin-flags` [1,1] `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/impersonation` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/notification-inbox` | `ggg` | 1 | Notification inbox read state | `ggg/page/dashboard` [1,1] `ggg/page/notifications` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/notification-preferences` | `ggg` | 1 | Notification preference saving | `ggg/page/settings-notifications` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `retain-data` |
 | `ggg/workflow/openapi-contract` | `ggg` | 1 | OpenAPI description | `ggg/system/api` [1,1] `ggg/system/server` [1,2] | `free` |
@@ -275,7 +275,7 @@ itself.
 | `ggg/system/ci-github` | `ggg` | 1 | Ci Github | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,6] | `free` |
 | `ggg/system/config` | `ggg` | 2 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
-| `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/component/empty-state` [1,1] `ggg/element/heading` [1,1] `ggg/element/link` [1,1] `ggg/element/prose` [1,1] `ggg/element/text` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/content-assets` | `ggg` | 1 | Embedded content corpus | `ggg/system/content` [1,1] | `free` |
 | `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/dev-tools` [1,1] | `replacement-required` |
 | `ggg/system/database-postgres` | `ggg` | 1 | Database Postgres | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
@@ -286,7 +286,7 @@ itself.
 | `ggg/system/e2e-sweeps` | `ggg` | 1 | E2E cross-cutting sweeps | `ggg/page/admin-jobs` [1,1] `ggg/page/admin-media` [1,1] `ggg/page/blog` [1,1] `ggg/page/changelog` [1,1] `ggg/page/dashboard` [1,1] `ggg/page/docs` [1,1] `ggg/page/docs-index` [1,1] `ggg/page/docs-search` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/workflow/seo-discovery` [1,1] | `free` |
 | `ggg/system/feature-flags` | `ggg` | 1 | Feature flags | `ggg/system/apphost` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/feature-flags-postgres` | `ggg` | 1 | Feature Flags Postgres | `ggg/system/feature-flags` [1,1] | `free` |
-| `ggg/system/i18n` | `ggg` | 1 | Localization | `ggg/system/apphost` [1,1] | `replacement-required` |
+| `ggg/system/i18n` | `ggg` | 1 | Localization | `ggg/component/form` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/identity` | `ggg` | 2 | Identity | `ggg/system/organizations` [1,1] | `major-version-only` |
 | `ggg/system/identity-clerk` | `ggg` | 1 | Clerk identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/identity` [2,2] | `free` |
 | `ggg/system/identity-dev` | `ggg` | 1 | Development identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/identity` [2,2] | `free` |
@@ -319,10 +319,10 @@ itself.
 | `ggg/system/schedules` | `ggg` | 1 | Recurring work | `ggg/system/database` [1,1] | `retain-data` |
 | `ggg/system/search` | `ggg` | 1 | Search | — | `replacement-required` |
 | `ggg/system/search-postgres` | `ggg` | 1 | Search Postgres | `ggg/system/database` [1,1] `ggg/system/search` [1,1] | `free` |
-| `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/system/identity` [2,2] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
+| `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/element/ui-core` [1,1] `ggg/system/identity` [2,2] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
 | `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] `ggg/system/static` [1,1] | `free` |
-| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/element/ui-core` [1,1] `ggg/system/analytics` [1,1] `ggg/system/api` [1,1] `ggg/system/apphost` [1,1] `ggg/system/audit` [1,1] `ggg/system/billing` [1,1] `ggg/system/cache` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/dev-tools` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/identity-session` [1,1] `ggg/system/jobs` [1,1] `ggg/system/llm` [1,1] `ggg/system/mail` [1,1] `ggg/system/modkit` [6,6] `ggg/system/observability` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/realtime` [1,1] `ggg/system/search` [1,1] `ggg/system/storage` [1,1] `ggg/system/telemetry` [1,1] `ggg/system/testdb` [1,1] `ggg/system/usage` [1,1] `ggg/system/webhooks` [1,1] | `replacement-required` |
+| `ggg/system/server` | `ggg` | 2 | HTTP server core | `ggg/component/banner` [1,1] `ggg/component/field` [1,1] `ggg/component/form` [1,1] `ggg/component/nav-tabs` [1,1] `ggg/component/pagination` [1,1] `ggg/component/plan-card` [1,1] `ggg/component/terminal-page` [1,1] `ggg/component/text-input` [1,1] `ggg/component/theme-toggle` [1,1] `ggg/component/toast-region` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/analytics` [1,1] `ggg/system/api` [1,1] `ggg/system/apphost` [1,1] `ggg/system/audit` [1,1] `ggg/system/billing` [1,1] `ggg/system/cache` [1,1] `ggg/system/config` [1,2] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/dev-tools` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/identity-session` [1,1] `ggg/system/jobs` [1,1] `ggg/system/llm` [1,1] `ggg/system/mail` [1,1] `ggg/system/modkit` [6,6] `ggg/system/observability` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/realtime` [1,1] `ggg/system/search` [1,1] `ggg/system/storage` [1,1] `ggg/system/telemetry` [1,1] `ggg/system/testdb` [1,1] `ggg/system/usage` [1,1] `ggg/system/webhooks` [1,1] | `replacement-required` |
 | `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/dev-tools` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `retain-data` |
 | `ggg/system/storage-filesystem` | `ggg` | 1 | Filesystem storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] `ggg/system/storage` [1,1] | `free` |

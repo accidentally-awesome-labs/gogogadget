@@ -306,14 +306,4 @@ func menuItemBody(item MenuItem) templ.Component {
 	})
 }
 
-// menuItemClass colours a destructive command. The kind is normalized, so a
-// typo cannot leave an item with no colour class at all.
-func menuItemClass(item MenuItem) string {
-	base := "block px-3 py-2 text-sm hover:bg-surface-raised"
-	if NormalizeKind(item.Kind) == KindDanger {
-		return base + " text-danger-text"
-	}
-	return base
-}
-
 var _ = templruntime.GeneratedTemplate

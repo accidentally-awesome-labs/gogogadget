@@ -60,6 +60,13 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/component/field"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/component/field-error"
       },
       {
@@ -74,10 +81,17 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/component/label"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/element/ui-core"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "assets": [
         {

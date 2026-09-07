@@ -228,10 +228,11 @@ func TestCreateResourcePlainShapeIsAServableSlice(t *testing.T) {
 	if !slices.Equal(manifest.Claims.Data, []string{"widgets"}) {
 		t.Fatalf("claims.data = %v, want the table", manifest.Claims.Data)
 	}
-	wantRequires := []string{
+	// The ui edges are the components the emitted templ renders;
+	// ValidateUIComponentRequires refuses the plan without them.
+	wantRequires := append(append([]string(nil), resourceScaffoldUIModules...),
 		"ggg/system/database", "ggg/system/i18n", "ggg/system/identity",
-		"ggg/system/organizations", "ggg/system/security", "ggg/system/server",
-	}
+		"ggg/system/organizations", "ggg/system/security", "ggg/system/server")
 	if got := requirementIDs(manifest); !slices.Equal(got, wantRequires) {
 		t.Fatalf("requires = %v, want %v", got, wantRequires)
 	}

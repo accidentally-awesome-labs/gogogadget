@@ -32,10 +32,17 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/element/copy-button"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/element/ui-core"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "ui": [
         {

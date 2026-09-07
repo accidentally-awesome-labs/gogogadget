@@ -363,6 +363,27 @@ var coreContractMaxima = map[string]int{
 	"ggg/system/server":   2,
 }
 
+// resourceScaffoldUIModules owns the components the emitted templ renders, in
+// the order the requires list sorts them into anyway.
+var resourceScaffoldUIModules = []string{
+	"ggg/component/confirm-action",
+	"ggg/component/data-table",
+	"ggg/component/empty-state",
+	"ggg/component/field",
+	"ggg/component/form",
+	"ggg/component/form-actions",
+	"ggg/component/notice",
+	"ggg/component/page-header",
+	"ggg/component/pagination",
+	"ggg/component/search-input",
+	"ggg/component/table-toolbar",
+	"ggg/component/text-input",
+	"ggg/element/button",
+	"ggg/element/button-link",
+	"ggg/element/spinner",
+	"ggg/element/ui-core",
+}
+
 // requirements names every module the emitted source actually imports or
 // depends on. A resource that reaches identity, i18n and the ui package but
 // declares only the database is a module that compiles on the machine that
@@ -378,6 +399,15 @@ func (r resourceSpec) requirements() []modkit.Requirement {
 	}
 	if !r.noUI {
 		ids = append(ids, "ggg/system/i18n")
+		// The components templatesTempl() renders. ValidateUIComponentRequires
+		// refuses the plan when a payload renders a component its module has
+		// no requires path to, so a scaffold that emitted the templ without
+		// these could not be installed — `ggg registry validate` caught
+		// exactly that on the example-notice fixture. The list is the emitted
+		// template's own component set and does not vary with the flags: the
+		// table, its toolbar, the form and the empty state are in every
+		// resource slice that has a UI at all.
+		ids = append(ids, resourceScaffoldUIModules...)
 	}
 	if r.scope == "org" {
 		ids = append(ids, "ggg/system/organizations")

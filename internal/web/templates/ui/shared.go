@@ -60,6 +60,24 @@ type Option struct {
 	Selected bool
 }
 
+// menuItemClass colours a destructive command. The kind is normalized, so a
+// typo cannot leave an item with no colour class at all.
+//
+// It lives here rather than in dropdown-menu.templ, where it was written,
+// because menuItemAttrs below calls it and both are ui-core's. The old home
+// made ggg/element/ui-core reference ggg/component/dropdown-menu at the Go
+// level — the one back-edge out of the package's universal base — so no
+// closure could install ui-core without also installing a dropdown menu, and
+// declaring that edge honestly would have been a requires cycle. MenuItem is
+// this file's type; its class function belongs beside it.
+func menuItemClass(item MenuItem) string {
+	base := "block px-3 py-2 text-sm hover:bg-surface-raised"
+	if NormalizeKind(item.Kind) == KindDanger {
+		return base + " text-danger-text"
+	}
+	return base
+}
+
 // menuItemAttrs builds the one attribute map a menu item's element spreads.
 //
 // MenuItem carried an Attrs field that no menu rendered, so no item could hold

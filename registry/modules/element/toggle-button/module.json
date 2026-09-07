@@ -32,10 +32,31 @@
           "max": 1,
           "min": 1
         },
+        "id": "ggg/element/button"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon-button"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
         "id": "ggg/element/ui-core"
       }
     ],
-    "revision": 1,
+    "revision": 2,
     "runtime": {
       "ui": [
         {
