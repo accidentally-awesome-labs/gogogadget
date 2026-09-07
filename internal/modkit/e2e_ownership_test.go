@@ -165,6 +165,110 @@ func TestEveryE2ESpecOnDiskHasExactlyOneOwner(t *testing.T) {
 	}
 }
 
+// The harness cannot build a session token, and this is what holds that.
+//
+// The synthetic token's grammar belongs to whichever identity adapter the
+// environment selected, and it is written in exactly one place: that
+// adapter's MintSession. It used to be restated in TypeScript as well, by a
+// generated sessionFor() helper the harness called — emitted unconditionally,
+// for personas declared by the provider-NEUTRAL identity seam, into a module
+// requiring neither the adapter nor the seam, and not even a faithful copy
+// (the Go minter refuses a subject containing the grammar's own separator;
+// the template did not). Nothing pinned the two spellings together, so a
+// grammar change in Go kept every Go package green and failed only in the
+// browser job, as the bounce to /login the Go-side refusal exists to replace.
+//
+// The harness now asks ggg/workflow/dev-session for its cookie. So the
+// invariant is adapter-neutral and mechanical: no TypeScript may NAME the
+// session cookie or install one a client assembled. A file that does either
+// has a second spelling of something Go owns, whatever prefix it uses.
+//
+// The route half is checked too, because "ask the server" is only true while
+// the server offers it — and the gate on it must never regress: the mint
+// route carries the same dev scope, policy and `Enabled: devAuthBypass`
+// predicate /dev/login does, and that predicate's key is a boot refusal under
+// APP_ENV=production.
+func TestNoTypeScriptCanBuildASessionToken(t *testing.T) {
+	root := specRepoRoot(t)
+
+	// Naming the cookie is the tell. addCookies is Playwright's only way to
+	// install one the client built; sessionFor was the generated helper.
+	forbidden := []string{"__session", "addCookies", "sessionFor"}
+	scanned := 0
+	walkErr := filepath.WalkDir(filepath.Join(root, "e2e"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			// Installed node packages and Playwright's own run artifacts are
+			// not this repository's source.
+			switch entry.Name() {
+			case "node_modules", "test-results", "playwright-report":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(entry.Name(), ".ts") {
+			return nil
+		}
+		body, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		scanned++
+		rel, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			rel = path
+		}
+		for _, needle := range forbidden {
+			if strings.Contains(string(body), needle) {
+				t.Errorf("%s contains %q: the session cookie is minted by the identity adapter "+
+					"selected for the environment and its grammar is written in Go alone. The "+
+					"harness must obtain a cookie from GET /dev/session, never assemble or "+
+					"install one.", filepath.ToSlash(rel), needle)
+			}
+		}
+		return nil
+	})
+	if walkErr != nil {
+		t.Fatalf("walk e2e: %v", walkErr)
+	}
+	if scanned == 0 {
+		t.Fatal("no TypeScript scanned: this check would pass over an empty harness")
+	}
+
+	catalog, err := LoadCatalog(os.DirFS(root))
+	if err != nil {
+		t.Fatalf("load catalog: %v", err)
+	}
+	var mint, login *RouteContribution
+	for _, module := range catalog.Modules {
+		for i, route := range module.Runtime.Routes {
+			switch route.Pattern {
+			case "/dev/session":
+				mint = &module.Runtime.Routes[i]
+			case "/dev/login":
+				login = &module.Runtime.Routes[i]
+			}
+		}
+	}
+	if mint == nil {
+		t.Fatal("no module declares /dev/session: the harness has no way to obtain a session")
+	}
+	if login == nil {
+		t.Fatal("no module declares /dev/login")
+	}
+	if mint.Enabled != login.Enabled || mint.Scope != login.Scope {
+		t.Errorf("/dev/session is gated %q in scope %q but /dev/login is gated %q in scope %q: "+
+			"the mint route hands an authenticated session to any caller that reaches it, so it "+
+			"must carry exactly the gate the dev login carries",
+			mint.Enabled, mint.Scope, login.Enabled, login.Scope)
+	}
+	if mint.Policy != login.Policy {
+		t.Errorf("/dev/session policy %+v differs from /dev/login's %+v", mint.Policy, login.Policy)
+	}
+}
+
 // specOwnership maps each advertised spec to its declaring module, and every
 // module in the catalog to the set it can reach through transitive requires.
 func specOwnership(t *testing.T, graph []Manifest) (map[string]string, map[string]map[string]bool) {

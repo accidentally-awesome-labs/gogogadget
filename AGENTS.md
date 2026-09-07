@@ -116,8 +116,16 @@ generation moved any generated file.
 Fresh clone works end-to-end: `.env.example` ships `DEV_AUTH_BYPASS=true`;
 `make setup && bin/ggg services up && make seed && make dev` →
 `/dev/login` signs in as the demo user. No Clerk/Polar/Resend account needed.
-E2E auth shape: cookie `__session=e2e:<userID>:<orgID>:<role>` (empty org = no
-active org). `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.
+E2E auth is a cookie the SERVER mints: `loginAs` calls `GET
+/dev/session?user=&org=&role=` (`ggg/workflow/dev-session`, same
+`devAuthBypass` gate as `/dev/login`) and Playwright's shared cookie jar
+carries the reply. The token shape — `__session=e2e:<userID>:<orgID>:<role>`,
+empty org = no active org — is written ONLY in the selected adapter's
+`MintSession`; `e2e/generated/personas.ts` is persona DATA and no `.ts` may
+name the session cookie (`TestNoTypeScriptCanBuildASessionToken`). A hosted
+adapter selected for test yields no minter, so the route 503s naming
+`identity.SyntheticSessionMinter` instead of handing back a cookie nothing
+verifies. `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.
 
 ## Conventions (verbatim, load-bearing)
 

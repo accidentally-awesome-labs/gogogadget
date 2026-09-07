@@ -4,10 +4,10 @@
     "id": "ggg/workflow/dev-session",
     "kind": "workflow",
     "name": "dev-session",
-    "revision": 3,
-    "contract": 1,
+    "revision": 4,
+    "contract": 2,
     "title": "Zero-account dev session",
-    "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",
+    "description": "Sets and rewrites the synthetic session cookie in DEV_AUTH_BYPASS mode — for the seeded demo user, for a chosen organization, and for any persona triple the e2e harness asks for — and owns the predicate that gates every dev-only route.",
     "requires": [
       {
         "id": "ggg/system/identity",
@@ -53,7 +53,7 @@
         "source": "internal/web/workflow_dev_session.go",
         "target": "internal/web/workflow_dev_session.go",
         "class": "go",
-        "sha256": "8aaa0f8f80955801a08bc6f70b7eaf61419356c19027278b1146e63a398e3814",
+        "sha256": "53505661bcccc43265b62a71cb1f283f16a5132924528dbdf87e6be50f7cef81",
         "rewrite_module": true,
         "contract": true
       },
@@ -61,7 +61,7 @@
         "source": "internal/web/workflow_dev_session_test.go",
         "target": "internal/web/workflow_dev_session_test.go",
         "class": "test",
-        "sha256": "8f75333ce4ebf0b314d582ac2877412e31d0d3787e6c1cf9ce06b97b0b3a2c89",
+        "sha256": "111b47c9dda0aa64df874a36a6c48698e93207649a4a8a7765abb267e1c7197a",
         "rewrite_module": true,
         "contract": false
       }
@@ -69,6 +69,7 @@
     "claims": {
       "routes": [
         "dev.login",
+        "dev.session",
         "dev.switch-org"
       ]
     },
@@ -90,6 +91,24 @@
           },
           "package": "internal/web",
           "handler": "handleDevLogin",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev.session",
+          "method": "GET",
+          "pattern": "/dev/session",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevSession",
           "enabled": "devAuthBypass"
         },
         {

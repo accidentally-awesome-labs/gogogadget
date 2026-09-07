@@ -2,6 +2,10 @@
 // identity owns the actors and a workflow may add one for the surface it
 // tests — and this file is the single source both the specs and the seeded
 // fixtures agree with.
+//
+// It is data only. The session token for a persona is minted by the server
+// (GET /dev/session), because its grammar belongs to whichever identity
+// adapter the environment selected and is written in Go alone.
 
 export type PersonaId = 'free' | 'pro' | 'admin' | 'support' | 'disabled' | 'noorg' | 'noactive' | 'toggle' | 'deleteme';
 
@@ -23,12 +27,3 @@ export const personas: Persona[] = [
   { id: 'toggle', user: 'user_toggle', org: 'org_free', role: 'org:member' },
   { id: 'deleteme', user: 'user_deleteme', org: 'org_deleteme', role: 'org:admin' },
 ];
-
-// sessionFor builds the DEV_AUTH_BYPASS cookie value for a persona. An
-// org-less actor carries empty org and role, which the session parser reads
-// as no active organization.
-export function sessionFor(p: PersonaId): string {
-  const persona = personas.find((x) => x.id === p);
-  if (!persona) throw new Error(`unknown persona ${p}`);
-  return `e2e:${persona.user}:${persona.org}:${persona.role}`;
-}

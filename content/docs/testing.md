@@ -309,20 +309,46 @@ exactly what it tore down.
 block the reset). One disposable database per server is deliberate; the visual
 harness resets the same one.
 
-Login is a cookie, not a hosted page:
+Login is a cookie the **server** mints, not a hosted page and not a string the
+harness builds:
 
 ```ts
 const context = await loginAs(browser, 'pro');
-// sets __session=e2e:user_pro:org_pro:org:admin
+// GET /dev/session?user=user_pro&org=org_pro&role=org:admin → 204 + Set-Cookie
 ```
 
-The personas are generated. `e2e/generated/personas.ts` is rendered from the
-`personas` declarations of the installed modules and exports `PersonaId` —
+The personas are generated data. `e2e/generated/personas.ts` is rendered from
+the `personas` declarations of the installed modules and exports `PersonaId` —
 `free`, `pro`, `admin`, `support`, `disabled`, `noorg`, `noactive`, `toggle`,
-`deleteme` — plus `sessionFor`. `e2e/helpers.ts` imports it rather than
-keeping a second literal map, so a module that adds a persona cannot leave the
-helper behind. Each persona owns disjoint orgs and rows, so `fullyParallel`
-specs never mutate each other's fixtures.
+`deleteme` — plus the `personas` array of triples. `e2e/helpers.ts` imports it
+rather than keeping a second literal map, so a module that adds a persona
+cannot leave the helper behind. Each persona owns disjoint orgs and rows, so
+`fullyParallel` specs never mutate each other's fixtures.
+
+What the harness does **not** have is the token's grammar. That belongs to
+whichever identity adapter the environment selected — `e2e:<user>:<org>:<role>`
+for `identity-dev` — and it is written in exactly one place, that adapter's
+`MintSession`. It used to be restated in TypeScript too, by a generated
+`sessionFor` helper, and nothing held the two spellings together: a grammar
+change in Go kept every Go package green and failed only in the browser job,
+as a bounce to `/login` with no diagnostic anywhere. The copy was not even
+faithful, since `MintSession` refuses a subject containing the grammar's own
+separator and the template did not.
+
+So `loginAs` asks `GET /dev/session` (owned by `ggg/workflow/dev-session`,
+gated by the same `DEV_AUTH_BYPASS` predicate `/dev/login` carries) and lets
+`context.request`'s shared cookie jar carry the reply's `Set-Cookie` into
+every page the context opens. `TestNoTypeScriptCanBuildASessionToken` holds
+the invariant mechanically: no `.ts` file may name the session cookie or
+install one a client assembled.
+
+The refusal reaches the harness too, which is the point of routing it through
+the server. A project selecting a **hosted** identity adapter for its test
+environment has no minter, the route answers 503 naming
+`identity.SyntheticSessionMinter`, and `loginAs` throws with that message
+instead of carrying a cookie nothing verifies. A subject the adapter will not
+mint is a 400 naming the subject — a caller error, deliberately not the same
+answer as a missing capability.
 
 Every spec belongs to the module whose surface it drives, declared in that
 module's `files` and `tests.e2e`. `ggg/workflow/billing-checkout` brings
@@ -334,8 +360,9 @@ Ownership splits three ways:
 
 - `ggg/system/e2e` is the **harness** — `playwright.config.ts`,
   `global-setup.ts`, `helpers.ts`, `package.json`, `package-lock.json` — and
-  requires nothing but `ggg/system/project-base`. Every spec-owning module
-  requires it, because every spec imports `@playwright/test` and `./helpers`.
+  requires `ggg/system/project-base` plus `ggg/workflow/dev-session`, whose
+  mint route is how `loginAs` gets a cookie. Every spec-owning module requires
+  the harness, because every spec imports `@playwright/test` and `./helpers`.
 - `ggg/system/e2e-sweeps` owns the nine cross-cutting suites (accessibility,
   keyboard, progressive enhancement, loading, mobile, CSP, visual, public
   site) and `visual.spec.ts-snapshots/`. They assert shell and platform

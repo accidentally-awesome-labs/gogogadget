@@ -199,7 +199,7 @@ itself.
 | `ggg/page/blog` | `ggg` | 1 | Blog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
 | `ggg/page/changelog` | `ggg` | 1 | Changelog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `retain-data` |
 | `ggg/page/dashboard` | `ggg` | 1 | App dashboard | `ggg/system/audit` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
-| `ggg/page/dev-gallery` | `ggg` | 1 | Component gallery | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/dev-session` [1,1] | `free` |
+| `ggg/page/dev-gallery` | `ggg` | 1 | Component gallery | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/workflow/dev-session` [1,2] | `free` |
 | `ggg/page/docs` | `ggg` | 1 | Documentation page | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-index` | `ggg` | 1 | Documentation index | `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/page/docs-search` | `ggg` | 1 | Documentation search | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,2] | `free` |
@@ -239,7 +239,7 @@ itself.
 | `ggg/workflow/auth-session` | `ggg` | 1 | Sign-in, sign-up and sign-out | `ggg/page/dashboard` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [2,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/workflow/billing-checkout` | `ggg` | 1 | Checkout and billing portal | `ggg/page/settings-billing` [1,1] `ggg/system/billing` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/billing-webhook` | `ggg` | 1 | Billing provider webhook | `ggg/system/billing` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] `ggg/system/server` [1,2] | `major-version-only` |
-| `ggg/workflow/dev-session` | `ggg` | 1 | Zero-account dev session | `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
+| `ggg/workflow/dev-session` | `ggg` | 2 | Zero-account dev session | `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/files` | `ggg` | 1 | File upload, download and delete | `ggg/page/files` [1,1] `ggg/system/audit` [1,1] `ggg/system/database` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/storage` [1,1] | `free` |
 | `ggg/workflow/identity-webhook-sync` | `ggg` | 1 | Identity provider sync | `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/server` [1,2] | `free` |
 | `ggg/workflow/impersonation` | `ggg` | 1 | Administrator impersonation | `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/impersonation` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] | `free` |
@@ -282,7 +282,7 @@ itself.
 | `ggg/system/deploy-fly` | `ggg` | 1 | Deploy Fly | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/dev-tools` | `ggg` | 1 | Dev Tools | `ggg/system/project-base` [1,1] | `free` |
 | `ggg/system/docker` | `ggg` | 1 | Docker | `ggg/system/project-base` [1,1] | `free` |
-| `ggg/system/e2e` | `ggg` | 1 | E2E harness | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/e2e` | `ggg` | 1 | E2E harness | `ggg/system/project-base` [1,1] `ggg/workflow/dev-session` [2,2] | `free` |
 | `ggg/system/e2e-sweeps` | `ggg` | 1 | E2E cross-cutting sweeps | `ggg/page/admin-jobs` [1,1] `ggg/page/admin-media` [1,1] `ggg/page/blog` [1,1] `ggg/page/changelog` [1,1] `ggg/page/dashboard` [1,1] `ggg/page/docs` [1,1] `ggg/page/docs-index` [1,1] `ggg/page/docs-search` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/workflow/seo-discovery` [1,1] | `free` |
 | `ggg/system/feature-flags` | `ggg` | 1 | Feature flags | `ggg/system/apphost` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/feature-flags-postgres` | `ggg` | 1 | Feature Flags Postgres | `ggg/system/feature-flags` [1,1] | `free` |

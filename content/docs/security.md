@@ -306,8 +306,21 @@ export is tested against exactly that regression.
 `DEV_AUTH_BYPASS=true` enables synthetic `e2e:` session tokens for local and
 e2e runs. Combined with `APP_ENV=production` it is a **hard boot error** — the
 escape hatch physically cannot reach production. The dev-only routes
-(`/dev/login`, `/dev/gallery`, `/dev/scenarios`) are registered only when the
-bypass is on. See [Authentication](/docs/authentication).
+(`/dev/login`, `/dev/session`, `/dev/switch-org`, `/dev/gallery`,
+`/dev/scenarios`) are registered only when the bypass is on.
+
+`GET /dev/session?user=&org=&role=` is the widest of them and is stated
+plainly here: it mints a session for **any** user, org and role and returns it
+as a cookie, so it hands an authenticated session to any caller that can reach
+it. It exists because the e2e harness must not know the token's grammar — that
+belongs to the selected identity adapter and is written in Go alone — and it is
+strictly narrower than what it replaced, where the harness minted any triple
+it liked with no server involvement at all. It carries exactly the gate
+`/dev/login` carries: the same `dev` scope, the same route policy, the same
+`DEV_AUTH_BYPASS` predicate behind the same production boot refusal. It adds
+no configuration key and no token lifetime of its own, and
+`TestNoTypeScriptCanBuildASessionToken` refuses a plan in which its gate
+drifts from `/dev/login`'s. See [Authentication](/docs/authentication).
 
 ## Data export and account deletion (GDPR self-serve)
 

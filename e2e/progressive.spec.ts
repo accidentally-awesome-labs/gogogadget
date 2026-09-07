@@ -1,5 +1,6 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { sessionFor, type PersonaId } from './generated/personas';
+import { mintSession } from './helpers';
+import { type PersonaId } from './generated/personas';
 
 // Progressive enhancement is the promise the whole catalog rests on: a component
 // may be *better* with its engine loaded, but it must not be *broken* without it.
@@ -24,8 +25,9 @@ const CAROUSEL_VIEWPORT = { width: 420, height: 900 };
 
 // noScript is the whole point of this file: javaScriptEnabled: false cannot be
 // set after a context exists, so loginAs (which owns its own context) cannot be
-// reused here. The session cookie is built from the same generated persona
-// source loginAs uses, so the actor cannot drift from the seeded fixtures.
+// reused here. The session is minted through the same helper loginAs uses, so
+// the actor cannot drift from the seeded fixtures and this file cannot build a
+// token of its own — the grammar lives in Go, behind GET /dev/session.
 async function noScript(
   browser: Browser,
   options: { persona?: PersonaId; viewport?: { width: number; height: number } } = {},
@@ -35,8 +37,7 @@ async function noScript(
     ...(options.viewport ? { viewport: options.viewport } : {}),
   });
   if (options.persona) {
-    const base = process.env.E2E_BASE_URL ?? 'http://localhost:18080';
-    await context.addCookies([{ name: '__session', value: sessionFor(options.persona), url: base }]);
+    await mintSession(context, options.persona);
   }
   return { page: await context.newPage(), context };
 }

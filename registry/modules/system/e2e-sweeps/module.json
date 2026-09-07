@@ -4,7 +4,7 @@
     "id": "ggg/system/e2e-sweeps",
     "kind": "system",
     "name": "e2e-sweeps",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "E2E cross-cutting sweeps",
     "description": "The accessibility, keyboard, progressive-enhancement, loading, mobile, CSP, visual and public-site suites that assert shell and platform behaviour rather than one feature.",
@@ -159,7 +159,7 @@
         "source": "e2e/progressive.spec.ts",
         "target": "e2e/progressive.spec.ts",
         "class": "test",
-        "sha256": "e1001cc45115df3311dbd272c56c6f80dc556766edd2af519d5ca147b1c470d7",
+        "sha256": "f1a7a5c1561491e1ada64f9679d14887f6c7cb08fb7543a02b6eba49079d91bf",
         "rewrite_module": false,
         "contract": false
       },

@@ -4,7 +4,7 @@
     "id": "ggg/system/content-assets",
     "kind": "system",
     "name": "content-assets",
-    "revision": 24,
+    "revision": 25,
     "contract": 1,
     "title": "Embedded content corpus",
     "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
@@ -147,7 +147,7 @@
         "source": "content/docs/authentication.md",
         "target": "content/docs/authentication.md",
         "class": "content",
-        "sha256": "8ca7c1f40044d17bb3a079848543e36a2be4628739dbcf9277a72658cdd9e957",
+        "sha256": "0cc97cf3930f9d764ff21d92d5fc52df30e2a67b60e737f85d6840a714878cef",
         "rewrite_module": false,
         "contract": false
       },
@@ -331,7 +331,7 @@
         "source": "content/docs/security.md",
         "target": "content/docs/security.md",
         "class": "content",
-        "sha256": "348c36829abd23eac0f2920a83716275b9415924a7eb2bb97e291c751ee4f252",
+        "sha256": "7bbaecf3d33938d3ba8c2fe52d72d3b263f4d97e8706cf67eff3e424cd1c115c",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "d783840760573fcff28ce35d249dbd7aab4b6d5e031dde2a2025754af09682ec",
+        "sha256": "46b35c7afa213ac91450b7848ddadf344539b811af6af35f6996c841d71f9c9f",
         "rewrite_module": false,
         "contract": false
       },

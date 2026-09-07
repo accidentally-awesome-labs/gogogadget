@@ -2352,7 +2352,20 @@ func TestSeedRegistryEmitsOrderedFragments(t *testing.T) {
 
 // Personas are declared once, next to the identity records they exercise, and
 // both the e2e helper and the fixture-parity check read the same declaration.
-func TestPersonasRegistryEmitsTypeScript(t *testing.T) {
+//
+// The registry is DATA. It used to end with a sessionFor() helper restating
+// identity-dev's private `e2e:<user>:<org>:<role>` token grammar in
+// TypeScript, emitted unconditionally for personas declared by the
+// provider-NEUTRAL identity seam. Nothing held the two spellings together: a
+// grammar change in Go kept every Go package green and failed only in the
+// browser job, as a bounce to /login with no diagnostic anywhere. The harness
+// now asks ggg/workflow/dev-session's mint route for its cookie instead, so
+// the grammar is written once, in the selected adapter.
+//
+// So the negative half of this test is the load-bearing half: anything here
+// that could construct a token is a second spelling by definition, and this
+// is what fails the moment one grows back.
+func TestPersonasRegistryEmitsDataAndCannotBuildAToken(t *testing.T) {
 	identity := Manifest{
 		ID: "ggg/system/identity", Kind: ModuleSystem, Name: "identity",
 		Revision: 1, Contract: 1, Title: "Identity", Description: "x.",
@@ -2379,10 +2392,23 @@ func TestPersonasRegistryEmitsTypeScript(t *testing.T) {
 	for _, want := range []string{
 		"export type PersonaId = 'pro' | 'noorg';",
 		"{ id: 'pro', user: 'user_pro', org: 'org_pro', role: 'org:admin' },",
-		"export function sessionFor(p: PersonaId): string",
+		"{ id: 'noorg', user: 'user_noorg', org: '', role: '' },",
 	} {
 		if !strings.Contains(ts, want) {
 			t.Fatalf("personas.ts missing %q:\n%s", want, ts)
+		}
+	}
+	// No token grammar, and no function at all: the file declares two types
+	// and a literal array, so there is nothing in it that could assemble a
+	// session. `e2e:` is the current adapter's prefix and the exact literal
+	// that used to be duplicated here; `function` catches the next spelling
+	// even under a different prefix.
+	for _, forbidden := range []string{"e2e:", "sessionFor", "function", "__session"} {
+		if strings.Contains(ts, forbidden) {
+			t.Fatalf("personas.ts contains %q: the synthetic token's grammar belongs to the "+
+				"identity adapter selected for the environment and is written in Go alone — "+
+				"the harness must ask GET /dev/session for a cookie, never build one:\n%s",
+				forbidden, ts)
 		}
 	}
 }

@@ -207,9 +207,19 @@ account. `GET /dev/login` sets the demo cookie
 (`e2e:user_demo:org_demo:org:admin`) and lands in `/app`; `/login` and
 `/signup` go there too, because that is what this adapter's `LoginURL` and
 `SignupURL` answer — the login handler reads no bypass key and names no dev
-route of its own. See
-[Getting started](/docs/getting-started) for the zero-account walkthrough and
-[Testing](/docs/testing) for the Playwright harness.
+route of its own.
+
+That shape is written in exactly one place: `identitydev.Verifier.MintSession`,
+the `identity.SyntheticSessionMinter` port. Nothing outside the adapter spells
+it. `ggg/workflow/dev-session` mints through the port and refuses loudly when
+the selected adapter offers no minter — a named 503 rather than a cookie the
+verifier rejects — and `GET /dev/session?user=&org=&role=` exposes the same
+mint to the e2e harness, so no TypeScript has to restate the grammar either.
+The route's guard, and why it is narrower than the client-side cookie it
+replaced, is in [Security](/docs/security#the-dev-backdoor-cannot-ship).
+
+See [Getting started](/docs/getting-started) for the zero-account walkthrough
+and [Testing](/docs/testing) for the Playwright harness.
 
 ## Mirror sync
 

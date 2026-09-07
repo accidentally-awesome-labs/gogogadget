@@ -84,6 +84,73 @@ func TestDevLoginRefusesLoudlyWithoutASyntheticSessionMinter(t *testing.T) {
 		"the response must name the missing capability")
 }
 
+// The mint route is the e2e harness's only path to an authenticated context,
+// and it exists so that no TypeScript has to know the token's grammar. What it
+// hands back must therefore be a token the SELECTED adapter verifies —
+// asserted here by comparing against the port's own output and then spending
+// the cookie on a guarded page, because a cookie that parses and a cookie
+// that authenticates are not the same claim.
+func TestDevSessionMintsACookieTheSelectedAdapterVerifies(t *testing.T) {
+	s := integrationServer(t, nil)
+
+	code, header, _ := serve(t, s, "GET", "/dev/session?user=user_mint&org=org_mint&role=org:admin", nil, nil)
+	require.Equal(t, http.StatusNoContent, code, "the harness reads the cookie, not a page")
+	var got string
+	for _, c := range header.Values("Set-Cookie") {
+		if strings.HasPrefix(c, sessionCookieName+"=") {
+			got = strings.SplitN(strings.TrimPrefix(c, sessionCookieName+"="), ";", 2)[0]
+		}
+	}
+	require.NotEmpty(t, got, "the route's whole output is the session cookie")
+	want, mintErr := identity.MockVerifier{}.MintSession("user_mint", "org_mint", "org:admin")
+	require.NoError(t, mintErr)
+	assert.Equal(t, want, got, "minted through the selected adapter, never assembled here")
+
+	code, _, _ = serve(t, s, "GET", "/app", nil, nil, &http.Cookie{Name: sessionCookieName, Value: got})
+	require.Equal(t, http.StatusOK, code, "the cookie must authenticate, not merely parse")
+}
+
+// The asymmetry that made the duplicated grammar dangerous, gone by
+// construction. MintSession refuses a subject containing the grammar's own
+// separator; the deleted TypeScript template did not, so a persona id
+// carrying a ':' yielded a token that split wrong and a cookie nothing could
+// verify. The route now answers the adapter's own refusal — as a CALLER error
+// rather than the 503 below, which means "this deployment cannot mint at
+// all". Conflating the two would name the wrong cause.
+func TestDevSessionRefusesASubjectCarryingTheGrammarSeparator(t *testing.T) {
+	s := integrationServer(t, nil)
+
+	code, header, body := serve(t, s, "GET", "/dev/session?user=user%3Aevil&org=org_mint&role=org:admin", nil, nil)
+	require.Equal(t, http.StatusBadRequest, code,
+		"a subject the adapter will not mint is the caller's error, not a missing capability")
+	assert.Contains(t, body, "may not contain ':'", "the refusal names what is wrong with the subject")
+	for _, c := range header.Values("Set-Cookie") {
+		assert.NotContains(t, c, sessionCookieName+"=", "no cookie for a subject the adapter refused")
+	}
+}
+
+// The refusal has to reach the harness, which is the whole reason this route
+// is worth more than deduplication. A derivative selecting a hosted identity
+// adapter for its test environment has no minter at all, and the harness must
+// be told which capability is missing, in a body it can print, rather than
+// carrying a cookie nothing verifies and reporting a bounce to /login.
+//
+// The two browser routes render the NotConfigured page for this. A harness is
+// not a browser, so this route answers the same refusal as text — one string,
+// devSessionCapability, names it on both paths.
+func TestDevSessionNamesTheMissingCapabilityForAHostedAdapter(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) { d.Verifier = identity.MockHostedVerifier{} })
+
+	code, header, body := serve(t, s, "GET", "/dev/session?user=user_mint&org=org_mint&role=org:admin", nil, nil)
+	require.Equal(t, http.StatusServiceUnavailable, code,
+		"a harness that cannot get a session must be told so, not redirected into a loop")
+	assert.Contains(t, body, devSessionCapability,
+		"the harness prints this body, so it must name the capability the selected adapter lacks")
+	for _, c := range header.Values("Set-Cookie") {
+		assert.NotContains(t, c, sessionCookieName+"=", "no session cookie that nothing can verify")
+	}
+}
+
 // The minter must never become a second route to a dev session in production.
 // The refusal is on the key, at config load, so a process that would have one
 // does not start at all — whatever the selected adapter can do.
