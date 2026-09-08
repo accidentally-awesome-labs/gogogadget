@@ -22,9 +22,27 @@ import (
 // through it. The set is DERIVED, not written down: a control is any installed
 // renderer whose options declare both ID and Name and whose output submits
 // under that name. The hand-written table this replaces named ten controls
-// owned by ten other modules from ui-core's own payload — so it did not compile
-// in a closure that installed ui-core without them — and it also silently
-// exempted the other fifteen controls in the catalog.
+// owned by ten other modules from ui-core's own payload, so it did not compile
+// in a closure that installed ui-core without them.
+//
+// It also exempted exactly ONE control: MarkdownEditor. An earlier note here
+// said "the other fifteen controls in the catalog", which was wrong — the
+// derivation finds ELEVEN addressable controls in the whole catalog
+// (ColorInput, Combobox, DateField, DateTimeField, FileDropzone, FileInput,
+// MarkdownEditor, MultiSelect, NumberInput, Select, TextInput), so eleven
+// against ten is the whole margin. The margin that actually carries the
+// "derived beats hand-written" argument belongs to a sibling derivation:
+// TestActingRenderersCarryNoDestination derives 25 acting renderers where its
+// hand table named 3.
+//
+// Seven renderers carry Name and Size and declare NO ID option at all —
+// Textarea, PasswordInput, SearchInput, TagsInput, SlugInput, TimeField and
+// OTPInput. A per-row instance of any of them still collides, which is the
+// exact defect this file exists to prevent, and they are exempt by
+// construction because the premise above cannot reach a renderer with no ID to
+// honour. Adding the option to all seven is a change to seven other modules'
+// payloads and is not this table's to make; it is recorded here so the
+// exemption is a known gap rather than an invisible one.
 func addressableControls(t *testing.T, id, name string) map[string]string {
 	t.Helper()
 	out := map[string]string{}

@@ -519,8 +519,8 @@ the old free-form `role` parameter: `LivePolite` renders `role="status"`,
 `role="alert"` interrupts a screen reader mid-sentence, which a success
 message has not earned, so the choice is now a typed one.
 
-There is **no hand-maintained signature list here**, on purpose: 172
-renderers ship across 143 element and component modules, and a list that long
+There is **no hand-maintained signature list here**, on purpose: 174
+renderers ship across 144 element and component modules, and a list that long
 rots. The generated
 inventory is authoritative in three places that cannot disagree, because all
 three come from the same manifests:

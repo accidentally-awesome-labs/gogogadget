@@ -1831,7 +1831,8 @@
         },
         "signature": {
           "type": "string",
-          "pattern": "^templ "
+          "pattern": "^templ \\w+\\(o \\w+Opts\\)$",
+          "$comment": "The Go validator (modkit.UIContribution.Renderer) applies the same pattern AND requires the two captured names to be identical, so `templ Badge(o CardOpts)` is refused by the tool while matching here. A backreference would express it, but every pattern in this document must compile under Go's RE2 engine (TestPublishedSchemaPatternsArePortableAndStrict), and RE2 has no backreferences. This is the one accepted divergence, and it is asserted to be the only one by TestPublishedSchemaAndValidatorAgreeOnRendererSignatures."
         },
         "summary": {
           "type": "string",
@@ -1866,7 +1867,8 @@
       },
       "required": [
         "name",
-        "family"
+        "family",
+        "signature"
       ]
     },
     "VendorArtifact": {

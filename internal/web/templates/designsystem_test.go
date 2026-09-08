@@ -406,12 +406,20 @@ func sizedRenderers(t *testing.T, include func(reflect.Value) bool) map[string]f
 //
 // A form control here is an installed renderer that carries the size axis, a
 // field name, no button Action axis, AND whose root element is the named
-// control itself. The last clause is the whole point: SlugInput and
-// FileDropzone put the size on an inner input and wrap it in a layout div, so
-// their root classes are Tailwind utilities that input.css correctly never
-// declares and their root is byte-identical across sizes. A rule read off the
-// root cannot say anything about a composite, and asserting it anyway would
-// report a working control as an unstyled one.
+// control itself. The last clause is the whole point: a composite puts the
+// size on an inner input and wraps it in a layout div, so its root classes are
+// Tailwind utilities that input.css correctly never declares and its root is
+// byte-identical across sizes. A rule read off the root cannot say anything
+// about a composite, and asserting it anyway would report a working control as
+// an unstyled one.
+//
+// Measured: 14 renderers carry Size and Name without Action, and the root
+// clause drops exactly THREE of them — SlugInput and SearchInput, which wrap
+// their control (SearchInput in its own GET form), and Avatar, which is not a
+// control at all. An earlier note named FileDropzone here; FileDropzone
+// declares no Size field, so it never enters the candidate set and this filter
+// cannot see it. The 11 that remain are a superset of the four the hand table
+// named.
 func TestEveryInputSizeIsStyledForEveryFormControl(t *testing.T) {
 	source := readInputCSS(t)
 

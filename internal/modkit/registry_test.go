@@ -555,6 +555,70 @@ func TestValidateManifestEnforcesRefusalAndDerivationSemantics(t *testing.T) {
 	}
 }
 
+// routeManifest is a manifest whose only interesting content is one route, so a
+// refusal names the route policy rather than some unrelated missing array.
+func routeManifest(route RouteContribution) Manifest {
+	return Manifest{
+		ID: "ggg/system/hatch", Kind: ModuleSystem, Name: "hatch",
+		Revision: 1, Contract: 1, Title: "Hatch", Description: "Hatch system.",
+		Requires: []Requirement{}, Files: []ManifestFile{}, Migrations: []ManifestMigration{},
+		Docs: []DocumentationRef{}, Data: []DataDeclaration{}, RemovalPolicy: RemovalFree,
+		Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		Claims:       NamespaceClaims{Routes: []string{route.ID}},
+		Runtime:      RuntimeContributions{Routes: []RouteContribution{route}},
+	}
+}
+
+// RoutePolicy.Idempotent reaches exactly two consumers, and both of them are
+// the API transport: scopeTargets.target wraps the handler in the
+// idempotency-key middleware under `case ScopeAPIRead, ScopeAPIWrite`, and the
+// generated OpenAPI document derives its Idempotency-Key parameter from the
+// same field. Declared on any other scope it documents a retry contract that
+// reaches no middleware — nine routes carried it while two were wrapped, and
+// two of the nine were GETs, where a retry key has nothing to deduplicate.
+//
+// A route that IS retry-safe some other way makes a different claim: the local
+// billing POSTs and both hosted webhook receivers dedupe on a server-derived id
+// in the webhook_events ledger, which needs no client header, and each states
+// that where it lives rather than borrowing this field's name for it.
+func TestValidateManifestRefusesAnUnenforceableIdempotencyClaim(t *testing.T) {
+	route := func(id string, method string, scope RouteScope, idempotent bool) RouteContribution {
+		return RouteContribution{
+			ID: id, Method: method, Pattern: "/api/v1/things", Scope: scope,
+			Package: "internal/web", Handler: "handleThings",
+			Policy: RoutePolicy{Idempotent: idempotent},
+		}
+	}
+
+	// The two controls: the shape the transport really enforces, and the same
+	// route without the flag. Without them every row below would pass even if
+	// the mutation were harmless.
+	if err := ValidateManifest(routeManifest(route("api.things.create", "POST", RouteAPIWrite, true))); err != nil {
+		t.Fatalf("control: an enforced idempotency declaration was refused: %v", err)
+	}
+	if err := ValidateManifest(routeManifest(route("app.things.create", "POST", RouteApp, false))); err != nil {
+		t.Fatalf("control: an app POST with no declaration was refused: %v", err)
+	}
+
+	for name, contribution := range map[string]RouteContribution{
+		"an app POST":        route("app.things.create", "POST", RouteApp, true),
+		"an app GET":         route("app.things.show", "GET", RouteApp, true),
+		"an admin POST":      route("admin.things.create", "POST", RouteAdmin, true),
+		"a webhook receiver": route("webhook.things.receive", "POST", RouteWebhook, true),
+		"a public POST":      route("public.things.create", "POST", RoutePublic, true),
+		"a dev POST":         route("dev.things.create", "POST", RouteDev, true),
+		"an api-write GET":   route("api.things.list", "GET", RouteAPIWrite, true),
+		"an api-read GET":    route("api.things.read", "GET", RouteAPIRead, true),
+		"an api-read HEAD":   route("api.things.head", "HEAD", RouteAPIRead, true),
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := ValidateManifest(routeManifest(contribution)); err == nil {
+				t.Fatal("ValidateManifest accepted an idempotency claim no middleware applies")
+			}
+		})
+	}
+}
+
 // scanManifest is an adapter or reader with exactly the fields the two config
 // scans look at.
 func scanManifest(id string, requires []string, adapter bool, env []EnvironmentVariable, targets ...string) Manifest {

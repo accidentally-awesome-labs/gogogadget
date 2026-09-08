@@ -5,7 +5,7 @@ section: Modules
 weight: 34
 ---
 
-There are 172 renderers. Nobody memorises them, and no hand-maintained list of
+There are 174 renderers. Nobody memorises them, and no hand-maintained list of
 that size survives a month, so every path to finding one is generated from the
 manifests.
 
@@ -44,7 +44,7 @@ the tests that cover it. A component with no declared tests reports
 
 **From this documentation.** The [Component
 reference](/docs/component-reference) page is generated from the same
-`runtime.ui` declarations: 172 rows grouped by gallery family, each with its
+`runtime.ui` declarations: 174 rows grouped by gallery family, each with its
 exact signature, owning module, engine, Alpine controller, and whether it
 declares a no-JavaScript fallback.
 
@@ -58,19 +58,19 @@ published in three places from that one source: `ggg info --json`, the generated
 `ui.ReferenceRegistry`, and the gallery detail page at
 `/dev/gallery/{family}/{component}`. The fields:
 
-| Field | What it answers |
-|---|---|
-| `name` | The `data-ui` marker on the component's root |
-| `family` | Which gallery family it appears under |
-| `signature` | The exact declaration, e.g. `templ Badge(o BadgeOpts)` |
-| `summary` | One line: what it is |
-| `guidance` | When to reach for it, when not to, and why it is built this way |
-| `keyboard` | The key contract it implements |
-| `states` | The states it genuinely has |
-| `engine` | The third-party runtime it needs, if any |
-| `alpine` | The CSP-safe Alpine controller it registers, if any |
-| `vendor` | The pinned vendored asset, if any |
-| `native_fallback` | What it degrades to with no JavaScript |
+| Field | Required | What it answers |
+|---|---|---|
+| `name` | yes | The `data-ui` marker on the component's root |
+| `family` | yes | Which gallery family it appears under |
+| `signature` | yes | The exact declaration, `templ Name(o NameOpts)` with the two names identical. `ggg registry build` refuses any other shape, because this is the only input the generated `ui.Renderers()` table projects the symbol out of |
+| `summary` | | One line: what it is |
+| `guidance` | | When to reach for it, when not to, and why it is built this way |
+| `keyboard` | | The key contract it implements |
+| `states` | | The states it genuinely has |
+| `engine` | | The third-party runtime it needs, if any |
+| `alpine` | | The CSP-safe Alpine controller it registers, if any |
+| `vendor` | | The pinned vendored asset, if any |
+| `native_fallback` | | What it degrades to with no JavaScript |
 
 The gallery detail page renders them in the order a reader needs them: what it
 is, how it is called, a copyable call, when to use it, what the keyboard does,
@@ -236,7 +236,7 @@ lifecycle](/docs/modules) for how `ggg diff` and `ggg update` treat that edit.
 
 ## Where to go next
 
-- [Component reference](/docs/component-reference) — all 172, generated.
+- [Component reference](/docs/component-reference) — all 174, generated.
 - [UI foundations](/docs/ui-foundations) — the conventions behind every call.
 - [Gallery and scenarios](/docs/gallery) — the live surfaces.
 - [Frontend](/docs/frontend) — the shell, htmx fragments, and Alpine.

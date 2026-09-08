@@ -4,7 +4,7 @@
     "id": "ggg/element/ui-core",
     "kind": "element",
     "name": "ui-core",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "UI core",
     "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
@@ -68,7 +68,7 @@
         "source": "internal/web/templates/ui/control-id_test.go",
         "target": "internal/web/templates/ui/control-id_test.go",
         "class": "test",
-        "sha256": "8b1781355064cbb5ffa0d900acc4aa992cf4d8ed510268d62575d02b81872579",
+        "sha256": "41ed4bed19706df77a2a8ebfbd575b1118352fa70584396cd6d4357694d9d9cc",
         "rewrite_module": true,
         "contract": false
       },

@@ -832,7 +832,11 @@ type UIContribution struct {
 	// because GenerateAll is a pure function of the manifest graph; a drift test
 	// asserts it still matches the code, so a declared signature cannot quietly
 	// describe a renderer that changed shape.
-	Signature string `json:"signature,omitempty"`
+	//
+	// It carries no omitempty because validateUI refuses a record that names no
+	// renderer: the field is required, and a tag that omitted it would let the
+	// published schema's `required` list disagree with the tool.
+	Signature string `json:"signature"`
 	// Summary is one sentence on what the component is for, taken from the
 	// renderer's own doc comment so the reference and the code cannot disagree.
 	Summary string `json:"summary,omitempty"`

@@ -1158,11 +1158,15 @@ from the `locales` blocks of every installed manifest.
 
 ## Add a component
 
-A component is a module: one public renderer, one options struct, one
-directory in the registry.
+A component is a module: one directory in the registry, one options struct per
+renderer, and one `runtime.ui` record per renderer. Most components export one
+renderer; twelve export several, because a part that only makes sense inside
+its parent still needs its own record — `chart` and `calendar` export six
+each, `markdown-editor` four, and `card`, `carousel`, `command`, `data-grid`,
+`kanban`, `panels`, `questionnaire` and `tree` three each.
 
 1. **Check first.** `ggg catalog --kind component` and
-   `--kind element` list 143 live modules, which between them export the 172
+   `--kind element` list 144 live modules, which between them export the 174
    renderers in `ui.ComponentRegistry`. `/dev/gallery` and the
    [component reference](/docs/component-reference) show them rendered.
 2. **A new colour?** A token in the `@theme` block of `input.css`, and in
@@ -1174,18 +1178,32 @@ directory in the registry.
    `@import` list in `input.css` is generated, so installing or removing a
    module never patches the entry file.
 4. **A recurring structure?** A new `.templ` in
-   `internal/web/templates/ui/`, exporting exactly one renderer of the shape
-   `templ Name(o NameOpts)` where `NameOpts` embeds `ui.Attrs`. `ui` imports
-   templ and stdlib only — never `templates`, `billing`, `identity` or sqlc —
-   and the compiler enforces that direction. Reuse the closed enums (`Kind`,
-   `Size`, `Emphasis`, …) and map domain values onto them next to their data.
-   See [UI foundations](/docs/ui-foundations).
+   `internal/web/templates/ui/`, exporting one or more renderers, each of the
+   shape `templ Name(o NameOpts)` where `NameOpts` embeds `ui.Attrs`. `ui`
+   imports templ and stdlib only — never `templates`, `billing`, `identity` or
+   sqlc — and the compiler enforces that direction. Reuse the closed enums
+   (`Kind`, `Size`, `Emphasis`, …) and map domain values onto them next to
+   their data. See [UI foundations](/docs/ui-foundations).
 5. **An icon?** One const in `icons.templ` plus one switch arm emitting the
    complete `<svg>`. `TestIconRegistryIsComplete` fails a const with no arm.
-6. **Declare it.** A `ggg/component/<kebab-name>` manifest requiring
-   `ggg/element/ui-core`, with a `runtime.ui` record carrying `name`, `family`,
-   `signature`, `summary` and `states`. That record is what puts the component
-   on `/dev/gallery/{family}/{name}`, in the generated reference, and in the
+6. **Declare it — once per renderer.** A `ggg/component/<kebab-name>` manifest
+   requiring `ggg/element/ui-core`, with a `runtime.ui` record per exported
+   renderer carrying `name`, `family`, `signature`, `summary` and `states`.
+
+   **`signature` is required and exact.** It must read
+   `templ Name(o NameOpts)` with the two names identical: `ggg registry build`
+   refuses anything else by name, and it is the only input the generated
+   `ui.Renderers()` table projects the symbol out of, so a renderer with no
+   record is not in the table and
+   `TestEveryRendererPropagatesItsAttrs` fails naming it. The published
+   `registry/schema/module.schema.json` states the same requirement, with one
+   documented gap recorded in its own `$comment`: JSON Schema cannot require
+   the two names to agree in a pattern that also compiles under Go's RE2
+   engine, so `templ Badge(o CardOpts)` passes the schema and is still refused
+   by `ggg`.
+
+   The record is also what puts the component on
+   `/dev/gallery/{family}/{name}`, in the generated reference, and in the
    visual and axe sweeps. `TestGalleryCoversEveryInstalledComponent` compares
    installed metadata against rendered `data-ui` values, so an undeclared or
    ungalleried component fails the gate.

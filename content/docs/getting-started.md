@@ -142,10 +142,18 @@ their own payloads, and the pages those drag in. Two of them are fixed:
   the OpenAPI document. `RoutePolicy.Idempotent` is applied at registration
   from the declaration the OpenAPI `Idempotency-Key` parameter is derived
   from, so a route cannot document a retry contract the transport does not
-  enforce. Declaring `ggg/system/api → ggg/workflow/projects` instead was
-  never available: it closes **15** requires cycles, starting with the direct
-  one, because the projects resource requires the transport for the name rule
-  both transports share.
+  enforce. Both of those are transport machinery, so `ggg registry build`
+  now REFUSES `idempotent: true` on any scope but `api-read`/`api-write`,
+  and on any safe method: nine routes declared the flag while two were
+  wrapped, and two of the nine were **GET**s, where a retry key means
+  nothing. A route that deduplicates retries some other way is making a
+  different claim — the local billing confirm and cancel POSTs and both
+  hosted webhook receivers dedupe on a server-derived id in the
+  `webhook_events` ledger, which needs no client header — and states it
+  where that claim lives. Declaring `ggg/system/api → ggg/workflow/projects`
+  instead was never available: it closes **15** requires cycles, starting
+  with the direct one, because the projects resource requires the transport
+  for the name rule both transports share.
 
 Three floors remain:
 

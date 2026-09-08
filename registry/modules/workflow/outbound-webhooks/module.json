@@ -4,7 +4,7 @@
     "id": "ggg/workflow/outbound-webhooks",
     "kind": "workflow",
     "name": "outbound-webhooks",
-    "revision": 5,
+    "revision": 6,
     "contract": 1,
     "title": "Outbound webhook management",
     "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
@@ -121,7 +121,7 @@
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": true,
+            "idempotent": false,
             "admin_write": false
           },
           "package": "internal/web",

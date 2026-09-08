@@ -4,7 +4,7 @@
     "id": "ggg/workflow/billing-webhook",
     "kind": "workflow",
     "name": "billing-webhook",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Billing provider webhook",
     "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",
@@ -80,7 +80,7 @@
             "rate_exempt": false,
             "maintenance_exempt": true,
             "max_body_bytes": 1048576,
-            "idempotent": true,
+            "idempotent": false,
             "admin_write": false
           },
           "package": "internal/web",

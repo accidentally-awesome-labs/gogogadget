@@ -832,6 +832,33 @@ func validateRoutes(routes []RouteContribution, canonical bool) error {
 				"manifest runtime routes[%d] policy max_body_bytes %d does not narrow the global %d-byte cap",
 				i, route.Policy.MaxBodyBytes, GlobalRequestBodyLimit)
 		}
+		// Idempotent is not a comment. It is the one declaration
+		// scopeTargets.target reads to wrap a handler in the idempotency-key
+		// middleware, and the same one the generated OpenAPI document derives
+		// its Idempotency-Key parameter from — and both of those live in the
+		// /api transport. Declared anywhere else it documents a retry contract
+		// nothing enforces, which is the "false safety claim in shipped docs"
+		// class. Nine routes declared it while two were wrapped, including two
+		// GET screens, before this refused it.
+		//
+		// A route that deduplicates a retry some other way is making a
+		// different claim and needs a different statement: the local billing
+		// POSTs and both hosted webhook receivers dedupe on a SERVER-derived id
+		// in the webhook_events ledger, which works with no client header at
+		// all, and that property is asserted in their own handlers' tests.
+		if route.Policy.Idempotent && route.Scope != RouteAPIRead && route.Scope != RouteAPIWrite {
+			return fmt.Errorf(
+				"manifest runtime routes[%d] policy idempotent is enforced only on the api-read and api-write scopes, not %q",
+				i, route.Scope)
+		}
+		// An idempotency key exists so that repeating an UNSAFE request acts
+		// once. A safe method has nothing to act twice, so the flag is a
+		// comment there as well.
+		if route.Policy.Idempotent && !unsafeHTTPMethod(route.Method) {
+			return fmt.Errorf(
+				"manifest runtime routes[%d] policy idempotent is meaningless on the safe method %s",
+				i, route.Method)
+		}
 		if _, ok := seen[route.ID]; ok {
 			return fmt.Errorf("manifest runtime routes contain duplicate id %q", route.ID)
 		}
@@ -2160,6 +2187,17 @@ func validAssetKind(value AssetKind) bool {
 func validHTTPMethod(value string) bool {
 	switch value {
 	case "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE":
+		return true
+	default:
+		return false
+	}
+}
+
+// unsafeHTTPMethod reports whether a method may change server state, which is
+// the only situation in which retry semantics are a question at all.
+func unsafeHTTPMethod(value string) bool {
+	switch value {
+	case "POST", "PUT", "PATCH", "DELETE":
 		return true
 	default:
 		return false

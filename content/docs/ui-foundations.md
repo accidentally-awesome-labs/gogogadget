@@ -100,7 +100,7 @@ Every `NameOpts` carries `ui.Attrs` as a field named `Attrs`. Primary content
 arrives as templ children; named secondary regions are `templ.Component` fields
 that omit their wrapper entirely when nil.
 
-The full list of 172 renderers with their exact signatures is on the [Component
+The full list of 174 renderers with their exact signatures is on the [Component
 reference](/docs/component-reference) page, generated from the manifests.
 
 ## Typed attributes
@@ -304,7 +304,7 @@ The seven pattern rules do reach `internal/web/templates/ui`: `templFiles` walks
 the tree rather than reading one directory. It read only `.` for a long time,
 which meant the raw-hex, `dark:`, palette-ramp, `!`-override and
 arbitrary-length checks were enforced on the page templates and on none of the
-172 renderers where the design system actually lives — the tests passed because
+174 renderers where the design system actually lives — the tests passed because
 they were looking at the wrong files.
 
 Two rules are scoped to the top-level directory on purpose, because that is
@@ -319,7 +319,7 @@ demonstrations, not product copy.
 
 - [Component usage](/docs/components) — finding a component and reading its
   reference entry.
-- [Component reference](/docs/component-reference) — all 172 signatures,
+- [Component reference](/docs/component-reference) — all 174 signatures,
   generated.
 - [Gallery and scenarios](/docs/gallery) — the dev surfaces that render them.
 - [Frontend](/docs/frontend) — htmx fragments, Alpine CSP, and the shell.

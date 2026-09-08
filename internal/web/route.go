@@ -81,6 +81,14 @@ type scopeTargets struct {
 	// generated OpenAPI document derives the Idempotency-Key parameter from, so
 	// a route cannot document a retry contract the transport does not enforce,
 	// or enforce one it does not document.
+	//
+	// Both of those live here, in the API transport, which is why
+	// modkit.validateRoutes refuses the declaration on any other scope and on
+	// any safe method: an /app route carrying it documented a header contract
+	// that reached no middleware at all. A route that deduplicates retries some
+	// other way — the local billing POSTs and both webhook receivers dedupe on
+	// a server-derived id in the webhook_events ledger — is making a different
+	// claim and states it where that claim lives.
 	apiIdempotent func(h http.Handler) http.Handler
 }
 

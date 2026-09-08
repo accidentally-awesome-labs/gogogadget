@@ -116,6 +116,20 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "no active local subscription", http.StatusNotFound)
 }
 
+// processLocalBillingEvent is where these two POSTs get their retry safety, and
+// it is NOT RoutePolicy.Idempotent: that flag is the /api transport's
+// Idempotency-Key contract, applied only under the api-read and api-write
+// scopes, and the validator refuses it on any other scope. It could not work
+// here anyway — the confirm screen posts a no-script <form>, which cannot send
+// a request header, and api.Middleware.Idempotent has to run inside
+// RequireAPIToken because the key is scoped to the org that token authenticated.
+//
+// The ledger is stronger for this shape. The id is derived on the SERVER from
+// the org, the product and the checkout (or, for a cancellation, the
+// subscription and its period end), so a double-submit or a back-button re-post
+// deduplicates with nothing supplied by the client. It is the same
+// webhook_events ledger the hosted Clerk and Polar receivers dedupe on, and
+// TestLocalBillingConfirmAndCancelActOnceOnARepeat asserts it.
 func (s *Server) processLocalBillingEvent(r *http.Request, evt billing.SubscriptionEvent, id string) error {
 	ctx := r.Context()
 	if _, err := s.q.InsertWebhookEvent(ctx, sqlc.InsertWebhookEventParams{ID: id, Provider: evt.Provider, EventType: evt.Type}); errors.Is(err, pgx.ErrNoRows) {
