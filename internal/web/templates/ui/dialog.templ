@@ -16,7 +16,7 @@ type DialogOpts struct {
 // `form method="dialog"` submit button - so the dialog dismisses with no
 // JavaScript at all. The Alpine `uiDialog` component only calls showModal().
 templ Dialog(o DialogOpts) {
-	<dialog id={ o.ID } { root("dialog", "dialog card max-w-lg w-full", o.Attrs)... }>
+	<dialog id={ controlID(o.ID, o.Attrs, "") } { controlRoot("dialog", "dialog card max-w-lg w-full", o.Attrs)... }>
 		<form method="dialog" class="flex flex-col gap-4">
 			<div class="flex items-center justify-between">
 				@Heading(HeadingOpts{Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM})

@@ -1,82 +1,82 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Dialog renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "8e0cbf23cc68cb48f14ffc0eb335d8c17941acc03a4753ea604d2f71b9d067f6",
-        "source": "internal/web/templates/ui/dialog.templ",
-        "target": "internal/web/templates/ui/dialog.templ"
-      }
-    ],
     "id": "ggg/component/dialog",
     "kind": "component",
-    "migrations": [],
     "name": "dialog",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "Dialog",
+    "description": "The Dialog renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/alert-dialog",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/alert-dialog"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/heading",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/heading"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/icon",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/icon"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/dialog.templ",
+        "target": "internal/web/templates/ui/dialog.templ",
+        "class": "templ",
+        "sha256": "e7fd31d99fedc090115230103da867594b1b49fba4d3deaa7d6f8572ec1f3533",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "alpine": "uiDialog",
-          "engine": "alpine",
-          "family": "overlays",
-          "guidance": "The platform supplies the top layer, the backdrop, the focus trap and Escape-to-close, and the close control is a `form method=\"dialog\"` submit button - so the dialog dismisses with no JavaScript at all. The Alpine `uiDialog` component only calls showModal().",
-          "keyboard": "Escape closes it: this is a native <dialog>, so the platform supplies dismissal and the focus trap.",
           "name": "dialog",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
           "native_fallback": "dialog element",
           "signature": "templ Dialog(o DialogOpts)",
+          "summary": "Renders a native \u003cdialog\u003e.",
+          "guidance": "The platform supplies the top layer, the backdrop, the focus trap and Escape-to-close, and the close control is a `form method=\"dialog\"` submit button - so the dialog dismisses with no JavaScript at all. The Alpine `uiDialog` component only calls showModal().",
+          "keyboard": "Escape closes it: this is a native \u003cdialog\u003e, so the platform supplies dismissal and the focus trap.",
           "states": [
             "default"
-          ],
-          "summary": "Renders a native <dialog>."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "Dialog"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

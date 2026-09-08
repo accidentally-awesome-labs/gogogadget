@@ -2,7 +2,11 @@ package ui
 
 // TimeFieldOpts is a time input.
 type TimeFieldOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID string
 	Value       string
 	Step        string
 	Hint, Error string
@@ -14,9 +18,9 @@ type TimeFieldOpts struct {
 // TimeField renders a native time input.
 templ TimeField(o TimeFieldOpts) {
 	<input
-		{ root("time-field", inputClass(o.Size), o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-		type="time" id={ o.Name } name={ o.Name } value={ o.Value }
+		{ controlRoot("time-field", inputClass(o.Size), o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="time" id={ controlID(o.ID, o.Attrs, o.Name) } name={ o.Name } value={ o.Value }
 		if o.Step != "" {
 			step={ o.Step }
 		}

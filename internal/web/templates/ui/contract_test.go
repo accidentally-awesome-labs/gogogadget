@@ -17,7 +17,8 @@ import (
 )
 
 // Every exported renderer takes exactly one options struct named after it, and
-// that struct embeds Attrs as a field called Attrs. The uniformity is the point:
+// that struct declares a NAMED field Attrs of type Attrs - not an embed, so
+// nothing is promoted and a caller writes o.Attrs.ID. The uniformity is the point:
 // a caller never has to remember an argument order, adding an option is not a
 // signature change for every existing call site, and Attrs is the single place
 // component-owned semantics are protected from callers.

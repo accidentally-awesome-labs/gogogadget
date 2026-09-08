@@ -80,9 +80,9 @@ type SlideOpts struct {
 // Slide renders one slide.
 templ Slide(o SlideOpts) {
 	<li
-		{ root("carousel-slide", "snap-start shrink-0 w-72 card p-4 space-y-2", o.Attrs)... }
-		id={ o.Slide.ID }
-		data-carousel-slide={ o.Slide.ID }
+		{ controlRoot("carousel-slide", "snap-start shrink-0 w-72 card p-4 space-y-2", o.Attrs)... }
+		id={ controlID(o.Slide.ID, o.Attrs, "") }
+		data-carousel-slide={ controlID(o.Slide.ID, o.Attrs, "") }
 	>
 		if o.Total > 1 {
 			<p class="text-xs text-fg-muted">{ fmt.Sprintf("%d of %d", o.Index, o.Total) }</p>

@@ -4,7 +4,7 @@
     "id": "ggg/component/panels",
     "kind": "component",
     "name": "panels",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Resizable panels",
     "description": "Stacked panels by default; on a wide screen a split with keyboard-operable role=separator handles carrying bounded aria-valuenow.",
@@ -39,7 +39,7 @@
         "source": "internal/web/templates/ui/panels.templ",
         "target": "internal/web/templates/ui/panels.templ",
         "class": "templ",
-        "sha256": "e3bac90cd912faf99405a81dd8161b7db7eb04e0ff72625599835eac4ac81330",
+        "sha256": "3e7f4368f822e8f7cd7ff544a4f73ecdc02b7d108f8d11aa0d039bd45a602532",
         "rewrite_module": true,
         "contract": true
       },
@@ -47,7 +47,7 @@
         "source": "internal/web/templates/ui/panels_test.go",
         "target": "internal/web/templates/ui/panels_test.go",
         "class": "test",
-        "sha256": "2c10a36e2b2ad3989cf342f53e832d4cec7e386cd32f80725394dd26fcb44bc9",
+        "sha256": "6c70e819027387c867f0db9f8d16f75d05dcf7bf9a7c750051c56eb54d76b50f",
         "rewrite_module": true,
         "contract": false
       },

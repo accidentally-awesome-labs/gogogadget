@@ -4,7 +4,7 @@
     "id": "ggg/component/drawer",
     "kind": "component",
     "name": "drawer",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "Drawer",
     "description": "The Drawer renderer and its options.",
@@ -53,7 +53,7 @@
         "source": "internal/web/templates/ui/drawer.templ",
         "target": "internal/web/templates/ui/drawer.templ",
         "class": "templ",
-        "sha256": "bc1aa5cc9f9d21684c57c4b0e60b4efb4f221a8cd3ae57c7913deed0112dc8b2",
+        "sha256": "0753277d14687260adc0106566b52dc380dffb226389112d095596533574fcd5",
         "rewrite_module": true,
         "contract": true
       },
@@ -61,7 +61,7 @@
         "source": "internal/web/templates/ui/drawer_test.go",
         "target": "internal/web/templates/ui/drawer_test.go",
         "class": "test",
-        "sha256": "a746e3d91659dd881d393fdbce55c6f35ebcd11b2d29610a719e04fbaf5eaeec",
+        "sha256": "ee926fe0905b35ce9fa5f9efab74ec58be62250a5285a8ba96ba7939a6f989fb",
         "rewrite_module": true,
         "contract": false
       }

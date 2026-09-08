@@ -4,7 +4,7 @@
     "id": "ggg/element/ui-core",
     "kind": "element",
     "name": "ui-core",
-    "revision": 5,
+    "revision": 6,
     "contract": 1,
     "title": "UI core",
     "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
@@ -60,7 +60,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "b04f9869b9d8584492ad5426680dd653830082fc0aca7da735dfc2035bfef164",
+        "sha256": "75add076f04bea8f982c841838bb21fe29f995f974a1b94d4c890a081327d100",
         "rewrite_module": true,
         "contract": false
       },
@@ -68,7 +68,7 @@
         "source": "internal/web/templates/ui/control-id_test.go",
         "target": "internal/web/templates/ui/control-id_test.go",
         "class": "test",
-        "sha256": "41ed4bed19706df77a2a8ebfbd575b1118352fa70584396cd6d4357694d9d9cc",
+        "sha256": "34c4f978e3a6ddc7118426ab63fc5d3986083534750b1a1e0fa7d92122cc46cc",
         "rewrite_module": true,
         "contract": false
       },
@@ -132,7 +132,7 @@
         "source": "internal/web/templates/ui/root.go",
         "target": "internal/web/templates/ui/root.go",
         "class": "go",
-        "sha256": "64c565ff82ffe53c293c7378ad8f6314f7eb73da0fa2200dc41e165cad12f40e",
+        "sha256": "cfcddc76c11fbb58204b4b7275c4a0e2d8a292ba8215c5c74675f38e6cd17838",
         "rewrite_module": true,
         "contract": true
       },

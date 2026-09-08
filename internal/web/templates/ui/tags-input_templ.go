@@ -10,7 +10,11 @@ import templruntime "github.com/a-h/templ/runtime"
 
 // TagsInputOpts is a comma-separated tag field.
 type TagsInputOpts struct {
-	Name  string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID    string
 	Value string
 	// Suggestions populate a datalist so the browser offers known tags without
 	// any custom popup.
@@ -26,6 +30,10 @@ type TagsInputOpts struct {
 // JavaScript, and the server parses the separator. A chip widget that keeps its
 // real value in hidden inputs loses everything the moment the script fails to
 // load, and cannot be edited with a keyboard without a custom keymap.
+//
+// The datalist is addressed from the resolved id, not from Name: two of these
+// in one table would otherwise share a datalist id, and every row's
+// suggestions would silently be the first row's.
 func TagsInput(o TagsInputOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -51,13 +59,13 @@ func TagsInput(o TagsInputOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("tags-input", inputClass(o.Size), o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, controlRootWith("tags-input", inputClass(o.Size), o.Attrs,
 			"x-data", "uiTags",
-			"list", o.Name+"-suggestions"))
+			"list", controlID(o.ID, o.Attrs, o.Name)+"-suggestions"))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error}))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error}))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,9 +74,9 @@ func TagsInput(o TagsInputOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(controlID(o.ID, o.Attrs, o.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 27, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 35, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -81,7 +89,7 @@ func TagsInput(o TagsInputOpts) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 27, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 35, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -94,7 +102,7 @@ func TagsInput(o TagsInputOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 27, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 35, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -110,9 +118,9 @@ func TagsInput(o TagsInputOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name + "-suggestions")
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(controlID(o.ID, o.Attrs, o.Name) + "-suggestions")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 30, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 38, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -130,7 +138,7 @@ func TagsInput(o TagsInputOpts) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(opt.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 32, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 40, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -143,7 +151,7 @@ func TagsInput(o TagsInputOpts) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(opt.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 32, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/tags-input.templ`, Line: 40, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {

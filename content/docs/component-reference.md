@@ -12,7 +12,9 @@ Generated from the `runtime.ui` declarations of every installed module — the
 same records the gallery renders and the coverage test compares rendered
 `data-ui` markers against.
 
-Every renderer takes exactly one options struct and embeds `ui.Attrs` in it;
+Every renderer takes exactly one options struct, and that struct declares a
+field `Attrs` of type `ui.Attrs` — a named field, not an embed, so a caller
+reaches it as `o.Attrs.ID`;
 see [UI foundations](/docs/ui-foundations) for the convention and
 [Component usage](/docs/components) for how to read an entry.
 

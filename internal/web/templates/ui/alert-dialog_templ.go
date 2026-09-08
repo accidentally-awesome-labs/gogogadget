@@ -75,9 +75,9 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(controlID(o.ID, o.Attrs, ""))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 46, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 46, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -87,10 +87,10 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("alert-dialog", "dialog card max-w-md w-full k-"+string(NormalizeKind(o.Kind)), o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, controlRootWith("alert-dialog", "dialog card max-w-md w-full k-"+string(NormalizeKind(o.Kind)), o.Attrs,
 			"role", "alertdialog",
-			"aria-labelledby", o.ID+"-title",
-			"aria-describedby", o.ID+"-message"))
+			"aria-labelledby", controlID(o.ID, o.Attrs, "")+"-title",
+			"aria-describedby", controlID(o.ID, o.Attrs, "")+"-message"))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,7 +100,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		}
 		templ_7745c5c3_Err = Heading(HeadingOpts{
 			Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
-			Attrs: Attrs{ID: o.ID + "-title", Class: "dialog-title"},
+			Attrs: Attrs{ID: controlID(o.ID, o.Attrs, "") + "-title", Class: "dialog-title"},
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -110,9 +110,9 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID + "-message")
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(controlID(o.ID, o.Attrs, "") + "-message")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 57, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 57, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -125,7 +125,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(o.Message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 57, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 57, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -172,9 +172,9 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue("close('" + o.ID + "', 'confirm')")
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue("close('" + controlID(o.ID, o.Attrs, "") + "', 'confirm')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 67, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 67, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {

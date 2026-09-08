@@ -4,7 +4,7 @@
     "id": "ggg/component/tags-input",
     "kind": "component",
     "name": "tags-input",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "TagsInput",
     "description": "The TagsInput renderer and its options.",
@@ -39,7 +39,7 @@
         "source": "internal/web/templates/ui/tags-input.templ",
         "target": "internal/web/templates/ui/tags-input.templ",
         "class": "templ",
-        "sha256": "6fbf61c1c9fdcfb7bb62ef5a71f09dd98dc4c28afdf4aa49bb2a661db394f8ed",
+        "sha256": "3280ddbdddf0166dc4e8b21a30ea7ba2404abec6f8201fc466bbb5e17bbd8717",
         "rewrite_module": true,
         "contract": true
       },

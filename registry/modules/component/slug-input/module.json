@@ -4,7 +4,7 @@
     "id": "ggg/component/slug-input",
     "kind": "component",
     "name": "slug-input",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "SlugInput",
     "description": "The SlugInput renderer and its options.",
@@ -53,7 +53,7 @@
         "source": "internal/web/templates/ui/slug-input.templ",
         "target": "internal/web/templates/ui/slug-input.templ",
         "class": "templ",
-        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
+        "sha256": "b2cbc6687256985ac2c6fab39fee7f56019a7e3c4ab05e45e9a970e66d4ca931",
         "rewrite_module": true,
         "contract": true
       },

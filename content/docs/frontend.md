@@ -481,10 +481,12 @@ package. Page and domain templates stay in `package templates` and import
 Every exported renderer has exactly one shape:
 
 ```go
-templ Name(o NameOpts)   // NameOpts embeds ui.Attrs as the field Attrs
+templ Name(o NameOpts)   // NameOpts declares a field Attrs of type ui.Attrs
 ```
 
-`Attrs` is the one attribute bundle a caller may set: `ID`, `Class`,
+`Attrs` is a NAMED field, not an embed: nothing is promoted onto `NameOpts`,
+so every attribute is reached through it as `o.Attrs.ID`, `o.Attrs.Class` and
+so on. It is the one attribute bundle a caller may set: `ID`, `Class`,
 `TestID`, `Title`, `Decorative`, `Data`, and the CSP-safe named `Alpine` and
 `HX` structs. There is deliberately **no arbitrary-attribute map**, so a
 caller cannot override the `role`, `aria-*`, `tabindex`, `type` or base class
@@ -492,6 +494,16 @@ the component owns. A component builds one `templ.Attributes` map and spreads
 it once on its root; `Class` is additive and `Data` reserves `data-ui` and
 `data-ui-*`. Primary content is templ children; named secondary slots are
 `templ.Component` fields that omit their wrapper when nil.
+
+A component that writes its own `id` — every form control, and every overlay
+whose `aria-labelledby`/`data-*` are derived from that id — declares a
+top-level `ID` beside the `Attrs` field and resolves one value through
+`controlID` (`ID`, then `Attrs.ID`, then `Name`). Its root must come from
+`controlRoot`/`controlRootWith`, which drop `id` from the spread map: two `id`
+attributes on one element is invalid HTML, and the browser keeps the first, so
+a component that spread `Attrs` and then wrote its own id beat the caller
+silently. `control-id_test.go` holds both halves — the resolution, and the
+catalog-wide count of `id` attributes per element.
 
 Three tests in `internal/web/templates/ui/contract_test.go` hold that line:
 `TestEveryExportedRendererTakesOneOptionsStruct`,

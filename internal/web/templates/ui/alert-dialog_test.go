@@ -45,3 +45,33 @@ func TestAlertDialogNormalizesItsKind(t *testing.T) {
 	assert.Contains(t, html, "k-neutral")
 	assert.Contains(t, html, "dialog-title")
 }
+
+// An alert dialog derives three references from its id - the title it is
+// labelled by, the message it is described by, and the id the confirm button
+// passes to close(). All three have to name the id the <dialog> actually
+// carries, or a destructive confirmation announces a title and consequence
+// that resolve to nothing and its confirm control closes some other dialog.
+func TestAlertDialogReferencesFollowWhicheverIDTheCallerSupplied(t *testing.T) {
+	declared := renderComponent(t, AlertDialog(AlertDialogOpts{
+		ID: "confirm-delete", Title: "Delete?", Message: "Gone forever.",
+		ConfirmLabel: "Delete", CancelLabel: "Keep", ConfirmHX: HX{Delete: "/x"},
+		Attrs: Attrs{ID: "escape-hatch"},
+	}))
+	assert.Contains(t, declared, `id="confirm-delete"`, "the ID field must outrank the generic Attrs.ID")
+	assert.Contains(t, declared, `aria-labelledby="confirm-delete-title"`)
+	assert.Contains(t, declared, `aria-describedby="confirm-delete-message"`)
+	// templ's own escaping of the Alpine expression, asserted as rendered: a
+	// test matching the unescaped form would pass against markup no browser
+	// could parse.
+	assert.Contains(t, declared, `close(&#39;confirm-delete&#39;, &#39;confirm&#39;)`)
+	assert.NotContains(t, declared, "escape-hatch",
+		"Attrs.ID stayed beside the id the dialog owns; two ids on one element is invalid HTML")
+
+	fallback := renderComponent(t, AlertDialog(AlertDialogOpts{
+		Title: "Delete?", Message: "Gone forever.", ConfirmLabel: "Delete", CancelLabel: "Keep",
+		Attrs: Attrs{ID: "from-attrs"},
+	}))
+	assert.Contains(t, fallback, `id="from-attrs"`)
+	assert.Contains(t, fallback, `aria-labelledby="from-attrs-title"`)
+	assert.Contains(t, fallback, `aria-describedby="from-attrs-message"`)
+}

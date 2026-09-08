@@ -1,56 +1,56 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The Textarea renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "7a801913ca36a6a3ffae5e844cad8bdc90c0a6d39f6f60e06ca52828d3266d2d",
-        "source": "internal/web/templates/ui/textarea.templ",
-        "target": "internal/web/templates/ui/textarea.templ"
-      }
-    ],
     "id": "ggg/component/textarea",
     "kind": "component",
-    "migrations": [],
     "name": "textarea",
-    "removal_policy": "free",
+    "revision": 2,
+    "contract": 1,
+    "title": "Textarea",
+    "description": "The Textarea renderer and its options.",
     "requires": [
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 1,
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/textarea.templ",
+        "target": "internal/web/templates/ui/textarea.templ",
+        "class": "templ",
+        "sha256": "18f07de31ab0fdb02b74b5107ad2640c3b54fb8d22c5c8db18697e509d5c7262",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "forms",
           "name": "textarea",
+          "family": "forms",
           "signature": "templ Textarea(o TextareaOpts)",
+          "summary": "A multi-line text input.",
           "states": [
             "default"
-          ],
-          "summary": "A multi-line text input."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "Textarea"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

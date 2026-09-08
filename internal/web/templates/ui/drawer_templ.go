@@ -58,9 +58,9 @@ func Drawer(o DrawerOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(controlID(o.ID, o.Attrs, ""))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/drawer.templ`, Line: 29, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/drawer.templ`, Line: 29, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -70,8 +70,8 @@ func Drawer(o DrawerOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("drawer", "dialog card "+drawerClass(o.Side), o.Attrs,
-			"aria-labelledby", o.ID+"-title"))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, controlRootWith("drawer", "dialog card "+drawerClass(o.Side), o.Attrs,
+			"aria-labelledby", controlID(o.ID, o.Attrs, "")+"-title"))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -81,7 +81,7 @@ func Drawer(o DrawerOpts) templ.Component {
 		}
 		templ_7745c5c3_Err = Heading(HeadingOpts{
 			Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
-			Attrs: Attrs{ID: o.ID + "-title"},
+			Attrs: Attrs{ID: controlID(o.ID, o.Attrs, "") + "-title"},
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

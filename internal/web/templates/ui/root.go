@@ -80,18 +80,33 @@ func withRequest(out templ.Attributes, hx HX) templ.Attributes {
 	return out
 }
 
-// controlID is the id a form control renders on its input element.
+// controlID is the id a component that owns its own id renders on that
+// element.
 //
-// Name is the default because a singleton form addresses its control by field
-// name, and that must stay true for every existing caller. It has to be
-// overridable: the same control repeated once per table row - a role select on
-// every admin user, a rollout input on every flag - otherwise emits one
-// identical id on every row, and `for=` and `aria-describedby` both resolve to
-// the first match, so forty rows of labels and errors all point at row one.
-// A label pointing at the wrong control is worse than no label.
+// Precedence is the component's own ID field, then Attrs.ID, then the name
+// default. It is ONE rule for the whole catalog, and the reason is sharpest
+// away from form controls: an overlay's id is a hub other attributes point at
+// - aria-labelledby="<id>-title", aria-describedby="<id>-message",
+// data-panel="<id>", the Alpine close('<id>') call - so whichever value wins
+// has to win in all of them at once. If Attrs.ID outranked the declared ID,
+// the element would carry one id while every reference to it still named the
+// other, which is a silently mislabelled dialog rather than a visible break.
 //
-// Attrs.ID is honoured as the fallback so a caller who already set the id there
-// keeps working instead of suddenly emitting two id attributes on one element.
+// Name is the default for a form control because a singleton form addresses
+// its control by field name, and that must stay true for every existing
+// caller. It has to be overridable: the same control repeated once per table
+// row - a role select on every admin user, a rollout input on every flag -
+// otherwise emits one identical id on every row, and `for=` and
+// `aria-describedby` both resolve to the first match, so forty rows of labels
+// and errors all point at row one. A label pointing at the wrong control is
+// worse than no label.
+//
+// A component with no name default passes "": an overlay's ID is required, and
+// inventing a default for it would produce a page-unique id out of nothing.
+//
+// Attrs.ID is honoured as the fallback so a caller who already set the id
+// there keeps working instead of suddenly emitting two id attributes on one
+// element.
 func controlID(id string, a Attrs, name string) string {
 	switch {
 	case id != "":
@@ -102,9 +117,14 @@ func controlID(id string, a Attrs, name string) string {
 	return name
 }
 
-// controlRoot is root for a form control: the resolved control id is
-// authoritative, so Attrs.ID is dropped from the map rather than emitted
-// alongside the explicit id the control renders itself.
+// controlRoot is root for a component that writes its own id attribute: the
+// resolved id is authoritative, so Attrs.ID is dropped from the map rather
+// than emitted alongside it. Two id attributes on one element is invalid HTML
+// and the browser keeps the FIRST, so a component that spread Attrs and then
+// wrote its own id beat the caller silently - worse than refusing the option.
+//
+// Every form control needs this, and so does every overlay whose sibling ids
+// are derived from its own: see controlID.
 func controlRoot(name, baseClass string, a Attrs) templ.Attributes {
 	out := root(name, baseClass, a)
 	delete(out, "id")

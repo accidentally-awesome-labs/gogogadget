@@ -2,7 +2,11 @@ package ui
 
 // RangeInputOpts is a slider.
 type RangeInputOpts struct {
-	Name           string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID string
 	Value          string
 	Min, Max, Step string
 	// ValueLabel is the human reading of the current value. A slider whose
@@ -17,9 +21,9 @@ type RangeInputOpts struct {
 templ RangeInput(o RangeInputOpts) {
 	<div class="flex items-center gap-3">
 		<input
-			{ root("range-input", "w-full", o.Attrs)... }
-			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
-			type="range" id={ o.Name } name={ o.Name } value={ o.Value }
+			{ controlRoot("range-input", "w-full", o.Attrs)... }
+			{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error})... }
+			type="range" id={ controlID(o.ID, o.Attrs, o.Name) } name={ o.Name } value={ o.Value }
 			if o.Min != "" {
 				min={ o.Min }
 			}

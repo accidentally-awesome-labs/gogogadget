@@ -1220,7 +1220,11 @@ each, `markdown-editor` four, and `card`, `carousel`, `command`, `data-grid`,
    module never patches the entry file.
 4. **A recurring structure?** A new `.templ` in
    `internal/web/templates/ui/`, exporting one or more renderers, each of the
-   shape `templ Name(o NameOpts)` where `NameOpts` embeds `ui.Attrs`. `ui`
+   shape `templ Name(o NameOpts)` where `NameOpts` declares a field `Attrs` of
+   type `ui.Attrs` — a named field, not an embed, so callers reach it as
+   `o.Attrs.ID`. If the renderer writes its own `id`, give it a top-level `ID`
+   too, resolve one value through `controlID`, and build the root with
+   `controlRoot`/`controlRootWith` so `Attrs.ID` cannot land beside it. `ui`
    imports templ and stdlib only — never `templates`, `billing`, `identity` or
    sqlc — and the compiler enforces that direction. Reuse the closed enums
    (`Kind`, `Size`, `Emphasis`, …) and map domain values onto them next to

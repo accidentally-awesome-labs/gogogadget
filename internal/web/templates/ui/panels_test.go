@@ -155,3 +155,33 @@ func TestPanelGroupRendersDeclaredContent(t *testing.T) {
 	assert.Equal(t, 1, strings.Count(html, `x-data="uiPanels"`))
 	assert.Contains(t, html, `data-panel-persist="demo"`)
 }
+
+// A panel's id names its scroll region, labels it through the heading derived
+// from that id, and is how the resize controller finds it. All three have to
+// agree: PanelGroup hands each Panel the caller's PanelData.Attrs, so a caller
+// who put the id there once got it on the <section> beside the panel's own -
+// two ids on one element, with aria-labelledby naming the loser.
+func TestPanelReferencesFollowWhicheverIDTheCallerSupplied(t *testing.T) {
+	declared := renderComponent(t, Panel(PanelOpts{
+		Panel: PanelData{ID: "left", Title: "List"}, Attrs: Attrs{ID: "escape-hatch"},
+	}))
+	assert.Contains(t, declared, `id="left"`, "PanelData.ID must outrank the generic Attrs.ID")
+	assert.Contains(t, declared, `data-panel="left"`)
+	assert.Contains(t, declared, `aria-labelledby="left-title"`)
+	assert.NotContains(t, declared, "escape-hatch",
+		"Attrs.ID stayed beside the id the panel owns; two ids on one element is invalid HTML")
+
+	fallback := renderComponent(t, Panel(PanelOpts{
+		Panel: PanelData{Title: "List"}, Attrs: Attrs{ID: "from-attrs"},
+	}))
+	assert.Contains(t, fallback, `id="from-attrs"`)
+	assert.Contains(t, fallback, `data-panel="from-attrs"`)
+	assert.Contains(t, fallback, `aria-labelledby="from-attrs-title"`)
+
+	// The handle is addressed the same way, and its own id is all it derives.
+	handle := renderComponent(t, PanelHandle(PanelHandleOpts{
+		ID: "left-handle-1", Label: "Resize", Attrs: Attrs{ID: "escape-hatch"},
+	}))
+	assert.Contains(t, handle, `id="left-handle-1"`)
+	assert.NotContains(t, handle, "escape-hatch")
+}

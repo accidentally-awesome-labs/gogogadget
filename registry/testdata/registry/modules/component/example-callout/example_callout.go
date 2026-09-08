@@ -9,9 +9,9 @@ package ui
 
 // ExampleCalloutOpts is the options struct the renderer takes. Every exported
 // renderer in this package has the shape `templ Name(o NameOpts)` and every
-// NameOpts embeds Attrs as the field Attrs, so a caller can set id, class, test
-// id, data, Alpine and HTMX without the component surrendering its own
-// semantics.
+// NameOpts declares a NAMED field Attrs of type Attrs - not an embed - so a
+// caller can set id, class, test id, data, Alpine and HTMX through o.Attrs
+// without the component surrendering its own semantics.
 type ExampleCalloutOpts struct {
 	Title string
 	Body  string

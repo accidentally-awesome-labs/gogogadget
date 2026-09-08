@@ -89,18 +89,18 @@ type PanelOpts struct {
 // rather than being an anonymous focus target.
 templ Panel(o PanelOpts) {
 	<section
-		{ root("panel", "min-w-0 min-h-0 overflow-auto", o.Attrs)... }
-		id={ o.Panel.ID }
-		data-panel={ o.Panel.ID }
+		{ controlRoot("panel", "min-w-0 min-h-0 overflow-auto", o.Attrs)... }
+		id={ controlID(o.Panel.ID, o.Attrs, "") }
+		data-panel={ controlID(o.Panel.ID, o.Attrs, "") }
 		data-panel-min={ fmt.Sprint(panelMin(o.Panel)) }
-		aria-labelledby={ o.Panel.ID + "-title" }
+		aria-labelledby={ controlID(o.Panel.ID, o.Attrs, "") + "-title" }
 		tabindex="0"
 	>
 		@Heading(HeadingOpts{
 			Text:  o.Panel.Title,
 			Level: panelLevel(o.Panel),
 			Size:  SizeSM,
-			Attrs: Attrs{ID: o.Panel.ID + "-title", Class: "mb-2"},
+			Attrs: Attrs{ID: controlID(o.Panel.ID, o.Attrs, "") + "-title", Class: "mb-2"},
 		})
 		// Declared content first, then any children the caller passes directly.
 		// Both paths exist because a group builds its panels from data while a
@@ -130,8 +130,8 @@ type PanelHandleOpts struct {
 // nothing.
 templ PanelHandle(o PanelHandleOpts) {
 	<div
-		{ root("panel-handle", panelHandleClass(o), o.Attrs)... }
-		id={ o.ID }
+		{ controlRoot("panel-handle", panelHandleClass(o), o.Attrs)... }
+		id={ controlID(o.ID, o.Attrs, "") }
 		role="separator"
 		tabindex="0"
 		aria-label={ o.Label }

@@ -4,7 +4,7 @@
     "id": "ggg/component/alert-dialog",
     "kind": "component",
     "name": "alert-dialog",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "AlertDialog",
     "description": "The AlertDialog renderer and its options.",
@@ -39,7 +39,7 @@
         "source": "internal/web/templates/ui/alert-dialog.templ",
         "target": "internal/web/templates/ui/alert-dialog.templ",
         "class": "templ",
-        "sha256": "4ae016c4e80dfdfb3fd78d1a4a568e8a6113810c08005a92a94e604163f03025",
+        "sha256": "b04bb30416bbe9ba9ea5c3e929a75951af5c9a96bb076001e80a1465c41894a6",
         "rewrite_module": true,
         "contract": true
       },
@@ -47,7 +47,7 @@
         "source": "internal/web/templates/ui/alert-dialog_test.go",
         "target": "internal/web/templates/ui/alert-dialog_test.go",
         "class": "test",
-        "sha256": "839d550a9ea3f19b42b9d00ee80001481b1cb0d88b8b348a254b94f9213a0481",
+        "sha256": "7bcf12a9d36b3ae2e740145aee7411b7a7a70b9148a2c7ff9720c1ee113fc5d0",
         "rewrite_module": true,
         "contract": false
       }

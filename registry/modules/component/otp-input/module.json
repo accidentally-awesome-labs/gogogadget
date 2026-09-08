@@ -4,7 +4,7 @@
     "id": "ggg/component/otp-input",
     "kind": "component",
     "name": "otp-input",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "OTPInput",
     "description": "The OTPInput renderer and its options.",
@@ -39,7 +39,7 @@
         "source": "internal/web/templates/ui/otp-input.templ",
         "target": "internal/web/templates/ui/otp-input.templ",
         "class": "templ",
-        "sha256": "a7a68dcf995f42d2e2ac42b2c488776c902992450b2bb71bd4b81e8e5a6c33df",
+        "sha256": "d657f3eff01ce8d34aa2094e6ebb399b3d4348985214256339c2de2a9730df48",
         "rewrite_module": true,
         "contract": true
       },

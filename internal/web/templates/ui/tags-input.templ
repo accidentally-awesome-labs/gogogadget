@@ -2,7 +2,11 @@ package ui
 
 // TagsInputOpts is a comma-separated tag field.
 type TagsInputOpts struct {
-	Name  string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID string
 	Value string
 	// Suggestions populate a datalist so the browser offers known tags without
 	// any custom popup.
@@ -18,16 +22,20 @@ type TagsInputOpts struct {
 // JavaScript, and the server parses the separator. A chip widget that keeps its
 // real value in hidden inputs loses everything the moment the script fails to
 // load, and cannot be edited with a keyboard without a custom keymap.
+//
+// The datalist is addressed from the resolved id, not from Name: two of these
+// in one table would otherwise share a datalist id, and every row's
+// suggestions would silently be the first row's.
 templ TagsInput(o TagsInputOpts) {
 	<input
-		{ rootWith("tags-input", inputClass(o.Size), o.Attrs,
+		{ controlRootWith("tags-input", inputClass(o.Size), o.Attrs,
 			"x-data", "uiTags",
-			"list", o.Name+"-suggestions")... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
-		type="text" id={ o.Name } name={ o.Name } value={ o.Value }
+			"list", controlID(o.ID, o.Attrs, o.Name)+"-suggestions")... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error})... }
+		type="text" id={ controlID(o.ID, o.Attrs, o.Name) } name={ o.Name } value={ o.Value }
 	/>
 	if len(o.Suggestions) > 0 {
-		<datalist id={ o.Name + "-suggestions" }>
+		<datalist id={ controlID(o.ID, o.Attrs, o.Name) + "-suggestions" }>
 			for _, opt := range o.Suggestions {
 				<option value={ opt.Value }>{ opt.Label }</option>
 			}

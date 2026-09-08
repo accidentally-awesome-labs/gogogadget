@@ -4,7 +4,11 @@ import "fmt"
 
 // OTPInputOpts is a one-time-code field.
 type OTPInputOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID string
 	Length      int
 	Hint, Error string
 	Size        Size
@@ -19,9 +23,9 @@ type OTPInputOpts struct {
 // offer the code from a message, and inputmode numeric brings up the keypad.
 templ OTPInput(o OTPInputOpts) {
 	<input
-		{ root("otp-input", inputClass(o.Size)+" text-center tracking-otp font-mono", o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: true})... }
-		type="text" id={ o.Name } name={ o.Name }
+		{ controlRoot("otp-input", inputClass(o.Size)+" text-center tracking-otp font-mono", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: true})... }
+		type="text" id={ controlID(o.ID, o.Attrs, o.Name) } name={ o.Name }
 		inputmode="numeric" autocomplete="one-time-code"
 		pattern="[0-9]*" maxlength={ fmt.Sprint(otpLength(o.Length)) }
 		required

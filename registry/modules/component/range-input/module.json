@@ -1,64 +1,64 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "The RangeInput renderer and its options.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "f798c7804ee21e4d3721a7149a08aaee164f9355f5b6b940ff881a1601d63e9a",
-        "source": "internal/web/templates/ui/range-input.templ",
-        "target": "internal/web/templates/ui/range-input.templ"
-      }
-    ],
     "id": "ggg/component/range-input",
     "kind": "component",
-    "migrations": [],
     "name": "range-input",
-    "removal_policy": "free",
+    "revision": 3,
+    "contract": 1,
+    "title": "RangeInput",
+    "description": "The RangeInput renderer and its options.",
     "requires": [
       {
+        "id": "ggg/component/field",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/component/field"
+          "min": 1,
+          "max": 1
+        }
       },
       {
+        "id": "ggg/element/ui-core",
         "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
+          "min": 1,
+          "max": 1
+        }
       }
     ],
-    "revision": 2,
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/templates/ui/range-input.templ",
+        "target": "internal/web/templates/ui/range-input.templ",
+        "class": "templ",
+        "sha256": "9c2c78994b68d7f8502d97285b314b1fe29cf5b01d5c28370615adeaef964bc8",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "forms",
           "name": "range-input",
+          "family": "forms",
           "signature": "templ RangeInput(o RangeInputOpts)",
+          "summary": "Renders a native slider with a text readout.",
           "states": [
             "default",
             "error"
-          ],
-          "summary": "Renders a native slider with a text readout."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "RangeInput"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

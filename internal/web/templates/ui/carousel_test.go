@@ -101,3 +101,25 @@ func TestSlideImageCarriesItsAlt(t *testing.T) {
 
 	assert.Contains(t, html, `alt="A wiring diagram"`)
 }
+
+// CarouselDots links to each slide's id, and the controller finds slides by
+// data-carousel-slide. Both have to name whichever id the slide actually
+// carries: a slide that took its id from Attrs.ID while the marker still read
+// the empty SlideData.ID would be unreachable from the dots and invisible to
+// the controller.
+func TestSlideMarkerFollowsWhicheverIDTheCallerSupplied(t *testing.T) {
+	declared := renderComponent(t, Slide(SlideOpts{
+		Slide: SlideData{ID: "slide-2", Title: "Second"}, Index: 2, Total: 3,
+		Attrs: Attrs{ID: "escape-hatch"},
+	}))
+	assert.Contains(t, declared, `id="slide-2"`, "SlideData.ID must outrank the generic Attrs.ID")
+	assert.Contains(t, declared, `data-carousel-slide="slide-2"`)
+	assert.NotContains(t, declared, "escape-hatch",
+		"Attrs.ID stayed beside the id the slide owns; two ids on one element is invalid HTML")
+
+	fallback := renderComponent(t, Slide(SlideOpts{
+		Slide: SlideData{Title: "Second"}, Index: 2, Total: 3, Attrs: Attrs{ID: "from-attrs"},
+	}))
+	assert.Contains(t, fallback, `id="from-attrs"`)
+	assert.Contains(t, fallback, `data-carousel-slide="from-attrs"`)
+}

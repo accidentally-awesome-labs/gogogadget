@@ -88,7 +88,7 @@
     },
     {
       "path": "registry/modules/component/alert-dialog/module.json",
-      "sha256": "d35427dc58532bfe23e369fc5c16915cbc409657cac22a9fd4b4e00b1625ddd2"
+      "sha256": "7443827decfb31d3f324bef4bb962cda8dbd8da5b8e79c4c460ca2496003465d"
     },
     {
       "path": "registry/modules/component/aspect-ratio/module.json",
@@ -124,7 +124,7 @@
     },
     {
       "path": "registry/modules/component/carousel/module.json",
-      "sha256": "36f4e151d792e03310a68812731a98eaf3c939e21e4cd25b1f19bcfda0d2e251"
+      "sha256": "57154422b03b270aea6b0e9d65e492c10c0d2646ef292d091bce203324b064a9"
     },
     {
       "path": "registry/modules/component/center/module.json",
@@ -232,7 +232,7 @@
     },
     {
       "path": "registry/modules/component/dialog/module.json",
-      "sha256": "68afc5eccc5a097a904aa62a527505f12274b1bb0d582d9e8ceaae262bbdfce2"
+      "sha256": "07c57303c547b29a764e21956bd3caa1929fa7cef670423f1f0be98bdf4acd41"
     },
     {
       "path": "registry/modules/component/disclosure/module.json",
@@ -240,7 +240,7 @@
     },
     {
       "path": "registry/modules/component/drawer/module.json",
-      "sha256": "1061d7c79cc445703533b380fc38b1405e5b0d4999cd132c752e364405d70586"
+      "sha256": "ec6224c36bbce50c21b324ebdcdb4e216eed1af91546c4d6818e7165cd6f209a"
     },
     {
       "path": "registry/modules/component/dropdown-menu/module.json",
@@ -376,7 +376,7 @@
     },
     {
       "path": "registry/modules/component/otp-input/module.json",
-      "sha256": "a4dbb3164ae7d1d47a73e712e4a4b0e345e5ce00c89f9bfb9175c833dfee87ff"
+      "sha256": "d947b5abc9a640afd69c63ad22f24f4a7638abac9a23dd3935f12625cd83b517"
     },
     {
       "path": "registry/modules/component/page-header/module.json",
@@ -388,11 +388,11 @@
     },
     {
       "path": "registry/modules/component/panels/module.json",
-      "sha256": "957450cc24ddf4fce1a7802ac80a992d0f9c8857dcbb14b3cee9c4d36fd6c2e2"
+      "sha256": "5116452993ffadd40be521d72051ff0dd7f49e69bcc93421836cb2c1efd6f800"
     },
     {
       "path": "registry/modules/component/password-input/module.json",
-      "sha256": "99bead76ab1c5a7ec5286969e70daa74ad6cbf95a6e5edbc3d3d6178bc746103"
+      "sha256": "be19fab3b69d22bfe1ae2922b145accec6b8e430240c648941c5bf40723b66e4"
     },
     {
       "path": "registry/modules/component/plan-card/module.json",
@@ -420,7 +420,7 @@
     },
     {
       "path": "registry/modules/component/range-input/module.json",
-      "sha256": "79dd88f32e3ed1cf3e5fcc616a0b7009fa19a6c52d6c57b057f4dca11a5cb3ba"
+      "sha256": "565d1af878c29bb527a3125ad0946d6e38e0d2fea3a61eacd7e308f510ab2030"
     },
     {
       "path": "registry/modules/component/row-actions/module.json",
@@ -468,7 +468,7 @@
     },
     {
       "path": "registry/modules/component/slug-input/module.json",
-      "sha256": "7bf6a9eec07d813830efa4a0fe2b61712aee089f26f88f7b0514f64b802ec3cf"
+      "sha256": "ab238eea3d6afe23d1732423ff1724f7c97c7d666a79107fb1473703c13b15b9"
     },
     {
       "path": "registry/modules/component/split/module.json",
@@ -524,7 +524,7 @@
     },
     {
       "path": "registry/modules/component/tags-input/module.json",
-      "sha256": "1eb65916a93f392a31ea73ff57d610ed5e9d730c62d45f6b208842cd4342c7de"
+      "sha256": "03d4fc578ebcd2728a2dacc1f898a16c50bdbfe646cf31498b37fc754919499c"
     },
     {
       "path": "registry/modules/component/terminal-page/module.json",
@@ -536,7 +536,7 @@
     },
     {
       "path": "registry/modules/component/textarea/module.json",
-      "sha256": "e166dcd2f6d493ff7dd0988c6be5413f41cd1aa08345311fed99ca11d5ae6a77"
+      "sha256": "10b8c13d20987bf8793a435e9391edc997c8757e9975a683fb66e2f28467cbeb"
     },
     {
       "path": "registry/modules/component/theme-toggle/module.json",
@@ -548,7 +548,7 @@
     },
     {
       "path": "registry/modules/component/time-field/module.json",
-      "sha256": "060b8dfaf4443c053b3a4f245bca514f3a4bdaca5f12922e25b09f9da8d6b6ca"
+      "sha256": "2b5bb3fee1a448576310dc266dd053cb37c6307f082a32b43622a7d2b7b67011"
     },
     {
       "path": "registry/modules/component/timeline/module.json",
@@ -660,7 +660,7 @@
     },
     {
       "path": "registry/modules/element/ui-core/module.json",
-      "sha256": "47f3b50a0baa601610b76f5d0ce52581afb9d7a6412768a0d447db952f09002e"
+      "sha256": "5ddf56036ae8b6ea39f8f45e366b2d80c80591aa83a4f0889a51dcb91717fa3b"
     },
     {
       "path": "registry/modules/element/visually-hidden/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "15877e8b0b5ea5dbb46192d5756ff00d6b20cb1df4dcd6641212ac95ebaef97a"
+      "sha256": "05a2dfd3292e42d87ab3a402c707909068ceb7717c194f5c7db689fee4fe4266"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "96ea9590097377912cff2f7125fb57ebd4585e46923fd04580818cc20ca802b0"
+      "sha256": "3cdd0e4e81e033c7acfafaefe355b038566d7cf798b139565e36fe3c855a03ca"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "b4a42d123f3ccc0b4bf097c938b81e36abc27b82d34cf54b47f8c7df4a4b83c3"
+      "sha256": "337f260a4a55c70637cec8aa3591eed99d94d0c07d11179d8df619957da52d9f"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1340,7 +1340,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/component/example-callout/example_callout.go",
-      "sha256": "4eeabadbd423ddeed823e78088f66bcf73ec92034f311b8e34e4549af0a536e0"
+      "sha256": "e5890cfa8b9379ff47117a1fe31b5b8411008b11e2c0fae095bac9b2c0c62d26"
     },
     {
       "path": "registry/testdata/registry/modules/component/example-callout/example_callout_test.go",
@@ -1348,7 +1348,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/component/example-callout/module.json",
-      "sha256": "57215a428797a6db102bbfc16e143e9cd6148b505113e4ad663804d7b0b92ad0"
+      "sha256": "395557776d8c3c597114079f2b3c014d7c5f04bdd0690b0344548f0b78b51691"
     },
     {
       "path": "registry/testdata/registry/modules/element/example-token/example_token.css",

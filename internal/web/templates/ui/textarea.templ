@@ -6,18 +6,23 @@ import (
 
 // TextareaOpts configures a multi-line input.
 type TextareaOpts struct {
-	Name, Value, Placeholder string
-	Rows                     int
-	Required                 bool
-	Size                     Size
-	Attrs                    Attrs
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID                  string
+	Value, Placeholder  string
+	Rows                int
+	Required            bool
+	Size                Size
+	Attrs               Attrs
 }
 
 // Textarea is a multi-line text input.
 templ Textarea(o TextareaOpts) {
 	<textarea
-		{ root("textarea", inputClass(o.Size), o.Attrs)... }
-		id={ o.Name } name={ o.Name } rows={ fmt.Sprint(o.Rows) }
+		{ controlRoot("textarea", inputClass(o.Size), o.Attrs)... }
+		id={ controlID(o.ID, o.Attrs, o.Name) } name={ o.Name } rows={ fmt.Sprint(o.Rows) }
 		placeholder={ o.Placeholder }
 		required?={ o.Required }
 	>{ o.Value }</textarea>
