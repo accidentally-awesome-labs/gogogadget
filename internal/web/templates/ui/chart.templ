@@ -160,7 +160,7 @@ templ ChartLegend(o ChartLegendOpts) {
 	<ul { rootWith("chart-legend", "flex flex-wrap gap-4 text-sm", o.Attrs, "role", "list")... }>
 		for _, series := range o.Series {
 			<li class="inline-flex items-center gap-2">
-				<span class={ "w-3 h-3 rounded-sm shrink-0 bg-" + string(NormalizeKind(series.Kind)) } aria-hidden="true"></span>
+				<span class={ "w-3 h-3 rounded-sm shrink-0 " + KindFillClass(series.Kind) } aria-hidden="true"></span>
 				{ series.Label }
 			</li>
 		}

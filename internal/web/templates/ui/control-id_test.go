@@ -360,17 +360,38 @@ func idValue(tag string) (string, bool) {
 // is where the collision lives: Attrs.ID alone is what a caller reaches for
 // when no ID option exists, and ID-and-Attrs.ID together is what happens when
 // one is added later.
+//
+// The fifth probe fills every collection reflectively (see fillOpts), because
+// the population being universal is not the same as the STIMULUS being
+// universal. rendererSeeds is a 13-entry hand table, and an element rendered
+// only inside a branch its values never reach was never scanned: a span with
+// two id attributes inside DropdownMenu's o.Items loop passed every probe,
+// because DropdownMenu is seeded with an ID and a Label and no Items.
+//
+// One more thing worth stating here rather than leaving to be rediscovered: a
+// renderer that renders NO element passes this loop silently, because there
+// are no start tags to scan and the only floor is catalogue-wide. That is not
+// exploitable, and the reason lives in another file —
+// TestEveryRendererPropagatesItsAttrs requires data-testid="probe-id" in the
+// output of every registry renderer, so a renderer that rendered nothing goes
+// red there. This guard's universality depends on that one.
 func TestNoRendererEmitsTwoIDsOnOneElement(t *testing.T) {
-	type probe struct{ name, id, attrsID string }
+	type probe struct {
+		name, id, attrsID string
+		fill, flags       bool
+	}
 	probes := []probe{
 		{name: "neither"},
 		{name: "attrs id only", attrsID: "probe-attrs"},
 		{name: "id only", id: "probe-id"},
 		{name: "both", id: "probe-id", attrsID: "probe-attrs"},
+		{name: "collections filled", id: "probe-id", attrsID: "probe-attrs", fill: true},
+		{name: "collections filled, flags set", id: "probe-id", attrsID: "probe-attrs", fill: true, flags: true},
 	}
-	identified := 0
+	identified, deepened := 0, 0
 	for renderer, raw := range renderers() {
 		fn := reflect.ValueOf(raw)
+		elements := map[string]int{}
 		for _, p := range probes {
 			opts := seededOpts(t, renderer, fn)
 			if hasStringField(opts, "Name") {
@@ -384,8 +405,13 @@ func TestNoRendererEmitsTwoIDsOnOneElement(t *testing.T) {
 					id.SetString(p.attrsID)
 				}
 			}
+			if p.fill {
+				fillOpts(opts, 4, p.flags)
+			}
 			html := renderComponent(t, fn.Call([]reflect.Value{opts})[0].Interface().(templ.Component))
-			for _, tag := range startTags(html) {
+			tags := startTags(html)
+			elements[p.name] = len(tags)
+			for _, tag := range tags {
 				switch n := idAttributes(tag); {
 				case n == 1:
 					identified++
@@ -396,9 +422,18 @@ func TestNoRendererEmitsTwoIDsOnOneElement(t *testing.T) {
 				}
 			}
 		}
+		if max(elements["collections filled"], elements["collections filled, flags set"]) > elements["both"] {
+			deepened++
+		}
 	}
 	require.Greater(t, identified, 30,
 		"only %d elements carried an id across the whole catalog; the tag scan has collapsed, not the catalog", identified)
+	// The stimulus floor. If filling the collections stopped reaching further
+	// than the seeds do, the fifth probe has become a copy of the fourth and
+	// every branch behind a collection is unscanned again - which is the state
+	// this probe exists to end, and it looks identical to a clean catalogue.
+	require.Greater(t, deepened, 40,
+		"filling the collections rendered more elements for only %d renderers; the reflective seeding has collapsed", deepened)
 }
 
 // startTags returns the raw source of every start or self-closing tag in html.

@@ -53,7 +53,7 @@ func StatusDot(o StatusDotOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{"w-2 h-2 rounded-full shrink-0 bg-" + string(NormalizeKind(o.Kind))}
+		var templ_7745c5c3_Var2 = []any{"w-2 h-2 rounded-full shrink-0 " + KindFillClass(o.Kind)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

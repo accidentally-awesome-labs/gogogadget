@@ -84,7 +84,7 @@
         "source": "internal/web/csp_test.go",
         "target": "internal/web/csp_test.go",
         "class": "test",
-        "sha256": "f6a639fdf617302d1e530b4476411c19c4e08fcb2a151fe589ed8c34d5f569e2",
+        "sha256": "6046bfa4242b715dc8745d032c579379ed1842fb12c8e47d2dea4b6cc1b9e6eb",
         "rewrite_module": true,
         "contract": false
       },

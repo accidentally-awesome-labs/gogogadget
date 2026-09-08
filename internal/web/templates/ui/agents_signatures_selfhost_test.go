@@ -61,24 +61,33 @@ func figure(t *testing.T, bullet, pattern string) int {
 }
 
 // exportedRenderers lists every exported renderer in this package, derived
-// from the generated templ output rather than from a regexp over the .templ
+// from the AST of its Go files rather than from a regexp over the .templ
 // sources — which is how 172 and 175 came to disagree.
+//
+// Every Go file, not only the generated templ output: a renderer hand-written
+// in a plain .go file is exported, installed and rendered like any other, and
+// while the glob read *_templ.go it was invisible here too — so it could
+// carry no ReferenceRegistry entry and no allow-list mention and still leave
+// both counts agreeing.
 func exportedRenderers(t *testing.T) []string {
 	t.Helper()
 	fset := token.NewFileSet()
-	files, err := filepath.Glob("*_templ.go")
+	entries, err := os.ReadDir(".")
 	if err != nil {
-		t.Fatalf("glob templ output: %v", err)
-	}
-	if len(files) == 0 {
-		t.Fatal("no *_templ.go in this package; run `make generate` before this check can answer")
+		t.Fatalf("read package directory: %v", err)
 	}
 	var renderers []string
-	for _, path := range files {
-		parsed, err := parser.ParseFile(fset, path, nil, 0)
-		if err != nil {
-			t.Fatalf("parse %s: %v", path, err)
+	scanned := 0
+	for _, entry := range entries {
+		path := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			continue
 		}
+		parsed, parseErr := parser.ParseFile(fset, path, nil, 0)
+		if parseErr != nil {
+			t.Fatalf("parse %s: %v", path, parseErr)
+		}
+		scanned++
 		for _, decl := range parsed.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
 			if !ok || fn.Recv != nil || !fn.Name.IsExported() || !returnsTemplComponent(fn) {
@@ -86,6 +95,9 @@ func exportedRenderers(t *testing.T) []string {
 			}
 			renderers = append(renderers, fn.Name.Name)
 		}
+	}
+	if scanned < 100 {
+		t.Fatalf("only %d non-test .go files in this package; run `make generate` before this check can answer", scanned)
 	}
 	sort.Strings(renderers)
 	return renderers

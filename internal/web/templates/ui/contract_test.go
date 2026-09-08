@@ -24,9 +24,22 @@ import (
 // component-owned semantics are protected from callers.
 func TestEveryExportedRendererTakesOneOptionsStruct(t *testing.T) {
 	fset := token.NewFileSet()
-	files, err := filepath.Glob("*_templ.go")
+	// Every non-test Go file, for the reason exportedRendererNames records: a
+	// renderer hand-written in a plain .go file takes whatever arguments it
+	// likes, and while this scan globbed *_templ.go it was exempt from the one
+	// contract that makes the catalogue uniform.
+	entries, err := os.ReadDir(".")
 	require.NoError(t, err)
-	require.NotEmpty(t, files)
+	var files []string
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		files = append(files, name)
+	}
+	require.Greater(t, len(files), 100,
+		"only %d non-test .go files found; the scan is looking in the wrong place", len(files))
 
 	checked := 0
 	for _, path := range files {
@@ -246,6 +259,105 @@ func setOptsFields(t *testing.T, name string, opts reflect.Value, fields map[str
 	}
 }
 
+// fillOpts populates every zero-valued field an options struct exposes, so a
+// branch that only runs when a collection is non-empty actually runs.
+//
+// rendererSeeds is a 13-entry hand table, and it decides which branches of 174
+// renderers ever render. That makes it the STIMULUS version of a
+// declaration-filtered population: DropdownMenu is seeded with an ID and a
+// Label but not with Items, so the loop over its items never executed under
+// any probe, and a span carrying two id attributes inside that loop rendered
+// on every production menu in the catalogue while both packages stayed green.
+//
+// So the collections are filled reflectively rather than named. Only zero
+// values are written, which leaves every seed and every probe value intact,
+// and the descent stops at three levels because the shapes here are data
+// structs and a cycle would otherwise be unbounded. Interfaces, functions and
+// channels are left nil: a templ.Component field is a caller's children, and
+// synthesising one would assert about this test's markup rather than the
+// renderer's.
+func fillOpts(opts reflect.Value, depth int, flag bool) {
+	if depth <= 0 || !opts.IsValid() {
+		return
+	}
+	switch opts.Kind() {
+	case reflect.Struct:
+		for i := range opts.NumField() {
+			field := opts.Field(i)
+			if !field.CanSet() {
+				continue
+			}
+			// Attrs is the probe's own axis; filling it would overwrite the
+			// id being tested and put a class on every element.
+			if opts.Type().Field(i).Name == "Attrs" {
+				continue
+			}
+			fillOpts(field, depth-1, flag)
+		}
+	case reflect.Slice:
+		if !opts.IsNil() && opts.Len() > 0 {
+			for i := range opts.Len() {
+				fillOpts(opts.Index(i), depth-1, flag)
+			}
+			return
+		}
+		// Two elements, not one: a separator, a divider or an "and N more"
+		// branch commonly renders only between items.
+		filled := reflect.MakeSlice(opts.Type(), 2, 2)
+		for i := range 2 {
+			// The two elements disagree about every boolean, so a branch that
+			// runs only for a flagged item and a branch that runs only for an
+			// unflagged one are both rendered in one pass. A separator is a
+			// bool on MenuItem, and two separators would have hidden the
+			// acting branch as surely as none hid the separator.
+			fillOpts(filled.Index(i), depth-1, i == 1 != flag)
+		}
+		opts.Set(filled)
+	case reflect.Map:
+		if !opts.IsNil() && opts.Len() > 0 {
+			return
+		}
+		key := reflect.New(opts.Type().Key()).Elem()
+		fillOpts(key, depth-1, flag)
+		value := reflect.New(opts.Type().Elem()).Elem()
+		fillOpts(value, depth-1, flag)
+		filled := reflect.MakeMap(opts.Type())
+		filled.SetMapIndex(key, value)
+		opts.Set(filled)
+	case reflect.Pointer:
+		if !opts.IsNil() {
+			fillOpts(opts.Elem(), depth-1, flag)
+			return
+		}
+		allocated := reflect.New(opts.Type().Elem())
+		fillOpts(allocated.Elem(), depth-1, flag)
+		opts.Set(allocated)
+	case reflect.Bool:
+		// Only ever set, never cleared: a seed that declared a flag true keeps
+		// it, and the flag axis is covered by running the probe both ways.
+		if !opts.Bool() && flag {
+			opts.SetBool(true)
+		}
+	case reflect.String:
+		if opts.Len() == 0 {
+			opts.SetString("probe")
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		if opts.Int() == 0 {
+			opts.SetInt(1)
+		}
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		if opts.Uint() == 0 {
+			opts.SetUint(1)
+		}
+	case reflect.Float32, reflect.Float64:
+		if opts.Float() == 0 {
+			opts.SetFloat(1)
+		}
+	default:
+	}
+}
+
 // renderers is every renderer this project installed, keyed by symbol.
 //
 // It is the generated registry - rendered from the same runtime.ui declarations
@@ -264,17 +376,39 @@ func renderers() map[string]any {
 // declared field's type against the type a caller passes.
 func typeOf(v any) reflect.Type { return reflect.TypeOf(v) }
 
-// exportedRendererNames returns every exported function in the generated templ
-// output that returns a templ.Component.
+// exportedRendererNames returns every exported function in this package that
+// returns a templ.Component.
+//
+// The population is the package's Go files, not its generated templ output.
+// Globbing *_templ.go was right about one thing - a regexp over the .templ
+// sources is how the counts 172 and 175 came to disagree, so the AST of
+// compiled Go is the honest reading - and wrong about the file kind: a
+// renderer hand-written in a plain .go file compiles, exports and renders
+// exactly like a generated one, and was in NEITHER population. One such file
+// voided four contracts at once with a green build: it took no options
+// struct, ignored Attrs entirely, put two ids on one element and rendered two
+// prohibited utilities. Zero exist today; the package already holds eight
+// hand-written .go files and CSRFField is already a hand-added registry
+// entry, so "a renderer the registry does not know about" is a shape this
+// package already has.
+//
+// Test files are excluded: a renderer declared in a _test.go is not installed
+// and cannot be reached by a page.
 func exportedRendererNames(t *testing.T) []string {
 	t.Helper()
 	fset := token.NewFileSet()
-	files, err := filepath.Glob("*_templ.go")
+	entries, err := os.ReadDir(".")
 	require.NoError(t, err)
 	var out []string
-	for _, path := range files {
+	scanned := 0
+	for _, entry := range entries {
+		path := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			continue
+		}
 		parsed, parseErr := parser.ParseFile(fset, path, nil, 0)
 		require.NoError(t, parseErr)
+		scanned++
 		for _, decl := range parsed.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
 			if !ok || fn.Recv != nil || !fn.Name.IsExported() || !returnsTemplComponent(fn) {
@@ -283,6 +417,8 @@ func exportedRendererNames(t *testing.T) []string {
 			out = append(out, fn.Name.Name)
 		}
 	}
+	require.Greater(t, scanned, 100,
+		"only %d non-test .go files parsed; the scan is looking in the wrong place", scanned)
 	require.NotEmpty(t, out)
 	return out
 }

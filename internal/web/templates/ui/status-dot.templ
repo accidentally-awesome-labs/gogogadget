@@ -14,7 +14,7 @@ type StatusDotOpts struct {
 // StatusDot renders a state dot with its label.
 templ StatusDot(o StatusDotOpts) {
 	<span { root("status-dot", "inline-flex items-center gap-2 text-sm", o.Attrs)... }>
-		<span class={ "w-2 h-2 rounded-full shrink-0 bg-" + string(NormalizeKind(o.Kind)) } aria-hidden="true"></span>
+		<span class={ "w-2 h-2 rounded-full shrink-0 " + KindFillClass(o.Kind) } aria-hidden="true"></span>
 		{ o.Label }
 	</span>
 }

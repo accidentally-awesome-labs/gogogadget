@@ -132,6 +132,36 @@ func menuItemRequests(item MenuItem) bool {
 	return false
 }
 
+// KindFillClass maps a semantic kind onto the solid background utility that
+// paints it.
+//
+// A switch rather than "bg-" + string(kind), and the difference is a rendered
+// class with no declaration. Tailwind decides what to emit by scanning source
+// TEXT, so a class assembled by concatenation is a class the build never sees:
+// bg-brand, bg-success, bg-danger and bg-neutral survived only because other
+// components happen to write them literally, while bg-info and bg-warn were
+// written nowhere at all — so a StatusDot or a chart legend swatch with either
+// of those kinds rendered a shape with no colour in it. Six literals here is
+// what puts six rules in static/app.css.
+//
+// Exported because the renderers that need it are other modules' — the same
+// reason MenuItem lives in this file.
+func KindFillClass(kind Kind) string {
+	switch NormalizeKind(kind) {
+	case KindBrand:
+		return "bg-brand"
+	case KindInfo:
+		return "bg-info"
+	case KindSuccess:
+		return "bg-success"
+	case KindWarn:
+		return "bg-warn"
+	case KindDanger:
+		return "bg-danger"
+	}
+	return "bg-neutral"
+}
+
 func gapClass(gap Gap) string {
 	switch gap.Value() {
 	case GapNone:

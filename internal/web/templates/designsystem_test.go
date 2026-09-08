@@ -117,19 +117,66 @@ func ruleMatches(rule designRule, src string) [][]int {
 	return rejected
 }
 
-func TestDesignSystemLayering(t *testing.T) {
-	sources := templFiles(t)
-	require.NotEmpty(t, sources, "no .templ files found — the scanner is looking in the wrong place")
+// designExemptions is the only place a rule does not apply, keyed by rule name
+// and by the path the walk below reports.
+//
+// theme.go is the surface AGENTS.md already names as the single exception to
+// the token rule: an HTML email has no stylesheet to load, so its colour has
+// to be inline. It needed no entry for as long as the scan read `.templ` only
+// — nothing looked at it — and an exemption a population makes unnecessary is
+// the tell that the population is too small.
+//
+// Every entry is checked BOTH ways below: an exemption whose file no longer
+// violates its rule fails as stale, because a skip nobody needs is a skip
+// standing ready to hide the next violation.
+func designExemptions() map[string][]string {
+	return map[string][]string{"raw hex colour": {"theme.go"}}
+}
 
+func TestDesignSystemLayering(t *testing.T) {
+	sources := designSources(t)
+
+	// Floors, one per file kind, so a walk that collapsed cannot report a
+	// clean tree. Both are load-bearing: the `.templ` half regressed to a
+	// `.`-only glob once already, and the `.go` half is new, so its own
+	// collapse would look exactly like the state this scan replaced.
+	markup, code := 0, 0
+	for path := range sources {
+		if strings.HasSuffix(path, ".templ") {
+			markup++
+			continue
+		}
+		code++
+	}
+	require.Greater(t, markup, 150,
+		"only %d .templ files found; the walk is looking in the wrong place, not the tree at a clean one", markup)
+	require.Greater(t, code, 15,
+		"only %d hand-written .go files found; a class string composed in Go is the same class string in the browser", code)
+
+	exempt := designExemptions()
+	skipped := map[string]int{}
 	rules := designRules()
 	for name, src := range sources {
 		for _, rule := range rules {
-			for _, loc := range ruleMatches(rule, src) {
+			matches := ruleMatches(rule, src)
+			if len(matches) > 0 && slices.Contains(exempt[rule.name], name) {
+				skipped[rule.name+"\x00"+name] += len(matches)
+				continue
+			}
+			for _, loc := range matches {
 				assert.Fail(t,
 					"design-system violation",
 					"%s:%d — %s — %q\nfix: %s",
 					name, lineOf(src, loc[0]), rule.name, src[loc[0]:loc[1]], rule.fix)
 			}
+		}
+	}
+	for rule, paths := range exempt {
+		for _, path := range paths {
+			require.Containsf(t, sources, path,
+				"the %q rule exempts %s and the scan never reads that file, so the exemption is a note about a file nobody checks", rule, path)
+			assert.Greaterf(t, skipped[rule+"\x00"+path], 0,
+				"%s no longer violates the %q rule, so its exemption is stale — delete it before it hides the next violation", path, rule)
 		}
 	}
 }
@@ -145,15 +192,32 @@ func TestIconRegistryIsComplete(t *testing.T) {
 	}
 }
 
-// Every semantic kind must resolve to a real component class, in every family
-// that takes a ui.Kind. A typo'd or unregistered kind renders "badge-" and no
-// templFiles walks the whole tree, not just this directory. It read only `.`
-// for a long time, which meant every rule below - raw hex, `dark:` variants,
-// palette ramps, `!` overrides, arbitrary lengths, templ expressions inside
-// quoted attributes - was enforced on the page templates and on none of the 172
-// renderers in ui/, where the design system actually lives. The tests passed
-// because they were looking at the wrong files.
-func templFiles(t *testing.T) map[string]string {
+// designSources is the population every design rule is enforced over: two file
+// kinds, both derived by walking the tree rather than named.
+//
+// The `.templ` half walks the whole tree, not just this directory. It read
+// only `.` for a long time, which meant every rule above - raw hex, `dark:`
+// variants, palette ramps, `!` overrides, arbitrary lengths, templ expressions
+// inside quoted attributes - was enforced on the page templates and on none of
+// the 145 renderers in ui/, where the design system actually lives. The tests
+// passed because they were looking at the wrong files.
+//
+// The hand-written `.go` half is here for the same reason one directory up: a
+// class string composed in Go is the same class string in the browser, and it
+// reaches further. menuItemClass in ui/shared.go is rendered on every item of
+// every menu in the catalog (ContextMenu, Menubar, RowActions and Kanban all
+// delegate to it), mergeClasses in ui/root.go touches every component root,
+// and ui_adapters.go composes markup for the page templates. For as long as
+// the scan read `.templ` only, all eighteen of those files were unscanned -
+// which is precisely why theme.go's email hex needed no exemption entry.
+//
+// Generated `*_templ.go` is deliberately OUT, and the reason is a different
+// gate rather than an oversight: templ emits it from the `.templ` files this
+// walk already reads, so the only way a prohibited utility enters a mirror is
+// a hand edit, and `ggg check` regenerates before it gates - a hand-edited
+// mirror is generated drift (exit 4). Scanning both would report one authored
+// violation twice and leave every failure ambiguous about which file to fix.
+func designSources(t *testing.T) map[string]string {
 	t.Helper()
 	// go test runs with cwd = the package directory.
 	out := map[string]string{}
@@ -161,7 +225,7 @@ func templFiles(t *testing.T) map[string]string {
 		if err != nil {
 			return err
 		}
-		if entry.IsDir() || !strings.HasSuffix(path, ".templ") {
+		if entry.IsDir() || !designScannedKind(path) {
 			return nil
 		}
 		body, readErr := os.ReadFile(path)
@@ -173,6 +237,21 @@ func templFiles(t *testing.T) map[string]string {
 	}))
 	require.NotEmpty(t, out)
 	return out
+}
+
+// designScannedKind reports whether one path is authored source the design
+// rules apply to: markup, or the Go that composes markup. Generated templ
+// output and test files are not authored surfaces - the first is derived from
+// markup already in the set, the second never reaches a browser.
+func designScannedKind(path string) bool {
+	switch {
+	case strings.HasSuffix(path, ".templ"):
+		return true
+	case strings.HasSuffix(path, "_templ.go"), strings.HasSuffix(path, "_test.go"):
+		return false
+	default:
+		return strings.HasSuffix(path, ".go")
+	}
 }
 
 func renderComponent(t *testing.T, c templ.Component) string {
@@ -1025,42 +1104,95 @@ func TestNoTemplateHandRollsAForm(t *testing.T) {
 // in markup, and a Confirm field on a ui.MenuItem or ui.HX literal. The dev
 // gallery, its fragments and the scenario pages are excluded by design - their
 // prompts are demonstrations rather than product copy, and frontend.md says so.
+//
+// The scan was non-recursive, and "on a PRODUCTION page" is not a statement
+// about one directory: a literal hx-confirm inside RowActions or DropdownMenu
+// puts window.confirm on every production page that renders a row menu, and a
+// literal in slots/ puts it in the shell of every authenticated page. Both
+// escaped; only the top-level plant was caught.
+//
+// Recursion alone was assumed to false-positive, because ui/ legitimately
+// implements the escape hatch AGENTS.md promises. MEASURED at HEAD: a
+// recursive scan over all 180 non-dev .templ files in this tree hits NOTHING.
+// The escape hatch is implemented in Go - ui/shared.go emits the attribute
+// from MenuItem.Confirm and ui/attrs_build.go from Attrs.HX.Confirm - so no
+// markup renders it and there was nothing to skip. The two Go emitters are in
+// scope here for the same reason the design rules now read Go: an attribute
+// composed in Go reaches the browser identically.
+//
+// So the rule is one rule with a component-layer clause rather than a
+// directory skip. In ui/ the attribute may be emitted only from a caller's
+// Confirm field, never from a literal — which is exactly the escape hatch,
+// stated as a constraint instead of an exemption, so the hatch cannot widen
+// into a prompt a ui renderer writes itself.
+//
+// Generated files are out. *_templ.go mirrors carry whatever the .templ says
+// and a hand edit is generated drift; *_gen.go is emitted from manifest
+// declarations and its prose documents the attribute (reference_gen.go's
+// guidance for ConfirmAction names it twice), which is documentation, not
+// markup.
 func TestNoProductionTemplateFallsBackToWindowConfirm(t *testing.T) {
-	files, err := filepath.Glob("*.templ")
-	require.NoError(t, err)
-	require.NotEmpty(t, files)
-
 	// A dev-only surface names itself. A new one that forgets the prefix is
 	// scanned as production and fails here, which is the safe direction to be
 	// wrong in.
 	devPrefixes := []string{"dev_", "gallery", "scenario_"}
 	confirms := regexp.MustCompile(`hx-confirm|\bConfirm:`)
+	// A caller-supplied value arrives through a selector. A literal never does.
+	fromCallerField := regexp.MustCompile(`\.Confirm\b`)
 
-	scanned := 0
-	for _, file := range files {
-		if slices.ContainsFunc(devPrefixes, func(p string) bool { return strings.HasPrefix(file, p) }) {
+	markup, code, fieldSourced := 0, 0, 0
+	for file, body := range designSources(t) {
+		if slices.ContainsFunc(devPrefixes, func(p string) bool { return strings.HasPrefix(filepath.Base(file), p) }) {
 			continue
 		}
-		body, err := os.ReadFile(file)
-		require.NoError(t, err)
-		scanned++
+		if strings.HasSuffix(file, "_gen.go") {
+			continue
+		}
+		if strings.HasSuffix(file, ".templ") {
+			markup++
+		} else {
+			code++
+		}
+		component := strings.HasPrefix(filepath.ToSlash(file), "ui/")
 		// Line-by-line, skipping comments: several production templates explain
 		// in prose why hx-confirm is gone, and a rule that cannot tell markup
 		// from a comment is a rule the first person to hit it deletes.
-		for i, line := range strings.Split(string(body), "\n") {
-			if strings.HasPrefix(strings.TrimSpace(line), "//") {
+		for i, line := range strings.Split(body, "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "//") || !confirms.MatchString(line) {
 				continue
 			}
-			if confirms.MatchString(line) {
-				assert.Fail(t,
-					"window.confirm fallback",
-					"%s:%d — a production surface must not gate an action with hx-confirm\n"+
-						"fix: @ui.ConfirmAction(ui.ConfirmActionOpts{...}) — the same HX rides the "+
-						"dialog's confirm control, and the copy becomes translatable and assertable",
-					file, i+1)
+			if component && fromCallerField.MatchString(line) {
+				fieldSourced++
+				continue
 			}
+			if component {
+				assert.Fail(t,
+					"literal confirmation prompt in a component",
+					"%s:%d — a ui/ renderer may emit hx-confirm only from a caller-supplied Confirm field, never a literal\n"+
+						"fix: this layer implements the escape hatch, it does not use it. Take the prompt as "+
+						"MenuItem.Confirm or Attrs.HX.Confirm and spread it, or gate the action with "+
+						"ui.ConfirmAction — a literal here renders window.confirm on every production page that "+
+						"renders this component",
+					file, i+1)
+				continue
+			}
+			assert.Fail(t,
+				"window.confirm fallback",
+				"%s:%d — a production surface must not gate an action with hx-confirm\n"+
+					"fix: @ui.ConfirmAction(ui.ConfirmActionOpts{...}) — the same HX rides the "+
+					"dialog's confirm control, and the copy becomes translatable and assertable",
+				file, i+1)
 		}
 	}
-	require.Greater(t, scanned, 20,
-		"the scan found suspiciously few production templates, so it is looking in the wrong place")
+
+	// Three floors. The first two are the populations; the third is the escape
+	// hatch itself, because a `.Confirm` selector this scan stopped recognising
+	// would turn the component clause into a rule that permits everything.
+	require.Greater(t, markup, 150,
+		"the scan read %d production templates; it is looking in the wrong place, not at a tree with no pages", markup)
+	require.Greater(t, code, 5,
+		"the scan read %d hand-written .go files, which is where this attribute is actually composed", code)
+	require.GreaterOrEqual(t, fieldSourced, 2,
+		"only %d field-sourced hx-confirm emitters found; AGENTS.md promises two (MenuItem.Confirm and Attrs.HX.Confirm) "+
+			"and if the scan cannot see them it is not enforcing the clause that distinguishes them from a literal", fieldSourced)
 }

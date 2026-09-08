@@ -87,12 +87,12 @@ var numberWords = map[int]string{
 // the first version of this file added four utilities to the built stylesheet
 // and `make check` refused the drift.
 var ruleFixtures = map[string]string{
-	"raw hex colour":                             `<div style="color: #ff00aa">x</div>`,
-	"dark: variant":                              `<div class="dark` + `:bg-black">x</div>`,
-	"palette ramp":                               `<div class="bg-` + `red-500">x</div>`,
-	"numeric brand step":                         `<div class="bg-brand-` + `500">x</div>`,
-	"! utility override":                         `<div class="!` + `p-0">x</div>`,
-	"arbitrary length":                           `<div class="w-[3` + `px]">x</div>`,
+	"raw hex colour":     `<div style="color: #ff00aa">x</div>`,
+	"dark: variant":      `<div class="dark` + `:bg-black">x</div>`,
+	"palette ramp":       `<div class="bg-` + `red-500">x</div>`,
+	"numeric brand step": `<div class="bg-brand-` + `500">x</div>`,
+	"! utility override": `<div class="!` + `p-0">x</div>`,
+	"arbitrary length":   `<div class="w-[3` + `px]">x</div>`,
 	"templ expression inside a quoted attribute": `<a href="/thing/{ id }">x</a>`,
 }
 
@@ -202,10 +202,7 @@ func TestAgentsHXConfirmScopeMatchesTheGuard(t *testing.T) {
 	// The document writes a skipped prefix as a glob (`gallery*`); the guard
 	// writes it as a prefix. Trailing `*` is the same statement.
 	var documented []string
-	for _, span := range codeSpans(between(t, bullet, "skipping ", " subtree")) {
-		if span == "ui/" {
-			continue
-		}
+	for _, span := range codeSpans(between(t, bullet, "skipping ", "; inside ")) {
 		documented = append(documented, strings.TrimSuffix(span, "*"))
 	}
 	sort.Strings(documented)
@@ -215,15 +212,34 @@ func TestAgentsHXConfirmScopeMatchesTheGuard(t *testing.T) {
 			"A guard that narrows without the document narrowing is a NEVER that stopped being one.", documented, enforced)
 	}
 
-	// Non-recursive: the document says top-level `*.templ` only, which is what
-	// makes the `ui/` subtree out of scope.
-	if !strings.Contains(guardBody, `filepath.Glob("*.templ")`) {
-		t.Error("the hx-confirm guard no longer scans with a non-recursive filepath.Glob(\"*.templ\"), " +
+	// Recursive, and over both file kinds: the document says every `.templ`
+	// under the directory plus the hand-written `.go` beside them, which is
+	// what makes the `ui/` clause below a constraint rather than a skip.
+	if !strings.Contains(guardBody, "designSources(t)") {
+		t.Error("the hx-confirm guard no longer scans the tree through designSources, " +
 			"so AGENTS.md's statement of its scope is wrong")
 	}
-	if !strings.Contains(bullet, "internal/web/templates/*.templ") {
-		t.Error("the AGENTS.md htmx-statuses bullet must state the guard's scope as top-level " +
-			"`internal/web/templates/*.templ`, or a reader takes the NEVER for tree-wide")
+	if !strings.Contains(bullet, "every `.templ` under `internal/web/templates/`") {
+		t.Error("the AGENTS.md htmx-statuses bullet must state the guard's scope as every `.templ` under " +
+			"`internal/web/templates/`, or a reader takes the recursion for a top-level glob")
+	}
+	if !strings.Contains(bullet, "hand-written `.go`") {
+		t.Error("the guard reads the hand-written `.go` files too - that is where both escape-hatch emitters " +
+			"live - and the bullet must say so")
+	}
+
+	// The `ui/` clause. The document states it as a constraint on the value's
+	// origin, and the guard enforces exactly that, so both spellings are
+	// pinned: a document that dropped the clause would read as a blanket ban
+	// on a layer that has to emit the attribute, and a guard that dropped it
+	// would let a component write its own prompt.
+	if !strings.Contains(bullet, "caller-supplied `Confirm` field, never from a literal") {
+		t.Error("the AGENTS.md htmx-statuses bullet must state that inside `ui/` the attribute may only come " +
+			"from a caller-supplied Confirm field, because that is the clause the guard enforces there")
+	}
+	if !strings.Contains(guardBody, `\.Confirm\b`) {
+		t.Error("the guard no longer distinguishes a caller-supplied Confirm field from a literal, " +
+			"so AGENTS.md's statement of the ui/ clause is wrong")
 	}
 
 	// And the escape hatch the document promises still works, behaviourally:

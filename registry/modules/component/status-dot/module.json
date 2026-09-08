@@ -1,75 +1,75 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/component/status-dot",
+    "kind": "component",
+    "name": "status-dot",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "StatusDot",
+    "description": "The StatusDot renderer and its options.",
+    "requires": [
+      {
+        "id": "ggg/element/ui-core",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The StatusDot renderer and its options.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "templ",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
         "source": "internal/web/templates/ui/status-dot.templ",
-        "target": "internal/web/templates/ui/status-dot.templ"
+        "target": "internal/web/templates/ui/status-dot.templ",
+        "class": "templ",
+        "sha256": "f58b8fb0910b0b65e94ad2f8b251299a51e7d20f9a3c2534b02f65c0a874a242",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
         "source": "internal/web/templates/ui/status-dot_test.go",
-        "target": "internal/web/templates/ui/status-dot_test.go"
+        "target": "internal/web/templates/ui/status-dot_test.go",
+        "class": "test",
+        "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/component/status-dot",
-    "kind": "component",
-    "migrations": [],
-    "name": "status-dot",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/element/ui-core"
-      }
-    ],
-    "revision": 1,
+    "claims": {},
     "runtime": {
       "ui": [
         {
-          "family": "feedback",
           "name": "status-dot",
+          "family": "feedback",
           "signature": "templ StatusDot(o StatusDotOpts)",
+          "summary": "Renders a state dot with its label.",
           "states": [
             "default",
             "error",
             "success"
-          ],
-          "summary": "Renders a state dot with its label."
+          ]
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "title": "StatusDot"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }
