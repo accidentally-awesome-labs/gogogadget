@@ -143,6 +143,12 @@ func (c *Controller) runAccountedGoTest(ctx context.Context, root string, flags 
 	if err := result.account.refuseEmptyRun(); err != nil {
 		return err
 	}
+	// A bare marker is refused everywhere, not only where skips are. It is
+	// not a skip the environment forced; it is a declaration the test made,
+	// and an undeclared reason is the one thing this gate can check about it.
+	if len(result.account.Unreasoned) > 0 {
+		return refusalError(fmt.Errorf("%s", result.account.unreasonedMarkerRefusal()))
+	}
 	if forbidden {
 		return refusalError(fmt.Errorf("%s", result.account.forbiddenSkipRefusal()))
 	}
@@ -194,6 +200,15 @@ type goTestAccount struct {
 	Skipped      int
 	Inapplicable int
 	Failed       int
+	// Untested names the packages that reported no test at all. `go test`
+	// prints those as `?   pkg [no test files]` and the totals line said
+	// nothing about them, so deleting every _test.go from three packages
+	// produced a summary indistinguishable from a healthy run.
+	Untested []string
+	// Unreasoned names the tests that declared themselves inapplicable and
+	// gave no reason. The marker is a self-exemption from the skip refusal;
+	// an exemption with no stated reason is a claim nobody can check.
+	Unreasoned []string
 }
 
 type packageAccount struct {
@@ -209,9 +224,12 @@ type packageAccount struct {
 	// Counting is deferred to tally, at package close, because whether a name
 	// is a leaf is only knowable once its siblings have been seen.
 	verdicts map[string]string
-	// inapplicable is the test names whose own output carried the marker.
+	// inapplicable is the test names whose own output carried the marker,
+	// mapped to whether that marker was followed by a reason.
 	inapplicable map[string]bool
-	output       []string
+	// unreasoned is the tests that wrote the marker with nothing after it.
+	unreasoned []string
+	output     []string
 }
 
 // tally counts LEAF tests. `go test -json` reports a verdict for a parent AND
@@ -229,9 +247,15 @@ func (p *packageAccount) tally() {
 		case "pass":
 			p.Passed++
 		case "skip":
-			if p.inapplicable[name] {
-				p.Inapplicable++
-				continue
+			if reasoned, declared := p.inapplicable[name]; declared {
+				if reasoned {
+					p.Inapplicable++
+					continue
+				}
+				// An undeclared reason is not a declaration. It falls back
+				// to being an ordinary skip AND is named separately, so the
+				// run refuses rather than silently accepting the exemption.
+				p.unreasoned = append(p.unreasoned, name)
 			}
 			p.Skipped++
 		case "fail":
@@ -300,12 +324,16 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error) 
 			}
 			// A test's own output is the only channel `testing` gives a skip
 			// to say WHY, so the marker is read from there and attributed to
-			// the test that wrote it.
+			// the test that wrote it — along with whether it said anything
+			// after the marker. A bare marker is a self-exemption from the
+			// skip refusal with no claim attached, and the whole point of
+			// the marker is that only the test knows the reason.
 			if event.Test != "" && strings.Contains(event.Output, InapplicableSkipMarker) {
 				if pkg.inapplicable == nil {
 					pkg.inapplicable = map[string]bool{}
 				}
-				pkg.inapplicable[event.Test] = true
+				_, reason, _ := strings.Cut(event.Output, InapplicableSkipMarker)
+				pkg.inapplicable[event.Test] = pkg.inapplicable[event.Test] || strings.TrimSpace(reason) != ""
 			}
 			pkg.output = append(pkg.output, event.Output)
 		case "pass", "fail", "skip":
@@ -323,6 +351,15 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error) 
 			account.Skipped += pkg.Skipped
 			account.Inapplicable += pkg.Inapplicable
 			account.Failed += pkg.Failed
+			for _, name := range pkg.unreasoned {
+				account.Unreasoned = append(account.Unreasoned, pkg.Name+"."+name)
+			}
+			// `go test -json` reports a package with no test files as a
+			// package-level skip carrying no Test field, so nothing above
+			// counts it and every total stays 0 while len(Packages) grows.
+			if pkg.Passed+pkg.Failed+pkg.Skipped+pkg.Inapplicable == 0 {
+				account.Untested = append(account.Untested, pkg.Name)
+			}
 			writeString(progress, pkg.line())
 			if event.Action == "fail" {
 				// The failing package's own output IS the diagnosis, so it
@@ -334,6 +371,7 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error) 
 			pkg.output = nil
 			pkg.verdicts = nil
 			pkg.inapplicable = nil
+			pkg.unreasoned = nil
 		}
 	}
 	return account, scanner.Err()
@@ -380,12 +418,43 @@ func (p packageAccount) line() string {
 // withPackages is false when a refusal is about to print the same breakdown,
 // so the list appears exactly once.
 func (a goTestAccount) summary(withPackages bool) string {
-	out := fmt.Sprintf("tests: %d passed, %d skipped, %d inapplicable, %d failed across %d packages\n",
+	out := fmt.Sprintf("tests: %d passed, %d skipped, %d inapplicable, %d failed across %d packages",
 		a.Passed, a.Skipped, a.Inapplicable, a.Failed, len(a.Packages))
-	if a.Skipped == 0 || !withPackages {
+	// The package count moved and nothing said why. `?   pkg [no test files]`
+	// is a package that contributed nothing to any total, so a suite whose
+	// tests were deleted reads exactly like one that ran them — apart from a
+	// number no reader compares against anything. Name them.
+	if len(a.Untested) > 0 {
+		out += fmt.Sprintf(", %d with no test files", len(a.Untested))
+	}
+	out += "\n"
+	if !withPackages {
+		return out
+	}
+	if len(a.Untested) > 0 {
+		for _, name := range a.Untested {
+			out += "  no test files\t" + name + "\n"
+		}
+	}
+	if a.Skipped == 0 {
 		return out
 	}
 	return out + a.skipBreakdown()
+}
+
+// unreasonedMarkerRefusal names every test that exempted itself from the skip
+// refusal without saying what it was exempting itself for.
+//
+// The marker is the one self-service escape in this gate: any test may write
+// it and none is refused for it. What makes that safe is the reason — the
+// gate cannot tell an absent service from an inapplicable case by looking, so
+// only the test knows, and a marker with nothing after it says nothing.
+func (a goTestAccount) unreasonedMarkerRefusal() string {
+	out := fmt.Sprintf("%d test(s) declared themselves %s and gave no reason:\n", len(a.Unreasoned), InapplicableSkipMarker)
+	for _, name := range a.Unreasoned {
+		out += "  " + name + "\n"
+	}
+	return out + "The marker exempts a skip from the CI refusal, so it has to carry the claim it is making: put the reason after it in the skip message."
 }
 
 // refuseEmptyRun is the floor. A suite that reported no package and no test

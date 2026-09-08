@@ -355,9 +355,20 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
 		return err
 	}
+	// A contributed command name is a namespace claim and a runtime
+	// declaration, and neither half means anything alone — the same shape as
+	// the job rule below, which has always refused both directions. A
+	// claims.cli entry with no runtime.cli record permanently reserves a
+	// `ggg` verb no code implements and blocks every other module from
+	// claiming it, because claims are exclusive.
 	for _, command := range m.Runtime.CLI {
 		if !slices.Contains(m.Claims.CLI, command.Name) {
 			return fmt.Errorf("manifest runtime cli %q requires a claims.cli entry", command.Name)
+		}
+	}
+	for _, name := range m.Claims.CLI {
+		if !slices.ContainsFunc(m.Runtime.CLI, func(command CLIContribution) bool { return command.Name == name }) {
+			return fmt.Errorf("manifest claims.cli %q has no runtime.cli declaration", name)
 		}
 	}
 	// A job kind is a namespace claim and a runtime declaration, and neither

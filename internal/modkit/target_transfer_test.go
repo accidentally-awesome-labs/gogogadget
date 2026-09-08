@@ -131,7 +131,13 @@ func TestSyncTransfersTargetOwnershipInOnePass(t *testing.T) {
 // above must not have widened into a silent double-owner install.
 func TestSyncRefusesTargetClaimedByTwoModules(t *testing.T) {
 	_, secondRegistry := transferRegistries(t, func(second fstest.MapFS) {
-		// The previous owner keeps its claim, so both modules declare it.
+		// The previous owner keeps its claim, so both modules declare it —
+		// and it keeps its BYTES too, because a declaration with no payload
+		// is a different refusal (ValidateRegistryTreeOwnership's declared
+		// half) and would fire first, testing nothing about collisions.
+		second["registry/modules/page/optional/optional.go"] = &fstest.MapFile{
+			Data: []byte("package optional\n\nconst Version = 1\n"),
+		}
 		mutatePlannerModule(t, second, "ggg/page/optional", func(module *Manifest) {
 			module.Files = []ManifestFile{{
 				Source: "registry/modules/page/optional/optional.go", Target: "internal/modules/optional.go",

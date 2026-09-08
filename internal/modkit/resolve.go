@@ -252,79 +252,19 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	// `ggg/profile/web` unable to create a project — it reaches ggg/analytics,
 	// ggg/billing, ggg/identity and ggg/llm through `requires` only, so its
 	// honest provider_defaults looked like four extra keys.
-	// validateProfileProviderParity has always walked `Requires` here; this
-	// loop is the same walk, so the two definitions of the word agree.
-	for _, id := range sortedKeys(selected) {
-		if err := expand(id); err != nil {
-			return selectedGraph{}, err
-		}
-	}
-	slots := map[string]struct{}{}
-	for id := range selected {
-		for _, slot := range moduleByID[id].Runtime.ProviderSlots {
-			slots[slot.ID] = struct{}{}
-		}
-	}
-	if missing, extra := slotDifference(slots, project.Providers); len(missing) != 0 || len(extra) != 0 {
-		return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots: missing %v, unselected %v", missing, extra)
-	}
-	adapterByID := map[string]Manifest{}
-	for _, id := range sortedKeys(moduleByID) {
-		module := moduleByID[id]
-		if module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
-			adapterByID[id] = module
-		}
-	}
-	slotsList := make([]string, 0, len(slots))
-	for slot := range slots {
-		slotsList = append(slotsList, slot)
-	}
-	sort.Strings(slotsList)
-	chosenAdapters := map[string]struct{}{}
-	for _, slot := range slotsList {
-		choices, ok := project.Providers[slot]
-		if !ok {
-			return selectedGraph{}, fmt.Errorf("provider slot %q has no selections", slot)
-		}
-		for _, selectedChoice := range []struct {
-			env    string
-			choice ProviderSelection
-		}{{"development", choices.Development}, {"test", choices.Test}, {"production", choices.Production}} {
-			adapterID := selectedChoice.choice.Adapter
-			adapter, ok := adapterByID[adapterID]
-			if !ok || adapter.Runtime.System.Adapter.Slot != slot {
-				return selectedGraph{}, fmt.Errorf("provider %s adapter %q does not implement slot %q", selectedChoice.env, adapterID, slot)
-			}
-			found := false
-			for _, target := range adapter.Runtime.System.Adapter.Targets {
-				if target.ID != selectedChoice.choice.Target {
-					continue
-				}
-				found = true
-				if !containsString(target.Environments, selectedChoice.env) {
-					return selectedGraph{}, fmt.Errorf("provider %s target %s@%s is not allowed in %s", slot, adapterID, target.ID, selectedChoice.env)
-				}
-				if selectedChoice.env == "production" && target.Mode == "development" {
-					return selectedGraph{}, fmt.Errorf("development target %s@%s cannot be used in production", adapterID, target.ID)
-				}
-			}
-			if !found {
-				return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, selectedChoice.choice.Target, adapterID)
-			}
-			chosenAdapters[adapterID] = struct{}{}
-			if _, exists := selected[adapterID]; !exists {
-				selected[adapterID] = struct{}{}
-				reasons[adapterID] = "provider"
-			}
-		}
-	}
-	for _, explicitID := range project.Modules {
-		if adapter, ok := adapterByID[explicitID]; ok {
-			if _, chosen := chosenAdapters[adapter.ID]; !chosen {
-				return selectedGraph{}, fmt.Errorf("explicit adapter %q is not selected by provider choices; use ggg provider set", explicitID)
-			}
-		}
-	}
+	//
+	// Transitive means transitive THROUGH THE ADAPTERS TOO, which is why this
+	// is a fixpoint and not two passes. Selecting an adapter can pull a module
+	// whose `requires` reaches a seam, that seam declares a slot, and that
+	// slot needs an adapter of its own. The two-pass shape expanded adapter
+	// and deployment requirements ninety lines AFTER the slot set was frozen,
+	// so a seam reachable only that way landed in the graph and in the lock
+	// having contributed no slot: exactly the nil capability this refusal
+	// exists to prevent, and the same one ordering fact also let a second
+	// module with a `runtime.deploy` target past the uniqueness refusal below.
+	//
+	// The deployment module joins `selected` before the loop for the same
+	// reason: what it requires is part of the closure the slot set describes.
 	if project.Deployment != "" {
 		deployment, ok := moduleByID[project.Deployment]
 		if !ok {
@@ -336,6 +276,89 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		selected[project.Deployment] = struct{}{}
 		reasons[project.Deployment] = "deployment"
 	}
+	adapterByID := map[string]Manifest{}
+	for _, id := range sortedKeys(moduleByID) {
+		module := moduleByID[id]
+		if module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+			adapterByID[id] = module
+		}
+	}
+	chosenAdapters := map[string]struct{}{}
+	// Terminates because every iteration either selects a module that was not
+	// selected before — and `selected` is bounded by the catalog — or stops.
+	for {
+		for _, id := range sortedKeys(selected) {
+			if err := expand(id); err != nil {
+				return selectedGraph{}, err
+			}
+		}
+		slots := map[string]struct{}{}
+		for id := range selected {
+			for _, slot := range moduleByID[id].Runtime.ProviderSlots {
+				slots[slot.ID] = struct{}{}
+			}
+		}
+		if missing, extra := slotDifference(slots, project.Providers); len(missing) != 0 || len(extra) != 0 {
+			return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots: missing %v, unselected %v", missing, extra)
+		}
+		slotsList := make([]string, 0, len(slots))
+		for slot := range slots {
+			slotsList = append(slotsList, slot)
+		}
+		sort.Strings(slotsList)
+		grew := false
+		for _, slot := range slotsList {
+			choices, ok := project.Providers[slot]
+			if !ok {
+				return selectedGraph{}, fmt.Errorf("provider slot %q has no selections", slot)
+			}
+			for _, selectedChoice := range []struct {
+				env    string
+				choice ProviderSelection
+			}{{"development", choices.Development}, {"test", choices.Test}, {"production", choices.Production}} {
+				adapterID := selectedChoice.choice.Adapter
+				adapter, ok := adapterByID[adapterID]
+				if !ok || adapter.Runtime.System.Adapter.Slot != slot {
+					return selectedGraph{}, fmt.Errorf("provider %s adapter %q does not implement slot %q", selectedChoice.env, adapterID, slot)
+				}
+				found := false
+				for _, target := range adapter.Runtime.System.Adapter.Targets {
+					if target.ID != selectedChoice.choice.Target {
+						continue
+					}
+					found = true
+					if !containsString(target.Environments, selectedChoice.env) {
+						return selectedGraph{}, fmt.Errorf("provider %s target %s@%s is not allowed in %s", slot, adapterID, target.ID, selectedChoice.env)
+					}
+					if selectedChoice.env == "production" && target.Mode == "development" {
+						return selectedGraph{}, fmt.Errorf("development target %s@%s cannot be used in production", adapterID, target.ID)
+					}
+				}
+				if !found {
+					return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, selectedChoice.choice.Target, adapterID)
+				}
+				chosenAdapters[adapterID] = struct{}{}
+				if _, exists := selected[adapterID]; !exists {
+					selected[adapterID] = struct{}{}
+					reasons[adapterID] = "provider"
+					grew = true
+				}
+			}
+		}
+		if !grew {
+			break
+		}
+	}
+	for _, explicitID := range project.Modules {
+		if adapter, ok := adapterByID[explicitID]; ok {
+			if _, chosen := chosenAdapters[adapter.ID]; !chosen {
+				return selectedGraph{}, fmt.Errorf("explicit adapter %q is not selected by provider choices; use ggg provider set", explicitID)
+			}
+		}
+	}
+	// Over the COMPLETE closure, so a second deploy target reachable only
+	// through a selected adapter's requires is refused rather than shipped in
+	// one lock and one generated deploy registry.
 	deployments := []string{}
 	for id := range selected {
 		if len(moduleByID[id].Runtime.Deploy) > 0 {
@@ -351,13 +374,6 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	}
 	if project.Deployment != "" && len(deployments) == 1 && deployments[0] != project.Deployment {
 		return selectedGraph{}, fmt.Errorf("deployment module %s conflicts with selected deployment %s", deployments[0], project.Deployment)
-	}
-	// The base closure is already expanded; this pass covers the adapters the
-	// provider choices selected and the deployment module.
-	for _, id := range sortedKeys(selected) {
-		if err := expand(id); err != nil {
-			return selectedGraph{}, err
-		}
 	}
 	order, err := stableTopologicalOrder(ctx, selected, moduleByID)
 	if err != nil {

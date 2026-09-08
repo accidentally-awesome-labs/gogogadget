@@ -307,6 +307,17 @@ func requireClaims(module Manifest) error {
 	if err := check("deploy", deploy, module.Claims.Deploy); err != nil {
 		return err
 	}
+	// A contributed `ggg` verb is an exclusive namespace reservation, so the
+	// claim without the declaration is a verb no code implements that no
+	// other module may take. validateManifest checks runtime.cli ⊆
+	// claims.cli; this is the half that was missing everywhere.
+	commands := make([]string, 0, len(module.Runtime.CLI))
+	for _, value := range module.Runtime.CLI {
+		commands = append(commands, value.Name)
+	}
+	if err := check("cli command", commands, module.Claims.CLI); err != nil {
+		return err
+	}
 	return nil
 }
 

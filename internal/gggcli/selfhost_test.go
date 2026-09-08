@@ -8,8 +8,13 @@
 package gggcli
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -211,4 +216,257 @@ var generatedRequirementIDs = map[string]bool{
 	"ggg/system/database": true, "ggg/system/security": true, "ggg/system/server": true,
 	"ggg/system/identity": true, "ggg/system/i18n": true, "ggg/system/organizations": true,
 	"ggg/system/api": true, "ggg/system/search": true, "ggg/workflow/openapi-contract": true,
+}
+
+// compiledSourceTrees are the directories that hold this repository's Go
+// packages. registry/ is payload bytes and testdata is not compiled, so
+// neither is a package that could have tests.
+var compiledSourceTrees = []string{"cmd", "content", "internal"}
+
+// packagesWithoutTests is every Go package in this repository that declares no
+// test file, with the reason it declares none.
+//
+// It exists because runAccountedGoTest structurally cannot see one. `go test
+// -json` reports a package with no test files as a package-level skip with no
+// Test field: nothing is tallied, no total moves, and the only observable is a
+// package count no guard compares against anything. Deleting every _test.go
+// from three packages was measured to produce `tests: 1 passed, 0 skipped, 0
+// inapplicable, 0 failed across 4 packages` and refuseEmptyRun() == nil.
+//
+// The list is a hand-written mirror and is checked against the tree in both
+// directions below, so it goes stale loudly: a package that loses its tests
+// fails here by name, and a package that gains them fails here as a dead row.
+var packagesWithoutTests = map[string]string{
+	"cmd/server":                   "the binary's whole behaviour is internal/modules boot, exercised by e2e and smoke",
+	"content":                      "an embed.FS declaration; internal/content owns every reader test",
+	"internal/billing/contract":    "the shared contract TABLE itself, run by each billing adapter's package",
+	"internal/cache":               "the cache.Store seam interface; internal/cache/memory and /redis run the behaviour",
+	"internal/database":            "the ggg/database slot contract: type aliases onto pgx and sqlc",
+	"internal/database/ops/docker": "shells pg_dump/pg_restore; covered by ggg db backup/restore-drill against a live stack",
+	"internal/db/sqlc":             "sqlc output, regenerated and drift-refused by make check",
+	"internal/deploy/docker":       "a DeployTarget over the docker CLI; exercised through ggg deploy against a live daemon",
+	"internal/deploy/fly":          "a DeployTarget over the fly CLI; exercised through ggg deploy against a live account",
+	"internal/gggcli/commands":     "the command table's leaf handlers; internal/gggcli owns the dispatch tests",
+	"internal/identity/contract":   "the shared contract TABLE itself, run by each identity adapter's package",
+	"internal/mail/contract":       "the shared contract TABLE itself, run by each mail adapter's package",
+	"internal/notifications":       "the notify slot contract; internal/notifications/postgres and /knock run the behaviour",
+	"internal/provision/neon":      "a ProviderProvisioner over the Neon API; exercised through ggg provider provision",
+	"internal/remote":              "the typed provisioner/deployer/database-operator interfaces and their value types",
+	"internal/storage/contract":    "the shared contract TABLE itself, run by each storage adapter's package",
+}
+
+// Every Go package in the compiled trees must declare a test file or say why
+// it does not.
+func TestEveryGoPackageDeclaresTestsOrSaysWhyNot(t *testing.T) {
+	root := repositoryRoot(t)
+	packages := map[string]bool{}
+	tested := map[string]bool{}
+	for _, tree := range compiledSourceTrees {
+		err := filepath.WalkDir(filepath.Join(root, tree), func(name string, entry fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if entry.IsDir() {
+				if entry.Name() == "testdata" || entry.Name() == "node_modules" {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if !strings.HasSuffix(entry.Name(), ".go") {
+				return nil
+			}
+			dir, relErr := filepath.Rel(root, filepath.Dir(name))
+			if relErr != nil {
+				return relErr
+			}
+			dir = filepath.ToSlash(dir)
+			packages[dir] = true
+			if strings.HasSuffix(entry.Name(), "_test.go") {
+				tested[dir] = true
+			}
+			return nil
+		})
+		require.NoError(t, err)
+	}
+	// The floor. A walk that found the wrong root would report no packages
+	// at all and every row below would read as a dead exemption.
+	require.GreaterOrEqual(t, len(packages), 60,
+		"only %d Go packages were found under %v; the walk has collapsed, not the tree", len(packages), compiledSourceTrees)
+
+	var undeclared []string
+	for dir := range packages {
+		if tested[dir] {
+			continue
+		}
+		if _, recorded := packagesWithoutTests[dir]; !recorded {
+			undeclared = append(undeclared, dir)
+		}
+	}
+	sort.Strings(undeclared)
+	require.Empty(t, undeclared,
+		"these packages declare no test file and packagesWithoutTests records no reason: %v.\n"+
+			"The accounted runner reports such a package as `?   pkg` and counts nothing, so a suite whose tests "+
+			"were deleted reads exactly like one that ran them. Add a test, or record why there is none.", undeclared)
+
+	var dead []string
+	for dir := range packagesWithoutTests {
+		if !packages[dir] {
+			dead = append(dead, dir+" (no such package)")
+			continue
+		}
+		if tested[dir] {
+			dead = append(dead, dir+" (now declares tests)")
+		}
+	}
+	sort.Strings(dead)
+	require.Empty(t, dead,
+		"these packagesWithoutTests rows no longer describe the tree: %v.\nDelete each one; an exemption that "+
+			"outlives its reason is how the next one gets added without argument.", dead)
+}
+
+// inapplicableSkipSites is every place in this repository that writes
+// InapplicableSkipMarker, keyed by `<path>:<enclosing function>`.
+//
+// The marker is the one self-service exemption in the accounted gate: a skip
+// carrying it is counted apart and never refused, and NOTHING guarded who may
+// write it. It is the `1 inapplicable` in every run this repository reports,
+// and a suite that quietly marked itself inapplicable would report the same
+// clean line as one that ran.
+//
+// So the sites are enumerated here with the claim each makes, and the walk
+// below refuses a site with no row and a row with no site. The reason a
+// marker gives at runtime is enforced separately, by the gate itself:
+// goTestAccount.unreasonedMarkerRefusal refuses a marker with nothing after it.
+var inapplicableSkipSites = map[string]string{
+	"internal/config/config_test.go:TestResolvedValuesCarryTheirProvenance":                         "a derivative on a managed database publishes no local Postgres, so there is nothing to derive and nothing to supply",
+	"internal/config/config_test.go:derivedFor":                                                     "the shared helper those derivation cases skip through, for the same reason",
+	"internal/gggcli/profile_genesis_test.go:TestEveryShippedProfileCreatesAProjectThatIsSyncClean": "the four-profile genesis sweep needs the network and 180s; CI's `profiles` job owns it and sets GGG_GENESIS_SWEEP",
+}
+
+// Every InapplicableSkipMarker site must be declared, and every declaration
+// must still name a site.
+func TestEveryInapplicableSkipSiteIsDeclared(t *testing.T) {
+	root := repositoryRoot(t)
+	found := map[string]bool{}
+	for _, tree := range compiledSourceTrees {
+		err := filepath.WalkDir(filepath.Join(root, tree), func(name string, entry fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if entry.IsDir() {
+				if entry.Name() == "testdata" || entry.Name() == "node_modules" {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if !strings.HasSuffix(entry.Name(), "_test.go") {
+				return nil
+			}
+			raw, readErr := os.ReadFile(name)
+			if readErr != nil {
+				return readErr
+			}
+			if !bytes.Contains(raw, []byte(InapplicableSkipMarker)) && !bytes.Contains(raw, []byte(inapplicableMarkerSymbol)) {
+				return nil
+			}
+			rel, relErr := filepath.Rel(root, name)
+			if relErr != nil {
+				return relErr
+			}
+			for _, function := range markerFunctions(t, name, raw) {
+				found[filepath.ToSlash(rel)+":"+function] = true
+			}
+			return nil
+		})
+		require.NoError(t, err)
+	}
+	// The floor. The marker is load-bearing — it is what keeps the CI skip
+	// refusal from shipping a false refusal into every derivative — so a walk
+	// that finds none of it has broken, not the tree.
+	require.NotEmpty(t, found, "no InapplicableSkipMarker site was found under %v; the walk has collapsed, not the tree", compiledSourceTrees)
+
+	var undeclared, dead []string
+	for site := range found {
+		if _, recorded := inapplicableSkipSites[site]; !recorded {
+			undeclared = append(undeclared, site)
+		}
+	}
+	for site := range inapplicableSkipSites {
+		if !found[site] {
+			dead = append(dead, site)
+		}
+	}
+	sort.Strings(undeclared)
+	sort.Strings(dead)
+	require.Empty(t, undeclared,
+		"these sites exempt themselves from the accounted gate's skip refusal and inapplicableSkipSites records nothing about them: %v.\n"+
+			"Record what each one claims, or make the skip a failure at its source.", undeclared)
+	require.Empty(t, dead,
+		"these inapplicableSkipSites rows name no marker site any more: %v.\nDelete each one.", dead)
+}
+
+// inapplicableMarkerSymbol is the constant's own name. A site may write the
+// marker either way, and reading only one of the two forms is how a walk
+// reports a clean sweep over half a tree.
+const inapplicableMarkerSymbol = "InapplicableSkipMarker"
+
+// markerFunctions names the top-level functions in one file that SKIP with
+// InapplicableSkipMarker. Parsed rather than matched on the nearest preceding
+// `func`, so a marker inside a closure is attributed to the declaration that
+// owns it, and scoped to a `Skip`/`Skipf` argument, so a test that merely
+// mentions the constant — gate_test.go builds event fixtures out of it — is
+// not recorded as exempting itself.
+func markerFunctions(t *testing.T, name string, raw []byte) []string {
+	t.Helper()
+	fileSet := token.NewFileSet()
+	parsed, err := parser.ParseFile(fileSet, name, raw, 0)
+	if err != nil {
+		t.Fatalf("parse %s: %v", name, err)
+	}
+	carriesMarker := func(node ast.Node) bool {
+		found := false
+		ast.Inspect(node, func(node ast.Node) bool {
+			switch node := node.(type) {
+			case *ast.BasicLit:
+				if node.Kind == token.STRING && strings.Contains(node.Value, InapplicableSkipMarker) {
+					found = true
+				}
+			case *ast.Ident:
+				if node.Name == inapplicableMarkerSymbol {
+					found = true
+				}
+			}
+			return true
+		})
+		return found
+	}
+	var out []string
+	for _, declaration := range parsed.Decls {
+		function, ok := declaration.(*ast.FuncDecl)
+		if !ok || function.Body == nil {
+			continue
+		}
+		skips := false
+		ast.Inspect(function.Body, func(node ast.Node) bool {
+			call, ok := node.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if !ok || (selector.Sel.Name != "Skip" && selector.Sel.Name != "Skipf") {
+				return true
+			}
+			for _, argument := range call.Args {
+				if carriesMarker(argument) {
+					skips = true
+				}
+			}
+			return true
+		})
+		if skips {
+			out = append(out, function.Name.Name)
+		}
+	}
+	sort.Strings(out)
+	return out
 }

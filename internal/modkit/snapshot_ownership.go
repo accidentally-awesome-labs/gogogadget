@@ -1,6 +1,7 @@
 package modkit
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"sort"
@@ -108,6 +109,9 @@ type ownershipRoot struct {
 	prefix    string
 	namespace string
 	declared  map[string]struct{}
+	// mustExist is the subset of declared that has to be in the tree; see
+	// declaredRegistryPaths for why generated-class claims are not.
+	mustExist map[string]struct{}
 }
 
 // registryOwnershipReport is what one pass observed. examined exists so a
@@ -119,37 +123,51 @@ type ownershipRoot struct {
 type registryOwnershipReport struct {
 	examined []string
 	unowned  map[string][]string
-	roots    []ownershipRoot
+	// missing is the other direction: a path some manifest DECLARES that is
+	// not in the tree. content/docs/extending.md states both halves —
+	// "a declared payload must exist in the tree, and a file in the registry
+	// tree must be declared" — and only the second was checked. A declared
+	// payload with no bytes installs as nothing: `registry build` re-signs
+	// happily, and the incidental os.ReadFile that would have caught it runs
+	// only at the outer root's fixed module depth, so a nested registry never
+	// gets even that.
+	missing map[string][]string
+	roots   []ownershipRoot
 }
 
 func (r registryOwnershipReport) refusal() error {
-	if len(r.unowned) == 0 {
+	if len(r.unowned) == 0 && len(r.missing) == 0 {
 		return nil
 	}
-	labels := make([]string, 0, len(r.unowned))
-	for prefix := range r.unowned {
-		labels = append(labels, prefix)
-	}
-	sort.Strings(labels)
-	clauses := make([]string, 0, len(labels))
-	for _, prefix := range labels {
-		paths := r.unowned[prefix]
-		sort.Strings(paths)
-		namespace := ""
+	namespaceOf := func(prefix string) string {
 		for _, root := range r.roots {
 			if root.prefix == prefix {
-				namespace = root.namespace
+				return root.namespace
 			}
 		}
+		return ""
+	}
+	clauses := make([]string, 0, len(r.unowned)+len(r.missing))
+	for _, prefix := range sortedKeys(r.unowned) {
+		paths := r.unowned[prefix]
+		sort.Strings(paths)
 		// The root path leads, because the namespace alone is ambiguous here:
 		// registry/testdata declares namespace "ggg" too, so "registry ggg"
 		// would not say which of the two trees to look in.
 		clauses = append(clauses, fmt.Sprintf(
 			"registry root %q (namespace %q) publishes %d file(s) no module declares and the format does not own: %s",
-			registryRootLabel(prefix), namespace, len(paths), strings.Join(paths, ", ")))
+			registryRootLabel(prefix), namespaceOf(prefix), len(paths), strings.Join(paths, ", ")))
 	}
-	return fmt.Errorf("%s; declare each one in a manifest (files or migrations) or delete it — "+
-		"an undeclared payload inside a signed snapshot is bytes nothing installs",
+	for _, prefix := range sortedKeys(r.missing) {
+		paths := r.missing[prefix]
+		sort.Strings(paths)
+		clauses = append(clauses, fmt.Sprintf(
+			"registry root %q (namespace %q) declares %d path(s) that are not in the tree: %s",
+			registryRootLabel(prefix), namespaceOf(prefix), len(paths), strings.Join(paths, ", ")))
+	}
+	return fmt.Errorf("%s; declare each undeclared file in a manifest (files or migrations) or delete it, "+
+		"and give each declared path bytes or drop the declaration — an undeclared payload inside a signed "+
+		"snapshot is bytes nothing installs, and a declared payload with no bytes installs nothing",
 		strings.Join(clauses, "; "))
 }
 
@@ -173,14 +191,15 @@ func registryTreeOwnership(fsys fs.FS) (registryOwnershipReport, error) {
 	if err != nil {
 		return registryOwnershipReport{}, fmt.Errorf("registry ownership: %w", err)
 	}
-	declared, err := declaredRegistryPaths(fsys)
+	declared, mustExist, err := declaredRegistryPaths(fsys)
 	if err != nil {
 		return registryOwnershipReport{}, fmt.Errorf("registry ownership: %w", err)
 	}
 	report := registryOwnershipReport{
 		examined: make([]string, 0),
 		unowned:  map[string][]string{},
-		roots:    []ownershipRoot{{prefix: "", namespace: outer.Namespace, declared: declared}},
+		missing:  map[string][]string{},
+		roots:    []ownershipRoot{{prefix: "", namespace: outer.Namespace, declared: declared, mustExist: mustExist}},
 	}
 	err = walkRegistrySnapshotScope(fsys, func(name string, entry fs.DirEntry) error {
 		if entry.IsDir() {
@@ -201,12 +220,12 @@ func registryTreeOwnership(fsys fs.FS) (registryOwnershipReport, error) {
 			if rootErr != nil {
 				return fmt.Errorf("registry ownership: nested registry %s: %w", name, rootErr)
 			}
-			nestedDeclared, declErr := declaredRegistryPaths(sub)
+			nestedDeclared, nestedMustExist, declErr := declaredRegistryPaths(sub)
 			if declErr != nil {
 				return fmt.Errorf("registry ownership: nested registry %s: %w", name, declErr)
 			}
 			report.roots = append(report.roots, ownershipRoot{
-				prefix: name + "/", namespace: nested.Namespace, declared: nestedDeclared,
+				prefix: name + "/", namespace: nested.Namespace, declared: nestedDeclared, mustExist: nestedMustExist,
 			})
 			return nil
 		}
@@ -239,6 +258,39 @@ func registryTreeOwnership(fsys fs.FS) (registryOwnershipReport, error) {
 	})
 	if err != nil {
 		return registryOwnershipReport{}, err
+	}
+	// The declared half, once every root is known. Roots are discovered
+	// during the walk above, so this cannot run inside it.
+	//
+	// The floor is per root and conditional on the tree, because an EMPTY
+	// registry legitimately declares nothing — InitRegistryTree writes six
+	// empty indexes and that is a complete registry. What cannot happen is a
+	// root that publishes module documents and resolves no declarations: that
+	// is the index read having collapsed, and it would turn both directions
+	// into a sweep over nothing.
+	for _, root := range report.roots {
+		if len(root.declared) == 0 {
+			for _, name := range report.examined {
+				if strings.HasPrefix(name, root.prefix+"registry/modules/") {
+					return registryOwnershipReport{}, fmt.Errorf(
+						"registry ownership: registry root %q publishes module documents (%s) and its indexes resolve "+
+							"to no declared path at all; the catalog read has collapsed, not the registry",
+						registryRootLabel(root.prefix), name)
+				}
+			}
+			continue
+		}
+		for _, relative := range sortedKeys(root.mustExist) {
+			_, statErr := fs.Stat(fsys, root.prefix+relative)
+			if statErr == nil {
+				continue
+			}
+			if !errors.Is(statErr, fs.ErrNotExist) {
+				return registryOwnershipReport{}, fmt.Errorf("registry ownership: stat declared path %s: %w",
+					root.prefix+relative, statErr)
+			}
+			report.missing[root.prefix] = append(report.missing[root.prefix], root.prefix+relative)
+		}
 	}
 	return report, nil
 }
@@ -296,32 +348,61 @@ func registryRootLabel(prefix string) string {
 // twelve modules still receives a snapshot listing all 240, and scoping the
 // declaration side to a selection would refuse every unselected module's
 // payloads in every project.
-func declaredRegistryPaths(fsys fs.FS) (map[string]struct{}, error) {
-	declared := make(map[string]struct{})
+//
+// It returns the claim set and, separately, the subset that must have BYTES.
+// Two exclusions, both of which a first version got wrong and a real run
+// caught:
+//
+// A `class:"generated"` entry is a claim of OWNERSHIP over an output another
+// tool writes — compose.yaml, static/app.css, the two generated JS bundles —
+// declared so removal sweeps it and carrying no digest for the same reason.
+// Requiring those to be present would refuse every clean checkout before
+// `make generate` has run, which is not what "a declared payload must exist"
+// means.
+//
+// And only sources INSIDE the payload root are required. A registry that
+// publishes its own repository — this one — names payload sources like
+// `internal/identity/clerk/clerk.go`, which live beside the registry rather
+// than in it. A derivative receives `registry/` and only the modules it
+// selected, so requiring every catalogued source to be present would refuse
+// every derivative for not carrying the source of modules it did not
+// install. `ggg registry validate` measured exactly that: 71 paths.
+//
+// Both stay in the claim set, so the file is still owned when it IS there.
+func declaredRegistryPaths(fsys fs.FS) (declared, mustExist map[string]struct{}, err error) {
+	declared = make(map[string]struct{})
+	mustExist = make(map[string]struct{})
 	for _, include := range catalogIncludes {
 		var index CatalogIndex
 		if err := readCatalogJSON(fsys, include.path, &index); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		for _, item := range index.Items {
 			if err := validateCatalogItemPath(include.kind, item); err != nil {
-				return nil, fmt.Errorf("%s items: %w", include.path, err)
+				return nil, nil, fmt.Errorf("%s items: %w", include.path, err)
 			}
 			declared[item] = struct{}{}
+			mustExist[item] = struct{}{}
 			if include.kind == CatalogProfile {
 				continue
 			}
 			var document ModuleDocument
 			if err := readCatalogJSON(fsys, item, &document); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			for _, file := range document.Module.Files {
 				declared[file.Source] = struct{}{}
+				if file.Class != FileClassGenerated && strings.HasPrefix(file.Source, "registry/") {
+					mustExist[file.Source] = struct{}{}
+				}
 			}
 			for _, migration := range document.Module.Migrations {
 				declared[migration.Source] = struct{}{}
+				if strings.HasPrefix(migration.Source, "registry/") {
+					mustExist[migration.Source] = struct{}{}
+				}
 			}
 		}
 	}
-	return declared, nil
+	return declared, mustExist, nil
 }

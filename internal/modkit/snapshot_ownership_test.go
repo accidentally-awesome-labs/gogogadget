@@ -78,6 +78,25 @@ func TestRegistryTreeOwnershipRefusesAnUndeclaredPayload(t *testing.T) {
 	assert.Contains(t, err.Error(), "no module declares")
 }
 
+// The other direction, which extending.md states in the same sentence as the
+// one above and which nothing checked: a manifest declaring a payload that is
+// not in the tree. `registry build` re-signs a catalog whose declaration
+// installs nothing, and the incidental os.ReadFile that would have caught it
+// visits only the OUTER root's fixed module depth — so a nested registry, of
+// which this repository publishes two, never got even that.
+func TestRegistryTreeOwnershipRefusesADeclaredPayloadThatIsAbsent(t *testing.T) {
+	root := t.TempDir()
+	writeOwnershipRegistry(t, root, "acme", "example.com/acme/catalog")
+	require.NoError(t, ValidateRegistryTreeOwnership(os.DirFS(root)),
+		"the fixture must be clean, or the refusal below is about something else")
+	require.NoError(t, os.Remove(filepath.Join(root, "registry", "modules", "system", "probe", "payload", "probe.sql")))
+
+	err := ValidateRegistryTreeOwnership(os.DirFS(root))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "registry/modules/system/probe/payload/probe.sql")
+	assert.Contains(t, err.Error(), "not in the tree")
+}
+
 // The refusal must precede the signature, not follow it. A gate that ran
 // after signing would leave a signed artifact on disk covering bytes nobody
 // declared, which is the exact state this repository shipped in.
@@ -259,7 +278,7 @@ func TestRegistryTreeOwnershipRefusesIndexesWrittenAtTheWrongDepth(t *testing.T)
 func TestRegistryTreeOwnershipCoversUnselectedModules(t *testing.T) {
 	root := t.TempDir()
 	writeOwnershipRegistry(t, root, "acme", "example.com/acme/catalog")
-	declared, err := declaredRegistryPaths(os.DirFS(root))
+	declared, _, err := declaredRegistryPaths(os.DirFS(root))
 	require.NoError(t, err)
 	assert.Contains(t, declared, "registry/modules/system/probe/module.json")
 	assert.Contains(t, declared, "registry/modules/system/probe/payload/probe.go.txt")

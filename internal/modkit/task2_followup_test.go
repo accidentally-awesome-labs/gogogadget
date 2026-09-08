@@ -200,6 +200,155 @@ func TestProviderSelectionAndClaimRefusals(t *testing.T) {
 	}
 }
 
+// A seam reachable ONLY through a selected adapter's `requires` declares its
+// slot as loudly as one named in the profile, and an installed seam with no
+// adapter selected boots a nil capability.
+//
+// The resolver used to freeze the slot set before expanding what the adapters
+// and the deployment module require, ninety lines apart, so both of the
+// refusals below were defeated by that one ordering fact — and both ship a
+// project rather than fail a test. Each case has a control that was already
+// caught, so the assertion is about the POPULATION and not the pattern.
+func TestProviderClosureReachesThroughSelectedAdapters(t *testing.T) {
+	slotSeam := func(id, slot string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Contract: 1, Runtime: RuntimeContributions{
+			ProviderSlots: []ProviderSlotContribution{{ID: slot, Capabilities: []CapabilityContribution{{Capability: slot + ".thing", Type: "any"}}}},
+		}}
+	}
+	requires := func(ids ...string) []Requirement {
+		out := make([]Requirement, 0, len(ids))
+		for _, id := range ids {
+			out = append(out, Requirement{ID: id, Contract: ContractBounds{Min: 1, Max: 1}})
+		}
+		return out
+	}
+	adapter := func(id, slot string, pulls ...string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Contract: 1, Requires: requires(pulls...), Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter: &AdapterContribution{Slot: slot, Targets: []ServiceTarget{{
+				ID: "t", Title: "T", Mode: "managed", Environments: []string{"development", "test", "production"},
+				Automation: "manual", DocsURL: "https://example.test",
+			}}},
+		}}}
+	}
+	deployModule := func(id string, pulls ...string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Contract: 1, Requires: requires(pulls...), Runtime: RuntimeContributions{
+			System: &SystemContribution{Package: "internal/deploy", Constructor: "New"},
+			Deploy: []DeployContribution{{ID: id + ".target", Package: "internal/deploy", Constructor: "New"}},
+		}}
+	}
+	selections := func(adapterID string) ProviderSelections {
+		choice := ProviderSelection{Adapter: adapterID, Target: "t"}
+		return ProviderSelections{Development: choice, Test: choice, Production: choice}
+	}
+
+	t.Run("a slot declared only through a selected adapter", func(t *testing.T) {
+		seamA := slotSeam("x/system/seam-a", "x/slot-a")
+		seamB := slotSeam("x/system/seam-b", "x/slot-b")
+		smuggler := adapter("x/system/adapter-a", "x/slot-a", seamB.ID)
+		root := Manifest{ID: "x/workflow/root", Kind: ModuleWorkflow, Contract: 1, Requires: requires(seamA.ID)}
+		catalog := Catalog{Modules: []Manifest{seamA, seamB, smuggler, root}}
+		project := Project{Schema: 2, Modules: []string{root.ID}, Providers: map[string]ProviderSelections{
+			"x/slot-a": selections(smuggler.ID),
+		}}
+		_, err := resolveSelectedGraph(t.Context(), project, catalog)
+		if err == nil || !strings.Contains(err.Error(), "missing [x/slot-b]") {
+			t.Fatalf("error = %v, want the slot the adapter's requires reached named as missing", err)
+		}
+
+		// Control: the same seam in the base closure, which the frozen slot
+		// set did catch. Same refusal, so the population is the difference.
+		base := root
+		base.Requires = requires(seamA.ID, seamB.ID)
+		control := Catalog{Modules: []Manifest{seamA, seamB, adapter("x/system/adapter-a", "x/slot-a"), base}}
+		_, err = resolveSelectedGraph(t.Context(), project, control)
+		if err == nil || !strings.Contains(err.Error(), "missing [x/slot-b]") {
+			t.Fatalf("control error = %v, want the base-closure refusal", err)
+		}
+	})
+
+	t.Run("a second deploy module reached only through a selected adapter", func(t *testing.T) {
+		seamA := slotSeam("x/system/seam-a", "x/slot-a")
+		deployOne := deployModule("x/system/deploy-one")
+		deployTwo := deployModule("x/system/deploy-two")
+		smuggler := adapter("x/system/adapter-a", "x/slot-a", deployTwo.ID)
+		root := Manifest{ID: "x/workflow/root", Kind: ModuleWorkflow, Contract: 1, Requires: requires(seamA.ID)}
+		catalog := Catalog{Modules: []Manifest{seamA, deployOne, deployTwo, smuggler, root}}
+		project := Project{
+			Schema: 2, Modules: []string{root.ID}, Deployment: deployOne.ID,
+			Providers: map[string]ProviderSelections{"x/slot-a": selections(smuggler.ID)},
+		}
+		_, err := resolveSelectedGraph(t.Context(), project, catalog)
+		if err == nil || !strings.Contains(err.Error(), "multiple deployment modules selected") {
+			t.Fatalf("error = %v, want the second deploy target refused", err)
+		}
+
+		// Control: one deploy module and nothing smuggled resolves cleanly,
+		// so the refusal above is about the second target and not the shape.
+		clean := Catalog{Modules: []Manifest{seamA, deployOne, adapter("x/system/adapter-a", "x/slot-a"), root}}
+		if _, err := resolveSelectedGraph(t.Context(), project, clean); err != nil {
+			t.Fatalf("the single-deployment control was refused: %v", err)
+		}
+	})
+
+	t.Run("a slot declared only through the deployment module", func(t *testing.T) {
+		seamB := slotSeam("x/system/seam-b", "x/slot-b")
+		deployOne := deployModule("x/system/deploy-one", seamB.ID)
+		root := Manifest{ID: "x/workflow/root", Kind: ModuleWorkflow, Contract: 1}
+		catalog := Catalog{Modules: []Manifest{seamB, deployOne, root}}
+		project := Project{Schema: 2, Modules: []string{root.ID}, Deployment: deployOne.ID,
+			Providers: map[string]ProviderSelections{}}
+		_, err := resolveSelectedGraph(t.Context(), project, catalog)
+		if err == nil || !strings.Contains(err.Error(), "missing [x/slot-b]") {
+			t.Fatalf("error = %v, want the slot the deployment module's requires reached named as missing", err)
+		}
+	})
+}
+
+// A claim is an EXCLUSIVE namespace reservation, so `claims.cli` with no
+// `runtime.cli` record permanently reserves a `ggg` verb that no code
+// implements and that no other module may then claim. The forward half
+// (runtime ⊆ claims) was checked; the reverse was not, in validateManifest
+// or in requireClaims — two lines below the job rule, which has always
+// refused both directions.
+func TestCLIClaimsAndDeclarationsRequireEachOther(t *testing.T) {
+	base := Manifest{
+		ID: "x/system/tool", Kind: ModuleSystem, Name: "tool", Revision: 1, Contract: 1,
+		Title: "Tool", Description: "A module that contributes one ggg command.",
+		Requires: []Requirement{}, Files: []ManifestFile{}, Migrations: []ManifestMigration{},
+		Environment: []EnvironmentVariable{}, Docs: []DocumentationRef{}, Data: []DataDeclaration{},
+		Dependencies:  Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		RemovalPolicy: RemovalFree,
+		Claims:        NamespaceClaims{CLI: []string{"ui"}, Packages: []string{"internal/tool"}},
+		Runtime: RuntimeContributions{
+			CLI: []CLIContribution{{Name: "ui", Summary: "Open the tool.", Package: "internal/tool", Handler: "Run"}},
+		},
+	}
+	if err := validateManifest(base, true); err != nil {
+		t.Fatalf("the matched pair was refused: %v", err)
+	}
+	if err := requireClaims(base); err != nil {
+		t.Fatalf("the matched pair was refused by requireClaims: %v", err)
+	}
+
+	claimOnly := base
+	claimOnly.Runtime = RuntimeContributions{}
+	if err := validateManifest(claimOnly, true); err == nil || !strings.Contains(err.Error(), `claims.cli "ui" has no runtime.cli declaration`) {
+		t.Fatalf("validateManifest error = %v, want the reserved verb named", err)
+	}
+	if err := requireClaims(claimOnly); err == nil || !strings.Contains(err.Error(), "cli command ui") {
+		t.Fatalf("requireClaims error = %v, want the reserved verb named", err)
+	}
+
+	declarationOnly := base
+	declarationOnly.Claims = NamespaceClaims{Packages: []string{"internal/tool"}}
+	if err := validateManifest(declarationOnly, true); err == nil || !strings.Contains(err.Error(), "requires a claims.cli entry") {
+		t.Fatalf("validateManifest error = %v, want the unclaimed command named", err)
+	}
+	if err := requireClaims(declarationOnly); err == nil || !strings.Contains(err.Error(), "cli command ui") {
+		t.Fatalf("requireClaims error = %v, want the unclaimed command named", err)
+	}
+}
+
 func indexOf(items []string, want string) int {
 	for i, item := range items {
 		if item == want {

@@ -11,6 +11,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -31,15 +32,40 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 	root := repoRoot(t)
 	lock := loadLock(t, root)
 
-	owned := map[string]bool{}
+	// Claimants, not a boolean. A `map[string]bool` answers "at least one
+	// owner" while this file's own comment says exactly one: a second
+	// claimant on a path sets the same key to the same value and disappears,
+	// and removal then has two modules with a call on one file.
+	//
+	// This half states the invariant where the claim is made; it is not where
+	// the invariant is won. loadLock cross-checks every lock row against its
+	// manifest, so a duplicated row is refused before it reaches this map
+	// ("files path ... is not owned by manifest"), and the reachable form of
+	// the defect is two MANIFESTS claiming one target while never appearing
+	// in the same plan. That is
+	// TestThePublishedCatalogClaimsEveryTargetExactlyOnce, over the catalog
+	// rather than one profile's closure.
+	claimants := map[string][]string{}
 	for _, module := range lock.Modules {
 		for _, file := range module.Files {
-			owned[file.Path] = true
+			claimants[file.Path] = append(claimants[file.Path], module.ID+" files")
 		}
 		for _, migration := range module.Migrations {
-			owned[migration.Path] = true
+			claimants[migration.Path] = append(claimants[migration.Path], module.ID+" migrations")
 		}
 	}
+	owned := make(map[string]bool, len(claimants))
+	var contested []string
+	for path, by := range claimants {
+		owned[path] = true
+		if len(by) > 1 {
+			sort.Strings(by)
+			contested = append(contested, path+" claimed by "+strings.Join(by, ", "))
+		}
+	}
+	sort.Strings(contested)
+	require.Empty(t, contested,
+		"these paths have more than one owner, so removing either module takes a file the other still declares: %v", contested)
 	require.NotEmpty(t, owned)
 	catalogOwned := registryPayloadTargets(t, root)
 	// Only dependency metadata and intent/lock state are project-owned. Every

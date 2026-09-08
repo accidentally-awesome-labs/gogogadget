@@ -272,6 +272,76 @@ func TestInapplicableSkipsAreCountedApartAndNeverRefused(t *testing.T) {
 	}
 }
 
+// A package with no test files contributes to no total. `go test -json`
+// reports it as a package-level skip with no Test field, so the account used
+// to grow len(Packages) and say nothing — deleting every _test.go from three
+// packages produced a summary line indistinguishable from a healthy run
+// except for a number nothing compares against a baseline.
+//
+// Mutation: drop the Untested arm and the totals line reads "1 passed …
+// across 4 packages" over three packages that ran nothing.
+func TestAccountNamesPackagesWithNoTestFiles(t *testing.T) {
+	stream := events(
+		event{Action: "start", Package: "example.test/a"},
+		event{Action: "pass", Package: "example.test/a", Test: "TestOne"},
+		event{Action: "pass", Package: "example.test/a", Elapsed: 0.1},
+		event{Action: "start", Package: "example.test/gutted"},
+		event{Action: "output", Package: "example.test/gutted", Output: "?   example.test/gutted [no test files]\n"},
+		event{Action: "skip", Package: "example.test/gutted"},
+	)
+	account, err := accountGoTest(strings.NewReader(stream), &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("accounting: %v", err)
+	}
+	if got := account.Untested; len(got) != 1 || got[0] != "example.test/gutted" {
+		t.Fatalf("Untested = %v, want [example.test/gutted]", got)
+	}
+	summary := account.summary(true)
+	for _, want := range []string{"1 with no test files", "example.test/gutted"} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary %q does not carry %q, so a package whose tests were deleted reads as one that ran them", summary, want)
+		}
+	}
+}
+
+// The marker is a self-exemption from the skip refusal that any test may
+// write, and the reason is the only part of it a gate can check. A marker
+// with nothing after it declares nothing, so it is not a declaration: the
+// skip falls back to being refusable and the run is refused by name.
+//
+// Mutation: treat any marker as a declaration and a suite can exempt itself
+// wholesale with six characters and no argument.
+func TestAccountRefusesAnInapplicableMarkerWithNoReason(t *testing.T) {
+	stream := events(
+		event{Action: "start", Package: "example.test/cfg"},
+		event{Action: "output", Package: "example.test/cfg", Test: "TestBare",
+			Output: "    cfg_test.go:9: " + InapplicableSkipMarker + "\n"},
+		event{Action: "skip", Package: "example.test/cfg", Test: "TestBare"},
+		event{Action: "output", Package: "example.test/cfg", Test: "TestStated",
+			Output: "    cfg_test.go:9: " + InapplicableSkipMarker + " no local Postgres here\n"},
+		event{Action: "skip", Package: "example.test/cfg", Test: "TestStated"},
+		event{Action: "pass", Package: "example.test/cfg", Test: "TestPure"},
+		event{Action: "pass", Package: "example.test/cfg", Elapsed: 0.1},
+	)
+	account, err := accountGoTest(strings.NewReader(stream), &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("accounting: %v", err)
+	}
+	if account.Inapplicable != 1 || account.Skipped != 1 {
+		t.Fatalf("account = %d inapplicable, %d skipped; want the stated one counted apart and the bare one refusable",
+			account.Inapplicable, account.Skipped)
+	}
+	if got := account.Unreasoned; len(got) != 1 || got[0] != "example.test/cfg.TestBare" {
+		t.Fatalf("Unreasoned = %v, want [example.test/cfg.TestBare]", got)
+	}
+	refusal := account.unreasonedMarkerRefusal()
+	for _, want := range []string{"TestBare", "gave no reason"} {
+		if !strings.Contains(refusal, want) {
+			t.Fatalf("the refusal %q does not name what is wrong and where", refusal)
+		}
+	}
+}
+
 // templ's --lazy skips regeneration when the output is newer than the source.
 // Adding it for speed would silently reduce the drift gate to exactly the
 // mtime comparison the design rejects — and it would fail open, reporting a

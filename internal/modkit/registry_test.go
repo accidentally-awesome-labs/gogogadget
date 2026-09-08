@@ -78,6 +78,10 @@ func registryFixture(t *testing.T) fstest.MapFS {
 	}
 	module := testLockedModule("ggg/element/button", testDigestA).Manifest
 	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
+	// The manifest DECLARES this payload, so the tree has to carry it:
+	// ValidateRegistryTreeOwnership refuses a declared path with no bytes,
+	// and a fixture that lies about its own contents tests the wrong thing.
+	files["registry/modules/element/button/button.go"] = &fstest.MapFile{Data: []byte("package button\n")}
 	putJSON(t, files, "registry/profiles/full.json", ProfileDocument{
 		Schema: 2,
 		Profile: Profile{
@@ -349,23 +353,50 @@ func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
 // way parity broke decides whether the fix is a tag, a `required` entry or a
 // conditional keyword.
 func assertSchemaDefinition(
-	t *testing.T, definitions map[string]map[string]any, modelType reflect.Type,
+	t *testing.T, definitions map[string]map[string]any, definitionName string, modelType reflect.Type,
 	conditional map[string]bool, recorded map[string]string,
 ) {
 	t.Helper()
-	definition, ok := definitions[modelType.Name()]
+	definition, ok := definitions[definitionName]
 	if !ok {
-		t.Fatalf("schema definition %s is missing", modelType.Name())
+		t.Fatalf("schema definition %s is missing", definitionName)
 	}
+	assertSchemaShape(t, definitions, definitionName, definition, modelType, conditional, recorded)
+}
+
+// assertSchemaShape is the body of the above over one schema NODE. A struct
+// property may state its shape by `$ref` or inline — the project document
+// does both — and an inline object is not an excuse to assert nothing about
+// it, so the same three comparisons recurse into it.
+func assertSchemaShape(
+	t *testing.T, definitions map[string]map[string]any, definitionName string,
+	definition map[string]any, modelType reflect.Type,
+	conditional map[string]bool, recorded map[string]string,
+) {
+	t.Helper()
 	if got := definition["type"]; got != "object" {
-		t.Fatalf("schema definition %s type = %v, want object", modelType.Name(), got)
+		t.Fatalf("schema definition %s type = %v, want object", definitionName, got)
 	}
 	if got := definition["additionalProperties"]; got != false {
-		t.Fatalf("schema definition %s additionalProperties = %v, want false", modelType.Name(), got)
+		t.Fatalf("schema definition %s additionalProperties = %v, want false", definitionName, got)
 	}
 	properties, ok := definition["properties"].(map[string]any)
 	if !ok {
-		t.Fatalf("schema definition %s properties is not an object", modelType.Name())
+		t.Fatalf("schema definition %s properties is not an object", definitionName)
+	}
+	// refersTo reports whether a `$ref` names the definition a Go type is
+	// published as. A type may be published under more than one name — the
+	// project document restates two lock definitions under its own names —
+	// and schemaDefinitionAliases is the only place that is written down.
+	refersTo := func(ref string, goType string) bool {
+		_, name, found := strings.Cut(ref, "#/$defs/")
+		if !found {
+			return false
+		}
+		if alias, ok := schemaDefinitionAliases[name]; ok {
+			name = alias
+		}
+		return name == goType
 	}
 
 	var wantProperties, wantRequired []string
@@ -382,7 +413,7 @@ func assertSchemaDefinition(
 		}
 		property, ok := properties[parts[0]].(map[string]any)
 		if !ok {
-			t.Fatalf("schema definition %s property %s is not an object", modelType.Name(), parts[0])
+			t.Fatalf("schema definition %s property %s is not an object", definitionName, parts[0])
 		}
 		fieldType := field.Type
 		if fieldType.Kind() == reflect.Pointer {
@@ -391,32 +422,78 @@ func assertSchemaDefinition(
 		switch fieldType.Kind() {
 		case reflect.Bool:
 			if got := property["type"]; got != "boolean" {
-				t.Fatalf("schema definition %s property %s type = %v, want boolean", modelType.Name(), parts[0], got)
+				t.Fatalf("schema definition %s property %s type = %v, want boolean", definitionName, parts[0], got)
 			}
 		case reflect.Int, reflect.Int64:
 			if got := property["type"]; got != "integer" {
-				t.Fatalf("schema definition %s property %s type = %v, want integer", modelType.Name(), parts[0], got)
+				t.Fatalf("schema definition %s property %s type = %v, want integer", definitionName, parts[0], got)
 			}
 		case reflect.String:
 			if got := property["type"]; got != "string" {
-				t.Fatalf("schema definition %s property %s type = %v, want string", modelType.Name(), parts[0], got)
+				t.Fatalf("schema definition %s property %s type = %v, want string", definitionName, parts[0], got)
 			}
 		case reflect.Slice:
+			// A named byte slice is a raw JSON region the decoder hands
+			// through untouched (jsontext.Value): OpenAPI `info`, `servers`,
+			// `responses`. Its shape is the OpenAPI document's business, not
+			// this model's, so the schema states it and reflection has
+			// nothing to compare against.
+			if fieldType.Elem().Kind() == reflect.Uint8 {
+				break
+			}
 			if got := property["type"]; got != "array" {
-				t.Fatalf("schema definition %s property %s type = %v, want array", modelType.Name(), parts[0], got)
+				t.Fatalf("schema definition %s property %s type = %v, want array", definitionName, parts[0], got)
 			}
 			if _, hasItems := property["items"].(map[string]any); !hasItems {
 				if _, hasPrefixItems := property["prefixItems"].([]any); !hasPrefixItems {
-					t.Fatalf("schema definition %s property %s has neither items nor prefixItems", modelType.Name(), parts[0])
+					t.Fatalf("schema definition %s property %s has neither items nor prefixItems", definitionName, parts[0])
 				}
 			}
-		case reflect.Struct:
-			ref, ok := property["$ref"].(string)
-			if !ok || !strings.HasSuffix(ref, "#/$defs/"+fieldType.Name()) {
-				t.Fatalf("schema definition %s property %s ref = %v, want %s", modelType.Name(), parts[0], property["$ref"], fieldType.Name())
+		case reflect.Map:
+			// A Go map is a JSON object with open keys. The schema may state
+			// the value shape inline or by reference; where it references,
+			// the reference must name the element type — a `$ref` at the
+			// wrong definition is the drift a map property can carry, and
+			// there was no arm here to catch it.
+			if got := property["type"]; got != "object" {
+				t.Fatalf("schema definition %s property %s type = %v, want object", definitionName, parts[0], got)
 			}
-			if _, ok := definitions[fieldType.Name()]; !ok {
-				t.Fatalf("schema definition %s property %s references missing %s", modelType.Name(), parts[0], fieldType.Name())
+			values, ok := property["additionalProperties"].(map[string]any)
+			if !ok {
+				break
+			}
+			ref, ok := values["$ref"].(string)
+			if !ok {
+				break
+			}
+			element := fieldType.Elem()
+			for element.Kind() == reflect.Pointer {
+				element = element.Elem()
+			}
+			if !refersTo(ref, element.Name()) {
+				t.Fatalf("schema definition %s property %s values ref %s, want the definition published for %s",
+					definitionName, parts[0], ref, element.Name())
+			}
+		case reflect.Struct:
+			ref, hasRef := property["$ref"].(string)
+			if !hasRef {
+				// Stated inline. Assert it rather than skipping it: the
+				// project document writes ProviderSelection's two fields out
+				// at each of its three environment properties, and an inline
+				// shape drifting from the model is the same defect a wrong
+				// `$ref` would be.
+				if _, hasProperties := property["properties"].(map[string]any); !hasProperties {
+					t.Fatalf("schema definition %s property %s neither $refs %s nor states its properties inline",
+						definitionName, parts[0], fieldType.Name())
+				}
+				assertSchemaShape(t, definitions, definitionName+"."+parts[0], property, fieldType, conditional, recorded)
+				break
+			}
+			if !refersTo(ref, fieldType.Name()) {
+				t.Fatalf("schema definition %s property %s ref = %v, want %s", definitionName, parts[0], ref, fieldType.Name())
+			}
+			if _, name, _ := strings.Cut(ref, "#/$defs/"); definitions[name] == nil {
+				t.Fatalf("schema definition %s property %s references missing %s", definitionName, parts[0], name)
 			}
 		}
 	}
@@ -424,15 +501,16 @@ func assertSchemaDefinition(
 	for name := range properties {
 		gotProperties = append(gotProperties, name)
 	}
-	requiredValue, ok := definition["required"].([]any)
-	if !ok {
-		t.Fatalf("schema definition %s required is not an array", modelType.Name())
-	}
+	// A definition with no `required` list requires nothing, which is a legal
+	// and used shape: OpenAPIContribution's every field carries omitempty.
+	// Absent and empty must read the same here, or the parity comparison
+	// below would fatal before it ever ran.
+	requiredValue, _ := definition["required"].([]any)
 	var gotRequired []string
 	for _, raw := range requiredValue {
 		value, ok := raw.(string)
 		if !ok {
-			t.Fatalf("schema definition %s required contains non-string %T", modelType.Name(), raw)
+			t.Fatalf("schema definition %s required contains non-string %T", definitionName, raw)
 		}
 		gotRequired = append(gotRequired, value)
 	}
@@ -441,13 +519,13 @@ func assertSchemaDefinition(
 	slices.Sort(gotProperties)
 	slices.Sort(gotRequired)
 	if !slices.Equal(gotProperties, wantProperties) {
-		t.Fatalf("schema definition %s properties = %v, want %v", modelType.Name(), gotProperties, wantProperties)
+		t.Fatalf("schema definition %s properties = %v, want %v", definitionName, gotProperties, wantProperties)
 	}
 	for _, name := range wantRequired {
 		if !slices.Contains(gotRequired, name) {
 			t.Fatalf("schema definition %s does not require %s, which carries no omitempty and "+
 				"is therefore refused when absent by requireJSONValue: the published contract "+
-				"accepts a manifest ggg refuses", modelType.Name(), name)
+				"accepts a manifest ggg refuses", definitionName, name)
 		}
 	}
 	for _, name := range gotRequired {
@@ -455,7 +533,7 @@ func assertSchemaDefinition(
 			t.Fatalf("schema definition %s requires %s, which carries omitempty and is therefore "+
 				"optional to the decoder: the published contract refuses a manifest ggg accepts. "+
 				"A requirement that only holds sometimes belongs in if/then, dependentRequired, "+
-				"oneOf or not, never in required", modelType.Name(), name)
+				"oneOf or not, never in required", definitionName, name)
 		}
 	}
 	for _, name := range wantProperties {
@@ -464,11 +542,11 @@ func assertSchemaDefinition(
 		if !isRecorded {
 			continue
 		}
-		if !conditional[key] {
+		if !conditional[key] && !conditional[definitionName+"."+name] {
 			t.Fatalf("schema definition %s states no conditional requirement about %s, and the "+
 				"validator enforces one (%s). `required` cannot carry it: the field is optional "+
 				"whenever the condition is absent, so a third party's manifest would validate "+
-				"clean and be refused by ggg", modelType.Name(), name, rule)
+				"clean and be refused by ggg", definitionName, name, rule)
 		}
 	}
 }

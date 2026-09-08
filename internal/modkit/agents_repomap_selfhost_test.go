@@ -35,9 +35,16 @@ type exclusivityClaim struct {
 	owner    string
 }
 
-// The map's five exclusivity claims. The documented side is the sentence; the
+// The map's exclusivity claims. The documented side is the sentence; the
 // truth side is a scan of every Go and templ file under internal/ and cmd/,
 // so neither a new importer nor a moved owner can pass.
+//
+// The row SET is not the claim set: it is a mirror of it, and
+// TestAgentsRepoMapStatesNoUnguardedExclusivityClaim reads the claims back out
+// of the document and refuses a sentence with no row here. Without that, a
+// flatly false "ONLY importer" bullet added to the manual an agent reads first
+// is green — measured, with a fabricated `internal/llm` pgx claim that 92
+// files contradict.
 var exclusivityClaims = []exclusivityClaim{
 	{
 		sentence: "`identity/clerk` is the only clerk-sdk-go + svix importer",
@@ -147,6 +154,63 @@ func TestAgentsRepoMapExclusivityClaimsHold(t *testing.T) {
 			t.Errorf("AGENTS.md points at %s for %s, and nothing there imports it — the importers are %v.\n"+
 				"The implementation moved; update the repo-map sentence to the path that holds it now.",
 				claim.owner, claim.vendor, importers)
+		}
+	}
+}
+
+// repoMapExclusivitySentence is the shape of an "ONLY importer" claim in the
+// repo map: a backticked owner, `is the only`, a vendor, and the word import.
+// Case-insensitive, because the document writes both `only` and `ONLY`.
+var repoMapExclusivitySentence = regexp.MustCompile("(?i)`([^`]+)` is the only ([^`]{1,60}?) (?:importer|import)\\b")
+
+// Every exclusivity claim the repo map STATES must have a row above.
+//
+// exclusivityClaims is a hand-written table, and the half that was missing is
+// the one that keeps a hand-written table honest: nothing counted the
+// document's own sentences against it. The table's comment said "five
+// exclusivity claims" over four rows one release after it was written, and a
+// bullet claiming `internal/llm` is the only pgx importer — zero imports
+// there, ninety-two elsewhere — passed every repo-map guard.
+//
+// Both directions, so neither list can drift: a sentence with no row is an
+// unguarded claim, and a row whose sentence this reader cannot find is a row
+// that has stopped mirroring the document (the literal-presence half is
+// asserted per row by TestAgentsRepoMapExclusivityClaimsHold).
+func TestAgentsRepoMapStatesNoUnguardedExclusivityClaim(t *testing.T) {
+	repoMap := collapse(agentsSection(t, "Repo map"))
+	stated := repoMapExclusivitySentence.FindAllString(repoMap, -1)
+	// The floor. A regexp that stopped matching would otherwise report that
+	// the document makes no claims at all, which is the vacuity this guard is.
+	if len(stated) < 3 {
+		t.Fatalf("only %d exclusivity sentence(s) were read out of the repo map (%q); the reader has collapsed, not the document",
+			len(stated), stated)
+	}
+
+	rowed := map[string]bool{}
+	for _, sentence := range stated {
+		covered := false
+		for _, claim := range exclusivityClaims {
+			// The row carries the sentence as the document writes it, which
+			// may run past the word this reader stops at ("… in the tree"),
+			// so containment either way is the match.
+			row := collapse(claim.sentence)
+			if strings.Contains(row, sentence) || strings.Contains(sentence, row) {
+				covered = true
+				rowed[row] = true
+			}
+		}
+		if !covered {
+			t.Errorf("AGENTS.md's repo map claims %q and exclusivityClaims has no row for it, so nothing checks it.\n"+
+				"Add a row naming the vendor module path and the owning prefix, or delete the sentence — an exclusivity claim the manual states and no test measures is worse than no claim at all.",
+				sentence)
+		}
+	}
+	for _, claim := range exclusivityClaims {
+		row := collapse(claim.sentence)
+		if !rowed[row] {
+			t.Errorf("exclusivityClaims row %q is not one of the exclusivity sentences this reader finds in the repo map: %q.\n"+
+				"Either the sentence was reworded out of the shape the reader knows — widen repoMapExclusivitySentence — or the row no longer mirrors the document.",
+				claim.sentence, stated)
 		}
 	}
 }

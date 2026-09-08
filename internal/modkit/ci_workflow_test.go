@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -261,9 +262,19 @@ func TestCIProfilesJobRunsTheGenesisSweep(t *testing.T) {
 	}
 	fields := strings.Fields(found[0])
 	at := slices.Index(fields, "-run")
-	if at < 0 || at+1 >= len(fields) || fields[at+1] != ciGenesisSweepTest {
+	if at < 0 || at+1 >= len(fields) {
+		t.Fatalf("the sweep command %q carries no -run filter, so it runs whatever ./internal/gggcli happens to contain", found[0])
+	}
+	if fields[at+1] != ciGenesisSweepTest {
 		t.Fatalf("the sweep command %q does not select %s", found[0], ciGenesisSweepTest)
 	}
+	// The pinned name is a STRING until something reads the package it names.
+	// `go test -run` treats a pattern that matches nothing as success — it
+	// prints `no tests to run` and exits 0 — so a rename of the sweep would
+	// leave this guard green over a CI job that runs no test at all. Both
+	// halves are asserted against the declarations on disk: the exact
+	// function must exist, and the pattern as written must select something.
+	assertRunFilterSelectsAGGGCLITest(t, fields[at+1])
 	// -count=1 for the reason the accounted suite pins it: this test's inputs
 	// are the whole registry tree, which `go test` cannot observe, so a
 	// cached verdict is a report on a run that did not happen.
@@ -274,6 +285,68 @@ func TestCIProfilesJobRunsTheGenesisSweep(t *testing.T) {
 	}
 	if setupIndex < 0 || setupIndex > sweepIndex {
 		t.Fatal("the profiles job runs the sweep before `make setup`, so the pinned tools are absent")
+	}
+}
+
+// gggcliTestNames is every top-level `func TestXxx(t *testing.T)` declared in
+// internal/gggcli, read out of the package's own sources. It is the
+// population `go test -run` filters, derived rather than written down.
+func gggcliTestNames(t *testing.T) []string {
+	t.Helper()
+	dir := filepath.Join("..", "gggcli")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read %s: %v", dir, err)
+	}
+	declaration := regexp.MustCompile(`(?m)^func (Test[A-Za-z0-9_]*)\(`)
+	var names []string
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") {
+			continue
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+		if err != nil {
+			t.Fatalf("read %s: %v", entry.Name(), err)
+		}
+		for _, match := range declaration.FindAllStringSubmatch(string(raw), -1) {
+			names = append(names, match[1])
+		}
+	}
+	slices.Sort(names)
+	// The floor. A walk that found the wrong directory, or a regexp that
+	// stopped matching, would otherwise answer "nothing matches" for every
+	// pattern and turn this guard into the vacuity it exists to refuse.
+	if len(names) < 50 {
+		t.Fatalf("only %d top-level tests were read out of %s; the walk has collapsed, not the package", len(names), dir)
+	}
+	return names
+}
+
+// assertRunFilterSelectsAGGGCLITest refuses a `-run` pattern that selects no
+// test. This is the vacuity `go test` itself will not report: an unmatched
+// filter is a warning on stdout and exit 0, so a CI job pinned to a renamed
+// test passes while running nothing.
+func assertRunFilterSelectsAGGGCLITest(t *testing.T, pattern string) {
+	t.Helper()
+	names := gggcliTestNames(t)
+	if !slices.Contains(names, pattern) {
+		// Reported first and by name, because an exact pin is what the
+		// workflow carries and a near-miss rename is the realistic failure.
+		t.Errorf("the workflow pins -run %s and internal/gggcli declares no `func %s(`.\n"+
+			"`go test -run %s ./internal/gggcli` exits 0 with `no tests to run`, so the job is green and the gate is gone. "+
+			"Repoint the workflow and %s at the test's current name, or restore the name.",
+			pattern, pattern, pattern, "ciGenesisSweepTest")
+	}
+	// `go test -run` compiles its argument as an unanchored regexp over
+	// top-level names, so the pin is checked the way the toolchain reads it
+	// as well as literally: a pattern that is nobody's name selects nothing.
+	filter, err := regexp.Compile(pattern)
+	if err != nil {
+		t.Fatalf("the workflow's -run %q is not a valid regexp, so `go test` refuses it: %v", pattern, err)
+	}
+	if !slices.ContainsFunc(names, filter.MatchString) {
+		t.Fatalf("the workflow's -run %q matches none of the %d tests internal/gggcli declares; the job runs nothing and exits 0",
+			pattern, len(names))
 	}
 }
 

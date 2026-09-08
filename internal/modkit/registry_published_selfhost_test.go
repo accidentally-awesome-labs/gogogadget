@@ -297,6 +297,35 @@ func TestPublishedSchemaInstancesValidate(t *testing.T) {
 	}
 }
 
+// Single ownership over the WHOLE published catalog, not one profile's plan.
+//
+// preflightNamespaces is the mechanism that enforces "exactly one module
+// claims a target", and Plan calls it over graph.modules — the selected
+// closure. So two modules that are co-present in no profile's closure may
+// both claim the same path and no plan ever asks. Three such pairs exist
+// today (ggg/system/registry-template against ggg/component/table-empty,
+// ggg/element/divider and ggg/system/mail-smtp: the template is the one
+// module outside the saas closure), and a collision inside any of them is
+// invisible to every other guard in the repository — the tracked-file sweep
+// answers "owned" for a path two modules claim, because owning it twice is
+// still owning it.
+func TestThePublishedCatalogClaimsEveryTargetExactlyOnce(t *testing.T) {
+	catalog, err := LoadCatalog(os.DirFS("../.."))
+	if err != nil {
+		t.Fatalf("load published catalog: %v", err)
+	}
+	// The floor. preflightNamespaces over an empty slice returns nil, which
+	// is the vacuity this whole family exists to refuse.
+	if len(catalog.Modules) < 200 {
+		t.Fatalf("the published catalog resolved %d modules; the load has collapsed, not the registry", len(catalog.Modules))
+	}
+	if err := preflightNamespaces(t.Context(), catalog.Modules); err != nil {
+		t.Fatalf("the published catalog does not claim every namespace exactly once: %v\n"+
+			"Two modules that share a target cannot both be installed, and if they are co-present in no profile's "+
+			"closure no plan will ever say so.", err)
+	}
+}
+
 func TestPublishedSchemasMatchModels(t *testing.T) {
 	repo := os.DirFS("../..")
 	definitions := map[string]map[string]any{}
@@ -330,35 +359,89 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 		}
 	}
 
-	modelTypes := []reflect.Type{
+	// The population is the documents, not a list. A hand-written
+	// []reflect.Type answers only for the types someone remembered to add,
+	// and 22 of these 68 definitions were walked by nobody: $defs.GoDependency
+	// could advertise a property no decoder accepts and drop a `required`
+	// field the decoder refuses when absent, and all seven parity guards
+	// stayed green.
+	//
+	// So the model side is the transitive reflect graph of the four document
+	// roots, and the assertion runs once per DEFINITION. A definition the
+	// graph does not reach is a failure that names it.
+	model := reflectModelGraph(
 		reflect.TypeOf(RegistryRoot{}), reflect.TypeOf(CatalogIndex{}),
-		reflect.TypeOf(ModuleDocument{}), reflect.TypeOf(ProfileDocument{}), reflect.TypeOf(Profile{}),
-		reflect.TypeOf(Project{}), reflect.TypeOf(ProjectRegistry{}), reflect.TypeOf(PortOverrides{}),
-		reflect.TypeOf(Manifest{}), reflect.TypeOf(ManifestFile{}), reflect.TypeOf(NamespaceClaims{}),
-		reflect.TypeOf(RuntimeContributions{}), reflect.TypeOf(ProviderSlotContribution{}),
-		reflect.TypeOf(CapabilityContribution{}), reflect.TypeOf(SystemContribution{}),
-		reflect.TypeOf(AdapterContribution{}), reflect.TypeOf(ServiceTarget{}),
-		reflect.TypeOf(RuntimeNeed{}), reflect.TypeOf(RuntimeProvide{}),
-		reflect.TypeOf(RouteContribution{}), reflect.TypeOf(RoutePolicy{}),
-		reflect.TypeOf(JobContribution{}), reflect.TypeOf(ContentTypeContribution{}),
-		reflect.TypeOf(NavigationContribution{}), reflect.TypeOf(SlotContribution{}),
-		reflect.TypeOf(UIContribution{}), reflect.TypeOf(AssetContribution{}),
-		reflect.TypeOf(CLIContribution{}), reflect.TypeOf(TargetInput{}),
-		reflect.TypeOf(LocalService{}), reflect.TypeOf(LocalServicePort{}),
-		reflect.TypeOf(LocalServiceEnv{}), reflect.TypeOf(LocalServiceVolume{}),
-		reflect.TypeOf(LocalServiceHealth{}),
-		reflect.TypeOf(ManifestMigration{}), reflect.TypeOf(EnvironmentVariable{}),
-		reflect.TypeOf(EnvironmentDerivation{}),
-		reflect.TypeOf(DocumentationRef{}), reflect.TypeOf(TestMetadata{}), reflect.TypeOf(DataDeclaration{}),
-		reflect.TypeOf(Lock{}), reflect.TypeOf(LockedModule{}), reflect.TypeOf(LockedFile{}),
-		reflect.TypeOf(LockedMigration{}), reflect.TypeOf(PendingUpdate{}), reflect.TypeOf(PendingConflict{}),
+		reflect.TypeOf(ModuleDocument{}), reflect.TypeOf(ProfileDocument{}),
+		reflect.TypeOf(Project{}), reflect.TypeOf(Lock{}),
+	)
+	// Two floors. Either walk collapsing would otherwise turn "every
+	// definition is checked" into "no definition is checked".
+	if len(definitions) < 60 {
+		t.Fatalf("only %d schema definitions were loaded from four documents; the load has collapsed, not the schemas", len(definitions))
 	}
+	if len(model) < 60 {
+		t.Fatalf("only %d model types were reached from the document roots; the reflect walk has collapsed, not the model", len(model))
+	}
+
 	conditional := schemaConditionalRequirements(t, publishedModuleSchemaDocument(t, repo))
-	walked := map[string]bool{}
-	for _, modelType := range modelTypes {
-		walked[modelType.Name()] = true
-		assertSchemaDefinition(t, definitions, modelType, conditional, publishedConditionalRules)
+	names := make([]string, 0, len(definitions))
+	for name := range definitions {
+		names = append(names, name)
 	}
+	sort.Strings(names)
+	walked := map[string]bool{}
+	for _, name := range names {
+		goName := name
+		if alias, ok := schemaDefinitionAliases[name]; ok {
+			goName = alias
+		}
+		modelType, ok := model[goName]
+		if !ok {
+			t.Errorf("schema $defs.%s is published in the extension contract and no Go type reachable from "+
+				"RegistryRoot, CatalogIndex, ModuleDocument, ProfileDocument, Project or Lock is named %s, "+
+				"so nothing compares its properties, its required list or its conditionals against the decoder. "+
+				"Name the Go type the same, or record the rename in schemaDefinitionAliases.", name, goName)
+			continue
+		}
+		walked[goName] = true
+		assertSchemaDefinition(t, definitions, name, modelType, conditional, publishedConditionalRules)
+	}
+
+	// The other direction: a model type the documents state inline rather
+	// than as a definition. Recorded, because "the schema has no $defs entry
+	// for this" is a real and legitimate answer — and because a record that
+	// stops being true fails here rather than silently excusing a definition
+	// someone later added.
+	for _, goName := range sortedKeys(model) {
+		if _, published := definitions[goName]; published {
+			continue
+		}
+		if _, inlined := inlinedModelTypes[goName]; !inlined {
+			t.Errorf("%s is part of the published document shape and no schema definition is named for it; "+
+				"add $defs.%s, or record in inlinedModelTypes where the documents state its shape inline",
+				goName, goName)
+		}
+	}
+	for goName, where := range inlinedModelTypes {
+		if _, published := definitions[goName]; published {
+			t.Errorf("%s is recorded as stated inline (%s) and the schemas now publish $defs.%s; delete the record",
+				goName, where, goName)
+		}
+		if _, reachable := model[goName]; !reachable {
+			t.Errorf("%s is recorded as stated inline (%s) and no model type reachable from the document roots "+
+				"is named that; the record is stale", goName, where)
+		}
+	}
+	for name, goName := range schemaDefinitionAliases {
+		if _, published := definitions[name]; !published {
+			t.Errorf("schemaDefinitionAliases maps %s onto %s and no document publishes $defs.%s; the alias is stale", name, goName, name)
+		}
+		if _, reachable := model[goName]; !reachable {
+			t.Errorf("schemaDefinitionAliases maps %s onto %s and no model type reachable from the document roots "+
+				"is named %s; the alias is stale", name, goName, goName)
+		}
+	}
+
 	// A recorded rule about a definition nothing above walks would be checked
 	// by no one, which is how a typo'd key passes as a clean sweep.
 	for key := range publishedConditionalRules {
@@ -368,6 +451,65 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 				"so its schema keyword is asserted by nothing", key, owner)
 		}
 	}
+}
+
+// schemaDefinitionAliases names the definitions a document publishes under a
+// name that is not the Go type's. The project document restates two lock
+// definitions with its own names rather than referencing across documents;
+// every other definition is named for the type it publishes, and this map is
+// checked in both directions so a third entry cannot be added to silence a
+// missing definition.
+var schemaDefinitionAliases = map[string]string{
+	"ProjectPortOverrides":      "PortOverrides",
+	"ProjectProviderSelections": "ProviderSelections",
+}
+
+// inlinedModelTypes are the model types the published documents state inline,
+// at the one property that carries them, instead of as a `$defs` entry.
+var inlinedModelTypes = map[string]string{
+	"Requirement":      "module.schema.json states it inline at Manifest.requires.items",
+	"ContractBounds":   "module.schema.json states it inline at Manifest.requires.items.contract",
+	"LockedDependency": "lock.schema.json states it inline at Lock.dependencies.items",
+	"LockedRegistry":   "lock.schema.json states it inline at Lock.registries.items",
+	"LockedSnapshot":   "lock.schema.json states it inline at Lock.snapshots.items",
+}
+
+// reflectModelGraph is every named struct type reachable from the given roots
+// through JSON-tagged fields, keyed by type name. Pointers, slices, arrays and
+// map values are followed to their element, so a contribution added to
+// RuntimeContributions joins the graph with no edit here.
+func reflectModelGraph(roots ...reflect.Type) map[string]reflect.Type {
+	out := map[string]reflect.Type{}
+	var walk func(reflect.Type)
+	walk = func(modelType reflect.Type) {
+		for {
+			switch modelType.Kind() {
+			case reflect.Pointer, reflect.Slice, reflect.Array, reflect.Map:
+				modelType = modelType.Elem()
+				continue
+			}
+			break
+		}
+		if modelType.Kind() != reflect.Struct || modelType.Name() == "" {
+			return
+		}
+		if _, seen := out[modelType.Name()]; seen {
+			return
+		}
+		out[modelType.Name()] = modelType
+		for i := range modelType.NumField() {
+			field := modelType.Field(i)
+			tag := field.Tag.Get("json")
+			if tag == "" || strings.HasPrefix(tag, "-") {
+				continue
+			}
+			walk(field.Type)
+		}
+	}
+	for _, root := range roots {
+		walk(root)
+	}
+	return out
 }
 
 // publishedModuleInstances lists every module.json the repository publishes.
@@ -906,6 +1048,72 @@ func TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements(t *testing.T)
 	}
 }
 
+// The live instance of the divergence this family exists to find, measured
+// rather than asserted.
+//
+// validate.go refuses an `enum`-typed target input that carries no values;
+// $defs.TargetInput declares `enum` as an ordinary optional array and states
+// no conditional about it. So a third party's adapter manifest validates
+// clean against the published contract and `ggg` refuses it — and it shipped
+// in v0.19.0 invisibly, because `TargetInput.enum` is one of the fields no
+// published manifest ever sets, which puts it out of reach of the mutation
+// walk in TestValidatorRequiredFieldsAreNotOptionalInTheContract.
+//
+// It is recorded in publishedValidatorOnlyConditionals because stating it in
+// the schema rewrites a signed snapshot payload, which belongs to the release
+// order. This test is the record's teeth: when the schema gains the keyword,
+// the schema half below fails and asks for the record to be deleted.
+func TestValidatorRefusesAnEnumTargetInputTheContractAccepts(t *testing.T) {
+	const smtp = "registry/modules/system/mail-smtp/module.json"
+	const key = "TargetInput.enum"
+	if _, recorded := publishedValidatorOnlyConditionals[key]; !recorded {
+		t.Fatalf("%s is no longer recorded as a validator-only conditional; this test measures that record", key)
+	}
+	repo := os.DirFS("../..")
+	schema := compilePublishedSchema(t, "registry/schema/module.schema.json", "#/$defs/ModuleDocument")
+	base, err := fs.ReadFile(repo, smtp)
+	if err != nil {
+		t.Fatalf("read %s: %v", smtp, err)
+	}
+	// The control. Both engines must accept the manifest as published, or a
+	// disagreement below would be about something else entirely.
+	if schemaRefusesModuleDocument(t, schema, base) || validatorRefusesModuleDocument(t, base, smtp) {
+		t.Fatalf("%s is refused unmutated: schema=%v validator=%v", smtp,
+			schemaRefusesModuleDocument(t, schema, base), validatorRefusesModuleDocument(t, base, smtp))
+	}
+
+	var document map[string]any
+	if err := json.Unmarshal(base, &document); err != nil {
+		t.Fatalf("decode %s: %v", smtp, err)
+	}
+	module := schemaObjectAt(t, document, "module")
+	target := schemaRecordAt(t, schemaObjectAt(t, module, "runtime", "system", "adapter"), "targets", 1)
+	input := schemaRecordAt(t, target, "inputs", 0)
+	if got := input["type"]; got != "string" {
+		t.Fatalf("the base input's type is %v, want string; the mutation below assumes it", got)
+	}
+	input["type"] = "enum"
+	if _, ok := input["enum"]; ok {
+		t.Fatalf("the base input already declares enum values; the mutation proves nothing")
+	}
+	mutated, err := json.Marshal(document)
+	if err != nil {
+		t.Fatalf("encode mutated %s: %v", smtp, err)
+	}
+
+	schemaRefuses := schemaRefusesModuleDocument(t, schema, mutated)
+	validatorRefuses := validatorRefusesModuleDocument(t, mutated, smtp)
+	if !validatorRefuses {
+		t.Fatalf("the validator now accepts an enum-typed target input with no values; %s no longer "+
+			"diverges and its record in publishedValidatorOnlyConditionals is stale", key)
+	}
+	if schemaRefuses {
+		t.Fatalf("the published schema now refuses an enum-typed target input with no values, so %s "+
+			"is no longer a validator-only rule: delete its record from "+
+			"publishedValidatorOnlyConditionals and add it to publishedConditionalRules", key)
+	}
+}
+
 // manifestFieldSite is one settable manifest field, reached by walking a real
 // decoded manifest rather than by naming paths: a new contribution type joins
 // the sweep by existing, not by being added to a list.
@@ -1079,6 +1287,11 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 	observed := map[string][]any{}
 	distinct := map[string]map[string]bool{}
 	candidates := map[string]string{}
+	// nonZero is every field site the catalog actually populates. It decides
+	// whether "no manifest is refused for this field's zero value" means the
+	// record went stale or the catalog simply never exercises the rule — the
+	// mutation walk cannot reach a field no published manifest ever sets.
+	nonZero := map[string]bool{}
 	sites := 0
 	for _, name := range instances {
 		manifest := load(name)
@@ -1100,6 +1313,9 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 					distinct[key][string(blob)] = true
 					observed[key] = append(observed[key], field.value.Interface())
 				}
+			}
+			if !field.value.IsZero() {
+				nonZero[key] = true
 			}
 			if !field.omitempty || field.value.IsZero() || !field.value.CanSet() {
 				continue
@@ -1131,12 +1347,14 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 	}
 
 	document := publishedModuleSchemaDocument(t, repo)
-	conditional := schemaConditionalRequirements(t, document)
+	scan := schemaConditionalScan(t, document)
+	conditional := scan.mentioned
 	if len(conditional) < len(publishedConditionalRules) {
 		t.Fatalf("only %d conditional requirements were read out of the published schema, "+
 			"fewer than the %d recorded rules; the walk has collapsed, not the schema",
 			len(conditional), len(publishedConditionalRules))
 	}
+	assertRecordedKeysNameRealProperties(t, document)
 
 	keys := make([]string, 0, len(candidates))
 	for key := range candidates {
@@ -1144,6 +1362,7 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 	}
 	sort.Strings(keys)
 	residualsReached := map[string]bool{}
+	validatorOnlyReached := map[string]bool{}
 	for _, key := range keys {
 		owner, tag, _ := strings.Cut(key, ".")
 		manifest := load(candidates[key])
@@ -1158,6 +1377,16 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 		}
 		if _, recorded := publishedSchemaResiduals[key]; recorded {
 			residualsReached[key] = true
+			continue
+		}
+		if reason, recorded := publishedValidatorOnlyConditionals[key]; recorded {
+			validatorOnlyReached[key] = true
+			// The record says the schema does not state it. If the schema
+			// has since started to, the record is what is wrong.
+			if scan.constrained[key] {
+				t.Errorf("%s is recorded as validator-only (%s) and the published schema now states a "+
+					"conditional requirement about it; move the row into publishedConditionalRules", key, reason)
+			}
 			continue
 		}
 		rule, recorded := publishedConditionalRules[key]
@@ -1193,9 +1422,177 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 				"cannot carry it, because the field is optional whenever the condition is absent",
 				rule, key)
 		}
-		if _, known := candidates[key]; !known {
+		if _, known := candidates[key]; known {
+			if _, unexercised := publishedUnexercisedConditionals[key]; unexercised {
+				t.Errorf("%s is recorded in publishedUnexercisedConditionals, and the catalog now "+
+					"refuses a manifest for its zero value; delete the record and let the candidate "+
+					"walk own the rule", key)
+			}
+			continue
+		}
+		if nonZero[key] {
 			t.Errorf("%s is recorded as conditionally required but no published manifest is "+
-				"refused for its zero value any more; the record is stale", key)
+				"refused for its zero value any more, though manifests do set it; the record is stale", key)
+			continue
+		}
+		if _, unexercised := publishedUnexercisedConditionals[key]; !unexercised {
+			t.Errorf("%s is recorded as conditionally required and no published manifest sets it at "+
+				"all, so the behavioural half of this gate can never reach it. Record why in "+
+				"publishedUnexercisedConditionals, or delete the rule.", key)
+		}
+	}
+	for key, reason := range publishedUnexercisedConditionals {
+		_, stated := publishedConditionalRules[key]
+		_, validatorOnly := publishedValidatorOnlyConditionals[key]
+		if !stated && !validatorOnly {
+			t.Errorf("%s is recorded as unexercised (%s) and neither publishedConditionalRules nor "+
+				"publishedValidatorOnlyConditionals states a rule about it, so the record excuses nothing", key, reason)
+		}
+		if nonZero[key] {
+			t.Errorf("%s is recorded as unexercised (%s) and published manifests do set it; the record is stale", key, reason)
+		}
+	}
+
+	// The reverse direction, and the one this family was missing. Everything
+	// above walks from the validator to the schema; a rule the published
+	// CONTRACT states and the validator does not enforce travels the other
+	// way, and refuses a third party's manifest ggg accepts — silently,
+	// because no core manifest need exercise it. Measured: `if type=="url"
+	// then required ["env_key"]` added to $defs.TargetInput left the whole
+	// internal/modkit suite green.
+	//
+	// Only CONSTRAINED fields are asked about. A field named inside an `if`
+	// is a discriminator, not a rule, and a field its own definition requires
+	// unconditionally is already covered by the `required` parity halves.
+	unconditional := unconditionallyRequiredFields(t, document)
+	constrained := make([]string, 0, len(scan.constrained))
+	for key := range scan.constrained {
+		if unconditional[key] {
+			continue
+		}
+		constrained = append(constrained, key)
+	}
+	sort.Strings(constrained)
+	if len(constrained) < len(publishedConditionalRules) {
+		t.Fatalf("only %d conditionally-constrained fields were read out of the published schema, "+
+			"fewer than the %d recorded rules; the constrained walk has collapsed, not the schema",
+			len(constrained), len(publishedConditionalRules))
+	}
+	for _, key := range constrained {
+		if _, recorded := publishedConditionalRules[key]; recorded {
+			continue
+		}
+		t.Errorf("the published schema states a conditional requirement about %s and nothing "+
+			"records what enforces it. Either the Go validator enforces the same rule — add it to "+
+			"publishedConditionalRules — or it does not, and the signed contract refuses a "+
+			"third-party manifest ggg accepts: delete the keyword from "+
+			"registry/schema/module.schema.json.", key)
+	}
+	for key, reason := range publishedValidatorOnlyConditionals {
+		if scan.constrained[key] {
+			t.Errorf("%s is recorded as stated by the validator and NOT by the published schema "+
+				"(%s), and the schema now states a conditional requirement about it; delete the "+
+				"record and add the rule to publishedConditionalRules", key, reason)
+		}
+		// A record the behavioural walk can reach must actually have been
+		// reached, or it is excusing a rule that is no longer enforced.
+		if _, reachable := candidates[key]; reachable && !validatorOnlyReached[key] {
+			t.Errorf("%s is recorded as validator-only (%s) and the candidate walk did not reach it; "+
+				"the record is stale", key, reason)
+		}
+		if _, reachable := candidates[key]; !reachable {
+			if nonZero[key] {
+				t.Errorf("%s is recorded as validator-only (%s) and the validator no longer refuses its "+
+					"zero value in any manifest that sets it; the record is stale", key, reason)
+			}
+			if _, unexercised := publishedUnexercisedConditionals[key]; !unexercised {
+				t.Errorf("%s is recorded as validator-only (%s) and no published manifest sets it at all, "+
+					"so nothing measures the validator half. Record why in publishedUnexercisedConditionals, "+
+					"or add a behavioural test that drives both engines.", key, reason)
+			}
+		}
+	}
+}
+
+// unconditionallyRequiredFields is every `Definition.field` the published
+// module schema lists in a definition's own top-level `required`. Those are
+// the fields assertSchemaDefinition already compares against the Go tags in
+// both directions, so a conditional keyword that restates one — the
+// `then: {required:["claims"]}` that exists only to reach a nested rule —
+// carries no requirement of its own.
+func unconditionallyRequiredFields(t *testing.T, document map[string]any) map[string]bool {
+	t.Helper()
+	defs, ok := document["$defs"].(map[string]any)
+	if !ok {
+		t.Fatal("published module schema has no $defs object")
+	}
+	out := map[string]bool{}
+	for name, raw := range defs {
+		definition, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		required, ok := definition["required"].([]any)
+		if !ok {
+			continue
+		}
+		for _, entry := range required {
+			if field, ok := entry.(string); ok {
+				out[name+"."+field] = true
+			}
+		}
+	}
+	if len(out) == 0 {
+		t.Fatal("no definition in the published module schema requires anything; the reader has collapsed, not the schema")
+	}
+	return out
+}
+
+// assertRecordedKeysNameRealProperties keeps the three inventories from
+// recording a typo. Each key is `Definition.field`, and both halves must
+// exist in the published schema — a misspelled key would otherwise sit in an
+// inventory forever, excusing nothing and checked by no one.
+func assertRecordedKeysNameRealProperties(t *testing.T, document map[string]any) {
+	t.Helper()
+	defs, ok := document["$defs"].(map[string]any)
+	if !ok {
+		t.Fatal("published module schema has no $defs object")
+	}
+	inventories := map[string]map[string]string{
+		"publishedConditionalRules":          publishedConditionalRules,
+		"publishedSchemaResiduals":           publishedSchemaResiduals,
+		"publishedUnexercisedConditionals":   publishedUnexercisedConditionals,
+		"publishedValidatorOnlyConditionals": publishedValidatorOnlyConditionals,
+	}
+	names := make([]string, 0, len(inventories))
+	for name := range inventories {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		keys := make([]string, 0, len(inventories[name]))
+		for key := range inventories[name] {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		if len(keys) == 0 {
+			continue
+		}
+		for _, key := range keys {
+			owner, field, found := strings.Cut(key, ".")
+			definition, ok := defs[owner].(map[string]any)
+			if !found || !ok {
+				t.Errorf("%s names %s and the published schema has no $defs.%s", name, key, owner)
+				continue
+			}
+			properties, ok := definition["properties"].(map[string]any)
+			if !ok {
+				t.Errorf("%s names %s and $defs.%s declares no properties", name, key, owner)
+				continue
+			}
+			if _, ok := properties[field]; !ok {
+				t.Errorf("%s names %s and $defs.%s has no property %q", name, key, owner, field)
+			}
 		}
 	}
 }
@@ -1211,6 +1608,7 @@ var publishedConditionalRules = map[string]string{
 	"AssetContribution.engine":        "dependentRequired co-presence",
 	"AssetContribution.integrity":     "dependentRequired co-presence",
 	"LocalServiceEnv.value":           "oneOf exclusive-or with from_key",
+	"LocalServiceEnv.from_key":        "oneOf exclusive-or with value",
 	"LocalServiceHealth.path":         "if kind is http/then required",
 	"NavigationContribution.href":     "oneOf exclusive-or with route_id",
 	"NavigationContribution.route_id": "oneOf exclusive-or with href",
@@ -1240,6 +1638,47 @@ var publishedSchemaResiduals = map[string]string{
 		"arrays on a matched value, which JSON Schema 2020-12 has no keyword for",
 }
 
+// publishedUnexercisedConditionals are recorded rules the published catalog
+// cannot exercise: no manifest sets the field non-zero anywhere, so the
+// behavioural half of the gate — mutate a real manifest's value to its zero
+// and see whether the validator refuses — has nothing to mutate.
+//
+// The record is not an excuse that can rot. The gate proves each entry is
+// still unreachable from the catalog it just walked, and says so by name the
+// moment a manifest starts setting the field: at that point the candidate
+// walk owns the rule and this row must go.
+var publishedUnexercisedConditionals = map[string]string{
+	"LocalServiceEnv.from_key": "no published local service takes an environment value from " +
+		"another key; every declared env entry carries a literal `value`, so `from_key` is zero " +
+		"in all 297 manifests and there is no instance to mutate",
+	"TargetInput.enum": "no published service target declares an enum-typed input; every " +
+		"declared input is string, integer or boolean, so `enum` is zero in all 297 manifests. " +
+		"TestValidatorRefusesAnEnumTargetInputTheContractAccepts drives both engines instead",
+}
+
+// publishedValidatorOnlyConditionals are conditional rules the Go validator
+// enforces and the published schema does not state. They are the divergence
+// this family exists to find, recorded rather than fixed only where fixing
+// means editing a signed snapshot payload, which is the release order's job
+// and not a test's.
+//
+// The record is checked in the direction that matters: the moment the schema
+// states the rule, this row fails and asks to be moved into
+// publishedConditionalRules. It cannot quietly outlive its reason.
+var publishedValidatorOnlyConditionals = map[string]string{
+	"TargetInput.enum": "validate.go's validateServiceTarget refuses an `enum`-typed target " +
+		"input with no values, and $defs.TargetInput declares `enum` as an ordinary optional " +
+		"array: a third party's adapter manifest validates clean against the published contract " +
+		"and ggg refuses it. TestValidatorRefusesAnEnumTargetInputTheContractAccepts measures " +
+		"both engines. State it as if type is enum/then required with minItems 1, in the same " +
+		"change that runs `ggg registry build && ggg registry sign`",
+	"RuntimeContributions.cli": "validateManifest and requireClaims now refuse a claims.cli entry " +
+		"with no runtime.cli record — a `ggg` verb permanently reserved that no code implements and " +
+		"no other module may claim — and $defs.Manifest states only the forward half, `if runtime.cli " +
+		"then claims.cli`. State the reverse as if claims.cli/then runtime.cli, in the same change " +
+		"that runs `ggg registry build && ggg registry sign`",
+}
+
 func publishedModuleSchemaDocument(t *testing.T, repo fs.FS) map[string]any {
 	t.Helper()
 	data, err := fs.ReadFile(repo, "registry/schema/module.schema.json")
@@ -1253,9 +1692,34 @@ func publishedModuleSchemaDocument(t *testing.T, repo fs.FS) map[string]any {
 	return document
 }
 
-// schemaConditionalRequirements reads out of the published module schema the
-// set of `Definition.field` pairs some conditional keyword constrains: a field
-// named by a `required` list inside `if`/`then`/`else`/`not`/`oneOf`/`anyOf`/
+// schemaConditionals is what one pass over the published module schema found:
+// every `Definition.field` pair a conditional keyword mentions, and the subset
+// a conditional keyword actually CONSTRAINS.
+//
+// The split is the difference between a discriminator and a rule. `if:
+// {properties:{type:{const:"enum"}}, required:["type"]}` names `type` only to
+// say when the rule applies; `then: {required:["enum"]}` is the rule. Reading
+// the schema back at the tool needs the second set — a rule the contract
+// states and the validator does not enforce refuses a third party's manifest
+// ggg accepts — and the first set would drown it in discriminators.
+type schemaConditionals struct {
+	mentioned   map[string]bool
+	constrained map[string]bool
+}
+
+// schemaConditionalRequirements is the mentioned half: any field some
+// conditional keyword names. assertSchemaDefinition asks this question —
+// "does the schema say anything conditional about this field" — because a
+// recorded rule may be stated as a discriminator on one definition and a
+// requirement on another.
+func schemaConditionalRequirements(t *testing.T, document map[string]any) map[string]bool {
+	t.Helper()
+	return schemaConditionalScan(t, document).mentioned
+}
+
+// schemaConditionalScan reads out of the published module schema the set of
+// `Definition.field` pairs some conditional keyword constrains: a field named
+// by a `required` list inside `if`/`then`/`else`/`not`/`oneOf`/`anyOf`/
 // `allOf`/`contains`, or by either side of a `dependentRequired` entry.
 //
 // It is a walk rather than a list because the rules do not all live on the
@@ -1264,7 +1728,7 @@ func publishedModuleSchemaDocument(t *testing.T, repo fs.FS) map[string]any {
 // definition each instance location belongs to and switches it when it steps
 // through a property whose declared schema is a `$ref` — or an array of them,
 // where `contains` and `items` then constrain one element.
-func schemaConditionalRequirements(t *testing.T, document map[string]any) map[string]bool {
+func schemaConditionalScan(t *testing.T, document map[string]any) schemaConditionals {
 	t.Helper()
 	defs, ok := document["$defs"].(map[string]any)
 	if !ok {
@@ -1304,30 +1768,44 @@ func schemaConditionalRequirements(t *testing.T, document map[string]any) map[st
 		return ""
 	}
 
-	found := map[string]bool{}
-	var walk func(node map[string]any, def string, inConditional bool)
-	walkAny := func(value any, def string, inConditional bool) {
+	// scope is where in a conditional the walk currently stands.
+	const (
+		outsideConditional = iota
+		inDiscriminator
+		inConsequent
+	)
+
+	scan := schemaConditionals{mentioned: map[string]bool{}, constrained: map[string]bool{}}
+	record := func(key string, scope int) {
+		if scope == outsideConditional {
+			return
+		}
+		scan.mentioned[key] = true
+		if scope == inConsequent {
+			scan.constrained[key] = true
+		}
+	}
+	var walk func(node map[string]any, def string, scope int)
+	walkAny := func(value any, def string, scope int) {
 		switch value := value.(type) {
 		case map[string]any:
-			walk(value, def, inConditional)
+			walk(value, def, scope)
 		case []any:
 			for _, child := range value {
 				if child, ok := child.(map[string]any); ok {
-					walk(child, def, inConditional)
+					walk(child, def, scope)
 				}
 			}
 		}
 	}
-	walk = func(node map[string]any, def string, inConditional bool) {
+	walk = func(node map[string]any, def string, scope int) {
 		if def == "" {
 			return
 		}
-		if inConditional {
-			if required, ok := node["required"].([]any); ok {
-				for _, raw := range required {
-					if name, ok := raw.(string); ok {
-						found[def+"."+name] = true
-					}
+		if required, ok := node["required"].([]any); ok {
+			for _, raw := range required {
+				if name, ok := raw.(string); ok {
+					record(def+"."+name, scope)
 				}
 			}
 		}
@@ -1336,46 +1814,59 @@ func schemaConditionalRequirements(t *testing.T, document map[string]any) map[st
 		// the dependency by the key that requires it.
 		if dependent, ok := node["dependentRequired"].(map[string]any); ok {
 			for name, raw := range dependent {
-				found[def+"."+name] = true
+				record(def+"."+name, inConsequent)
 				if list, ok := raw.([]any); ok {
 					for _, entry := range list {
 						if dependency, ok := entry.(string); ok {
-							found[def+"."+dependency] = true
+							record(def+"."+dependency, inConsequent)
 						}
 					}
 				}
 			}
 		}
 		for _, keyword := range []string{"if", "then", "else", "not", "oneOf", "anyOf", "allOf", "contains", "dependentSchemas"} {
-			if child, ok := node[keyword]; ok {
-				if keyword == "dependentSchemas" {
-					if schemas, ok := child.(map[string]any); ok {
-						for _, schema := range schemas {
-							walkAny(schema, def, true)
-						}
-					}
-					continue
-				}
-				walkAny(child, def, true)
+			child, ok := node[keyword]
+			if !ok {
+				continue
 			}
+			// `if` names its discriminator; every other applicator states the
+			// consequence, which is the half the validator must mirror. A
+			// condition is a condition all the way down: `if: {properties:
+			// {environment: {contains: {required:["derivation"]}}}}` names
+			// `derivation` to say WHEN, and reading that `contains` as a
+			// requirement would put the discriminator of every nested rule
+			// into the set the validator has to enforce.
+			next := inConsequent
+			if keyword == "if" || scope == inDiscriminator {
+				next = inDiscriminator
+			}
+			if keyword == "dependentSchemas" {
+				if schemas, ok := child.(map[string]any); ok {
+					for _, schema := range schemas {
+						walkAny(schema, def, next)
+					}
+				}
+				continue
+			}
+			walkAny(child, def, next)
 		}
 		// items and prefixItems keep the definition: an array property already
 		// resolved to its element definition above.
 		for _, keyword := range []string{"items", "prefixItems"} {
 			if child, ok := node[keyword]; ok {
-				walkAny(child, def, inConditional)
+				walkAny(child, def, scope)
 			}
 		}
 		if properties, ok := node["properties"].(map[string]any); ok {
 			for name, child := range properties {
-				walkAny(child, resolve(def, name), inConditional)
+				walkAny(child, resolve(def, name), scope)
 			}
 		}
 	}
 	for name := range defs {
 		if definition, ok := defs[name].(map[string]any); ok {
-			walk(definition, name, false)
+			walk(definition, name, outsideConditional)
 		}
 	}
-	return found
+	return scan
 }
