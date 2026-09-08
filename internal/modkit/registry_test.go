@@ -327,7 +327,31 @@ func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
 	}
 }
 
-func assertSchemaDefinition(t *testing.T, definitions map[string]map[string]any, modelType reflect.Type) {
+// assertSchemaDefinition proves the parity between one Go model and its
+// published JSON Schema definition in three parts, because the contract has
+// three kinds of requirement and one keyword cannot carry all three.
+//
+//   - Shape: the property set is exactly the tagged field set, every property
+//     has the declared type, and every struct property $refs a real definition.
+//   - Unconditional requirement: every field WITHOUT `omitempty` is in
+//     `required`, which is the same set requireJSONValue refuses a missing key
+//     for. This is the half the decoder and the schema must agree on exactly.
+//   - Conditional requirement: a field WITH `omitempty` may never appear in
+//     `required` — that would make the contract refuse a manifest the decoder
+//     accepts — so a rule like "provisioner is required for provision
+//     automation" has to live in `if`/`then`, `dependentRequired`, `oneOf` or
+//     `not` instead. conditional is the set of `Definition.field` pairs read
+//     back out of the schema's conditional keywords, and recorded names the
+//     rules the validator enforces, so dropping one from the schema fails here
+//     rather than only when the catalog is re-measured.
+//
+// The two required assertions are separate and directional on purpose: which
+// way parity broke decides whether the fix is a tag, a `required` entry or a
+// conditional keyword.
+func assertSchemaDefinition(
+	t *testing.T, definitions map[string]map[string]any, modelType reflect.Type,
+	conditional map[string]bool, recorded map[string]string,
+) {
 	t.Helper()
 	definition, ok := definitions[modelType.Name()]
 	if !ok {
@@ -419,8 +443,33 @@ func assertSchemaDefinition(t *testing.T, definitions map[string]map[string]any,
 	if !slices.Equal(gotProperties, wantProperties) {
 		t.Fatalf("schema definition %s properties = %v, want %v", modelType.Name(), gotProperties, wantProperties)
 	}
-	if !slices.Equal(gotRequired, wantRequired) {
-		t.Fatalf("schema definition %s required = %v, want %v", modelType.Name(), gotRequired, wantRequired)
+	for _, name := range wantRequired {
+		if !slices.Contains(gotRequired, name) {
+			t.Fatalf("schema definition %s does not require %s, which carries no omitempty and "+
+				"is therefore refused when absent by requireJSONValue: the published contract "+
+				"accepts a manifest ggg refuses", modelType.Name(), name)
+		}
+	}
+	for _, name := range gotRequired {
+		if !slices.Contains(wantRequired, name) {
+			t.Fatalf("schema definition %s requires %s, which carries omitempty and is therefore "+
+				"optional to the decoder: the published contract refuses a manifest ggg accepts. "+
+				"A requirement that only holds sometimes belongs in if/then, dependentRequired, "+
+				"oneOf or not, never in required", modelType.Name(), name)
+		}
+	}
+	for _, name := range wantProperties {
+		key := modelType.Name() + "." + name
+		rule, isRecorded := recorded[key]
+		if !isRecorded {
+			continue
+		}
+		if !conditional[key] {
+			t.Fatalf("schema definition %s states no conditional requirement about %s, and the "+
+				"validator enforces one (%s). `required` cannot carry it: the field is optional "+
+				"whenever the condition is absent, so a third party's manifest would validate "+
+				"clean and be refused by ggg", modelType.Name(), name, rule)
+		}
 	}
 }
 

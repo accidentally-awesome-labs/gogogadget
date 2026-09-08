@@ -8,6 +8,7 @@
 package modkit
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -342,15 +343,30 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 		reflect.TypeOf(JobContribution{}), reflect.TypeOf(ContentTypeContribution{}),
 		reflect.TypeOf(NavigationContribution{}), reflect.TypeOf(SlotContribution{}),
 		reflect.TypeOf(UIContribution{}), reflect.TypeOf(AssetContribution{}),
-		reflect.TypeOf(CLIContribution{}),
+		reflect.TypeOf(CLIContribution{}), reflect.TypeOf(TargetInput{}),
+		reflect.TypeOf(LocalService{}), reflect.TypeOf(LocalServicePort{}),
+		reflect.TypeOf(LocalServiceEnv{}), reflect.TypeOf(LocalServiceVolume{}),
+		reflect.TypeOf(LocalServiceHealth{}),
 		reflect.TypeOf(ManifestMigration{}), reflect.TypeOf(EnvironmentVariable{}),
 		reflect.TypeOf(EnvironmentDerivation{}),
 		reflect.TypeOf(DocumentationRef{}), reflect.TypeOf(TestMetadata{}), reflect.TypeOf(DataDeclaration{}),
 		reflect.TypeOf(Lock{}), reflect.TypeOf(LockedModule{}), reflect.TypeOf(LockedFile{}),
 		reflect.TypeOf(LockedMigration{}), reflect.TypeOf(PendingUpdate{}), reflect.TypeOf(PendingConflict{}),
 	}
+	conditional := schemaConditionalRequirements(t, publishedModuleSchemaDocument(t, repo))
+	walked := map[string]bool{}
 	for _, modelType := range modelTypes {
-		assertSchemaDefinition(t, definitions, modelType)
+		walked[modelType.Name()] = true
+		assertSchemaDefinition(t, definitions, modelType, conditional, publishedConditionalRules)
+	}
+	// A recorded rule about a definition nothing above walks would be checked
+	// by no one, which is how a typo'd key passes as a clean sweep.
+	for key := range publishedConditionalRules {
+		owner, _, _ := strings.Cut(key, ".")
+		if !walked[owner] {
+			t.Errorf("publishedConditionalRules names %s, but no model type above walks %s, "+
+				"so its schema keyword is asserted by nothing", key, owner)
+		}
 	}
 }
 
@@ -424,23 +440,8 @@ func TestPublishedSchemaAndValidatorAgreeOnRendererSignatures(t *testing.T) {
 		}
 		return out
 	}
-	schemaRefuses := func(body []byte) bool {
-		var instance any
-		if err := json.Unmarshal(body, &instance); err != nil {
-			t.Fatalf("decode mutated instance: %v", err)
-		}
-		return schema.Validate(instance) != nil
-	}
-	validatorRefuses := func(body []byte) bool {
-		var document ModuleDocument
-		if err := decodeStrict(body, &document); err != nil {
-			return true
-		}
-		if err := requireJSONValue(body, reflect.TypeOf(&document), base); err != nil {
-			return true
-		}
-		return validateManifest(document.Module, true) != nil
-	}
+	schemaRefuses := func(body []byte) bool { return schemaRefusesModuleDocument(t, schema, body) }
+	validatorRefuses := func(body []byte) bool { return validatorRefusesModuleDocument(t, body, base) }
 
 	// The valid case first. Without it every row below would pass even if the
 	// mutation under test were harmless, because a broken base refuses too.
@@ -492,6 +493,416 @@ func TestPublishedSchemaAndValidatorAgreeOnRendererSignatures(t *testing.T) {
 	}
 	if residuals != 1 {
 		t.Fatalf("%d residual divergences are declared; exactly one is accepted and documented", residuals)
+	}
+}
+
+// schemaRefusesModuleDocument and validatorRefusesModuleDocument are the two
+// verdicts every published-contract agreement test compares. Both take the
+// document BYTES rather than a decoded Manifest, because two of the
+// validator's refusals — strict decoding and requireJSONValue's missing-key
+// check — do not survive a round trip through the model.
+func schemaRefusesModuleDocument(t *testing.T, schema *jsonschema.Schema, body []byte) bool {
+	t.Helper()
+	var instance any
+	if err := json.Unmarshal(body, &instance); err != nil {
+		t.Fatalf("decode module document: %v", err)
+	}
+	return schema.Validate(instance) != nil
+}
+
+func validatorRefusesModuleDocument(t *testing.T, body []byte, origin string) bool {
+	t.Helper()
+	var document ModuleDocument
+	if err := decodeStrict(body, &document); err != nil {
+		return true
+	}
+	if err := requireJSONValue(body, reflect.TypeOf(&document), origin); err != nil {
+		return true
+	}
+	return validateManifest(document.Module, true) != nil
+}
+
+// The three mutators below are deliberately fussy about what is already there.
+// A row that deletes an absent key or overwrites a key it meant to add would
+// still produce a verdict, and the verdict would be about the base manifest
+// rather than about the rule under test — which is exactly how a conditional
+// requirement test rots into a tautology when a base manifest moves.
+func schemaDropKeys(t *testing.T, node map[string]any, keys ...string) {
+	t.Helper()
+	for _, key := range keys {
+		if _, ok := node[key]; !ok {
+			t.Fatalf("base record does not carry %q, so dropping it asserts nothing", key)
+		}
+		delete(node, key)
+	}
+}
+
+func schemaAddKey(t *testing.T, node map[string]any, key string, value any) {
+	t.Helper()
+	if _, ok := node[key]; ok {
+		t.Fatalf("base record already carries %q, so adding it asserts nothing", key)
+	}
+	node[key] = value
+}
+
+func schemaReplaceKey(t *testing.T, node map[string]any, key string, value any) {
+	t.Helper()
+	if _, ok := node[key]; !ok {
+		t.Fatalf("base record does not carry %q, so replacing it asserts nothing", key)
+	}
+	node[key] = value
+}
+
+// schemaObjectAt walks named object keys, and schemaRecordAt indexes one
+// record out of a named array. Both fail rather than return zero values: a
+// base manifest that no longer carries the shape under test must fail loudly.
+func schemaObjectAt(t *testing.T, node map[string]any, keys ...string) map[string]any {
+	t.Helper()
+	for _, key := range keys {
+		child, ok := node[key].(map[string]any)
+		if !ok {
+			t.Fatalf("base document has no object at %q", key)
+		}
+		node = child
+	}
+	return node
+}
+
+func schemaRecordAt(t *testing.T, node map[string]any, key string, index int) map[string]any {
+	t.Helper()
+	records, ok := node[key].([]any)
+	if !ok {
+		t.Fatalf("base document has no array at %q", key)
+	}
+	if index >= len(records) {
+		t.Fatalf("base document %q has %d records, wanted index %d", key, len(records), index)
+	}
+	record, ok := records[index].(map[string]any)
+	if !ok {
+		t.Fatalf("base document %q[%d] is not an object", key, index)
+	}
+	return record
+}
+
+// The conditional half of the published extension contract.
+//
+// TestPublishedSchemaAndValidatorAgreeOnRendererSignatures closed one
+// UNCONDITIONAL divergence. The gate that landed with it then measured fifteen
+// more of a different shape: requirements the validator applies only when a
+// sibling field says so, which `required` alone cannot state, and which the
+// published schema therefore stated not at all. A third party writing an
+// adapter manifest got no warning from the contract and a refusal from `ggg`.
+//
+// Every row is a real published manifest with one mutation, run through both
+// engines. Each rule appears twice at least: a shape the tool refuses, which
+// the schema must now refuse too, and a shape where the DISCRIMINATOR is
+// absent and both engines accept the very same missing field — without which a
+// conditional keyword would be indistinguishable from an unconditional
+// requirement bolted onto `required`.
+func TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements(t *testing.T) {
+	const (
+		chart    = "registry/modules/component/chart/module.json"
+		postgres = "registry/modules/system/database-postgres/module.json"
+		storage  = "registry/modules/system/storage-s3/module.json"
+		home     = "registry/modules/page/home/module.json"
+		mail     = "registry/modules/system/mail/module.json"
+		cli      = "registry/modules/system/cli-ui/module.json"
+		clerk    = "registry/modules/system/identity-clerk/module.json"
+	)
+	repo := os.DirFS("../..")
+	schema := compilePublishedSchema(t, "registry/schema/module.schema.json", "#/$defs/ModuleDocument")
+
+	read := func(t *testing.T, name string) []byte {
+		t.Helper()
+		data, err := fs.ReadFile(repo, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		return data
+	}
+	// mutate applies one change to the manifest inside a real module document
+	// and refuses to return bytes that are identical to the ones it read.
+	mutate := func(t *testing.T, name string, apply func(*testing.T, map[string]any)) []byte {
+		t.Helper()
+		var document map[string]any
+		if err := json.Unmarshal(read(t, name), &document); err != nil {
+			t.Fatalf("decode %s: %v", name, err)
+		}
+		before, err := json.Marshal(document)
+		if err != nil {
+			t.Fatalf("encode %s: %v", name, err)
+		}
+		apply(t, schemaObjectAt(t, document, "module"))
+		after, err := json.Marshal(document)
+		if err != nil {
+			t.Fatalf("encode mutated %s: %v", name, err)
+		}
+		if bytes.Equal(before, after) {
+			t.Fatalf("the mutation left %s unchanged", name)
+		}
+		return after
+	}
+
+	// The valid case first, once per base. Without it every row below would
+	// pass even if its mutation were harmless, because a base refused for its
+	// own reasons is refused by both engines too.
+	for _, name := range []string{chart, postgres, storage, home, mail, cli, clerk} {
+		body := read(t, name)
+		if schemaRefusesModuleDocument(t, schema, body) || validatorRefusesModuleDocument(t, body, name) {
+			t.Fatalf("%s is refused unmutated: schema=%v validator=%v", name,
+				schemaRefusesModuleDocument(t, schema, body), validatorRefusesModuleDocument(t, body, name))
+		}
+	}
+
+	adapterTarget := func(t *testing.T, module map[string]any, index int) map[string]any {
+		t.Helper()
+		return schemaRecordAt(t, schemaObjectAt(t, module, "runtime", "system", "adapter"), "targets", index)
+	}
+	for _, tc := range []struct {
+		rule    string
+		name    string
+		base    string
+		apply   func(*testing.T, map[string]any)
+		refused bool
+	}{
+		{
+			rule: "AssetContribution.engine/integrity", name: "an engine asset with no integrity",
+			base: chart, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "assets", 0), "integrity")
+			},
+		},
+		{
+			rule: "AssetContribution.engine/integrity", name: "an integrity value with no engine",
+			base: chart, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "assets", 0), "engine")
+			},
+		},
+		{
+			rule: "AssetContribution.engine/integrity", name: "an ordinary asset with neither",
+			base: chart,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "assets", 0), "engine", "integrity")
+			},
+		},
+		{
+			rule: "LocalServiceEnv.value", name: "a container env entry with neither value nor from_key",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, adapterTarget(t, m, 0), "local_service"), "environment", 0), "value")
+			},
+		},
+		{
+			rule: "LocalServiceEnv.value", name: "a container env entry with both",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaAddKey(t, schemaRecordAt(t, schemaObjectAt(t, adapterTarget(t, m, 0), "local_service"), "environment", 0), "from_key", "POSTGRES_PASSWORD")
+			},
+		},
+		{
+			rule: "LocalServiceEnv.value", name: "a container env entry with from_key instead",
+			base: postgres,
+			apply: func(t *testing.T, m map[string]any) {
+				record := schemaRecordAt(t, schemaObjectAt(t, adapterTarget(t, m, 0), "local_service"), "environment", 0)
+				schemaDropKeys(t, record, "value")
+				schemaAddKey(t, record, "from_key", "POSTGRES_PASSWORD")
+			},
+		},
+		{
+			rule: "LocalServiceHealth.path", name: "an http probe with no path",
+			base: storage, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, adapterTarget(t, m, 0), "local_service", "health"), "path")
+			},
+		},
+		{
+			rule: "LocalServiceHealth.path", name: "a tcp probe with no path",
+			base: storage,
+			apply: func(t *testing.T, m map[string]any) {
+				health := schemaObjectAt(t, adapterTarget(t, m, 0), "local_service", "health")
+				schemaReplaceKey(t, health, "kind", "tcp")
+				schemaDropKeys(t, health, "path")
+			},
+		},
+		{
+			rule: "NavigationContribution.href/route_id", name: "a nav entry with neither target",
+			base: home, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 2), "href")
+			},
+		},
+		{
+			rule: "NavigationContribution.href/route_id", name: "a nav entry with both targets",
+			base: home, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaAddKey(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 2), "route_id", "home.show")
+			},
+		},
+		{
+			rule: "NavigationContribution.href/route_id", name: "a nav entry with a route id instead",
+			base: home,
+			apply: func(t *testing.T, m map[string]any) {
+				record := schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 2)
+				schemaDropKeys(t, record, "href")
+				schemaAddKey(t, record, "route_id", "home.show")
+			},
+		},
+		{
+			rule: "NavigationContribution.group", name: "a footer entry with no group",
+			base: home, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 0), "group")
+			},
+		},
+		{
+			rule: "NavigationContribution.group", name: "a non-footer entry with a group",
+			base: home, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaAddKey(t, schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 2), "group", "footer.company")
+			},
+		},
+		{
+			rule: "NavigationContribution.group", name: "the same entry outside the footer with no group",
+			base: home,
+			apply: func(t *testing.T, m map[string]any) {
+				record := schemaRecordAt(t, schemaObjectAt(t, m, "runtime"), "navigation", 0)
+				schemaReplaceKey(t, record, "area", "public")
+				schemaDropKeys(t, record, "group")
+			},
+		},
+		{
+			rule: "NamespaceClaims.jobs/RuntimeContributions.jobs", name: "a declared job kind with no claim",
+			base: mail, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "jobs")
+			},
+		},
+		{
+			rule: "NamespaceClaims.jobs/RuntimeContributions.jobs", name: "a claimed job kind with no declaration",
+			base: mail, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime"), "jobs")
+			},
+		},
+		{
+			rule: "NamespaceClaims.jobs/RuntimeContributions.jobs", name: "neither half",
+			base: mail,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "jobs")
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime"), "jobs")
+			},
+		},
+		{
+			rule: "NamespaceClaims.cli", name: "a contributed command with no claim",
+			base: cli, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "cli")
+			},
+		},
+		{
+			rule: "NamespaceClaims.cli", name: "no contributed command and no claim",
+			base: cli,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "cli")
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime"), "cli")
+			},
+		},
+		{
+			rule: "NamespaceClaims.packages", name: "a derivation with no claimed package",
+			base: clerk, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "packages")
+			},
+		},
+		{
+			rule: "NamespaceClaims.packages", name: "no derivation and no claimed package",
+			base: clerk,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaRecordAt(t, m, "environment", 0), "derivation")
+				schemaDropKeys(t, schemaObjectAt(t, m, "claims"), "packages")
+			},
+		},
+		{
+			rule: "RuntimeContributions.system/SystemContribution.adapter", name: "a target-narrowed env key with no adapter",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime", "system"), "adapter")
+			},
+		},
+		{
+			rule: "RuntimeContributions.system/SystemContribution.adapter", name: "a target-narrowed env key with no system contribution",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime"), "system")
+			},
+		},
+		{
+			rule: "RuntimeContributions.system/SystemContribution.adapter", name: "no adapter and no target-narrowed env key",
+			base: postgres,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, schemaObjectAt(t, m, "runtime"), "system")
+				schemaDropKeys(t, schemaRecordAt(t, m, "environment", 0), "targets")
+				schemaDropKeys(t, schemaRecordAt(t, m, "environment", 1), "targets")
+			},
+		},
+		{
+			rule: "ServiceTarget.provisioner", name: "a provision target with no provisioner",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				schemaDropKeys(t, adapterTarget(t, m, 1), "provisioner")
+			},
+		},
+		{
+			rule: "ServiceTarget.provisioner", name: "a configure target with no provisioner",
+			base: postgres, refused: true,
+			apply: func(t *testing.T, m map[string]any) {
+				target := adapterTarget(t, m, 1)
+				schemaReplaceKey(t, target, "automation", "configure")
+				schemaDropKeys(t, target, "provisioner")
+			},
+		},
+		{
+			rule: "ServiceTarget.provisioner", name: "a manual target with no provisioner",
+			base: postgres,
+			apply: func(t *testing.T, m map[string]any) {
+				target := adapterTarget(t, m, 1)
+				schemaReplaceKey(t, target, "automation", "manual")
+				schemaDropKeys(t, target, "provisioner")
+			},
+		},
+	} {
+		t.Run(tc.rule+"/"+tc.name, func(t *testing.T) {
+			body := mutate(t, tc.base, tc.apply)
+			if got := validatorRefusesModuleDocument(t, body, tc.base); got != tc.refused {
+				t.Fatalf("validator refuses = %v, want %v — the row no longer describes the "+
+					"rule it names, so the agreement below would assert nothing", got, tc.refused)
+			}
+			if got := schemaRefusesModuleDocument(t, schema, body); got != tc.refused {
+				t.Fatalf("published schema refuses = %v, want %v — the external extension "+
+					"contract disagrees with the tool about %s", got, tc.refused, tc.rule)
+			}
+		})
+	}
+
+	// The recorded residual, asserted rather than described. The validator
+	// requires an env declaration's `secret` flag to EQUAL the flag on the
+	// adapter target input whose `env_key` names it, which is a join between
+	// two sibling arrays on a matched value; JSON Schema 2020-12 has no keyword
+	// for it, the same way RE2 has no backreference for the renderer signature.
+	// Asserting the schema still ACCEPTS it keeps the record honest: a future
+	// keyword that expressed the rule would fail here and the $comment would
+	// have to go.
+	residual := mutate(t, postgres, func(t *testing.T, m map[string]any) {
+		schemaDropKeys(t, schemaRecordAt(t, m, "environment", 0), "secret")
+	})
+	if !validatorRefusesModuleDocument(t, residual, postgres) {
+		t.Fatal("the validator now accepts an env declaration whose secret flag " +
+			"disagrees with its adapter input, so the recorded residual is stale")
+	}
+	if schemaRefusesModuleDocument(t, schema, residual) {
+		t.Fatal("the published schema now refuses a secret-flag mismatch too, so the " +
+			"recorded residual in EnvironmentVariable.secret's $comment must be deleted")
 	}
 }
 
@@ -558,11 +969,12 @@ func fieldPathsRelated(a, b string) bool {
 // the values the catalog never exercises — and returns the first change that
 // makes the manifest valid again.
 //
-// A rescue means the requirement is CONDITIONAL: JSON Schema can only state it
-// with `if`/`then`/`dependentRequired`/`oneOf`, and the published contract
-// deliberately does not model those (assertSchemaDefinition pins `required` to
-// exactly the non-omitempty field set). No rescue means the field is required
-// outright, and an `omitempty` tag on it is the defect.
+// A rescue means the requirement is CONDITIONAL, and the published contract
+// states those with `if`/`then`, `dependentRequired`, `oneOf` and `not` rather
+// than with `required` — so a rescue is no longer an excuse for the schema to
+// say nothing, only for it to say something other than "always required". No
+// rescue means the field is required outright, and an `omitempty` tag on it is
+// the defect.
 func searchForRescue(
 	t *testing.T, manifest *Manifest, observed map[string][]any, owner, tag string,
 ) (string, int) {
@@ -617,24 +1029,37 @@ func searchForRescue(
 	return "", attempts
 }
 
-// The gate whose absence let C1 ship. Presence parity was already held from two
-// sides — requireJSONValue refuses a missing key for every field without
-// `omitempty`, and assertSchemaDefinition pins the schema's `required` list to
-// exactly that same set — so the published contract can only diverge from the
-// tool where the TAG is wrong: a field the validator refuses outright at its
-// zero value, declared `omitempty`, is optional to the decoder and optional in
-// the published schema while being required in fact. That is precisely what
-// runtime.ui[].signature was.
+// The gate whose absence let C1 ship, upgraded from presence parity to
+// CONDITIONAL parity.
 //
-// Both halves are derived from the published catalog, not written down: the
-// candidate set is every `omitempty` field whose zero value some real manifest
-// is refused for, and conditionality is decided by searchForRescue rather than
-// by an exemption list, so a new conditional rule needs no edit here and a new
-// unconditional one cannot be waved through.
+// Presence parity is held from two sides — requireJSONValue refuses a missing
+// key for every field without `omitempty`, and assertSchemaDefinition pins the
+// schema's `required` list to exactly that same set — so the contract could
+// diverge from the tool in two ways. The first is a wrong TAG: a field the
+// validator refuses outright at its zero value, declared `omitempty`, is
+// optional to the decoder and optional in the published schema while being
+// required in fact. That is what runtime.ui[].signature was, and it is what
+// the rescue search below still catches.
 //
-// Measured over the 297 published manifests: 15 candidates, all 15 rescued,
-// zero findings — and reverting signature's tag to `omitempty` puts it back on
-// the list, which is the false-negative this test exists to remove.
+// The second is a CONDITIONAL requirement the schema states not at all. When
+// this gate first landed it excused those: a rescue proved the rule could not
+// live in `required`, and the measurement stopped there, recording fifteen
+// real gaps in the published contract. The schema now expresses them with
+// `if`/`then`, `dependentRequired`, `oneOf` and `not`, so a rescue must now be
+// answered by a conditional keyword that names the same field. A field with a
+// rescue and no conditional is a shape a third party's manifest passes and
+// `ggg` refuses — and it fails here naming the field and its discriminator.
+//
+// Both halves stay derived from the published catalog rather than written down:
+// the candidate set is every `omitempty` field whose zero value some real
+// manifest is refused for, conditionality is decided by searchForRescue, and
+// the schema's side is read out of the document by
+// schemaConditionalRequirements. A new conditional rule in the validator needs
+// no edit here — only a keyword in the schema, or an entry in
+// publishedSchemaResiduals saying which keyword JSON Schema lacks.
+//
+// Measured over the 297 published manifests: 15 candidates, all 15 rescued, 14
+// answered by a conditional keyword and one recorded residual.
 func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 	repo := os.DirFS("../..")
 	instances := publishedModuleInstances(t, repo)
@@ -705,11 +1130,20 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 			"cannot distinguish a conditional requirement from an outright one", rescue, attempts)
 	}
 
+	document := publishedModuleSchemaDocument(t, repo)
+	conditional := schemaConditionalRequirements(t, document)
+	if len(conditional) < len(publishedConditionalRules) {
+		t.Fatalf("only %d conditional requirements were read out of the published schema, "+
+			"fewer than the %d recorded rules; the walk has collapsed, not the schema",
+			len(conditional), len(publishedConditionalRules))
+	}
+
 	keys := make([]string, 0, len(candidates))
 	for key := range candidates {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
+	residualsReached := map[string]bool{}
 	for _, key := range keys {
 		owner, tag, _ := strings.Cut(key, ".")
 		manifest := load(candidates[key])
@@ -720,6 +1154,228 @@ func TestValidatorRequiredFieldsAreNotOptionalInTheContract(t *testing.T) {
 				"says omitempty, which makes it optional to requireJSONValue and absent from the "+
 				"published schema's required list. Drop the omitempty.",
 				key, candidates[key], attempts)
+			continue
+		}
+		if _, recorded := publishedSchemaResiduals[key]; recorded {
+			residualsReached[key] = true
+			continue
+		}
+		rule, recorded := publishedConditionalRules[key]
+		if !recorded {
+			t.Errorf("%s is CONDITIONALLY required — the validator refuses its zero value in %s "+
+				"and %s rescues it — and the inventory records nothing about it. State the rule "+
+				"in registry/schema/module.schema.json with if/then, dependentRequired, oneOf or "+
+				"not and add it to publishedConditionalRules; if JSON Schema cannot express it, "+
+				"record it in publishedSchemaResiduals with the keyword it lacks rather than "+
+				"approximating it.", key, candidates[key], rescue)
+			continue
+		}
+		if !conditional[key] {
+			t.Errorf("%s is CONDITIONALLY required — the validator refuses its zero value in %s "+
+				"and %s rescues it — and the published schema states no conditional requirement "+
+				"about it (recorded rule: %s), so a third party's manifest validates clean and "+
+				"ggg refuses it.", key, candidates[key], rescue, rule)
 		}
 	}
+	for key, reason := range publishedSchemaResiduals {
+		if !residualsReached[key] {
+			t.Errorf("%s is recorded as a residual (%s) but the sweep no longer reaches it as a "+
+				"conditional requirement; the record is stale", key, reason)
+		}
+		if conditional[key] {
+			t.Errorf("%s is recorded as inexpressible (%s) and the published schema now states "+
+				"a conditional about it; delete the record and its $comment", key, reason)
+		}
+	}
+	for key, rule := range publishedConditionalRules {
+		if !conditional[key] {
+			t.Errorf("the published schema no longer states the %s rule about %s; `required` "+
+				"cannot carry it, because the field is optional whenever the condition is absent",
+				rule, key)
+		}
+		if _, known := candidates[key]; !known {
+			t.Errorf("%s is recorded as conditionally required but no published manifest is "+
+				"refused for its zero value any more; the record is stale", key)
+		}
+	}
+}
+
+// publishedConditionalRules is the inventory of conditional requirements the
+// Go validator enforces and the keyword registry/schema/module.schema.json
+// states each with. It is a record, not the check: the check reads the schema
+// (schemaConditionalRequirements) and the validator (searchForRescue) and
+// compares them. The record exists so dropping a keyword from the published
+// contract fails by name in two places — here and in assertSchemaDefinition —
+// rather than only when someone re-measures the catalog.
+var publishedConditionalRules = map[string]string{
+	"AssetContribution.engine":        "dependentRequired co-presence",
+	"AssetContribution.integrity":     "dependentRequired co-presence",
+	"LocalServiceEnv.value":           "oneOf exclusive-or with from_key",
+	"LocalServiceHealth.path":         "if kind is http/then required",
+	"NavigationContribution.href":     "oneOf exclusive-or with route_id",
+	"NavigationContribution.route_id": "oneOf exclusive-or with href",
+	"NavigationContribution.group":    "if area is footer/then required/else not required",
+	"NamespaceClaims.jobs":            "if runtime.jobs/then required",
+	"RuntimeContributions.jobs":       "if claims.jobs/then required",
+	"NamespaceClaims.cli":             "if runtime.cli/then required",
+	"NamespaceClaims.packages":        "if any environment derivation/then required",
+	"RuntimeContributions.system":     "if any target-narrowed environment record/then required",
+	"SystemContribution.adapter":      "if any target-narrowed environment record/then required",
+	"ServiceTarget.provisioner":       "if automation is provision or configure/then required",
+}
+
+// publishedSchemaResiduals are the requirements JSON Schema 2020-12 cannot
+// state, with the keyword it would need. Both are value joins the tool
+// performs and no applicator expresses; approximating either with a weaker
+// keyword would be worse than silence, because a keyword reads as a guarantee.
+//
+// UIContribution.signature is the other recorded divergence and is not listed
+// here: its pattern IS published, and only the equality of the two captured
+// names is missing, which is a pattern-engine limit rather than a missing
+// conditional. TestPublishedSchemaAndValidatorAgreeOnRendererSignatures owns
+// that one.
+var publishedSchemaResiduals = map[string]string{
+	"EnvironmentVariable.secret": "the flag must EQUAL the secret flag of the adapter " +
+		"target input whose env_key names this record's key — a join between two sibling " +
+		"arrays on a matched value, which JSON Schema 2020-12 has no keyword for",
+}
+
+func publishedModuleSchemaDocument(t *testing.T, repo fs.FS) map[string]any {
+	t.Helper()
+	data, err := fs.ReadFile(repo, "registry/schema/module.schema.json")
+	if err != nil {
+		t.Fatalf("read module schema: %v", err)
+	}
+	var document map[string]any
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatalf("decode module schema: %v", err)
+	}
+	return document
+}
+
+// schemaConditionalRequirements reads out of the published module schema the
+// set of `Definition.field` pairs some conditional keyword constrains: a field
+// named by a `required` list inside `if`/`then`/`else`/`not`/`oneOf`/`anyOf`/
+// `allOf`/`contains`, or by either side of a `dependentRequired` entry.
+//
+// It is a walk rather than a list because the rules do not all live on the
+// definition that owns the field: the two-halves rules span `claims` and
+// `runtime`, which are sibling properties of Manifest. So the walk carries the
+// definition each instance location belongs to and switches it when it steps
+// through a property whose declared schema is a `$ref` — or an array of them,
+// where `contains` and `items` then constrain one element.
+func schemaConditionalRequirements(t *testing.T, document map[string]any) map[string]bool {
+	t.Helper()
+	defs, ok := document["$defs"].(map[string]any)
+	if !ok {
+		t.Fatal("published module schema has no $defs object")
+	}
+	definitionName := func(node map[string]any) string {
+		ref, ok := node["$ref"].(string)
+		if !ok {
+			return ""
+		}
+		if _, name, found := strings.Cut(ref, "#/$defs/"); found {
+			return name
+		}
+		return ""
+	}
+	// resolve names the definition a property of def carries, following either
+	// a direct $ref or the $ref of an array's items.
+	resolve := func(def, property string) string {
+		owner, ok := defs[def].(map[string]any)
+		if !ok {
+			return ""
+		}
+		properties, ok := owner["properties"].(map[string]any)
+		if !ok {
+			return ""
+		}
+		declared, ok := properties[property].(map[string]any)
+		if !ok {
+			return ""
+		}
+		if name := definitionName(declared); name != "" {
+			return name
+		}
+		if items, ok := declared["items"].(map[string]any); ok {
+			return definitionName(items)
+		}
+		return ""
+	}
+
+	found := map[string]bool{}
+	var walk func(node map[string]any, def string, inConditional bool)
+	walkAny := func(value any, def string, inConditional bool) {
+		switch value := value.(type) {
+		case map[string]any:
+			walk(value, def, inConditional)
+		case []any:
+			for _, child := range value {
+				if child, ok := child.(map[string]any); ok {
+					walk(child, def, inConditional)
+				}
+			}
+		}
+	}
+	walk = func(node map[string]any, def string, inConditional bool) {
+		if def == "" {
+			return
+		}
+		if inConditional {
+			if required, ok := node["required"].([]any); ok {
+				for _, raw := range required {
+					if name, ok := raw.(string); ok {
+						found[def+"."+name] = true
+					}
+				}
+			}
+		}
+		// dependentRequired is conditional wherever it appears, and both sides
+		// of each entry are constrained: the key by the dependency it drags in,
+		// the dependency by the key that requires it.
+		if dependent, ok := node["dependentRequired"].(map[string]any); ok {
+			for name, raw := range dependent {
+				found[def+"."+name] = true
+				if list, ok := raw.([]any); ok {
+					for _, entry := range list {
+						if dependency, ok := entry.(string); ok {
+							found[def+"."+dependency] = true
+						}
+					}
+				}
+			}
+		}
+		for _, keyword := range []string{"if", "then", "else", "not", "oneOf", "anyOf", "allOf", "contains", "dependentSchemas"} {
+			if child, ok := node[keyword]; ok {
+				if keyword == "dependentSchemas" {
+					if schemas, ok := child.(map[string]any); ok {
+						for _, schema := range schemas {
+							walkAny(schema, def, true)
+						}
+					}
+					continue
+				}
+				walkAny(child, def, true)
+			}
+		}
+		// items and prefixItems keep the definition: an array property already
+		// resolved to its element definition above.
+		for _, keyword := range []string{"items", "prefixItems"} {
+			if child, ok := node[keyword]; ok {
+				walkAny(child, def, inConditional)
+			}
+		}
+		if properties, ok := node["properties"].(map[string]any); ok {
+			for name, child := range properties {
+				walkAny(child, resolve(def, name), inConditional)
+			}
+		}
+	}
+	for name := range defs {
+		if definition, ok := defs[name].(map[string]any); ok {
+			walk(definition, name, false)
+		}
+	}
+	return found
 }

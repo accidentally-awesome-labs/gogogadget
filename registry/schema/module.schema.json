@@ -64,7 +64,16 @@
         "id",
         "path",
         "kind"
-      ]
+      ],
+      "$comment": "engine and integrity are one declaration, not two optional ones. modkit.validateAssets refuses an engine with no integrity (an injected browser engine whose bytes nothing pins) and an integrity with no engine (a value the shell would silently ignore, because template-owned script tags carry their own). dependentRequired states both halves.",
+      "dependentRequired": {
+        "engine": [
+          "integrity"
+        ],
+        "integrity": [
+          "engine"
+        ]
+      }
     },
     "ContentTypeContribution": {
       "type": "object",
@@ -267,7 +276,8 @@
           "type": "boolean"
         },
         "secret": {
-          "type": "boolean"
+          "type": "boolean",
+          "$comment": "The Go validator (modkit.validateAdapterEnvironment) additionally requires this flag to EQUAL the `secret` flag of the adapter target input whose `env_key` is this record's `key`, and the same for `type`. Stating that needs a join between two sibling arrays on a matched value, which JSON Schema 2020-12 has no keyword for — the same class of limit as the missing backreference in UIContribution.signature's pattern. Those two are the only recorded divergences, and TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements asserts a third cannot hide behind them."
         },
         "trim_slash": {
           "type": "boolean"
@@ -530,6 +540,195 @@
         "tests",
         "data",
         "removal_policy"
+      ],
+      "$comment": "The rules below span two sibling objects, so they cannot live on either definition alone. Each is one half of a rule modkit.validateManifest enforces; a manifest that fails one here is refused by `ggg` for the named reason.",
+      "allOf": [
+        {
+          "$comment": "A job kind is a claim AND a declaration, and neither half means anything alone: a claims.jobs entry with no runtime.jobs record is a kind nothing dispatches, and a runtime.jobs record with no claim is a handler outside the collision check. The set equality the validator enforces (every claimed kind is declared and back) needs to compare values across two arrays, which JSON Schema 2020-12 cannot do; presence of both halves is the part it can state.",
+          "if": {
+            "required": [
+              "runtime"
+            ],
+            "properties": {
+              "runtime": {
+                "required": [
+                  "jobs"
+                ],
+                "properties": {
+                  "jobs": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "claims"
+            ],
+            "properties": {
+              "claims": {
+                "required": [
+                  "jobs"
+                ],
+                "properties": {
+                  "jobs": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "The other half of the job rule.",
+          "if": {
+            "required": [
+              "claims"
+            ],
+            "properties": {
+              "claims": {
+                "required": [
+                  "jobs"
+                ],
+                "properties": {
+                  "jobs": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "runtime"
+            ],
+            "properties": {
+              "runtime": {
+                "required": [
+                  "jobs"
+                ],
+                "properties": {
+                  "jobs": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "A contributed ggg command name is collision-checked under claims.cli, so a runtime.cli record with no claim is a command name outside the namespace check.",
+          "if": {
+            "required": [
+              "runtime"
+            ],
+            "properties": {
+              "runtime": {
+                "required": [
+                  "cli"
+                ],
+                "properties": {
+                  "cli": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "claims"
+            ],
+            "properties": {
+              "claims": {
+                "required": [
+                  "cli"
+                ],
+                "properties": {
+                  "cli": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "A derivation names a package the generated config loader calls, and that package must be one this module claims. The validator checks the exact package string against claims.packages; the part statable here is that a manifest declaring any derivation claims at least one package.",
+          "if": {
+            "required": [
+              "environment"
+            ],
+            "properties": {
+              "environment": {
+                "contains": {
+                  "required": [
+                    "derivation"
+                  ]
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "claims"
+            ],
+            "properties": {
+              "claims": {
+                "required": [
+                  "packages"
+                ],
+                "properties": {
+                  "packages": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "An environment record narrowed to `targets` names service targets of THIS module's adapter, so the adapter has to exist for the narrowing to mean anything. The validator additionally checks each `<adapter>@<target>` string against the declared target ids, which is a value join JSON Schema cannot express.",
+          "if": {
+            "required": [
+              "environment"
+            ],
+            "properties": {
+              "environment": {
+                "contains": {
+                  "required": [
+                    "targets"
+                  ],
+                  "properties": {
+                    "targets": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "runtime"
+            ],
+            "properties": {
+              "runtime": {
+                "required": [
+                  "system"
+                ],
+                "properties": {
+                  "system": {
+                    "required": [
+                      "adapter"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "ManifestFile": {
@@ -840,7 +1039,42 @@
         "area",
         "id",
         "label_key"
-      ]
+      ],
+      "$comment": "A navigation entry needs exactly one target: a route_id, whose href comes from the generated route table and cannot go stale, or a literal href for a target that is not a route. `group` is the footer column an entry belongs to, so it is required for footer entries and meaningless — and refused — anywhere else.",
+      "oneOf": [
+        {
+          "required": [
+            "route_id"
+          ]
+        },
+        {
+          "required": [
+            "href"
+          ]
+        }
+      ],
+      "if": {
+        "required": [
+          "area"
+        ],
+        "properties": {
+          "area": {
+            "const": "footer"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "group"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "group"
+          ]
+        }
+      }
     },
     "OpenAPIContribution": {
       "type": "object",
@@ -1359,7 +1593,31 @@
         "automation",
         "docs_url",
         "inputs"
-      ]
+      ],
+      "$comment": "`provision` and `configure` automation both run a typed provisioner against the service, so the target has to name one; a `manual` target runs a checklist instead and names none.",
+      "if": {
+        "required": [
+          "automation"
+        ],
+        "properties": {
+          "automation": {
+            "enum": [
+              "provision",
+              "configure"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "provisioner"
+        ],
+        "properties": {
+          "provisioner": {
+            "minLength": 1
+          }
+        }
+      }
     },
     "RuntimeContributions": {
       "type": "object",
@@ -2088,6 +2346,29 @@
       },
       "required": [
         "key"
+      ],
+      "$comment": "A container environment entry is either a literal value or a reference to one declared env key, never both and never neither: `value` and `from_key` are exclusive halves of one decision.",
+      "oneOf": [
+        {
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "from_key"
+          ],
+          "properties": {
+            "from_key": {
+              "minLength": 1
+            }
+          }
+        }
       ]
     },
     "LocalServiceVolume": {
@@ -2131,7 +2412,28 @@
       "required": [
         "kind",
         "port"
-      ]
+      ],
+      "$comment": "An http probe fetches a path, so a `kind: http` health check must declare one. A `kind: tcp` probe dials the port and needs none.",
+      "if": {
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "const": "http"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "minLength": 1
+          }
+        }
+      }
     },
     "ProvisionerContribution": {
       "type": "object",

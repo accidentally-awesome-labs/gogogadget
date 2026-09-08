@@ -427,10 +427,51 @@ The fields that carry weight:
 - **`claims`** — the collision-checked names this module owns: packages,
   routes, jobs, and for the framework surfaces `provider_slots`,
   `provisioners`, `database_ops`, `cli` and `deploy`. Every declaration needs
-  a matching claim.
+  a matching claim, and for job kinds the rule runs both ways: a
+  `claims.jobs` entry with no `runtime.jobs` record is refused too, because it
+  is a kind nothing dispatches.
 - **`removal_policy`** — `free`, `retain-data`, `drain-required`,
   `replacement-required` or `major-version-only`. See
   [module removal](/docs/module-removal).
+
+### The conditional rules the contract states
+
+Most manifest fields are required outright or optional outright, and
+`registry/schema/module.schema.json` says which by listing the first kind in
+`required`. Ten rules are neither: the field is required *because of a sibling
+field*, and the published schema states each with `if`/`then`,
+`dependentRequired`, `oneOf` or `not` rather than in `required`, so a
+third-party manifest is refused by a plain JSON Schema validator for the same
+reason `ggg` refuses it.
+
+| rule | condition |
+|---|---|
+| `runtime.assets[].engine` and `.integrity` | each requires the other — an injected engine whose bytes nothing pins, or a checksum the shell would ignore |
+| `local_service.environment[].value` / `.from_key` | exactly one, never both and never neither |
+| `local_service.health.path` | required when `health.kind` is `http`, unused when it is `tcp` |
+| `runtime.navigation[].route_id` / `.href` | exactly one target |
+| `runtime.navigation[].group` | required when `area` is `footer`, refused in every other area |
+| `claims.jobs` ↔ `runtime.jobs` | each half requires the other |
+| `claims.cli` | required when `runtime.cli` declares a command |
+| `claims.packages` | required when any `environment[].derivation` names a package |
+| `runtime.system.adapter` | required when any `environment[]` record narrows itself to `targets` |
+| `targets[].provisioner` | required when `automation` is `provision` or `configure`, none for `manual` |
+
+Two requirements the tool enforces are **not** in the contract, and both are
+recorded rather than approximated — a keyword that stated a weaker rule would
+read as a guarantee:
+
+- `environment[].secret` (and `.type`) must **equal** the flag on the adapter
+  target input whose `env_key` names that key. That is a join between two
+  sibling arrays on a matched value, and JSON Schema 2020-12 has no keyword
+  for it.
+- `runtime.ui[].signature` must have its two names identical, which needs a
+  backreference RE2 does not have — see **Add a component** below.
+
+Both are named in the schema's own `$comment`s, and
+`TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements` plus
+`TestValidatorRequiredFieldsAreNotOptionalInTheContract` fail if a third
+divergence appears or if a recorded one becomes expressible.
 
 Then build and validate:
 
@@ -1200,7 +1241,10 @@ each, `markdown-editor` four, and `card`, `carousel`, `command`, `data-grid`,
    documented gap recorded in its own `$comment`: JSON Schema cannot require
    the two names to agree in a pattern that also compiles under Go's RE2
    engine, so `templ Badge(o CardOpts)` passes the schema and is still refused
-   by `ggg`.
+   by `ggg`. It is one of exactly two recorded divergences between the tool and
+   the published contract; the other is the adapter `secret` flag join, and
+   both are listed under **The conditional rules the contract states** in the
+   manifest reference above.
 
    The record is also what puts the component on
    `/dev/gallery/{family}/{name}`, in the generated reference, and in the
