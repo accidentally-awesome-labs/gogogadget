@@ -660,7 +660,7 @@
     },
     {
       "path": "registry/modules/element/ui-core/module.json",
-      "sha256": "5ddf56036ae8b6ea39f8f45e366b2d80c80591aa83a4f0889a51dcb91717fa3b"
+      "sha256": "d72991563854e357f2b420c57af496e3b9b0e7077e10fdfcabe8090b59d633be"
     },
     {
       "path": "registry/modules/element/visually-hidden/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "3cdd0e4e81e033c7acfafaefe355b038566d7cf798b139565e36fe3c855a03ca"
+      "sha256": "4731d704cccdd55cfc03b99c2a82adda2039d513bf309c4a1c0fa9189d60c953"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "f37f13dfa0ef2f375f34a32fc2e14fe3cfe00a7ca40d31cb8f3fd503c6dc89a4"
+      "sha256": "0657d28e39dce254b95f2f2e7c2f6d2b41d84372d14055c793c448450107ce30"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "b500dfa721ef60485da969ffa7368010154aa399f33aa8ff1b6498a2bf5b62d7"
+      "sha256": "f216c1c6f50961bb208f656df35966f23bf7cf659dc5b224a71be180da78d125"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "d3e3cbfc98c46705bf8ae7e960bdc697032f2af43264aba09aabdbe79df7310b"
+      "sha256": "5a68f71b5027b8b719c8d836265f33bd665a068490e02ea2b9c31e628d8e8ed4"
     },
     {
       "path": "registry/modules/system/static/module.json",

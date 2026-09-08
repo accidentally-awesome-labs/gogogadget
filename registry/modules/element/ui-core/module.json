@@ -4,7 +4,7 @@
     "id": "ggg/element/ui-core",
     "kind": "element",
     "name": "ui-core",
-    "revision": 6,
+    "revision": 7,
     "contract": 1,
     "title": "UI core",
     "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
@@ -24,6 +24,15 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "internal/web/templates/ui/agents_signatures_selfhost_test.go",
+        "target": "internal/web/templates/ui/agents_signatures_selfhost_test.go",
+        "class": "test",
+        "sha256": "bd98a097733b8cee1c9633396ee2502a3872c15f05024f0919fc8496ed7b1efc",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
       {
         "source": "internal/web/templates/ui/attrs.go",
         "target": "internal/web/templates/ui/attrs.go",

@@ -4,7 +4,7 @@
     "id": "ggg/system/server",
     "kind": "system",
     "name": "server",
-    "revision": 22,
+    "revision": 24,
     "contract": 2,
     "title": "HTTP server core",
     "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
@@ -339,6 +339,15 @@
         "contract": false
       },
       {
+        "source": "internal/web/agents_middleware_selfhost_test.go",
+        "target": "internal/web/agents_middleware_selfhost_test.go",
+        "class": "test",
+        "sha256": "6b8e4a7e32900e5fbdc8ce88a371e2a2bd22e124ae17f3b1ac8e28f92cf9668a",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/web/api_transport.go",
         "target": "internal/web/api_transport.go",
         "class": "go",
@@ -478,9 +487,18 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "c1b7e63bea5bb86beb21232de07ec7161f037c5c14662a3fb4ca5298f2096fff",
+        "sha256": "6e53ac787f5cf49fd61d8dededab4c291033a91e3401baab4b3cd9d64b37e994",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/agents_designsystem_selfhost_test.go",
+        "target": "internal/web/templates/agents_designsystem_selfhost_test.go",
+        "class": "test",
+        "sha256": "a1cff68fb5cd4e382109945b44ee279ebdb535c4aba13aeee4303b2d9f541af6",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/web/templates/chrome.go",
@@ -510,7 +528,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "aab00a936dd8c88c1e264942d646f5a90ef82286d1f3426e3027bd64bb3cedf5",
+        "sha256": "731047207f3a6fcd8a93eb2eeec32bcc7f537c4dda6238a884c68d9f3ea7121d",
         "rewrite_module": true,
         "contract": false
       },

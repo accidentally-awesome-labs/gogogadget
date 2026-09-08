@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 75,
+    "revision": 77,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -51,6 +51,15 @@
         "sha256": "8bf3b958bb75940ade3525b01dda6122ada725ec022f189b74f1fcabd318a163",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/gggcli/agents_loop_selfhost_test.go",
+        "target": "internal/gggcli/agents_loop_selfhost_test.go",
+        "class": "test",
+        "sha256": "561cd8df9cd57aeae2fb7b5b2019eb27171cf1923551ad62a984c4363d133ec2",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/gggcli/app.go",
@@ -389,6 +398,42 @@
         "sha256": "703ea341cc8904c4e2ded7570bac999818d5c7e3e186b0fb7d93cfea15e0a059",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/modkit/agents_counts_selfhost_test.go",
+        "target": "internal/modkit/agents_counts_selfhost_test.go",
+        "class": "test",
+        "sha256": "edb4730439b38ac4baa98d19fb00a0ab5a048475873b130f489f9463968f4d42",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/agents_declarations_selfhost_test.go",
+        "target": "internal/modkit/agents_declarations_selfhost_test.go",
+        "class": "test",
+        "sha256": "02daaa2236e6e0d9cb8573a20d48706d2636128963e28e7c171341382ab91166",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/agents_planes_selfhost_test.go",
+        "target": "internal/modkit/agents_planes_selfhost_test.go",
+        "class": "test",
+        "sha256": "0b838161b6c0545d16eb6c844ea18a95749223e4520514f58dc64971ea84549d",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/agents_repomap_selfhost_test.go",
+        "target": "internal/modkit/agents_repomap_selfhost_test.go",
+        "class": "test",
+        "sha256": "2a1426f421b79d7251f89db9511e8275417073315f1373ba56b4c0d354e2f171",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/apply.go",
@@ -753,7 +798,7 @@
         "source": "internal/modkit/ownership_selfhost_test.go",
         "target": "internal/modkit/ownership_selfhost_test.go",
         "class": "test",
-        "sha256": "32aa50a30ffd6e9f0073a8ee484255b5418e54874e1acd4265a1dbe12b39f108",
+        "sha256": "3322efc104510e714cc9f8581028fc6019d3cd0b64643e6ecd866e46bed3b181",
         "rewrite_module": true,
         "contract": false,
         "self_host": true

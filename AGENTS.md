@@ -25,16 +25,24 @@ until the next `make generate`, then vanishes silently. Not a convention: a
 closed switch in `internal/modkit/migration_plan.go`.
 
 **2. Project — the tool's and yours, never a module's.** `go.mod`, `go.sum`,
-`gogogadget.json`, `gogogadget.lock.json`, `.gitignore`, `.gitattributes`
+`gogogadget.json`, `gogogadget.lock.json`, `.gitattributes`
 (`projectOwned` in modkit's ownership sweep). `ggg add`/`provider set` rewrite
 intent; the lock is ledger state, and a hand edit there is a corrupted lock.
+`.gitignore` is NOT here: `ggg/system/project-base` owns it, so it is plane 4.
 
-**3. Catalog — written by `ggg registry build`/`sign`,** checked by
+**3. Catalog — the registry format's own files,** checked by
 `modkit.ValidateRegistryTreeOwnership`: `registry.json`,
-`registry.snapshot.json`, `registry.snapshot.sig`, the `registry/*.json`
-indexes. A hand edit is silently rebuilt, and editing the snapshot breaks the
-signature. Only the manifests and payloads under `registry/modules/` and
-`registry/profiles/` are hand-authored.
+`registry.snapshot.json`, `registry.snapshot.sig`, the six
+`registry/{elements,components,pages,workflows,systems,profiles}.json`
+indexes and the five
+`registry/schema/{registry,module,project,lock,snapshot}.schema.json`
+contracts. `ggg registry build` writes the indexes and the snapshot and
+`registry sign` the signature, so a hand edit is silently rebuilt and editing
+the snapshot breaks the signature; `registry.json` and the schemas are
+hand-authored. Everything else under `registry/` is catalog content some
+manifest declares: the manifests and payloads under `registry/modules/` and
+`registry/profiles/`, and the nested fixture registries, each declared by its
+own.
 
 **4. Ordinary editable source — one module owner each.** Handlers, templates,
 queries, `input.css`, tests: every tracked file outside planes 1–3 is some
@@ -77,8 +85,9 @@ contract range), `dependencies` (`go`, `go_tools`, `tools`, `containers`),
 `data`, `provider_slots`, `provisioners`, `database_ops`, `cli`, `deploy`),
 `runtime.{system,provider_slots,provisioners,database_ops,deploy,cli,routes,jobs,janitors,queries,content_types,navigation,slots,csp,ui,assets,scenarios,visual}`
 (18), `environment`, `locales`, `migrations`, `vendors`, `openapi`,
-`personas`, `docs`, `tests`, `data`, `removal_policy`, `test_only`, plus
-identity metadata; adapters and their service targets live under
+`personas`, `docs`, `tests`, `data`, `removal_policy`, `test_only`, plus the
+identity metadata `id`, `kind`, `name`, `title`, `description`, `revision`,
+`contract`; adapters and their service targets live under
 `runtime.system.adapter`. Authority: `Manifest` in `internal/modkit/model.go`
 and `$defs.Manifest` in `registry/schema/module.schema.json`, held in parity
 by test.
@@ -90,14 +99,16 @@ assertion about THIS repository — the committed snapshot signature, the
 `templates/external-registry`, `registry/schema`, `.github/workflows`, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
-`canonical_module`. So a new self-hosting test goes in one of the 21
-`self_host` payloads, all owned by `ggg/system/modkit`: the
-`*_selfhost_test.go` files, the bare `selfhost_test.go` in `internal/modkit`
-and `internal/gggcli`, plus `ci_workflow_test.go`, `e2e_ownership_test.go`,
-`fuzz_gate_test.go`, `registry_build_internal_test.go`,
-`external_template_test.go`, `shipped_profiles_test.go`,
-`stale_sweep_scope_test.go` and `profile_genesis_test.go`; anything portable
-stays in a normal test payload so generated projects keep running it. NEVER
+`canonical_module`. So a new self-hosting test goes in a `self_host` payload
+— 29 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+`ggg/system/server`, because the module that owns the SUBJECT owns the
+assertion about it: the `*_selfhost_test.go` files, the bare
+`selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus
+`ci_workflow_test.go`, `e2e_ownership_test.go`, `fuzz_gate_test.go`,
+`registry_build_internal_test.go`, `external_template_test.go`,
+`shipped_profiles_test.go`, `stale_sweep_scope_test.go` and
+`profile_genesis_test.go`; anything portable stays in a normal test payload
+so generated projects keep running it. NEVER
 reach for `t.Skip` when an artifact is absent: that lets the core gate pass by
 skipping.
 
@@ -160,9 +171,9 @@ generation moved any generated file.
 - `internal/llm` — `Completer` seam. Adapters: `llm/fake` (deterministic, zero-account) and `llm/openai` (OpenAI-compatible net/http client).
 - `internal/flags` — DB-backed feature flags (30s cache, FNV bucketing, per-org overrides).
 - `internal/schedules` — builder-facing recurring-work helper.
-- `internal/observability` — `Reporter` seam (`NoopReporter` is its own default). Adapters `observability/log` (the dev/test selection, aliases `NoopReporter`) and `observability/sentryadapter` (`sentryadapter.Reporter` over a module-owned `*sentry.Client` it flushes on `Stop`) — that file is the ONLY sentry-go import in the tree.
+- `internal/observability` — `Reporter` seam (`NoopReporter` is its own default). Adapters `observability/log` (the dev/test selection, aliases `NoopReporter`) and `observability/sentryadapter` (`sentryadapter.Reporter` over a module-owned `*sentry.Client` it flushes on `Stop`) — `observability/sentryadapter/sentry.go` is the ONLY sentry-go import in the tree.
 - `internal/ratelimit` — `Limiter` seam (`memory`, `redis`) behind the `rateLimit` middleware. `internal/cache` — `cache.Store` seam (`memory`, `redis`), keys caller-owned. `internal/telemetry` — OTel tracer/meter seam (`noop`, `otlp`); `instrument.go` wraps HTTP, pgx, jobs.
-- `internal/search` — `search.Index` seam (`postgres`, `typesense`) + the coalescing outbox. `internal/realtime` — `Broker` seam (`postgres` LISTEN/NOTIFY, `ably`) the SSE stream publishes through. `internal/notifications` — the provider-neutral `Notifier` slot (`postgres`, `knock`). `internal/audit_export` — `Exporter` (`noop`, `otlp`).
+- `internal/search` — `search.Index` seam (`postgres`, `typesense`) + the coalescing outbox. `internal/realtime` — `Broker` seam (`postgres` LISTEN/NOTIFY, `ably`) the SSE stream publishes through. `internal/notifications` — the provider-neutral `Notifier` slot (`postgres`, `knock`), NOT `internal/notify`, the in-app rows. `internal/audit_export` — `Exporter` (`noop`, `otlp`).
 - `internal/database` — the `ggg/database` slot contract only (`database.Pool`/`Queries` alias pgx and sqlc) + its `postgres` adapter and `ops` (backup/restore/drill); the pool, migrations and queries are `internal/db`. `internal/provision` — the `neon` provisioner. `internal/deploy` — `docker` and `fly` deploy targets. `internal/remote` — the typed provisioner/deployer/database-operator contracts those implement + the shared progress/secret-handle/remote-change vocabulary.
 - `static/` — built CSS (generated), `app.js` (shell: theme, nav, SSE, toasts, Alpine bootstrap, clerk boot), `analytics.js` (PostHog bootstrap + consent gate), GENERATED `ui-components.js`/`ui-engines.js`, `ui/*.js` (module-owned Alpine components), vendored JS/fonts. `content/` — markdown. `e2e/` — Playwright (node lives ONLY here).
 
@@ -215,7 +226,7 @@ role than was asked. `DEV_AUTH_BYPASS` is boot-refused when
 - **One owning query file per table** in `internal/db/queries/` — a table's queries are never split, though one file may own a coupled group (`identity.sql`: the three mapping tables). Every UPDATE on a table that HAS an `updated_at` column sets `updated_at = now()` (23/23); the append-only and state-machine tables — `jobs`, `notifications`, `api_tokens`, `usage_events`, `webhook_deliveries`, `impersonation_sessions` — have no such column.
 - **`data-testid`** on every element a test asserts on.
 - **Routes and nav are DECLARED, not registered**: a `runtime.routes` entry (required `id`, `method`, `pattern`, `scope`, `policy`, `package`, `handler`; optional `enabled` for a gated route) plus a `claims.routes` id; the records are `internal/web/routes_registry_gen.go` (`RouteRegistry`) and `routes.go` registers them onto the scope muxes. No individual route is written in `routes.go` — it owns only what a generated record cannot describe: the scope muxes and their chains, the `enabledRoutes` filter, the policy matcher, the `/api/` JSON 404, the catch-alls.
-- **Design system is three layers, one home each**: **tokens** (`input.css` `@theme` + `.dark`; `theme.go` for email, the one surface that inlines hex), **component classes** (`input.css` `@layer components` — `.btn`/`.btn-{primary,ghost,danger,inverse}` × `.btn-{sm,xs,lg,icon}`, `.input`, `.card`, `.table-card`, `.page-*`, `.nav-link`, `.tab`, `.prose`, plus the `.k-{brand,info,success,warn,danger,neutral}` matrix that feeds `--ui-solid|solid-fg|tint|tint-fg|line|text` to `.badge`/`.alert`/`.banner`/`.toast`), **templ components** (`internal/web/templates/ui/*.templ` + `icons.templ`). `designsystem_test.go` fails the `templates` package on a raw hex, `dark:` variant, palette ramp, numeric brand step, `!` override, arbitrary length or quoted-attribute interpolation.
+- **Design system is three layers, one home each**: **tokens** (`input.css` `@theme` + `.dark`; `theme.go` for email, the one surface that inlines hex), **component classes** (`input.css` `@layer components` — `.btn`/`.btn-{primary,ghost,danger,inverse}` × `.btn-{sm,xs,lg,icon}`, `.input`, `.card`, `.table-card`, `.page-*`, `.nav-link`, `.tab`, `.prose`, plus the `.k-{brand,info,success,warn,danger,neutral}` matrix that feeds `--ui-solid|solid-fg|tint|tint-fg|line|text` to `.badge`/`.alert`/`.banner`/`.toast`), **templ components** (`internal/web/templates/ui/*.templ` + `icons.templ`). `designsystem_test.go` fails the `templates` package on any of its seven rules: `raw hex colour`, `dark: variant`, `palette ramp`, `numeric brand step`, `! utility override`, `arbitrary length`, `templ expression inside a quoted attribute` — each with a fixture in `agents_designsystem_selfhost_test.go` that the guard must reject.
 - **One options struct per UI component**: every exported renderer in `package ui` is `templ Name(o NameOpts)` and every `NameOpts` declares a NAMED field `Attrs` of type `ui.Attrs` — not an embed, so nothing is promoted and every attribute is reached through it (`o.Attrs.ID`, `.Class`, `.TestID`, `.Title`, `.Decorative`, `.Data`, CSP-safe `.Alpine`, `.HX`). A form control or other component that owns its element id declares its own top-level `ID` beside that field; `ui.controlID` resolves `ID` → `Attrs.ID` → `Name`, and such a component MUST build its root through `controlRoot`/`controlRootWith` so `Attrs.ID` is dropped from the spread map instead of landing beside the id the component writes itself (two `id` attributes on one element is invalid HTML and the browser keeps the first). `Attrs` has NO arbitrary-attribute map — components own `role`/`aria-*`/`tabindex`/`type`/base class and callers cannot override them. Enums are closed and normalize (empty or unknown → `KindNeutral`, `SizeMD`, `LiveOff`, …). `ui` imports templ + stdlib only, never `templates`/`billing`/`identity`/sqlc. Held by `ui/contract_test.go` and `ui/control-id_test.go`; the 174 documented signatures live in `ui/reference_gen.go` and `ggg info`, never in prose; the one exported renderer of 175 with no `Reference` entry is `CSRFField`, which `ui.Form` renders for callers instead of exposing as a component.
 - **No executable inline scripts** anywhere (CSP `script-src 'self'`) — the one inline element is the `application/ld+json` data block `templ.JSONScript` emits, which CSP never evaluates. Shell logic is `Alpine.data` in `static/app.js`; component logic belongs to the owning module in `static/ui/*.js`, registered on `alpine:init` and loaded before `alpine-csp.min.js`.
 - **Middleware order is load-bearing**: maxBytes → provider-environment/config-lookup → telemetry.HTTP → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → route groups (app: `requireAuth → requireNotDisabled → requireOrg → loadPlan`; admin: that chain + `requireStaff → requireAdminWrite`; `/api`: `RequireAPIToken`). `routeBodyLimit` narrows the 10 MB global cap to `RoutePolicy.MaxBodyBytes`; it sits outside csrf because parsing a form reads the body. The two unnamed wrappers sit outside `recover` on purpose: the 500 page needs the request-scoped provider context, and the span must close on the recovered 500 rather than unwind through the panic. The policy matcher is fed the same `enabledRoutes` slice the mux is, so a route whose `Enabled` gate refused registration resolves to no policy at all.
@@ -256,13 +267,19 @@ you touched a manifest-owned file, `go run ./cmd/ggg registry build && go run ./
 
 ## Task playbook
 
-Recipes (add CRUD resource / plan / email kind / job kind / webhook event /
-API endpoint / component / locale / content type / swap providers), plus
-module authoring, `ggg diff`, conflict resolution, and the data-loss rules
-(`.env` never edited, migrations retained and forward-only, `update` never
-overwrites local source, stricter removal for API/identity, vendored widget
-assets self-hosted and checksummed): **`/docs/extending`**
-(`content/docs/extending.md`).
+Every recipe is a heading on `/docs/extending`
+(`content/docs/extending.md`): *Add a CRUD resource*, *Add a plan*, *Add
+annual pricing*, *Add an email kind*, *Add a job kind*, *Add search to a
+resource*, *Schedule recurring work*, *Add a webhook event*, *Add an OAuth
+provider*, *Swap a provider*, *B2C mode (no organizations)*, *Add an API
+endpoint*, *Add an admin page*, *Add a content type*, *Add a docs page*, *Add
+an export*, *Add a locale*, *Add a component*, *Add a theme (rebrand)* — 19,
+the whole catalogue after the data-loss rules. Earlier on the same page:
+*Author a module*, *Modify installed source* (where `ggg diff` lives),
+*Resolve an update conflict*, and *Rules that prevent data loss* (`.env`
+never edited, migrations retained and forward-only, `update` never overwrites
+local source, stricter removal for API/identity, vendored widget assets
+self-hosted and checksummed).
 
 ## Docs discipline
 

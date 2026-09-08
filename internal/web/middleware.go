@@ -21,7 +21,7 @@ import (
 
 // Middleware chain (outermost → innermost), assembled in Handler:
 //
-//	maxBytes → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
+//	maxBytes → provider-environment/config-lookup → telemetry.HTTP → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
 //
 // The order is load-bearing. sessionLoad lands in the identity step, between
 // secureHeaders and csrf. maintenanceMode sits inside i18n.Detect (the 503

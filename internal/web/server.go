@@ -235,9 +235,11 @@ func (s *Server) invalidateAnnouncementCache() {
 }
 
 // Handler applies the global middleware stack. The order is load-bearing —
-// see docs/architecture: maxBytes → recover → routeBodyLimit → requestID →
-// accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders →
-// sessionLoad (identity step) → csrf → routes.
+// see docs/architecture:
+//
+//	maxBytes → provider-environment/config-lookup → telemetry.HTTP → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
+//
+// sessionLoad is the identity step.
 //
 // recover sits immediately inside the global body cap and outside every other
 // middleware, so a panic anywhere below it — a handler, csrf, the session

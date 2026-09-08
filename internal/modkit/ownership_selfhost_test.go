@@ -44,11 +44,13 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 	catalogOwned := registryPayloadTargets(t, root)
 	// Only dependency metadata and intent/lock state are project-owned. Every
 	// distributable scaffold is a module payload; .ggg is ignored and therefore
-	// never appears in the tracked-file inventory.
+	// never appears in the tracked-file inventory. `.gitignore` is NOT here:
+	// ggg/system/project-base declares it, so `owned` answers for it and a
+	// second entry would be a dead exemption that outlived its reason.
 	projectOwned := map[string]bool{
 		"go.mod": true, "go.sum": true,
 		"gogogadget.json": true, "gogogadget.lock.json": true,
-		".gitattributes": true, ".gitignore": true,
+		".gitattributes": true,
 	}
 
 	var orphans []string

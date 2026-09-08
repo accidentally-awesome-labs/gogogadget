@@ -102,6 +102,21 @@ func isWordByte(b byte) bool {
 	return false
 }
 
+// ruleMatches returns the locations in src one rule rejects, after its own
+// narrowing has had its say. One decision function, so the tree scan below
+// and the per-prohibition fixtures in agents_designsystem_selfhost_test.go
+// can never disagree about what "violates" means.
+func ruleMatches(rule designRule, src string) [][]int {
+	var rejected [][]int
+	for _, loc := range rule.re.FindAllStringIndex(src, -1) {
+		if rule.reject != nil && !rule.reject(src, loc) {
+			continue
+		}
+		rejected = append(rejected, loc)
+	}
+	return rejected
+}
+
 func TestDesignSystemLayering(t *testing.T) {
 	sources := templFiles(t)
 	require.NotEmpty(t, sources, "no .templ files found — the scanner is looking in the wrong place")
@@ -109,10 +124,7 @@ func TestDesignSystemLayering(t *testing.T) {
 	rules := designRules()
 	for name, src := range sources {
 		for _, rule := range rules {
-			for _, loc := range rule.re.FindAllStringIndex(src, -1) {
-				if rule.reject != nil && !rule.reject(src, loc) {
-					continue
-				}
+			for _, loc := range ruleMatches(rule, src) {
 				assert.Fail(t,
 					"design-system violation",
 					"%s:%d — %s — %q\nfix: %s",
