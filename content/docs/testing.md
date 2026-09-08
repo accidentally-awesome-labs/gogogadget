@@ -545,7 +545,8 @@ and **refuses a nonzero skip count**, and this is the job where nothing can
 legitimately be absent.
 `e2e`, `visual`, `smoke`, `docker`, `registry-core`, `registry-external` and
 `profiles`
-all depend on `test`: `e2e` installs Chromium and runs `make e2e`; `visual`
+all depend on `test`: `e2e` installs Chromium and runs `npx playwright test`
+in `e2e/` (not `make e2e` — CI brings up no compose stack); `visual`
 runs `make visual`, which owns its own seeding and host server — do not add
 seed or start-server steps beside it, because a second process cannot bind
 `:18080` and the baselines only reproduce against the harness that wrote them;

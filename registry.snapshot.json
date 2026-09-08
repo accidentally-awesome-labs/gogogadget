@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "05a2dfd3292e42d87ab3a402c707909068ceb7717c194f5c7db689fee4fe4266"
+      "sha256": "dc528281d6426e5e5ef1454e5dd449d1873e9e04e0a933602d383bbad93d55df"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -948,7 +948,7 @@
     },
     {
       "path": "registry/modules/system/identity-dev/module.json",
-      "sha256": "d0ad724e596730bb5b651a6cf8be1cc08fa995b71ee19e35867ca6a46bd87bca"
+      "sha256": "6cffdc8991e6fdd2da8d2bd52909848c9e5c984efe3df38a8f02b87fa14950d5"
     },
     {
       "path": "registry/modules/system/identity-session/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "337f260a4a55c70637cec8aa3591eed99d94d0c07d11179d8df619957da52d9f"
+      "sha256": "f37f13dfa0ef2f375f34a32fc2e14fe3cfe00a7ca40d31cb8f3fd503c6dc89a4"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",

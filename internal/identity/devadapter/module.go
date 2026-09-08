@@ -55,7 +55,7 @@ type Verifier struct{}
 func (Verifier) Verify(_ context.Context, token string) (*identity.ProviderClaims, error) {
 	parts := strings.SplitN(token, ":", 4)
 	if len(parts) != 4 || parts[0] != "e2e" || parts[1] == "" {
-		return nil, fmt.Errorf("%w: want e2e:<userID>:<orgID>:<role>", identity.ErrInvalidToken)
+		return nil, fmt.Errorf("%w: want e2e:<userSubject>:<orgSubject>:<role>", identity.ErrInvalidToken)
 	}
 	return &identity.ProviderClaims{Provider: Provider, UserSubject: parts[1], OrgSubject: parts[2], OrgRole: parts[3], OrgSlug: parts[2]}, nil
 }
