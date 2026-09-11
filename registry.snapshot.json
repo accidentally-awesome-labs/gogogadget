@@ -136,7 +136,7 @@
     },
     {
       "path": "registry/modules/component/chart/module.json",
-      "sha256": "55370706d15724b1d2f85069a744b65caa43a9cc3b636eaa4e95b168076f205a"
+      "sha256": "0aca866c128bf5b64edb46d34006145fbbb3187de31109cac6fb86bb2e46a648"
     },
     {
       "path": "registry/modules/component/chat-log/module.json",
@@ -484,7 +484,7 @@
     },
     {
       "path": "registry/modules/component/status-dot/module.json",
-      "sha256": "b1039f88054a54d9b7fbc1d67c0099930f2ff7f63e4bc9b0a62ba84a2855e574"
+      "sha256": "db6a885cd59642f1b616d514043cea2f77fe228564cbf12fa1f063112edd4286"
     },
     {
       "path": "registry/modules/component/steps/module.json",
@@ -660,7 +660,7 @@
     },
     {
       "path": "registry/modules/element/ui-core/module.json",
-      "sha256": "d72991563854e357f2b420c57af496e3b9b0e7077e10fdfcabe8090b59d633be"
+      "sha256": "70da99f7a58c12c469ea760a3a54ec9f92c450099072d0a0386935db18890267"
     },
     {
       "path": "registry/modules/element/visually-hidden/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "4731d704cccdd55cfc03b99c2a82adda2039d513bf309c4a1c0fa9189d60c953"
+      "sha256": "def389e41b030fa952cac9aa3d1d85994e3cce6347c23c5a0aa0815836d7dd19"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "0657d28e39dce254b95f2f2e7c2f6d2b41d84372d14055c793c448450107ce30"
+      "sha256": "457739480e93377bc675cd0e70cce7244c26edbe44c708de4186418a8e9d4a0a"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "f216c1c6f50961bb208f656df35966f23bf7cf659dc5b224a71be180da78d125"
+      "sha256": "b504e39d44609fe8d3fad20e3dc88282f8528ab3bfc8cfae9821c3faff606a59"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -1096,7 +1096,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "5a68f71b5027b8b719c8d836265f33bd665a068490e02ea2b9c31e628d8e8ed4"
+      "sha256": "66461629d431620cb3686bd50732c71f406425700202477479a6d9dc6c3118a4"
     },
     {
       "path": "registry/modules/system/static/module.json",

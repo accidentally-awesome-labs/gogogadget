@@ -4,7 +4,7 @@
     "id": "ggg/component/chart",
     "kind": "component",
     "name": "chart",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Charts",
     "description": "Bar, line, area, donut and sparkline figures. Each renders a caption, summary and semantic data table always; the Chart.js visual is added on top only when the engine loads.",

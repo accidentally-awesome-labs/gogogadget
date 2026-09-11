@@ -4,7 +4,7 @@
     "id": "ggg/component/status-dot",
     "kind": "component",
     "name": "status-dot",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "StatusDot",
     "description": "The StatusDot renderer and its options.",
