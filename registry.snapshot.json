@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "2c507fc50817535bc01662f72e0db78abe866f58f0d8ec63021c2e562ff6e0dd"
+      "sha256": "db8d8ac8100a71c14826114493964b757554ed10a28cdc83975cc0f5db15fd9d"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "457739480e93377bc675cd0e70cce7244c26edbe44c708de4186418a8e9d4a0a"
+      "sha256": "a0ce91ad437298fb6a2beec47a85d997f257e1927f02c1a8c3372d1e3e016ccc"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
