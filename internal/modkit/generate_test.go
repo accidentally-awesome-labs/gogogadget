@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"gopkg.in/yaml.v3"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -2699,4 +2700,36 @@ func TestEngineRegistryCarriesModuleFlag(t *testing.T) {
 	if !strings.Contains(f.Content, "esm: true") {
 		t.Fatalf("an ES module engine must be marked:\n%s", f.Content)
 	}
+}
+
+// The dependency-reference render must be a function of the dependency
+// SET, not of list order. Lock-embedded manifests are canonicalized (their
+// go dependency lists sorted by module path) while catalog manifests carry
+// authored order, and a targeted update renders retained rows from the
+// lock while a full sync renders them from the catalog — a render that
+// echoed input order flip-flopped between the two, so a fully green walk
+// always ended with a generated_drift gate accusing the operator of
+// editing a file they never touched (finding P1-1).
+func TestDependencyReferenceRenderIsOrderInsensitive(t *testing.T) {
+	render := func(order []GoDependency) string {
+		module := testLockedModule("ggg/system/cli-ui", testDigestA).Manifest
+		module.Dependencies.Go = order
+		var b strings.Builder
+		writeDependencyReference(&b, []Manifest{module})
+		return b.String()
+	}
+	authored := []GoDependency{
+		{Module: "charm.land/bubbletea/v2", Version: "v2.0.0"},
+		{Module: "charm.land/bubbles/v2", Version: "v2.0.0"},
+		{Module: "charm.land/huh/v2", Version: "v2.0.0"},
+	}
+	canonical := append([]GoDependency(nil), authored...)
+	sortGoDepsForTest(canonical)
+	if render(authored) != render(canonical) {
+		t.Fatalf("module-reference dependency rows differ between authored order\n%v\nand canonical (lock-embedded) order\n%v", authored, canonical)
+	}
+}
+
+func sortGoDepsForTest(deps []GoDependency) {
+	sort.Slice(deps, func(i, j int) bool { return deps[i].Module < deps[j].Module })
 }

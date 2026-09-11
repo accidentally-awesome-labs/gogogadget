@@ -749,3 +749,142 @@ func TestAdoptionRefusesUnclaimedDivergentFile(t *testing.T) {
 		t.Fatal("base_sha256 equals local_sha256; the upstream digest was not recorded")
 	}
 }
+
+// generatedHeldRegistries builds the P0-3 shape: a local edit in a module
+// whose upstream payload churns (button), whose reverse dependent (card)
+// owns a generated output. The held module's carry-forward used to restate
+// the generated row as clean/modified against an empty base digest, and
+// the planned lock then failed its own validation (`base_sha256 is
+// invalid`) with exit 3 — nothing staged, no resolve path, on the one
+// scenario the staging promise exists for.
+func generatedHeldRegistries(t *testing.T) (fstest.MapFS, fstest.MapFS) {
+	t.Helper()
+	first, second := conflictRegistries(t)
+	addGenerated := func(files fstest.MapFS, id string) {
+		mutatePlannerModule(t, files, id, func(module *Manifest) {
+			module.Files = append(module.Files, ManifestFile{
+				Source: "registry/static/card.css",
+				Target: "static/card.css",
+				Class:  FileClassGenerated,
+			})
+		})
+	}
+	addGenerated(first, "ggg/component/card")
+	addGenerated(second, "ggg/component/card")
+	return first, second
+}
+
+func TestHeldModuleGeneratedFileReachesConflictStaging(t *testing.T) {
+	first, second := generatedHeldRegistries(t)
+	source := refSource{snapshots: map[string]Snapshot{
+		"v1":        {Commit: testCommitA, FS: first},
+		"v2":        {Commit: testCommitB, FS: second},
+		testCommitB: {Commit: testCommitB, FS: second},
+	}}
+	root := writeTargetProject(t, "example.com/acme/app", Project{
+		Schema:     2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+	})
+	engine := New(Options{Source: source})
+	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Plan(initial): %v", err)
+	}
+	materializePlanFixture(t, root, initial)
+	// The local edit in the churned module is the conflict trigger...
+	writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst Local = true\n"))
+	// ...and the generated output exists on disk, as every real render does.
+	writeTestFile(t, root, "static/card.css", []byte("/* rendered */ .card{}\n"))
+
+	// This plan is the whole regression: it used to die at
+	// `marshal planned lock: ... base_sha256 is invalid` (exit 3, nothing
+	// staged) and must instead stage the conflict (the exit-4 path).
+	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
+	if err != nil {
+		t.Fatalf("Plan(update with held generated file): %v", err)
+	}
+	if len(update.Conflicts) != 1 || update.Conflicts[0].Module != "ggg/element/button" {
+		t.Fatalf("conflicts = %#v, want one staged button conflict", update.Conflicts)
+	}
+	if staged := stagedChanges(update); len(staged) == 0 {
+		t.Fatal("the staged candidate artifacts are missing from the plan")
+	}
+	var card *LockedModule
+	for i := range update.Lock.Modules {
+		if update.Lock.Modules[i].ID == "ggg/component/card" {
+			card = &update.Lock.Modules[i]
+		}
+	}
+	if card == nil {
+		t.Fatal("held module missing from planned lock")
+	}
+	var generated *LockedFile
+	for i := range card.Files {
+		if card.Files[i].Path == "static/card.css" {
+			generated = &card.Files[i]
+		}
+	}
+	if generated == nil {
+		t.Fatal("generated row missing from held module")
+	}
+	if generated.State != FileGenerated || generated.BaseSHA256 != "" || generated.LocalSHA256 != "" {
+		t.Fatalf("carried generated row = %#v, want state-only FileGenerated", *generated)
+	}
+
+	// And the staged conflict resolves without the lock failing its own
+	materializePlanFixture(t, root, update)
+	// validation on the held module's rows.
+	resolved, err := engine.ResolveConflict(
+		context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionKeepLocal,
+	)
+	if err != nil {
+		t.Fatalf("ResolveConflict over a held generated row: %v", err)
+	}
+	if len(resolved.Conflicts) != 0 {
+		t.Fatalf("conflicts after resolve = %#v", resolved.Conflicts)
+	}
+}
+
+func TestResolveSeedsGeneratedRowsOfTheTargetManifest(t *testing.T) {
+	// The conflicted module's own pending manifest declares a generated
+	// output the installed era did not: resolution rebuilds the row from
+	// the target manifest and must record the generated target, or the
+	// resolved lock fails validation for a file nothing ever staged.
+	first, second := conflictRegistries(t)
+	mutatePlannerModule(t, second, "ggg/element/button", func(module *Manifest) {
+		module.Files = append(module.Files, ManifestFile{
+			Source: "registry/static/button.css",
+			Target: "static/button.css",
+			Class:  FileClassGenerated,
+		})
+	})
+	source := refSource{snapshots: map[string]Snapshot{
+		"v1":        {Commit: testCommitA, FS: first},
+		"v2":        {Commit: testCommitB, FS: second},
+		testCommitB: {Commit: testCommitB, FS: second},
+	}}
+	root := writeTargetProject(t, "example.com/acme/app", Project{
+		Schema:     2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+	})
+	engine := New(Options{Source: source})
+	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Plan(initial): %v", err)
+	}
+	materializePlanFixture(t, root, initial)
+	writeTestFile(t, root, "internal/modules/button.go", []byte("package button\n\nconst Local = true\n"))
+	update, err := engine.Plan(context.Background(), root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
+	if err != nil {
+		t.Fatalf("Plan(update): %v", err)
+	}
+	materializePlanFixture(t, root, update)
+	_, err = engine.ResolveConflict(
+		context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionKeepLocal,
+	)
+	if err != nil {
+		t.Fatalf("ResolveConflict must cover the target manifest's generated files: %v", err)
+	}
+}

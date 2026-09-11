@@ -3798,23 +3798,39 @@ func writeDependencyReference(b *strings.Builder, catalog []Manifest) {
 			len(m.Dependencies.Tools) == 0 && len(m.Dependencies.Containers) == 0 {
 			continue
 		}
-		gomods := make([]string, 0, len(m.Dependencies.Go))
-		for _, dependency := range m.Dependencies.Go {
+		// The rendered row must be a function of the dependency SET, not of
+		// list order: lock-embedded manifests are canonicalized (their go
+		// lists sorted) while catalog manifests carry authored order, and a
+		// render that echoes input order flip-flops between the two — every
+		// targeted update rewrote module-reference.md one way and the next
+		// full sync the other, so a fully green walk always ended with a
+		// generated_drift gate accusing the operator of editing a generated
+		// file they never touched (finding P1-1). Sort exactly what the lock
+		// canonicalizer reorders: go modules, tools, containers.
+		declared := m.Dependencies
+		goDeps := append([]GoDependency(nil), declared.Go...)
+		sort.Slice(goDeps, func(i, j int) bool { return goDeps[i].Module < goDeps[j].Module })
+		toolArtifacts := append([]ToolArtifact(nil), declared.Tools...)
+		sort.Slice(toolArtifacts, func(i, j int) bool { return toolArtifacts[i].InstallPath < toolArtifacts[j].InstallPath })
+		containers := append([]ContainerDependency(nil), declared.Containers...)
+		sort.Slice(containers, func(i, j int) bool { return containers[i].Name < containers[j].Name })
+		gomods := make([]string, 0, len(goDeps))
+		for _, dependency := range goDeps {
 			gomods = append(gomods, fmt.Sprintf("`%s %s`", dependency.Module, dependency.Version))
 		}
-		tools := make([]string, 0, len(m.Dependencies.GoTools)+len(m.Dependencies.Tools))
-		for _, tool := range m.Dependencies.GoTools {
+		tools := make([]string, 0, len(declared.GoTools)+len(toolArtifacts))
+		for _, tool := range declared.GoTools {
 			tools = append(tools, "`"+tool+"`")
 		}
-		for _, tool := range m.Dependencies.Tools {
+		for _, tool := range toolArtifacts {
 			tools = append(tools, fmt.Sprintf("`%s/%s`", tool.OS, tool.Arch))
 		}
-		containers := make([]string, 0, len(m.Dependencies.Containers))
-		for _, container := range m.Dependencies.Containers {
-			containers = append(containers, "`"+container.Name+"`")
+		containerList := make([]string, 0, len(containers))
+		for _, container := range containers {
+			containerList = append(containerList, "`"+container.Name+"`")
 		}
 		rows = append(rows, row{
-			module: m.ID, gomods: joinOrDash(gomods), tools: joinOrDash(tools), containers: joinOrDash(containers),
+			module: m.ID, gomods: joinOrDash(gomods), tools: joinOrDash(tools), containers: joinOrDash(containerList),
 		})
 	}
 	if len(rows) == 0 {

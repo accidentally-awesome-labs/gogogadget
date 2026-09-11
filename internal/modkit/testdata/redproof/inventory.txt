@@ -52,12 +52,14 @@ TestEveryTrackedSourceFileHasAnOwner	ownership	own-orphan-file
 TestEveryUITestPayloadCompilesInItsOwnClosure	modkit	allow:fixture-closure compile gate (ui_test_payload_selfhost); no plant transcribed — add one
 TestEveryUnsafeFormInThePackageRendersTheToken	web	allow:sweep web.md row 11 UNDER-SCOPED at file granularity (PLANT-P documented the escape: one compliant form hides a second bare one); the element-scoping patch is unwritten — the honest red is that widening, not yet taken
 TestEveryVendoredFileIsDeclared	modkit	allow:vendored-bytes ownership gate (vendor_selfhost); no plant transcribed — add one
+TestHeldModuleGeneratedFileReachesConflictStaging	modkit	modkit-held-generated-carry
 TestNoProductionTemplateFallsBackToWindowConfirm	web	web-hxconfirm
 TestNoRendererEmitsTwoIDsOnOneElement	web	web-dropdown-ids
 TestNoTemplateHandRollsAComponentRoot	web	allow:sweep web.md row 10 UNDER-SCOPED (set B, top level only; PLANT-O documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
 TestNoTemplateHandRollsAForm	web	allow:sweep web.md row 9 UNDER-SCOPED (set B; PLANT-N documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
 TestNoUnsweptShippedPayloadDiffPassesCheck	ownership	own-genesis-refusal
 TestNormalizeKindClosesTheEnum	web	allow:sweep web.md row 24 SOUND (closed together with TestEveryDeclaredEnumIsCovered's AST-derived population); plant not transcribed — add one
+TestParseLockAcceptsEraManifests	modkit	modkit-era-lock-authoring
 TestPublishedRegistryIsConsistent	modkit	allow:catalog self-consistency gate over the published indexes; no plant transcribed — add one
 TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements	modkit	allow:bidirectional per-row agreement; both directions the residual family failed are patched (modkit-schema-conditional adds an unrecorded rule; modkit-enum-gutted guts a recorded one)
 TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs	modkit	modkit-enum-gutted

@@ -1548,3 +1548,39 @@ func treeDigest(t *testing.T, root string) string {
 	}
 	return hex.EncodeToString(sum.Sum(nil))
 }
+
+// A command's documented flag forms must exist in the command table:
+// `registry update`'s usage advertises `--registry NAMESPACE --ref REF`,
+// and the table's FlagSpec list once carried `ref` but not `registry` —
+// so the only documented way to name the registry refused with
+// `flag provided but not defined: -registry` (exit 2) on every created
+// project, which is exactly the audience the command exists for. This
+// pins both directions: the flags parse, and the table cannot lose one
+// again.
+func TestRegistryUpdateDocumentedFlagsExistInTable(t *testing.T) {
+	spec, ok := lookupSpec(builtInCommands(), "registry")
+	if !ok {
+		t.Fatal("registry command missing from the built-in table")
+	}
+	for name, usage := range map[string]string{
+		"registry": "ggg registry update [--registry NAMESPACE --ref REF]",
+		"ref":      "ggg registry update [--registry NAMESPACE --ref REF]",
+	} {
+		if _, declared := spec.spec(name); !declared {
+			t.Errorf("flag --%s is documented (%s) but missing from the registry command's FlagSpec list", name, usage)
+		}
+	}
+	parsed, err := parseArgv(spec, []string{"update", "--registry", "ggg", "--ref", "v0.23.0"})
+	if err != nil {
+		t.Fatalf("the documented invocation must parse: %v", err)
+	}
+	if got := parsed.value("registry", ""); got != "ggg" {
+		t.Fatalf("--registry parsed as %q, want ggg", got)
+	}
+	if got := parsed.value("ref", ""); got != "v0.23.0" {
+		t.Fatalf("--ref parsed as %q, want v0.23.0", got)
+	}
+	if len(parsed.positional) != 1 || parsed.positional[0] != "update" {
+		t.Fatalf("positional = %v, want [update]", parsed.positional)
+	}
+}

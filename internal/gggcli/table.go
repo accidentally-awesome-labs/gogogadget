@@ -151,6 +151,7 @@ func builtInCommands() []CommandSpec {
 			{Name: "old-key-file", Help: "outgoing private key file (rotate)", Value: true},
 			{Name: "new-key-file", Help: "incoming private key file (rotate)", Value: true},
 			{Name: "not-before", Help: "RFC3339 UTC instant the new key activates (rotate)", Value: true},
+			{Name: "registry", Help: "registry namespace whose ref moves (update)", Value: true},
 			{Name: "ref", Help: "registry ref to pin (add, update)", Value: true, Default: "main"},
 		}},
 		{Name: "remove", Summary: "Remove modules from the project", Usage: "ggg remove NAMESPACE/KIND/NAME... [--purge-data] [--dry-run] [--json]", Flags: []FlagSpec{

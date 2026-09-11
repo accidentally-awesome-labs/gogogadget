@@ -396,6 +396,23 @@ func reconcilePlannedState(
 		} else if held {
 			lockedFiles := make([]LockedFile, 0, len(oldModule.Files))
 			for _, oldFile := range oldModule.Files {
+				// A generated target has no canonical bytes and no local
+				// digest to compare: its row is state-only, and restating it
+				// through the clean/modified branch below would attach the
+				// on-disk render's digest to an empty base — a planned lock
+				// that fails its own validation (`base_sha256 is invalid`)
+				// and kills the promised exit-4 staging with exit 3 before
+				// anything is staged (finding P0-3: every core-module
+				// conflict on the v0.22→v0.23 pair died exactly here,
+				// because the held modules behind it own generated outputs).
+				// Generated rows carry forward verbatim, the same way the
+				// retained branch above carries whole rows.
+				if oldFile.State == FileGenerated {
+					lockedFiles = append(lockedFiles, LockedFile{
+						Path: oldFile.Path, Source: oldFile.Source, State: FileGenerated,
+					})
+					continue
+				}
 				_, localDigest, missing, err := CurrentTargetState(root, oldFile.Path)
 				if err != nil {
 					return Lock{}, nil, nil, nil, err

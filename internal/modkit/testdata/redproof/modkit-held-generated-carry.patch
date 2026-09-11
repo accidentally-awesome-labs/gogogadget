@@ -1,0 +1,33 @@
+Redproof-Patch: modkit-held-generated-carry
+Redproof-Family: modkit
+Redproof-Run: TestHeldModuleGeneratedFileReachesConflictStaging
+Redproof-Package: ./internal/modkit
+Redproof-Expect: base_sha256 is invalid
+Redproof-Summary: Dropping the FileGenerated branch from the held-module carry-forward (the exact P0-3 defect) kills the promised exit-4 staging with the marshal-time base_sha256 refusal — the guard is the adjacent-pair conflict staging test.
+diff --git a/internal/modkit/reconcile.go b/internal/modkit/reconcile.go
+--- a/internal/modkit/reconcile.go
++++ b/internal/modkit/reconcile.go
+@@ -396,23 +396,6 @@
+ 		} else if held {
+ 			lockedFiles := make([]LockedFile, 0, len(oldModule.Files))
+ 			for _, oldFile := range oldModule.Files {
+-				// A generated target has no canonical bytes and no local
+-				// digest to compare: its row is state-only, and restating it
+-				// through the clean/modified branch below would attach the
+-				// on-disk render's digest to an empty base — a planned lock
+-				// that fails its own validation (`base_sha256 is invalid`)
+-				// and kills the promised exit-4 staging with exit 3 before
+-				// anything is staged (finding P0-3: every core-module
+-				// conflict on the v0.22→v0.23 pair died exactly here,
+-				// because the held modules behind it own generated outputs).
+-				// Generated rows carry forward verbatim, the same way the
+-				// retained branch above carries whole rows.
+-				if oldFile.State == FileGenerated {
+-					lockedFiles = append(lockedFiles, LockedFile{
+-						Path: oldFile.Path, Source: oldFile.Source, State: FileGenerated,
+-					})
+-					continue
+-				}
+ 				_, localDigest, missing, err := CurrentTargetState(root, oldFile.Path)
+ 				if err != nil {
+ 					return Lock{}, nil, nil, nil, err

@@ -330,6 +330,14 @@ func resolveModuleFiles(
 	}
 
 	for _, oldFile := range module.Files {
+		// A generated row is state-only: no payload, no digests to compare,
+		// and no meaning for the dropped-file refusal below (an on-disk
+		// render always digests differently from an empty base). Generated
+		// outputs the new manifest no longer declares are the generator's
+		// unrendered-output scan's to retire, not this loop's.
+		if oldFile.State == FileGenerated {
+			continue
+		}
 		if _, exists := payloadByPath[oldFile.Path]; exists {
 			continue
 		}
@@ -353,6 +361,19 @@ func resolveModuleFiles(
 
 	ownership := lockedFileOwnership(currentLock, true)
 	files := make([]LockedFile, 0, len(payloads))
+	// Generated targets carry no payload, so the rebuild below never sees
+	// them. Seed them as state-only rows the same way a fresh install does,
+	// or the resolved row would not cover the target manifest's declared
+	// targets and the lock would fail its own validation at marshal time —
+	// the same class of staged-then-refused dead end as the held-module
+	// carry-forward (finding P0-3).
+	for _, file := range targetManifest.Files {
+		if file.Class == FileClassGenerated {
+			files = append(files, LockedFile{
+				Path: file.Target, Source: file.Source, State: FileGenerated,
+			})
+		}
+	}
 	for _, payload := range payloads {
 		newDigest := digestBytes(payload.content)
 		oldFile, hadOld := oldFiles[payload.file.Target]

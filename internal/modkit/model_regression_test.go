@@ -502,3 +502,193 @@ func TestValidateAssetsRequiresIntegrityForEngines(t *testing.T) {
 		t.Fatal("an engine name that cannot appear in an attribute selector must be rejected")
 	}
 }
+
+// The tests in this file pin the two-sided rule the lock/authoring
+// validation split implements (see the comment on validateManifest):
+//
+//   - a lock row's embedded manifest is a historical RECORD — legal under
+//     the era that wrote it — so lock parsing validates record integrity
+//     only, and every era's lock must parse under today's binary;
+//   - tamper detection for those same rows must stay fully armed: a
+//     corrupt record, a file row that stops matching its embedded
+//     manifest, or a row that stops covering its declared targets still
+//     refuses loudly;
+//   - the authoring rules themselves still exist and still gate every
+//     manifest entering the system (catalog parse, `ggg create`).
+
+// eraJobsLock builds a lock whose single row embeds a v0.16.0-era
+// `ggg/system/billing` shape: five jobs declared in runtime.jobs while
+// claims.jobs is empty — legal when written, refused by every authoring
+// rule since v0.16.0 (finding P0-1's exact refusal).
+func eraJobsLock() Lock {
+	module := testLockedModule("ggg/system/billing", testDigestA)
+	module.Manifest.Runtime.Jobs = []JobContribution{
+		{Kind: "email.dunning_final", Package: "internal/billing", Handler: "HandleDunningFinal"},
+	}
+	return Lock{
+		Schema:         2,
+		EngineContract: 0, // written before the guard existed
+		RegistryCommit: testCommitA,
+		Order:          []string{module.ID},
+		Modules:        []LockedModule{module},
+	}
+}
+
+// eraIdempotentLock builds a lock whose single row embeds a v0.16.0-era
+// `ggg/system/billing-local` shape: `idempotent: true` on an `app`-scope
+// POST — legal when written, refused by the authoring rule first shipped
+// v0.17.0 (finding P0-2's exact refusal).
+func eraIdempotentLock() Lock {
+	module := testLockedModule("ggg/system/billing-local", testDigestA)
+	module.Manifest.Runtime.Routes = []RouteContribution{
+		{ID: "app.billing.confirm", Method: "POST", Pattern: "/app/billing/confirm",
+			Scope: RouteApp, Policy: RoutePolicy{Idempotent: true},
+			Package: "internal/billing/local", Handler: "confirm"},
+	}
+	return Lock{
+		Schema:         2,
+		EngineContract: 0,
+		RegistryCommit: testCommitA,
+		Order:          []string{module.ID},
+		Modules:        []LockedModule{module},
+	}
+}
+
+func TestParseLockAcceptsEraManifests(t *testing.T) {
+	// Each case is a manifest shape that WAS legal, stopped being legal for
+	// new authoring at a named release, and must never stop the lock that
+	// records it from parsing — the update that would replace the row is
+	// the remedy, and it cannot even plan while the lock refuses to parse.
+	t.Run("pre-v0.16 jobs without claims parse (P0-1)", func(t *testing.T) {
+		if _, err := ParseLock(marshalLockJSON(t, eraJobsLock())); err != nil {
+			t.Fatalf("an era lock must parse under record validation: %v", err)
+		}
+	})
+	t.Run("pre-v0.17 app-scope idempotent route parses (P0-2)", func(t *testing.T) {
+		if _, err := ParseLock(marshalLockJSON(t, eraIdempotentLock())); err != nil {
+			t.Fatalf("an era lock must parse under record validation: %v", err)
+		}
+	})
+	t.Run("an era-shaped pending manifest parses", func(t *testing.T) {
+		lock := eraJobsLock()
+		module := &lock.Modules[0]
+		module.Files[0].LocalSHA256 = testDigestB
+		module.Files[0].State = FileConflicted
+		pending := module.Manifest
+		pending.Revision = 2
+		pending.Files = append([]ManifestFile(nil), pending.Files...)
+		pending.Files[0].SHA256 = testDigestB
+		module.Pending = &PendingUpdate{
+			RunID: "run1", RegistryCommit: testCommitB, SourceCommit: testCommitB,
+			Manifest: pending,
+			Conflicts: []PendingConflict{{
+				Path: module.Files[0].Path, CandidatePath: "tmp/ggg/conflicts/run1/x.go",
+				DiffPath: "tmp/ggg/conflicts/run1/x.go.diff", CandidateSHA256: testDigestB,
+			}},
+		}
+		if _, err := ParseLock(marshalLockJSON(t, lock)); err != nil {
+			t.Fatalf("an era-shaped pending manifest must parse under record validation: %v", err)
+		}
+	})
+	t.Run("both era shapes in one lock parse", func(t *testing.T) {
+		jobs := eraJobsLock()
+		idem := eraIdempotentLock()
+		lock := Lock{
+			Schema: 2, RegistryCommit: testCommitA,
+			Order:   []string{jobs.Modules[0].ID, idem.Modules[0].ID},
+			Modules: []LockedModule{jobs.Modules[0], idem.Modules[0]},
+		}
+		if _, err := ParseLock(marshalLockJSON(t, lock)); err != nil {
+			t.Fatalf("a mixed-era lock must parse under record validation: %v", err)
+		}
+	})
+}
+
+func TestParseLockStillRefusesTamperedEraRecords(t *testing.T) {
+	// Every case starts from an era lock proven to parse above and corrupts
+	// exactly one record-integrity property. The relaxed authoring tier
+	// must not have relaxed any of these.
+	base := func() Lock {
+		jobs := eraJobsLock()
+		idem := eraIdempotentLock()
+		idem.Modules[0].Manifest.Requires = []Requirement{{ID: jobs.Modules[0].ID, Contract: ContractBounds{Min: 1, Max: 1}}}
+		jobs.Modules[0].RequiredBy = []string{idem.Modules[0].ID}
+		return Lock{
+			Schema: 2, RegistryCommit: testCommitA,
+			Order:   []string{jobs.Modules[0].ID, idem.Modules[0].ID},
+			Modules: []LockedModule{jobs.Modules[0], idem.Modules[0]},
+		}
+	}
+
+	t.Run("file row stops matching its embedded manifest digest", func(t *testing.T) {
+		lock := base()
+		lock.Modules[0].Files[0].BaseSHA256 = testDigestC
+		lock.Modules[0].Files[0].LocalSHA256 = testDigestC
+		_, err := ParseLock(marshalLockJSON(t, lock))
+		if err == nil || !strings.Contains(err.Error(), "does not match manifest sha256") {
+			t.Fatalf("ParseLock error = %v, want the base/manifest digest coupling to refuse", err)
+		}
+	})
+	t.Run("embedded manifest digest is structurally corrupt", func(t *testing.T) {
+		lock := base()
+		lock.Modules[0].Manifest.Files[0].SHA256 = "not-a-digest"
+		_, err := ParseLock(marshalLockJSON(t, lock))
+		if err == nil || !strings.Contains(err.Error(), "sha256 is invalid") {
+			t.Fatalf("ParseLock error = %v, want invalid manifest digest to refuse", err)
+		}
+	})
+	t.Run("row stops covering a declared manifest target", func(t *testing.T) {
+		lock := base()
+		lock.Modules[0].Manifest.Files = append(lock.Modules[0].Manifest.Files, ManifestFile{
+			Source: "registry/modules/system/billing/extra.go",
+			Target: "internal/modules/billing/extra.go",
+			Class:  FileClassGo, SHA256: testDigestB,
+		})
+		_, err := ParseLock(marshalLockJSON(t, lock))
+		if err == nil || !strings.Contains(err.Error(), "must cover every manifest file target") {
+			t.Fatalf("ParseLock error = %v, want uncovered manifest target to refuse", err)
+		}
+	})
+	t.Run("identity coupling between row and manifest breaks", func(t *testing.T) {
+		lock := base()
+		lock.Modules[0].Revision = 7
+		_, err := ParseLock(marshalLockJSON(t, lock))
+		if err == nil || !strings.Contains(err.Error(), "identity/revision/contract") {
+			t.Fatalf("ParseLock error = %v, want row/manifest identity coupling to refuse", err)
+		}
+	})
+	t.Run("order stops matching the dependency edges", func(t *testing.T) {
+		lock := base()
+		lock.Order = []string{lock.Modules[1].ID, lock.Modules[0].ID} // consumer first
+		_, err := ParseLock(marshalLockJSON(t, lock))
+		if err == nil || !strings.Contains(err.Error(), "places dependency") {
+			t.Fatalf("ParseLock error = %v, want order/dependency coupling to refuse", err)
+		}
+	})
+}
+
+func TestAuthoringPolicyStillGatesManifestsEnteringTheSystem(t *testing.T) {
+	t.Run("claims.jobs pairing refuses for authoring", func(t *testing.T) {
+		manifest := eraJobsLock().Modules[0].Manifest
+		err := ValidateManifest(manifest)
+		if err == nil || !strings.Contains(err.Error(), `runtime jobs "email.dunning_final" requires a claims.jobs entry`) {
+			t.Fatalf("ValidateManifest error = %v, want the claims.jobs pairing to refuse new authoring", err)
+		}
+	})
+	t.Run("idempotent scope refuses for authoring", func(t *testing.T) {
+		manifest := eraIdempotentLock().Modules[0].Manifest
+		err := ValidateManifest(manifest)
+		if err == nil || !strings.Contains(err.Error(), "idempotent is enforced only on the api-read and api-write scopes") {
+			t.Fatalf("ValidateManifest error = %v, want the idempotent scope rule to refuse new authoring", err)
+		}
+	})
+	t.Run("idempotent safe method refuses for authoring", func(t *testing.T) {
+		manifest := eraIdempotentLock().Modules[0].Manifest
+		manifest.Runtime.Routes[0].Method = "GET"
+		manifest.Runtime.Routes[0].Scope = RouteAPIRead
+		err := ValidateManifest(manifest)
+		if err == nil || !strings.Contains(err.Error(), "idempotent is meaningless on the safe method") {
+			t.Fatalf("ValidateManifest error = %v, want the safe-method rule to refuse new authoring", err)
+		}
+	})
+}

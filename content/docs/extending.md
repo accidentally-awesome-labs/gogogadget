@@ -152,6 +152,19 @@ they require, leaving everything else at its recorded per-module snapshot.
 registry and takes no module operands. Either way, incompatibility is
 reported by naming the modules that must move together.
 
+The two forms compose through the **declared ref**, and that is where the
+fine print lives. Named modules move to whatever their registry's declared
+ref resolves to — so on a registry pinned to a tag, after
+`ggg update --registry ggg --ref v1.4.0` has run, a later
+`ggg update ggg/component/badge` is a no-op by design: the declared ref is
+already the newest thing the project has agreed to, and partial advance
+beyond it does not exist. The mixed-snapshot state — some modules at one
+generation, the rest at another — is reached by moving the ref *forward*
+and then updating only the modules you name, or by tracking a moving branch,
+where `ggg update MODULES` genuinely advances just those modules ahead of
+their neighbors. A tag pin is all-or-nothing: to advance one module past
+its neighbors, move the ref first.
+
 Pristine files are replaced silently. A file you edited that upstream also
 changed is **never** overwritten. Your bytes stay exactly as they are, the
 complete upstream candidate and a unified diff are written under

@@ -1,0 +1,18 @@
+Redproof-Patch: modkit-era-lock-authoring
+Redproof-Family: modkit
+Redproof-Run: TestParseLockAcceptsEraManifests
+Redproof-Package: ./internal/modkit
+Redproof-Expect: requires a claims.jobs entry
+Redproof-Summary: Reapplying today's authoring rules to a lock row's embedded manifest (the pre-P0-1/2 shape) makes every pre-v0.16 derivative's lock unparseable again — the guard walks the era walk's own regression test.
+diff --git a/internal/modkit/validate.go b/internal/modkit/validate.go
+--- a/internal/modkit/validate.go
++++ b/internal/modkit/validate.go
+@@ -1596,7 +1596,7 @@
+ 	// historical record of what was installed, and its shape, digests, and
+ 	// self-consistency below are the tamper detection that stays armed —
+ 	// while today's authoring rules have no standing over it.
+-	if err := validateManifestRecord(module.Manifest, canonical); err != nil {
++	if err := validateManifest(module.Manifest, canonical); err != nil {
+ 		return fmt.Errorf("manifest: %w", err)
+ 	}
+ 	if module.Manifest.TestOnly {

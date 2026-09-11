@@ -137,6 +137,8 @@ var redproofNamedGuards = map[string]string{
 	"TestDesignSystemLayering":                           "web",
 	"TestUIImportsTemplAndStdlibOnly":                    "web",
 	"TestCIProfilesJobRunsTheGenesisSweep":               "modkit",
+	"TestParseLockAcceptsEraManifests":                   "modkit",
+	"TestHeldModuleGeneratedFileReachesConflictStaging":  "modkit",
 	"TestAccountNamesPackagesWithNoTestFiles":            "ownership",
 	"TestAccountRefusesAnInapplicableMarkerWithNoReason": "ownership",
 }

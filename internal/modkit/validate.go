@@ -287,7 +287,48 @@ func validSafeArchivePath(value string) bool {
 	return value != "" && validateSafePath(value) == nil
 }
 
+// A manifest embedded in gogogadget.lock.json is a RECORD of what was
+// installed — written by the tool of the era that installed it, legal under
+// that era's authoring rules — never a fresh authoring input. Validation is
+// therefore split into two tiers, and which tier runs where is the whole
+// design:
+//
+//   - Record integrity (validateManifestRecord): everything that makes a
+//     manifest a well-formed, self-consistent record — identity coherence,
+//     per-declaration shape, pinned digests, uniqueness, canonical
+//     ordering. Applied EVERYWHERE a manifest is read, lock rows and
+//     pending blocks included, whatever era wrote them: a corrupt,
+//     truncated, or hand-edited record must refuse loudly, and the
+//     lock-row coupling around it (files cover manifest targets, base
+//     digests match the embedded manifest, order/required_by agree) is
+//     tamper detection that stays fully armed.
+//   - Current authoring policy (validateManifestAuthoring): the cross-field
+//     rules encoding what a manifest may declare TODAY — claims↔runtime
+//     pairing (jobs, cli), idempotency scope and safe-method rules,
+//     derivation package claims, adapter/target env wiring. Applied only
+//     where a manifest ENTERS the system: registry catalogs at resolve, and
+//     `ggg create` authoring. Never to the historical manifests embedded
+//     in a lock: each rule tightening here used to retroactively invalidate
+//     every previously written lock (the claims.jobs pairing, first shipped
+//     v0.16.0, bricked all older locks; the idempotent scope rule, first
+//     shipped v0.17.0, bricked v0.16.0 locks) — the validator refused the
+//     very rows the requested update was about to replace, with every
+//     escape hatch equally refused (findings P0-1/P0-2).
+//
+// Rows this tool writes always carry catalog manifests that passed the
+// authoring tier at resolve time, so the relaxed lock tier cannot launder a
+// policy-violating manifest into a lock through the tool itself. And
+// relaxing the lock tier weakens no integrity guarantee: none of the moved
+// rules are integrity rules — they govern what may be declared, not
+// whether the record is truthful about what was.
 func validateManifest(m Manifest, canonical bool) error {
+	if err := validateManifestRecord(m, canonical); err != nil {
+		return err
+	}
+	return validateManifestAuthoring(m)
+}
+
+func validateManifestRecord(m Manifest, canonical bool) error {
 	namespace, kind, name, ok := splitScopedModuleID(m.ID)
 	if !ok || !validModuleKind(ModuleKind(kind)) || !validNamespace(namespace) {
 		return fmt.Errorf("manifest id %q is not a valid scoped module id", m.ID)
@@ -334,9 +375,6 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateEnvironment(m.Environment, canonical); err != nil {
 		return err
 	}
-	if err := validateEnvironmentTargets(m.Environment, m.Runtime.System, m.ID); err != nil {
-		return err
-	}
 	if m.Docs == nil {
 		return fmt.Errorf("manifest docs array is required")
 	}
@@ -353,6 +391,23 @@ func validateManifest(m Manifest, canonical bool) error {
 		return err
 	}
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
+		return err
+	}
+	if err := validateVendors(m.Vendors, canonical); err != nil {
+		return err
+	}
+	if err := validateTests(m.Tests, canonical); err != nil {
+		return err
+	}
+	return nil
+}
+
+// validateManifestAuthoring holds the current-authoring rules enumerated on
+// validateManifest. It runs for manifests entering the system (catalog
+// parse, the public authoring API) and must not run against manifests
+// embedded in a lock — row or pending.
+func validateManifestAuthoring(m Manifest) error {
+	if err := validateEnvironmentTargets(m.Environment, m.Runtime.System, m.ID); err != nil {
 		return err
 	}
 	// A contributed command name is a namespace claim and a runtime
@@ -402,11 +457,44 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil {
 		return err
 	}
-	if err := validateVendors(m.Vendors, canonical); err != nil {
-		return err
-	}
-	if err := validateTests(m.Tests, canonical); err != nil {
-		return err
+	return validateRouteIdempotencyPolicy(m.Runtime.Routes)
+}
+
+// validateRouteIdempotencyPolicy is the current-authoring half of the route
+// rules: what a manifest may declare about idempotency today. It is
+// deliberately outside validateRoutes — whose checks are record-tier shape
+// validation — because the scope rule first shipped in v0.17.0 and must not
+// be applied to historical manifests embedded in locks written by earlier
+// eras.
+func validateRouteIdempotencyPolicy(routes []RouteContribution) error {
+	for i, route := range routes {
+		// Idempotent is not a comment. It is the one declaration
+		// scopeTargets.target reads to wrap a handler in the idempotency-key
+		// middleware, and the same one the generated OpenAPI document derives
+		// its Idempotency-Key parameter from — and both of those live in the
+		// /api transport. Declared anywhere else it documents a retry contract
+		// nothing enforces, which is the "false safety claim in shipped docs"
+		// class. Nine routes declared it while two were wrapped, including two
+		// GET screens, before this refused it.
+		//
+		// A route that deduplicates a retry some other way is making a
+		// different claim and needs a different statement: the local billing
+		// POSTs and both hosted webhook receivers dedupe on a SERVER-derived id
+		// in the webhook_events ledger, which works with no client header at
+		// all, and that property is asserted in their own handlers' tests.
+		if route.Policy.Idempotent && route.Scope != RouteAPIRead && route.Scope != RouteAPIWrite {
+			return fmt.Errorf(
+				"manifest runtime routes[%d] policy idempotent is enforced only on the api-read and api-write scopes, not %q",
+				i, route.Scope)
+		}
+		// An idempotency key exists so that repeating an UNSAFE request acts
+		// once. A safe method has nothing to act twice, so the flag is a
+		// comment there as well.
+		if route.Policy.Idempotent && !unsafeHTTPMethod(route.Method) {
+			return fmt.Errorf(
+				"manifest runtime routes[%d] policy idempotent is meaningless on the safe method %s",
+				i, route.Method)
+		}
 	}
 	return nil
 }
@@ -843,33 +931,6 @@ func validateRoutes(routes []RouteContribution, canonical bool) error {
 			return fmt.Errorf(
 				"manifest runtime routes[%d] policy max_body_bytes %d does not narrow the global %d-byte cap",
 				i, route.Policy.MaxBodyBytes, GlobalRequestBodyLimit)
-		}
-		// Idempotent is not a comment. It is the one declaration
-		// scopeTargets.target reads to wrap a handler in the idempotency-key
-		// middleware, and the same one the generated OpenAPI document derives
-		// its Idempotency-Key parameter from — and both of those live in the
-		// /api transport. Declared anywhere else it documents a retry contract
-		// nothing enforces, which is the "false safety claim in shipped docs"
-		// class. Nine routes declared it while two were wrapped, including two
-		// GET screens, before this refused it.
-		//
-		// A route that deduplicates a retry some other way is making a
-		// different claim and needs a different statement: the local billing
-		// POSTs and both hosted webhook receivers dedupe on a SERVER-derived id
-		// in the webhook_events ledger, which works with no client header at
-		// all, and that property is asserted in their own handlers' tests.
-		if route.Policy.Idempotent && route.Scope != RouteAPIRead && route.Scope != RouteAPIWrite {
-			return fmt.Errorf(
-				"manifest runtime routes[%d] policy idempotent is enforced only on the api-read and api-write scopes, not %q",
-				i, route.Scope)
-		}
-		// An idempotency key exists so that repeating an UNSAFE request acts
-		// once. A safe method has nothing to act twice, so the flag is a
-		// comment there as well.
-		if route.Policy.Idempotent && !unsafeHTTPMethod(route.Method) {
-			return fmt.Errorf(
-				"manifest runtime routes[%d] policy idempotent is meaningless on the safe method %s",
-				i, route.Method)
 		}
 		if _, ok := seen[route.ID]; ok {
 			return fmt.Errorf("manifest runtime routes contain duplicate id %q", route.ID)
@@ -1534,7 +1595,11 @@ func validateLockedModule(module *LockedModule, canonical bool) error {
 	if err := validateStringSet("required_by", module.RequiredBy, canonical, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
-	if err := validateManifest(module.Manifest, canonical); err != nil {
+	// Record tier only (see validateManifest): the embedded manifest is the
+	// historical record of what was installed, and its shape, digests, and
+	// self-consistency below are the tamper detection that stays armed —
+	// while today's authoring rules have no standing over it.
+	if err := validateManifestRecord(module.Manifest, canonical); err != nil {
 		return fmt.Errorf("manifest: %w", err)
 	}
 	if module.Manifest.TestOnly {
@@ -1691,7 +1756,10 @@ func validatePending(moduleID string, pending *PendingUpdate, files []LockedFile
 	if strings.TrimSpace(pending.SourceCommit) == "" {
 		return fmt.Errorf("source_commit must be non-empty")
 	}
-	if err := validateManifest(pending.Manifest, canonical); err != nil {
+	// Record tier only, same rule as the row manifest: a pending block is a
+	// record the writing tool produced from a catalog that passed that era's
+	// authoring validation at resolve time.
+	if err := validateManifestRecord(pending.Manifest, canonical); err != nil {
 		return fmt.Errorf("manifest: %w", err)
 	}
 	if pending.Manifest.TestOnly {
