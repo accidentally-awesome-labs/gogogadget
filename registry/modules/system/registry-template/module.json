@@ -4,7 +4,7 @@
     "id": "ggg/system/registry-template",
     "kind": "system",
     "name": "registry-template",
-    "revision": 6,
+    "revision": 7,
     "contract": 1,
     "title": "External registry template",
     "description": "The maintained, signed registry a third party copies to publish modules against this framework.",
@@ -35,7 +35,7 @@
         "source": "templates/external-registry/README.md",
         "target": "templates/external-registry/README.md",
         "class": "docs",
-        "sha256": "3e17bcf2f6b57b9df096af12bb3115030d662003ce157826757af1c83c3873d8",
+        "sha256": "4753ec9a70aa64d3c2cf5870d2fede4273711b4aeb93e474a0ddde2c9dbfedc0",
         "rewrite_module": false,
         "contract": false
       },

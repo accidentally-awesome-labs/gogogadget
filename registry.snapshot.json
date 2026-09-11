@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "a560fe99d1737b26b4dd832f08382031597dbffebe0f3df5ac4460bb6b8aa144"
+      "sha256": "9cab5b240098446d98e1ff8fdf544c55bbd89451b2094d68e7c266978cd64fa8"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "c26ab828ae1d0872914f09389df27d5360201de0bf307ebf8b03604e0ba50763"
+      "sha256": "ff847b397aec72873450372f3025536e0ae751a7b1ae2bc0b8c296db6d2aa129"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1064,7 +1064,7 @@
     },
     {
       "path": "registry/modules/system/registry-template/module.json",
-      "sha256": "601175daa0ca81281b2e3a13582f102d383f648d996bbb55c06e9e93ba5e3caa"
+      "sha256": "ebaddda775c48e106c984b4645bbda3d87cd6e8b47173588f13dd07b7c1be8f7"
     },
     {
       "path": "registry/modules/system/schedules/module.json",
@@ -1280,7 +1280,7 @@
     },
     {
       "path": "registry/profiles/minimal.json",
-      "sha256": "7fc200c3d604ceb91f8b10270ed4b0dcd68aa85fc268ac2128bfdac2627ddbcc"
+      "sha256": "0f7b1450a0cd0319dc10e64a591ed06a5eb30aac54ec04ea047bcb0067f1b5f4"
     },
     {
       "path": "registry/profiles/saas.json",
@@ -1288,7 +1288,7 @@
     },
     {
       "path": "registry/profiles/web.json",
-      "sha256": "dced7d0c78758451b8b9f9c1dfc7eac4e3026e6a2646b2647e7ae7980daac80f"
+      "sha256": "af894b322759b12ee7730c24497ca69923041acfa52c1c9193758fe6b39f8b9d"
     },
     {
       "path": "registry/schema/lock.schema.json",
