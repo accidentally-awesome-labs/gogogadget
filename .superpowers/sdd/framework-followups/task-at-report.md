@@ -272,11 +272,12 @@ Main's to run once this slice lands.
 
 | gate | result |
 |---|---|
-| `go test ./internal/modkit -run TestRedProofGate` | **pass** — `ok … 91.829s`, 25/25 proofs red-then-reverted, clean canary green |
-| `go test -race ./internal/modkit` | see final yield (run below) |
-| `go test -race ./internal/gggcli` | see final yield |
-| `go vet ./internal/modkit` | clean |
-| `make check` (runner active) | run after the release order refreshes the snapshot — quoted in the final yield |
-| `bin/ggg registry validate` | same |
+| `go test ./internal/modkit -run TestRedProofGate` | **pass** — `ok … 91.111s` (final certification run), 26/26 subtests, 25 proofs red-then-reverted, clean canary green |
+| `go test -race ./internal/modkit` | exactly four failures, all release-order staleness (`TestCoreRepositoryInstallsEverySelfHostPayload` + the three profile-table gates), enumerated; green after the release order (`make check` below covers it) |
+| `go test -race ./internal/gggcli` | **pass** — `ok … 8.894s`; before the release order, only `TestCommittedSnapshotVerifiesUnderThePinnedCoreKey` failed (green with it skipped) |
+| `go vet ./internal/modkit ./internal/gggcli` | clean; `gofmt` clean |
+| `make check` (runner active, post release order `f0e537fb`) | **pass** — `tests: 2166 passed, 0 skipped, 1 inapplicable, 0 failed across 91 packages, 16 with no test files`, with `ok …internal/modkit 126.681s` (the gate's ~91 s visible inside the accounted suite; the package's pre-gate baseline was ~35 s) |
+| `bin/ggg registry validate` (post release order) | **pass** — 3m41s, every example closure verified, `2064 tree entries restored byte for byte`, the external `gadgetworks` closure included |
+| genesis sweep (parent's, over this slice's shipped-payload diff) | **pass** — Main ran it: all four profiles, `ok 160.7s` |
 
 Not pushed, not tagged. The sweep reports were read and left untouched.
