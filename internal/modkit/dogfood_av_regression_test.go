@@ -31,14 +31,17 @@ func TestRemoveKeepsProviderSelectionsAndPortsInTheLock(t *testing.T) {
 			Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main",
 			PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=",
 		}},
+		// Every selected adapter is installed and survives the removal —
+		// the dogfood's shape: the removal touches a non-adapter module and
+		// the selections must live on in the lock.
 		Providers: map[string]ProviderSelections{
 			"ggg/mail": {
-				Development: ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"},
-				Test:        ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"},
-				Production:  ProviderSelection{Adapter: "ggg/system/mail-resend", Target: "resend"},
+				Development: ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
+				Test:        ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
+				Production:  ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
 			},
 		},
-		Ports:      map[string]PortOverrides{"ggg/system/mail-smtp@mailpit/smtp": {Development: 1025, Test: 1026}},
+		Ports:      map[string]PortOverrides{"ggg/component/card@one/smtp": {Development: 1025, Test: 1026}},
 		Deployment: "",
 		Modules:    []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
@@ -55,10 +58,10 @@ func TestRemoveKeepsProviderSelectionsAndPortsInTheLock(t *testing.T) {
 	if !ok {
 		t.Fatalf("lock dropped the provider selections: %#v", plan.Lock.Providers)
 	}
-	if selection.Production.Adapter != "ggg/system/mail-resend" || selection.Production.Target != "resend" {
+	if selection.Production.Adapter != "ggg/component/card" || selection.Production.Target != "one" {
 		t.Fatalf("lock provider selection = %#v", selection)
 	}
-	if plan.Lock.Ports["ggg/system/mail-smtp@mailpit/smtp"].Development != 1025 {
+	if plan.Lock.Ports["ggg/component/card@one/smtp"].Development != 1025 {
 		t.Fatalf("lock ports = %#v", plan.Lock.Ports)
 	}
 }
@@ -618,4 +621,63 @@ func TestSetExcludeSequencesRegistryRemovalTombstones(t *testing.T) {
 			t.Fatalf("non-sync SetExclude = %v, want refusal", err)
 		}
 	})
+}
+
+// The registry-validate identity-providers fixture is the original red: it
+// stages a provider switch by writing the intent's selections BEFORE the
+// adapters are installed, then removes the legacy adapters in the same
+// breath. The removal renders its outputs against the post-removal tree, so
+// a selection naming an adapter that tree does not have — incoming here,
+// retiring in the mirror case — made the removal refuse to render its own
+// outputs ("selected adapter … is not installed"). The removal's lock now
+// keeps only the selections that tree can resolve; the intent keeps them
+// all, and the next sync re-stamps.
+func TestRemoveRendersOnlySelectionsThePostRemovalTreeResolves(t *testing.T) {
+	root, engine, _ := installedRemovalProject(t)
+	intent, err := MarshalProject(Project{
+		Schema: 2,
+		Registries: []ProjectRegistry{{
+			Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main",
+			PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=",
+		}},
+		Providers: map[string]ProviderSelections{
+			// Survives: every environment's adapter is installed and kept.
+			"ggg/kept": {
+				Development: ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
+				Test:        ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
+				Production:  ProviderSelection{Adapter: "ggg/component/card", Target: "one"},
+			},
+			// The staged-switch shape: selected in the intent, installed by
+			// the NEXT operation, absent from the tree this removal leaves.
+			"ggg/incoming": {
+				Development: ProviderSelection{Adapter: "ggg/element/invented", Target: "one"},
+				Test:        ProviderSelection{Adapter: "ggg/element/invented", Target: "one"},
+				Production:  ProviderSelection{Adapter: "ggg/element/invented", Target: "one"},
+			},
+		},
+		Deployment: "",
+		Modules:    []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, ProjectFileName, intent)
+
+	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
+	if err != nil {
+		t.Fatalf("Plan(remove) over a staged provider switch: %v", err)
+	}
+	if _, kept := plan.Lock.Providers["ggg/kept"]; !kept {
+		t.Fatalf("removal dropped a selection whose adapter survives: %#v", plan.Lock.Providers)
+	}
+	if _, incoming := plan.Lock.Providers["ggg/incoming"]; incoming {
+		t.Fatalf("removal lock records a selection the post-removal tree cannot resolve: %#v", plan.Lock.Providers)
+	}
+	// The filter runs before the removal renders (the lock field the
+	// generator reads); the identity-providers fixture exercises that render
+	// end to end and is cited above as the original red.
+	// The intent is the human's record and keeps every selection.
+	if _, ok := plan.Project.Providers["ggg/incoming"]; !ok {
+		t.Fatal("removal rewrote the intent's staged selection away")
+	}
 }

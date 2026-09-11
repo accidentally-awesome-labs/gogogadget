@@ -454,7 +454,7 @@ func (e *Engine) planRemove(
 		// with "missing [17 slots]" and blamed the intent file, whose values
 		// were correct all along; only an undocumented bare `ggg sync`
 		// re-stamped them.
-		Providers: maps.Clone(desired.Providers), Ports: maps.Clone(desired.Ports),
+		Providers: resolvableRemovalProviders(desired.Providers, modules), Ports: maps.Clone(desired.Ports),
 		GoTools:      append([]string{}, currentLock.GoTools...),
 		Dependencies: append([]LockedDependency{}, currentLock.Dependencies...),
 		Modules:      modules,
@@ -527,6 +527,42 @@ func (e *Engine) planRemove(
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts,
 		rendered: rendered,
 	}, nil
+}
+
+// resolvableRemovalProviders keeps the intent's provider selections only
+// where every environment's adapter is present in the module set this
+// removal leaves behind. The removal's lock and its rendered outputs
+// describe that post-removal tree, and compose resolves each selection
+// against it: a selection whose adapter is being tombstoned, or one a hand
+// edit advanced to an adapter not installed yet — exactly how a provider
+// fixture stages its switch before the install — names a module the
+// generator cannot resolve, so the removal would refuse to render its
+// own outputs. The intent keeps the full selections untouched; the next
+// sync that installs the adapter re-stamps them.
+func resolvableRemovalProviders(providers map[string]ProviderSelections, modules []LockedModule) map[string]ProviderSelections {
+	if len(providers) == 0 {
+		return maps.Clone(providers)
+	}
+	live := make(map[string]struct{}, len(modules))
+	for _, module := range modules {
+		if module.Reason != TombstoneReason {
+			live[module.ID] = struct{}{}
+		}
+	}
+	resolvable := make(map[string]ProviderSelections, len(providers))
+	for slot, selections := range providers {
+		if _, ok := live[selections.Development.Adapter]; !ok {
+			continue
+		}
+		if _, ok := live[selections.Test.Adapter]; !ok {
+			continue
+		}
+		if _, ok := live[selections.Production.Adapter]; !ok {
+			continue
+		}
+		resolvable[slot] = selections
+	}
+	return resolvable
 }
 
 func dedupeSorted(values []string) []string {
