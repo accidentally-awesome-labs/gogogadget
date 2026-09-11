@@ -1,0 +1,37 @@
+Redproof-Patch: web-templ-raw
+Redproof-Family: web
+Redproof-Run: TestEveryTemplRawCallSiteIsJustified
+Redproof-Package: ./internal/web/templates
+Redproof-Expect: unjustified templ.Raw
+Redproof-Summary: PLANT-T: stored XSS — the org-visible project name rendered through templ.Raw in projects.templ and its compiled mirror (sweep web.md row 1, task-aq item 1).
+diff --git a/internal/web/templates/projects.templ b/internal/web/templates/projects.templ
+index a37d559..2be07ed 100644
+--- a/internal/web/templates/projects.templ
++++ b/internal/web/templates/projects.templ
+@@ -60,7 +60,7 @@ templ ProjectsTable(d ProjectListData) {
+ 	@ui.DataTable(projectsTable(ctx, d)) {
+ 		for _, p := range d.Projects {
+ 			<tr id={ fmt.Sprintf("project-%d", p.ID) } data-testid="project-row">
+-				<td class="px-4 py-3 font-medium">{ p.Name }</td>
++				<td class="px-4 py-3 font-medium">@templ.Raw(p.Name)</td>
+ 				<td class="px-4 py-3 text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+ 				<td class="px-4 py-3">
+ 					<div class="card-actions">
+diff --git a/internal/web/templates/projects_templ.go b/internal/web/templates/projects_templ.go
+index 1ddf8ce..29e7108 100644
+--- a/internal/web/templates/projects_templ.go
++++ b/internal/web/templates/projects_templ.go
+@@ -207,12 +207,7 @@ func ProjectsTable(d ProjectListData) templ.Component {
+ 				if templ_7745c5c3_Err != nil {
+ 					return templ_7745c5c3_Err
+ 				}
+-				var templ_7745c5c3_Var8 string
+-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
+-				if templ_7745c5c3_Err != nil {
+-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/projects.templ`, Line: 63, Col: 46}
+-				}
+-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
++				templ_7745c5c3_Err = templ.Raw(p.Name).Render(ctx, templ_7745c5c3_Buffer)
+ 				if templ_7745c5c3_Err != nil {
+ 					return templ_7745c5c3_Err
+ 				}

@@ -1,0 +1,16 @@
+Redproof-Patch: own-orphan-file
+Redproof-Family: ownership
+Redproof-Run: TestEveryTrackedSourceFileHasAnOwner
+Redproof-Package: ./internal/modkit
+Redproof-Expect: belong to no module
+Redproof-Summary: An unowned tracked file under internal/gggcli — invisible to install, update and removal (sweep ownership.md, plane 4).
+diff --git a/internal/gggcli/zz_plant_probe_test.go b/internal/gggcli/zz_plant_probe_test.go
+new file mode 100644
+index 0000000..ec01f41
+--- /dev/null
++++ b/internal/gggcli/zz_plant_probe_test.go
+@@ -0,0 +1,4 @@
++package gggcli
++
++// zz_plant_probe_test.go belongs to no module.
++const zzPlantProbe = 1

@@ -1,0 +1,19 @@
+Redproof-Patch: web-hxconfirm
+Redproof-Family: web
+Redproof-Run: TestNoProductionTemplateFallsBackToWindowConfirm
+Redproof-Package: ./internal/web/templates
+Redproof-Expect: must not gate an action with hx-confirm
+Redproof-Summary: PLANT-A: a literal hx-confirm on a production table cell in projects.templ — window.confirm on a shipped surface (sweep web.md row 8, task-aq item 6).
+diff --git a/internal/web/templates/projects.templ b/internal/web/templates/projects.templ
+index a37d559..1142280 100644
+--- a/internal/web/templates/projects.templ
++++ b/internal/web/templates/projects.templ
+@@ -60,7 +60,7 @@ templ ProjectsTable(d ProjectListData) {
+ 	@ui.DataTable(projectsTable(ctx, d)) {
+ 		for _, p := range d.Projects {
+ 			<tr id={ fmt.Sprintf("project-%d", p.ID) } data-testid="project-row">
+-				<td class="px-4 py-3 font-medium">{ p.Name }</td>
++				<td class="px-4 py-3 font-medium" hx-confirm="Delete this project?">{ p.Name }</td>
+ 				<td class="px-4 py-3 text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+ 				<td class="px-4 py-3">
+ 					<div class="card-actions">

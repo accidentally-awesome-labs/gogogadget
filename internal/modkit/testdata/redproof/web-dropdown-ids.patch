@@ -1,0 +1,18 @@
+Redproof-Patch: web-dropdown-ids
+Redproof-Family: web
+Redproof-Run: TestNoRendererEmitsTwoIDsOnOneElement
+Redproof-Package: ./internal/web/templates/ui
+Redproof-Expect: duplicate id attribute
+Redproof-Summary: PLANT-M: a span with two id attributes inside DropdownMenu's o.Items separator branch — the branch the old seed table never reached (sweep web.md row 19, task-aq item 7).
+diff --git a/internal/web/templates/ui/dropdown-menu_templ.go b/internal/web/templates/ui/dropdown-menu_templ.go
+index 05eb4ff..8a43af8 100644
+--- a/internal/web/templates/ui/dropdown-menu_templ.go
++++ b/internal/web/templates/ui/dropdown-menu_templ.go
+@@ -113,6 +113,7 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
+ 		}
+ 		for _, item := range o.Items {
+ 			if item.Separator {
++				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<span id=\"plant-one\" id=\"plant-two\"></span>")
+ 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<hr role=\"separator\" class=\"my-1 border-t border-border\">")
+ 				if templ_7745c5c3_Err != nil {
+ 					return templ_7745c5c3_Err

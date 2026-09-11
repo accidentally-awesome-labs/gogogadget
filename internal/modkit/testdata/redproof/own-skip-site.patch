@@ -1,0 +1,18 @@
+Redproof-Patch: own-skip-site
+Redproof-Family: ownership
+Redproof-Run: TestEveryInapplicableSkipSiteIsDeclared
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: records nothing
+Redproof-Summary: An undeclared [inapplicable] skip site in config_test.go — the one self-service exemption in the accounted gate, written where no row records its claim (task-ar item 4b).
+diff --git a/internal/config/config_test.go b/internal/config/config_test.go
+index f30ee78..014e6d3 100644
+--- a/internal/config/config_test.go
++++ b/internal/config/config_test.go
+@@ -574,3 +574,7 @@ func derivedFor(t *testing.T, environment string) string {
+ 	}
+ 	return value
+ }
++
++func TestPlantUndeclaredSkipSite(t *testing.T) {
++	t.Skip("[inapplicable] plant: an undeclared marker site")
++}

@@ -1,0 +1,19 @@
+Redproof-Patch: web-csp-grammar
+Redproof-Family: web
+Redproof-Run: TestRuntimeGrammarAgreesWithThePlanTimeGrammar
+Redproof-Package: ./internal/web
+Redproof-Expect: runtime grammar is looser than plan time
+Redproof-Summary: PLANT-S2: cspContributableSource loosened to accept filesystem: and wss?:// hosts — a plaintext-WebSocket exfil channel refused at plan time (sweep web.md row 4, task-aq item 3).
+diff --git a/internal/web/csp.go b/internal/web/csp.go
+index 292dc4a..7ce12ce 100644
+--- a/internal/web/csp.go
++++ b/internal/web/csp.go
+@@ -62,7 +62,7 @@ var cspBase = []struct {
+ // which has to hold for values that came from configuration and therefore
+ // could not be checked when the plan was made.
+ var cspContributableSource = regexp.MustCompile(
+-	`^(?:blob:|data:|https://(?:\*\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?::(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-9][0-9]{0,3}))?)$`)
++	`^(?:blob:|data:|filesystem:|wss?://[a-z0-9.\-]+|https://(?:\*\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?::(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-9][0-9]{0,3}))?)$`)
+ 
+ // contentSecurityPolicy composes the header from the base policy plus every
+ // active contribution.

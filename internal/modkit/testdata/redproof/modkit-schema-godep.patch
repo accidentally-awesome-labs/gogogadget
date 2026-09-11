@@ -1,0 +1,26 @@
+Redproof-Patch: modkit-schema-godep
+Redproof-Family: modkit
+Redproof-Run: TestPublishedSchemasMatchModels
+Redproof-Package: ./internal/modkit
+Redproof-Expect: bogus_field module version
+Redproof-Summary: $defs.GoDependency gains bogus_field and drops version from required — the published contract accepts what the decoder refuses (sweep modkit.md / ownership.md 4.1, task-ar item 3).
+diff --git a/registry/schema/module.schema.json b/registry/schema/module.schema.json
+index cbd9d37..f749a17 100644
+--- a/registry/schema/module.schema.json
++++ b/registry/schema/module.schema.json
+@@ -2561,11 +2561,13 @@
+         },
+         "version": {
+           "type": "string"
++        },
++        "bogus_field": {
++          "type": "string"
+         }
+       },
+       "required": [
+-        "module",
+-        "version"
++        "module"
+       ]
+     },
+     "ToolArtifact": {

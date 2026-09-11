@@ -1,0 +1,38 @@
+Redproof-Patch: web-badge-xxl
+Redproof-Family: web
+Redproof-Run: TestEveryClassARendererEmitsIsStyled
+Redproof-Package: ./internal/web/templates/ui
+Redproof-Expect: Badge renders "badge-xxl"
+Redproof-Summary: PLANT-W: BadgeOpts grows a nested Sizing.Size axis rendering badge-xxl, a class no stylesheet declares — the nesting blind spot of the three matrix guards (sweep web.md rows 14-16, task-aq item 7).
+diff --git a/internal/web/templates/ui/badge_templ.go b/internal/web/templates/ui/badge_templ.go
+index 69a2afe..c411bd1 100644
+--- a/internal/web/templates/ui/badge_templ.go
++++ b/internal/web/templates/ui/badge_templ.go
+@@ -16,6 +16,7 @@ type BadgeOpts struct {
+ 	Kind     Kind
+ 	Emphasis Emphasis
+ 	Attrs    Attrs
++	Sizing   struct{ Size Size }
+ }
+ 
+ func Badge(o BadgeOpts) templ.Component {
+@@ -43,7 +44,7 @@ func Badge(o BadgeOpts) templ.Component {
+ 		if templ_7745c5c3_Err != nil {
+ 			return templ_7745c5c3_Err
+ 		}
+-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("badge", badgeClass(o.Kind, o.Emphasis), o.Attrs))
++		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("badge", badgeClass(o.Kind, o.Emphasis)+plantBadgeSize(o.Sizing.Size), o.Attrs))
+ 		if templ_7745c5c3_Err != nil {
+ 			return templ_7745c5c3_Err
+ 		}
+@@ -82,3 +83,10 @@ func badgeClass(kind Kind, emphasis Emphasis) string {
+ }
+ 
+ var _ = templruntime.GeneratedTemplate
++
++func plantBadgeSize(s Size) string {
++	if s == SizeLG {
++		return " badge-xxl"
++	}
++	return ""
++}

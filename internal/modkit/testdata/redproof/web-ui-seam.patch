@@ -1,0 +1,26 @@
+Redproof-Patch: web-ui-seam
+Redproof-Family: web
+Redproof-Run: TestUIImportsTemplAndStdlibOnly
+Redproof-Package: ./internal/web/templates/ui
+Redproof-Expect: ui seam breach
+Redproof-Summary: PLANT-X: ui/shared.go imports internal/billing and internal/db/sqlc, breaching the seam-purity the whole ui layer rests on (sweep web.md row 2, task-aq item 2).
+diff --git a/internal/web/templates/ui/shared.go b/internal/web/templates/ui/shared.go
+index 181556a..ff191d7 100644
+--- a/internal/web/templates/ui/shared.go
++++ b/internal/web/templates/ui/shared.go
+@@ -1,6 +1,14 @@
+ package ui
+ 
+-import "github.com/a-h/templ"
++import (
++	"github.com/a-h/templ"
++	"github.com/gogogadget/gogogadget/internal/billing"
++	"github.com/gogogadget/gogogadget/internal/db/sqlc"
++)
++
++var plantPlan billing.Plan
++
++var plantRow sqlc.Project
+ 
+ // Shared data contracts. These are data types, not renderers: several
+ // components read the same shape, so the shape is declared once here in the

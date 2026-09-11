@@ -1,0 +1,33 @@
+Redproof-Patch: web-admin-chrome
+Redproof-Family: web
+Redproof-Run: TestEveryBoostedLayoutClassSharesChrome
+Redproof-Package: ./internal/web
+Redproof-Expect: plant-admin-chrome
+Redproof-Summary: PLANT-V: AdminLayout writes a footer before delegating to AppLayout, so every boosted /app page inherits admin chrome (sweep web.md row 5, task-aq item 5).
+diff --git a/internal/web/templates/layouts.templ b/internal/web/templates/layouts.templ
+index 8f2f471..19a70d0 100644
+--- a/internal/web/templates/layouts.templ
++++ b/internal/web/templates/layouts.templ
+@@ -255,6 +255,7 @@ templ billingBanner(page Page) {
+ // wrapLayout switches on Page.Layout, and an admin page that renders the app
+ // shell should say so.
+ templ AdminLayout(page Page, content templ.Component) {
++	<footer data-testid="plant-admin-chrome"></footer>
+ 	@AppLayout(page, content)
+ }
+ 
+diff --git a/internal/web/templates/layouts_templ.go b/internal/web/templates/layouts_templ.go
+index fb6be80..bf45450 100644
+--- a/internal/web/templates/layouts_templ.go
++++ b/internal/web/templates/layouts_templ.go
+@@ -1228,6 +1228,10 @@ func AdminLayout(page Page, content templ.Component) templ.Component {
+ 			templ_7745c5c3_Var54 = templ.NopComponent
+ 		}
+ 		ctx = templ.ClearChildren(ctx)
++		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<footer data-testid=\"plant-admin-chrome\"></footer>")
++		if templ_7745c5c3_Err != nil {
++			return templ_7745c5c3_Err
++		}
+ 		templ_7745c5c3_Err = AppLayout(page, content).Render(ctx, templ_7745c5c3_Buffer)
+ 		if templ_7745c5c3_Err != nil {
+ 			return templ_7745c5c3_Err

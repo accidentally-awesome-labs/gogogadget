@@ -1,0 +1,20 @@
+Redproof-Patch: modkit-enum-gutted
+Redproof-Family: modkit
+Redproof-Run: TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs
+Redproof-Package: ./internal/modkit
+Redproof-Expect: the row no longer describes the rule it names
+Redproof-Summary: validateServiceTarget's enum refusal deleted, so the validator accepts an enum-typed input with no values the published schema refuses — a gutted check behind intact floors (v0.19.0-v0.21.0 enum parity work).
+diff --git a/internal/modkit/validate.go b/internal/modkit/validate.go
+index 23f65da..636f7f5 100644
+--- a/internal/modkit/validate.go
++++ b/internal/modkit/validate.go
+@@ -744,9 +744,6 @@ func validateServiceTarget(target ServiceTarget) error {
+ 		default:
+ 			return fmt.Errorf("target input %q type is invalid", input.Key)
+ 		}
+-		if input.Type == "enum" && len(input.Enum) == 0 {
+-			return fmt.Errorf("target input %q enum is required", input.Key)
+-		}
+ 		if _, ok := inputSeen[input.Key]; ok {
+ 			return fmt.Errorf("target inputs contain duplicate %q", input.Key)
+ 		}

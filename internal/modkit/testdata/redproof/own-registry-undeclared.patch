@@ -1,0 +1,13 @@
+Redproof-Patch: own-registry-undeclared
+Redproof-Family: ownership
+Redproof-Run: TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner
+Redproof-Package: ./internal/modkit
+Redproof-Expect: no module declares
+Redproof-Summary: An undeclared on-disk payload inside the signed registry tree — bytes nothing installs (sweep ownership.md 2, modkit.md R-4).
+diff --git a/registry/modules/system/modkit/UNLISTED.txt b/registry/modules/system/modkit/UNLISTED.txt
+new file mode 100644
+index 0000000..63eea98
+--- /dev/null
++++ b/registry/modules/system/modkit/UNLISTED.txt
+@@ -0,0 +1 @@
++undeclared payload

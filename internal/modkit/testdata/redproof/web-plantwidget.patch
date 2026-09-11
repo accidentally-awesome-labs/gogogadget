@@ -1,0 +1,24 @@
+Redproof-Patch: web-plantwidget
+Redproof-Family: web
+Redproof-Run: TestEveryRendererPropagatesItsAttrs|TestAgentsRendererCountsMatchTheReferenceRegistry
+Redproof-Package: ./internal/web/templates/ui
+Redproof-Expect: no Reference entry
+Redproof-Summary: PLANT-J: a hand-written .go renderer the registry does not know — outside the *_templ.go alphabet, voiding the Attrs contract and the renderer counts at once (sweep web.md row 17, task-aq item 7).
+diff --git a/internal/web/templates/ui/plantwidget.go b/internal/web/templates/ui/plantwidget.go
+new file mode 100644
+index 0000000..806f279
+--- /dev/null
++++ b/internal/web/templates/ui/plantwidget.go
+@@ -0,0 +1,12 @@
++package ui
++
++import "github.com/a-h/templ"
++
++// PlantWidgetOpts is a hand-written renderer the registry does not know.
++type PlantWidgetOpts struct {
++	Label string
++}
++
++func PlantWidget(o PlantWidgetOpts) templ.Component {
++	return templ.Raw("<div id=\"plant-one\" id=\"plant-two\" class=\"dark:bg-black\" style=\"color:#ff00aa\">" + o.Label + "</div>")
++}

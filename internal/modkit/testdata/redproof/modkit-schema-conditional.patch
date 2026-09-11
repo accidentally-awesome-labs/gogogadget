@@ -1,0 +1,42 @@
+Redproof-Patch: modkit-schema-conditional
+Redproof-Family: modkit
+Redproof-Run: TestValidatorRequiredFieldsAreNotOptionalInTheContract
+Redproof-Package: ./internal/modkit
+Redproof-Expect: TargetInput.env_key
+Redproof-Summary: A sixteenth conditional (if type is url then env_key required) the Go validator does not enforce — the exact residual shape the parity gate exists for (sweep modkit.md R-7, task-ar item 2).
+diff --git a/registry/schema/module.schema.json b/registry/schema/module.schema.json
+index cbd9d37..850788d 100644
+--- a/registry/schema/module.schema.json
++++ b/registry/schema/module.schema.json
+@@ -2269,24 +2269,19 @@
+       ],
+       "$comment": "An `enum`-typed input offers the operator a closed choice, so it must carry at least one value: modkit.validateServiceTarget refuses an `enum`-typed input whose values are missing or empty. Inputs of every other type are exempt, because the requirement keys on `type` and never lands on the property unconditionally.",
+       "if": {
+-        "required": [
+-          "type"
+-        ],
+         "properties": {
+           "type": {
+-            "const": "enum"
++            "const": "url"
+           }
+-        }
++        },
++        "required": [
++          "type"
++        ]
+       },
+       "then": {
+         "required": [
+-          "enum"
+-        ],
+-        "properties": {
+-          "enum": {
+-            "minItems": 1
+-          }
+-        }
++          "env_key"
++        ]
+       }
+     },
+     "LocalService": {

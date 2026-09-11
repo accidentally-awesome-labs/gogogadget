@@ -1,0 +1,16 @@
+Redproof-Patch: modkit-genesis-run
+Redproof-Family: modkit
+Redproof-Run: TestCIProfilesJobRunsTheGenesisSweep
+Redproof-Package: ./internal/modkit
+Redproof-Expect: does not select
+Redproof-Summary: The profiles job's -run value renamed to a test that does not exist: the CI gate would exit 0 green having run nothing (task-ar item 1).
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 83f4e26..0fc3313 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -341,4 +341,4 @@ jobs:
+       # is a report on a run that did not happen, and this test's inputs — the
+       # whole registry tree — are not inputs `go test` can observe.
+       - name: Every shipped profile creates a sync-clean project
+-        run: go test -count=1 -run TestEveryShippedProfileCreatesAProjectThatIsSyncClean ./internal/gggcli -v
++        run: go test -count=1 -run TestProfileGenesisSweepIsSyncClean ./internal/gggcli -v

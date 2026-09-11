@@ -1,0 +1,19 @@
+Redproof-Patch: own-planes-figure
+Redproof-Family: ownership
+Redproof-Run: TestAgentsGeneratedPlaneEqualsTheGeneratedPredicate
+Redproof-Package: ./internal/modkit
+Redproof-Expect: plane 1 does not add up
+Redproof-Summary: AGENTS.md plane 1's generated-path figure drifted from what IsGeneratedOutputPath answers — the inventory the document outgrew (sweep ownership.md 3, the stale-figure defect this program shipped in v0.19.0).
+diff --git a/AGENTS.md b/AGENTS.md
+index c72207d..b5f57e3 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -10,7 +10,7 @@ is the deep reference and updates in the same change as any behavior edit.
+ Four ownership planes answer "may I edit this path?"; each names the
+ predicate that decides.
+ 
+-**1. Generated — never edit** (`modkit.IsGeneratedOutputPath`, 275 paths on
++**1. Generated — never edit** (`modkit.IsGeneratedOutputPath`, 999 paths on
+ disk). 40 of them satisfy `modkit.IsRegistryOwnedOutputPath` — the aggregates
+ `ggg sync` RENDERS from module manifests and sweeps: every `*_registry_gen.*`,
+ `compose.yaml`, `compose.test.yaml`, `static/ui-components.js`,

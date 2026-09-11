@@ -1,0 +1,19 @@
+Redproof-Patch: web-chain-comment
+Redproof-Family: web
+Redproof-Run: TestEveryChainCommentInThisPackageAgreesWithTheAssembledChain
+Redproof-Package: ./internal/web
+Redproof-Expect: chain comment states
+Redproof-Summary: PLANT-R: middleware.go's chain comment restates a stale order anchored at maxBytes — the historically observed staleness the anchor does catch (sweep web.md row 6).
+diff --git a/internal/web/middleware.go b/internal/web/middleware.go
+index 6da14e4..8115f91 100644
+--- a/internal/web/middleware.go
++++ b/internal/web/middleware.go
+@@ -21,7 +21,7 @@ import (
+ 
+ // Middleware chain (outermost → innermost), assembled in Handler:
+ //
+-//	maxBytes → provider-environment/config-lookup → telemetry.HTTP → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
++//	maxBytes → recover → routeBodyLimit → requestID → accessLog → routes
+ //
+ // The order is load-bearing. sessionLoad lands in the identity step, between
+ // secureHeaders and csrf. maintenanceMode sits inside i18n.Detect (the 503

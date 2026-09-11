@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 80,
+    "revision": 81,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -330,7 +330,7 @@
         "source": "internal/gggcli/selfhost_test.go",
         "target": "internal/gggcli/selfhost_test.go",
         "class": "test",
-        "sha256": "ee9e0fa2181ee57fe7177d6d796eff1c5a32e2627969fdbeb991c9c17c63b0aa",
+        "sha256": "db4987bcbb43bb62120dae12ea89c5121f5a81a46eb20b870d0aa3fe74a1f8f8",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -860,6 +860,15 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/redproof_selfhost_test.go",
+        "target": "internal/modkit/redproof_selfhost_test.go",
+        "class": "test",
+        "sha256": "dc4863401f017d70712ba6fb412d22b6367ca7f053d311832f09663048634210",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/reference_scan.go",
         "target": "internal/modkit/reference_scan.go",
         "class": "go",
@@ -1201,6 +1210,240 @@
         "sha256": "faa591d0496d9c85a998f7ae17313d456b58a069409621cac8684c078a954878",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/inventory.txt",
+        "target": "internal/modkit/testdata/redproof/inventory.txt",
+        "class": "test",
+        "sha256": "d975a7dccd3f64e61161e8828cf2793bd88a441e2bd5c47ec6c1dd1ee85e998c",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/modkit-enum-gutted.patch",
+        "target": "internal/modkit/testdata/redproof/modkit-enum-gutted.patch",
+        "class": "test",
+        "sha256": "068c79b2d23d751fed749a9ebac1605ade629794cbf65e67a55fc4dbddd74f5a",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/modkit-genesis-run.patch",
+        "target": "internal/modkit/testdata/redproof/modkit-genesis-run.patch",
+        "class": "test",
+        "sha256": "42f0a0daaac79984007ee3d44b3e01b523108c8957cea3b357d7c47ea0771e26",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/modkit-schema-conditional.patch",
+        "target": "internal/modkit/testdata/redproof/modkit-schema-conditional.patch",
+        "class": "test",
+        "sha256": "efd4bc7e5126a9d820810acab73458cd371c699a7241f27c8a79b2e38019b989",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/modkit-schema-godep.patch",
+        "target": "internal/modkit/testdata/redproof/modkit-schema-godep.patch",
+        "class": "test",
+        "sha256": "3f870321e2f2eebcdf65e823b77d309c701832eb8103eecafcf6bfe156a803c7",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-catalog-collision.patch",
+        "target": "internal/modkit/testdata/redproof/own-catalog-collision.patch",
+        "class": "test",
+        "sha256": "bcc25c6ae140986a966ed869841e6cb6e246107d29813796fa7582dad148bc6e",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-gate-marker.patch",
+        "target": "internal/modkit/testdata/redproof/own-gate-marker.patch",
+        "class": "test",
+        "sha256": "a87411fcde7f2199ea1189d272584456ff2fcbdbe314c9a04d32b5453efa76dd",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-gate-untested.patch",
+        "target": "internal/modkit/testdata/redproof/own-gate-untested.patch",
+        "class": "test",
+        "sha256": "df222accfa0faaf6573c4ab11f40096b07a4d50d3ab3e55ba0113ba1dbe1fa25",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-notify-tests-deleted.patch",
+        "target": "internal/modkit/testdata/redproof/own-notify-tests-deleted.patch",
+        "class": "test",
+        "sha256": "9f767047b7211a62db7be7c43c6b9d03eef68bf56b20d66b215a76b7e2520465",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-orphan-file.patch",
+        "target": "internal/modkit/testdata/redproof/own-orphan-file.patch",
+        "class": "test",
+        "sha256": "f4a0a22c0aa56ec189561b534598837c0ccd6c00a9c5c045d347c04099776c96",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-pcre-lookbehind.patch",
+        "target": "internal/modkit/testdata/redproof/own-pcre-lookbehind.patch",
+        "class": "test",
+        "sha256": "3e3d0b468da4dd862e94c5bf85471827e5466371b4f7dc679f26d64431fec613",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-planes-figure.patch",
+        "target": "internal/modkit/testdata/redproof/own-planes-figure.patch",
+        "class": "test",
+        "sha256": "2e19385359012593a58697557ab318008bf824b7baef445bd86f953d429b2560",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-registry-undeclared.patch",
+        "target": "internal/modkit/testdata/redproof/own-registry-undeclared.patch",
+        "class": "test",
+        "sha256": "5103dfd4fbf21562b42ef421cf5a12216c0483d480f6ff2a03805c66b56181d4",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-repomap-claim.patch",
+        "target": "internal/modkit/testdata/redproof/own-repomap-claim.patch",
+        "class": "test",
+        "sha256": "7a588f3ef06ff6b82b8bda2b5a20244cb96bee74b1bda3a14dbeb0dfe0d7414d",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-skip-site.patch",
+        "target": "internal/modkit/testdata/redproof/own-skip-site.patch",
+        "class": "test",
+        "sha256": "d397afa8ef127809637001d650092145168500f18a824e9d53bcc73dba9967d5",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-admin-chrome.patch",
+        "target": "internal/modkit/testdata/redproof/web-admin-chrome.patch",
+        "class": "test",
+        "sha256": "eacad2d7517183f3e188556cdc17573c61eb483e72a89bb49b5f12f4d7094bd7",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-badge-xxl.patch",
+        "target": "internal/modkit/testdata/redproof/web-badge-xxl.patch",
+        "class": "test",
+        "sha256": "4c0a1ce100e66d62431e6403b43e225ada9b12843ff3a01a8642f183f6576297",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-chain-comment.patch",
+        "target": "internal/modkit/testdata/redproof/web-chain-comment.patch",
+        "class": "test",
+        "sha256": "d12f0306760542c343e01aff925cfd87b6531c38bf1f122efc18666e3fdc1f5d",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-csp-grammar.patch",
+        "target": "internal/modkit/testdata/redproof/web-csp-grammar.patch",
+        "class": "test",
+        "sha256": "21f23c2ee74024409e83e6e2e86849d88f8927dc10cce0b2536d21ef211edd6a",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-dropdown-ids.patch",
+        "target": "internal/modkit/testdata/redproof/web-dropdown-ids.patch",
+        "class": "test",
+        "sha256": "97f27fa0aac2c9050752579d7f9ac833db2276cf0745330ce6b59b2186c9e632",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-hxconfirm.patch",
+        "target": "internal/modkit/testdata/redproof/web-hxconfirm.patch",
+        "class": "test",
+        "sha256": "68d65ad3110ee27567d39c4804dc3510231df2b71d46f16006e9be2ede78a195",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-menuitem-design.patch",
+        "target": "internal/modkit/testdata/redproof/web-menuitem-design.patch",
+        "class": "test",
+        "sha256": "4df2cdef3fa63e026e5dabdf908033e5bd607d6378b69aab8d87193f2f3156df",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-middleware-doc.patch",
+        "target": "internal/modkit/testdata/redproof/web-middleware-doc.patch",
+        "class": "test",
+        "sha256": "eb54d2b87a229b450561a386ba04bf9d5d7b415c0ffb2a6ff23e50c0d2645e8b",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-plantwidget.patch",
+        "target": "internal/modkit/testdata/redproof/web-plantwidget.patch",
+        "class": "test",
+        "sha256": "360e64837fc4f0260a7b60cc88b26cd4edc2b225f700990789a4c29e3fed639c",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-templ-raw.patch",
+        "target": "internal/modkit/testdata/redproof/web-templ-raw.patch",
+        "class": "test",
+        "sha256": "08c209fe8413a5602c1782d2f093dc43214beb6841bec2aab16464d3be757108",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/web-ui-seam.patch",
+        "target": "internal/modkit/testdata/redproof/web-ui-seam.patch",
+        "class": "test",
+        "sha256": "d13dbff076a654e6584b0957dfddf54db9a10094f1b6fb5f4d75e4955d3debcb",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/ui_derive_selfhost_test.go",

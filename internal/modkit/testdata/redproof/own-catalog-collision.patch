@@ -1,0 +1,25 @@
+Redproof-Patch: own-catalog-collision
+Redproof-Family: ownership
+Redproof-Run: TestThePublishedCatalogClaimsEveryTargetExactlyOnce
+Redproof-Package: ./internal/modkit
+Redproof-Expect: does not claim every namespace exactly once
+Redproof-Summary: ggg/system/registry-template claims internal/mail/smtp/contract_test.go beside its owner — two modules, one target, co-present in no profile closure (sweep ownership.md 1, task-ar item 5).
+diff --git a/registry/modules/system/registry-template/module.json b/registry/modules/system/registry-template/module.json
+index 0bb0fed..8f58639 100644
+--- a/registry/modules/system/registry-template/module.json
++++ b/registry/modules/system/registry-template/module.json
+@@ -15,6 +15,14 @@
+       "containers": []
+     },
+     "files": [
++      {
++        "source": "internal/mail/smtp/contract_test.go",
++        "target": "internal/mail/smtp/contract_test.go",
++        "class": "test",
++        "sha256": "4a24ff5bd31352a223b2796be60ad3908e5ea7c94c68a65564150ee3501c382d",
++        "rewrite_module": true,
++        "contract": false
++      },
+       {
+         "source": "templates/external-registry/.github/workflows/registry.yml",
+         "target": "templates/external-registry/.github/workflows/registry.yml",

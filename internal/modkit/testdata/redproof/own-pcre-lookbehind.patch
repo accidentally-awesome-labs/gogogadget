@@ -1,0 +1,19 @@
+Redproof-Patch: own-pcre-lookbehind
+Redproof-Family: ownership
+Redproof-Run: TestPublishedSchemaInstancesValidate
+Redproof-Package: ./internal/modkit
+Redproof-Expect: is not valid regex
+Redproof-Summary: A PCRE-only lookbehind in project.schema.json's namespace pattern — a pattern Go's compiler cannot even compile, invisible to the strictness walk (sweep ownership.md 4.2).
+diff --git a/registry/schema/project.schema.json b/registry/schema/project.schema.json
+index 13f725e..a887afb 100644
+--- a/registry/schema/project.schema.json
++++ b/registry/schema/project.schema.json
+@@ -84,7 +84,7 @@
+       "properties": {
+         "namespace": {
+           "type": "string",
+-          "pattern": "^[a-z][a-z0-9-]*$"
++          "pattern": "(?<=a)b"
+         },
+         "source": {
+           "type": "string",

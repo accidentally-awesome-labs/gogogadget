@@ -1,0 +1,18 @@
+Redproof-Patch: own-gate-untested
+Redproof-Family: ownership
+Redproof-Run: TestAccountNamesPackagesWithNoTestFiles
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: Untested = [], want
+Redproof-Summary: The accounted runner's Untested population gutted: a package whose tests were deleted again reads like one that ran them (task-ar item 4a).
+diff --git a/internal/gggcli/gate.go b/internal/gggcli/gate.go
+index bf48844..860ac19 100644
+--- a/internal/gggcli/gate.go
++++ b/internal/gggcli/gate.go
+@@ -358,7 +358,6 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error)
+ 			// package-level skip carrying no Test field, so nothing above
+ 			// counts it and every total stays 0 while len(Packages) grows.
+ 			if pkg.Passed+pkg.Failed+pkg.Skipped+pkg.Inapplicable == 0 {
+-				account.Untested = append(account.Untested, pkg.Name)
+ 			}
+ 			writeString(progress, pkg.line())
+ 			if event.Action == "fail" {

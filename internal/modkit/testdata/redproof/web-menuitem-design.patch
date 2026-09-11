@@ -1,0 +1,19 @@
+Redproof-Patch: web-menuitem-design
+Redproof-Family: web
+Redproof-Run: TestDesignSystemLayering
+Redproof-Package: ./internal/web/templates
+Redproof-Expect: design-system violation
+Redproof-Summary: PLANT-H: menuItemClass in ui/shared.go returns dark:bg-black bg-red-500 w-[3px] !p-0 #ff00aa — five of the seven prohibitions on every menu item in the catalog (sweep web.md row 7, task-aq item 4).
+diff --git a/internal/web/templates/ui/shared.go b/internal/web/templates/ui/shared.go
+index 181556a..04ee46d 100644
+--- a/internal/web/templates/ui/shared.go
++++ b/internal/web/templates/ui/shared.go
+@@ -71,7 +71,7 @@ type Option struct {
+ // declaring that edge honestly would have been a requires cycle. MenuItem is
+ // this file's type; its class function belongs beside it.
+ func menuItemClass(item MenuItem) string {
+-	base := "block px-3 py-2 text-sm hover:bg-surface-raised"
++	base := "block px-3 py-2 text-sm hover:bg-surface-raised dark:bg-black bg-red-500 w-[3px] !p-0 #ff00aa"
+ 	if NormalizeKind(item.Kind) == KindDanger {
+ 		return base + " text-danger-text"
+ 	}

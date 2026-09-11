@@ -1,0 +1,75 @@
+# Red-proof guard inventory — DERIVED, do not hand-edit.
+# Regenerate: GGG_REDPROOF_UPDATE_INVENTORY=1 go test ./internal/modkit -run TestRedProofGate
+# Derivation: every test matching the guard naming families
+# (TestAgents*|TestEvery*|TestNo*|TestPublished*|TestValidator*|TestThe*) in the
+# guard files — every *_selfhost_test.go under internal/{modkit,gggcli,web} plus the
+# swept non-selfhost guard files — cross-checked against the named contract guards.
+# One line per guard: name, family, and either the patch id that proves it red or
+# allow:<why it carries no red proof today>.
+TestAccountNamesPackagesWithNoTestFiles	ownership	own-gate-untested
+TestAccountRefusesAnInapplicableMarkerWithNoReason	ownership	own-gate-marker
+TestAgentsCatalogCountsMatchTheRegistryAndTheLock	ownership	allow:sweep ownership.md verdict SOUND (live catalog+lock count equality, no test-only inputs); plant not transcribed — add one
+TestAgentsCatalogPlaneEqualsTheFormatOwnedPaths	ownership	allow:sweep ownership.md verdict SOUND (plane-3 set equality via compareForms); plant not transcribed — add one
+TestAgentsClaimFamiliesEqualTheModelAndTheSchema	ownership	allow:sweep ownership.md verdict SOUND (three-way requireSameKeys parity, same machinery TestAgentsManifestKeysEqualTheModelAndTheSchema uses); plant not transcribed — add one
+TestAgentsDependencyKeysEqualTheModelAndTheSchema	ownership	allow:the Dependencies keys are held SOUND (ownership.md); the GoDependency deep parity this stops at is what the modkit-schema-godep patch proves red on TestPublishedSchemasMatchModels
+TestAgentsDesignRulesAreDocumentedAndEnforced	web	allow:sweep web.md row 25 SOUND (set equality plus one fixture per rule with a negative control); a doc-span drift plant is the natural red — add one
+TestAgentsExitCodeTableMatchesTheDeclaredCodes	ownership	allow:sweep ownership.md verdict SOUND on names (four inclusions, AST-derived const blocks); the value residual (R8) is unwritten — the name-half plant is the natural red
+TestAgentsGeneratedPlaneEqualsTheGeneratedPredicate	ownership	own-planes-figure
+TestAgentsGroupChainsMatchTheGuardSequences	web	allow:sweep web.md row 28 SOUND (AST-derived from appChain/adminChain, never a list in the test); plant not transcribed — add one
+TestAgentsHXConfirmScopeMatchesTheGuard	web	allow:sweep web.md row 26 SOUND and re-derived against the widened guard in task-aq item 6; plant not transcribed — add one
+TestAgentsManifestKeysEqualTheModelAndTheSchema	ownership	allow:sweep ownership.md verdict SOUND (three-way, four inclusions via requireSameKeys); plant not transcribed — add one
+TestAgentsMiddlewareOrderMatchesTheAssembledChain	web	web-middleware-doc
+TestAgentsPlaybookRecipesResolveToExtendingHeadings	ownership	allow:sweep ownership.md verdict SOUND (both directions plus stated count); plant not transcribed — add one
+TestAgentsProjectPlaneEqualsTheUnownedResidue	ownership	allow:sweep ownership.md verdict SOUND (plane-2 residue equality via compareSets); plant not transcribed — add one
+TestAgentsRendererCountsMatchTheReferenceRegistry	web	web-plantwidget
+TestAgentsRepoMapConfinesNodeToTheE2ETree	ownership	allow:sweep ownership.md verdict SOUND (behavioural over the tracked tree); plant not transcribed — add one
+TestAgentsRepoMapDisambiguatesTheNearCollisions	ownership	allow:sweep ownership.md verdict SOUND (twin-pair enumeration, both directions); plant not transcribed — add one
+TestAgentsRepoMapExclusivityClaimsHold	ownership	allow:sweep ownership.md 4.3 DECLARATION-DERIVED per-row half; the half that failed (claims with no row) is patched as own-repomap-claim on TestAgentsRepoMapStatesNoUnguardedExclusivityClaim
+TestAgentsRepoMapNamesEveryInternalPackage	ownership	allow:sweep ownership.md verdict SOUND (package coverage, both directions); plant not transcribed — add one
+TestAgentsRepoMapPathsExist	ownership	allow:sweep ownership.md verdict SOUND (path existence over the tracked tree); plant not transcribed — add one
+TestAgentsRepoMapStatesNoUnguardedExclusivityClaim	ownership	own-repomap-claim
+TestAgentsRuntimeKeysEqualTheModelAndTheSchema	ownership	allow:sweep ownership.md verdict SOUND (three-way parity sibling); plant not transcribed — add one
+TestAgentsSelfHostInventoryMatchesTheManifests	ownership	allow:sweep ownership.md verdict SOUND (glob-or-literal reach both ways); plant not transcribed — add one
+TestAgentsSourcePlaneNamesItsGuard	ownership	allow:sweep ownership.md verdict SOUND (document names the test AND the test declares the func); plant not transcribed — add one
+TestCIProfilesJobRunsTheGenesisSweep	modkit	modkit-genesis-run
+TestDesignSystemLayering	web	web-menuitem-design
+TestEveryAlpineComponentUsedIsRegistered	web	allow:sweep web.md row 12 UNDER-SCOPED (set C misses slots/ and Go-composed x-data; PLANT-Z documented the escape); the widening is unwritten, so the honest red is the widening patch plus PLANT-Z — not yet taken
+TestEveryBoostedLayoutClassSharesChrome	web	web-admin-chrome
+TestEveryChainCommentInThisPackageAgreesWithTheAssembledChain	web	web-chain-comment
+TestEveryClassARendererEmitsIsStyled	web	web-badge-xxl
+TestEveryControlHonoursAnExplicitID	web	allow:sweep web.md row 20 DECLARATION-DERIVED, knowingly: the filter is stated in its own comment and the compensating behavioural derivation is row 19, patched as web-dropdown-ids
+TestEveryExportedRendererTakesOneOptionsStruct	web	allow:sweep web.md row 17 DECLARATION-DERIVED (the *_templ.go alphabet); the escape (PLANT-J, a .go renderer) is patched as web-plantwidget on the parity guards that catch it
+TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner	ownership	own-registry-undeclared
+TestEveryGatedRouteIDExistsInThePublishedCatalog	modkit	allow:behavioural existence gate over the published catalog (route_scan_selfhost); no plant transcribed — add one
+TestEveryGoPackageDeclaresTestsOrSaysWhyNot	ownership	own-notify-tests-deleted
+TestEveryInapplicableSkipSiteIsDeclared	ownership	own-skip-site
+TestEveryInputSizeIsStyledForEveryFormControl	web	allow:sweep web.md row 15 DECLARATION-DERIVED (top-level Size field of type ui.Size); the compensating rendered-output universal is patched as web-badge-xxl on TestEveryClassARendererEmitsIsStyled
+TestEveryKindIsStyledForEveryStateFamily	web	allow:sweep web.md row 16 DECLARATION-DERIVED (literal family list); compensated by the rendered-output universal patched as web-badge-xxl
+TestEveryRendererPropagatesItsAttrs	web	web-plantwidget
+TestEverySizeIsStyledForEveryControlFamily	web	allow:sweep web.md row 14 DECLARATION-DERIVED (same filter as row 15); compensated by the rendered-output universal patched as web-badge-xxl
+TestEveryTemplRawCallSiteIsJustified	web	web-templ-raw
+TestEveryTrackedSourceFileHasAnOwner	ownership	own-orphan-file
+TestEveryUITestPayloadCompilesInItsOwnClosure	modkit	allow:fixture-closure compile gate (ui_test_payload_selfhost); no plant transcribed — add one
+TestEveryUnsafeFormInThePackageRendersTheToken	web	allow:sweep web.md row 11 UNDER-SCOPED at file granularity (PLANT-P documented the escape: one compliant form hides a second bare one); the element-scoping patch is unwritten — the honest red is that widening, not yet taken
+TestEveryVendoredFileIsDeclared	modkit	allow:vendored-bytes ownership gate (vendor_selfhost); no plant transcribed — add one
+TestNoProductionTemplateFallsBackToWindowConfirm	web	web-hxconfirm
+TestNoRendererEmitsTwoIDsOnOneElement	web	web-dropdown-ids
+TestNoTemplateHandRollsAComponentRoot	web	allow:sweep web.md row 10 UNDER-SCOPED (set B, top level only; PLANT-O documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
+TestNoTemplateHandRollsAForm	web	allow:sweep web.md row 9 UNDER-SCOPED (set B; PLANT-N documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
+TestNormalizeKindClosesTheEnum	web	allow:sweep web.md row 24 SOUND (closed together with TestEveryDeclaredEnumIsCovered's AST-derived population); plant not transcribed — add one
+TestPublishedRegistryIsConsistent	modkit	allow:catalog self-consistency gate over the published indexes; no plant transcribed — add one
+TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements	modkit	allow:bidirectional per-row agreement; both directions the residual family failed are patched (modkit-schema-conditional adds an unrecorded rule; modkit-enum-gutted guts a recorded one)
+TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs	modkit	modkit-enum-gutted
+TestPublishedSchemaAndValidatorAgreeOnRendererSignatures	modkit	allow:renderer-signature agreement between schema and validator; no plant transcribed — add one
+TestPublishedSchemaInstancesValidate	modkit	own-pcre-lookbehind
+TestPublishedSchemaPatternsArePortableAndStrict	modkit	allow:portability half is closed by the PCRE plant (own-pcre-lookbehind, on TestPublishedSchemaInstancesValidate which compiles all five documents); the strictness half's narrowing is sweep ownership.md R6, unwritten
+TestPublishedSchemasMatchModels	modkit	modkit-schema-godep
+TestRuntimeGrammarAgreesWithThePlanTimeGrammar	web	web-csp-grammar
+TestTheCommittedCoreSnapshotListsOnlyOwnedFiles	ownership	allow:sweep ownership.md section 2 SOUND (caught the UNLISTED plant beside the registry-tree guard); the same violation is patched as own-registry-undeclared on TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner
+TestTheDeclaredUIEdgesAreTheOnesTheCodeReferences	modkit	allow:ui_scan edge agreement gate; no plant transcribed — add one
+TestThePublishedCatalogClaimsEveryTargetExactlyOnce	modkit	own-catalog-collision
+TestTheRouteReferenceGateHoldsOverTheWholeTree	modkit	allow:route-reference existence over the whole tree (route_scan_selfhost); no plant transcribed — add one
+TestTheRouteReferenceGateRefusesADeletedRouteDeclaration	modkit	allow:the refusal half of the route-reference gate, with its own fixture; no plant transcribed — add one
+TestTheUIComponentGateHoldsAndRefusesARemovedEdge	modkit	allow:ui_derive gate with refusal fixture; no plant transcribed — add one
+TestUIImportsTemplAndStdlibOnly	web	web-ui-seam
+TestValidatorRequiredFieldsAreNotOptionalInTheContract	modkit	modkit-schema-conditional

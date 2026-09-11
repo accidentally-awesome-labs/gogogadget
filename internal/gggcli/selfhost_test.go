@@ -341,6 +341,7 @@ var inapplicableSkipSites = map[string]string{
 	"internal/config/config_test.go:TestResolvedValuesCarryTheirProvenance":                         "a derivative on a managed database publishes no local Postgres, so there is nothing to derive and nothing to supply",
 	"internal/config/config_test.go:derivedFor":                                                     "the shared helper those derivation cases skip through, for the same reason",
 	"internal/gggcli/profile_genesis_test.go:TestEveryShippedProfileCreatesAProjectThatIsSyncClean": "the four-profile genesis sweep needs the network and 180s; CI's `profiles` job owns it and sets GGG_GENESIS_SWEEP",
+	"internal/modkit/redproof_selfhost_test.go:TestRedProofGate":                                    "the mutation-proof gate needs minutes and a whole-tree scratch copy; GGG_REDPROOF=off disables it where that is impractical, and the corpus and inventory floors are still checked before the skip",
 }
 
 // Every InapplicableSkipMarker site must be declared, and every declaration

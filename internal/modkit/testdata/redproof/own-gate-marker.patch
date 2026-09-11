@@ -1,0 +1,19 @@
+Redproof-Patch: own-gate-marker
+Redproof-Family: ownership
+Redproof-Run: TestAccountRefusesAnInapplicableMarkerWithNoReason
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: the bare one refusable
+Redproof-Summary: The inapplicable-marker detection disabled: every skip counts as plain Skipped and an unreasoned marker is never refused (task-ar item 4b).
+diff --git a/internal/gggcli/gate.go b/internal/gggcli/gate.go
+index bf48844..a7b664b 100644
+--- a/internal/gggcli/gate.go
++++ b/internal/gggcli/gate.go
+@@ -328,7 +328,7 @@ func accountGoTest(events io.Reader, progress io.Writer) (goTestAccount, error)
+ 			// after the marker. A bare marker is a self-exemption from the
+ 			// skip refusal with no claim attached, and the whole point of
+ 			// the marker is that only the test knows the reason.
+-			if event.Test != "" && strings.Contains(event.Output, InapplicableSkipMarker) {
++			if false && event.Test != "" && strings.Contains(event.Output, InapplicableSkipMarker) {
+ 				if pkg.inapplicable == nil {
+ 					pkg.inapplicable = map[string]bool{}
+ 				}

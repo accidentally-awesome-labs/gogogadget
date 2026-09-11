@@ -100,14 +100,17 @@ assertion about THIS repository — the committed snapshot signature, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
 `canonical_module`. So a new self-hosting test goes in a `self_host` payload
-— 29 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+— 56 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
 `ggg/system/server`, because the module that owns the SUBJECT owns the
 assertion about it: the `*_selfhost_test.go` files, the bare
 `selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus
 `ci_workflow_test.go`, `e2e_ownership_test.go`, `fuzz_gate_test.go`,
 `registry_build_internal_test.go`, `external_template_test.go`,
 `shipped_profiles_test.go`, `stale_sweep_scope_test.go` and
-`profile_genesis_test.go`; anything portable stays in a normal test payload
+`profile_genesis_test.go`; the red-proof corpus is self_host data of the same
+kind — `inventory.txt` and the 25 mutation patches
+`modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
+core-only paths; anything portable stays in a normal test payload
 so generated projects keep running it. NEVER
 reach for `t.Skip` when an artifact is absent: that lets the core gate pass by
 skipping.
