@@ -4,7 +4,7 @@
     "id": "ggg/system/ci-github",
     "kind": "system",
     "name": "ci-github",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "Ci Github",
     "description": "Project scaffold ownership for ci-github.",
@@ -35,7 +35,7 @@
         "source": ".github/workflows/ci.yml",
         "target": ".github/workflows/ci.yml",
         "class": "asset",
-        "sha256": "6b583def4738faed27f71b4fbd80e912115155ca0b0f2a0c21b018468f6b7428",
+        "sha256": "83c2ee18528f2d8dfc80589ce8a0cbb7fd6cb52fb7a0657903293c59b3b3a721",
         "rewrite_module": false,
         "contract": false
       }

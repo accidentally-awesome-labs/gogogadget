@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 81,
+    "revision": 82,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -185,7 +185,7 @@
         "source": "internal/gggcli/gate.go",
         "target": "internal/gggcli/gate.go",
         "class": "go",
-        "sha256": "ca1b1d73c2d1e5b56377d7a483c5d65b7483a54c7c190e2f46013369177d652a",
+        "sha256": "01ca65a951aff2e029d3061ccdf20a17de1a0594d10e7bff503e7303a1f23025",
         "rewrite_module": true,
         "contract": false
       },
@@ -193,7 +193,7 @@
         "source": "internal/gggcli/gate_test.go",
         "target": "internal/gggcli/gate_test.go",
         "class": "test",
-        "sha256": "9e032b6e474f1c86ab9dda509c8877192bd1424a9d41e5fd0fc519e523fd507e",
+        "sha256": "da81329480b169a152ed5d24b21bd0970dc1e6c667a64f6aead1a959b80fa8b7",
         "rewrite_module": true,
         "contract": false
       },
@@ -379,7 +379,7 @@
         "source": "internal/gggcli/tasks.go",
         "target": "internal/gggcli/tasks.go",
         "class": "go",
-        "sha256": "c32750328b631dc92c496841114fed89c02d47ad17fab51278906bc083255bf6",
+        "sha256": "0db09aa836209d6ae3c3642a3a55e2caa3ddc229cfbaa5bcd64e8b4b5fbf7226",
         "rewrite_module": true,
         "contract": true
       },
@@ -479,7 +479,7 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "af6de5e8d717116b90b03903f1c75dbf959ddc7f53cd4e893334691f7b287aa8",
+        "sha256": "55bb304309c488576d83da04cffc525caf82ad28734d0204dd7c3f3544181572",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -1215,7 +1215,7 @@
         "source": "internal/modkit/testdata/redproof/inventory.txt",
         "target": "internal/modkit/testdata/redproof/inventory.txt",
         "class": "test",
-        "sha256": "d975a7dccd3f64e61161e8828cf2793bd88a441e2bd5c47ec6c1dd1ee85e998c",
+        "sha256": "91fdf83162b19b3f739df1b708683c816a6bf66ccbb0275b095b154d734c2809",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
