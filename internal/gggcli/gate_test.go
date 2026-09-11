@@ -3,10 +3,13 @@ package gggcli
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -531,3 +534,359 @@ func (r *generatingRunner) RunOutput(ctx context.Context, root string, argv []st
 }
 
 func (r *generatingRunner) Progress() io.Writer { return io.Discard }
+
+// The totals line's shape is muscle memory — CI, the loop docs and the
+// operator's eye all read `tests: N passed, M skipped, …`. The budget line
+// after it is new: the slowest three packages, from the elapsed times the
+// event stream already carried, so the next conversation about whether a gate
+// is too expensive starts from a printed number instead of a guess.
+//
+// Mutation: print the three alphabetically, take the fastest, drop the line,
+// or let it wander from directly after the totals, and this fails.
+func TestSummaryNamesTheSlowestPackages(t *testing.T) {
+	stream := events(
+		event{Action: "start", Package: "example.test/internal/api"},
+		event{Action: "pass", Package: "example.test/internal/api", Test: "TestRoutes"},
+		event{Action: "pass", Package: "example.test/internal/api", Elapsed: 3.3},
+		event{Action: "start", Package: "example.test/internal/jobs"},
+		event{Action: "pass", Package: "example.test/internal/jobs", Test: "TestWorker"},
+		event{Action: "pass", Package: "example.test/internal/jobs", Elapsed: 37.6},
+		event{Action: "start", Package: "example.test/internal/modkit"},
+		event{Action: "pass", Package: "example.test/internal/modkit", Test: "TestResolve"},
+		event{Action: "pass", Package: "example.test/internal/modkit", Elapsed: 136.1},
+		event{Action: "start", Package: "example.test/internal/web"},
+		event{Action: "pass", Package: "example.test/internal/web", Test: "TestHandlers"},
+		event{Action: "pass", Package: "example.test/internal/web", Elapsed: 160.4},
+	)
+	account, err := accountGoTest(strings.NewReader(stream), io.Discard)
+	if err != nil {
+		t.Fatalf("accounting the event stream: %v", err)
+	}
+	for _, withPackages := range []bool{true, false} {
+		summary := account.summary(withPackages)
+		lines := strings.Split(strings.TrimRight(summary, "\n"), "\n")
+		if len(lines) < 2 {
+			t.Fatalf("summary(withPackages=%v) has %d line(s); the budget line is missing:\n%s", withPackages, len(lines), summary)
+		}
+		// The totals line keeps the shape everything reads.
+		totals := regexp.MustCompile(`^tests: [0-9]+ passed, [0-9]+ skipped, [0-9]+ inapplicable, [0-9]+ failed across [0-9]+ packages$`)
+		if !totals.MatchString(lines[0]) {
+			t.Fatalf("the totals line changed shape: %q", lines[0])
+		}
+		// The budget line is directly after it, worst first, and the fourth
+		// package stays off it.
+		if want := "slowest web 160s modkit 136s jobs 38s"; lines[1] != want {
+			t.Fatalf("the budget line is %q, want %q", lines[1], want)
+		}
+	}
+}
+
+// The genesis-sweep trigger, driven both ways plus the two degradations. The
+// incident it closes: v0.20.0's first push failed CI on a
+// derivative-compile break because the only gate that would have caught it —
+// the four-profile genesis sweep — was opt-in and nothing local said a
+// payload diff had made it mandatory.
+func TestNoUnsweptShippedPayloadDiffPassesCheck(t *testing.T) {
+	t.Run("a source-only diff passes", func(t *testing.T) {
+		root, check, progress := newSweptRepo(t)
+		writeTestFile(t, root, "internal/probe/probe_selfhost_test.go", []byte("package probe\n\n// edited: an assertion about this repository, which never ships\n"))
+		if err := check(context.Background(), root); err != nil {
+			t.Fatalf("a self_host payload diff was refused:\n%v", err)
+		}
+		writeTestFile(t, root, "docs/notes.md", []byte("unowned project notes\n"))
+		if err := check(context.Background(), root); err != nil {
+			t.Fatalf("an unowned-file diff was refused:\n%v", err)
+		}
+		if reason := progress.String(); strings.Contains(reason, "skipped") {
+			t.Fatalf("a runnable trigger reported a skip it had no reason to:\n%s", reason)
+		}
+	})
+
+	t.Run("a shipped-payload diff refuses, naming the file and the remedy", func(t *testing.T) {
+		// The ack env completes a real check, and an ambient one must not
+		// hollow out this proof: `GGG_GENESIS_SWEEP=1 make check` runs the
+		// suite under the env, and the refusal still has to be exercisable
+		// there.
+		t.Setenv(genesisSweepEnv, "")
+		root, check, _ := newSweptRepo(t)
+		writeTestFile(t, root, "internal/probe/probe.go", []byte("package probe\n\nconst Edited = 2\n"))
+		err := check(context.Background(), root)
+		if err == nil {
+			t.Fatal("a diff that edits the shipped payload of an installed module passed the trigger")
+		}
+		for _, want := range []string{
+			"internal/probe/probe.go",
+			"payload of ggg/system/probe",
+			genesisSweepRemedy,
+		} {
+			if !strings.Contains(err.Error(), want) {
+				t.Fatalf("the refusal does not name %q:\n%v", want, err)
+			}
+		}
+	})
+
+	t.Run("a module-manifest diff refuses as a declaration change", func(t *testing.T) {
+		t.Setenv(genesisSweepEnv, "")
+		root, check, _ := newSweptRepo(t)
+		manifest := sweepFixtureManifest()
+		manifest.Revision = 2
+		document, marshalErr := json.Marshal(modkit.ModuleDocument{Schema: 2, Module: manifest})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		writeTestFile(t, root, "registry/modules/system/probe/module.json", document)
+		err := check(context.Background(), root)
+		if err == nil {
+			t.Fatal("a diff that edits a module manifest passed the trigger")
+		}
+		if !strings.Contains(err.Error(), "declaration of ggg/system/probe") {
+			t.Fatalf("the refusal does not name the manifest as a declaration change:\n%v", err)
+		}
+	})
+
+	t.Run("a profile declaration diff refuses, though no profile is installed", func(t *testing.T) {
+		t.Setenv(genesisSweepEnv, "")
+		root, check, _ := newSweptRepo(t)
+		profile := sweepFixtureProfile()
+		profile.Revision = 2
+		document, marshalErr := json.Marshal(modkit.ProfileDocument{Schema: 2, Profile: profile})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		writeTestFile(t, root, "registry/profiles/probe.json", document)
+		err := check(context.Background(), root)
+		if err == nil {
+			t.Fatal("a diff that edits a profile declaration passed the trigger; the sweep walks catalog.Profiles, and three of the four shipped profiles are installed by nobody")
+		}
+		if !strings.Contains(err.Error(), "registry/profiles/probe.json") {
+			t.Fatalf("the refusal does not name the profile declaration:\n%v", err)
+		}
+	})
+
+	t.Run("GGG_GENESIS_SWEEP=1 runs the sweep instead of refusing", func(t *testing.T) {
+		t.Setenv(genesisSweepEnv, "1")
+		root, check, progress := newSweptRepo(t)
+		writeTestFile(t, root, "internal/probe/probe.go", []byte("package probe\n\nconst Edited = 2\n"))
+		if err := check(context.Background(), root); err != nil {
+			t.Fatalf("the ack env is set, so the sweep is this run's concern, but the trigger refused:\n%v", err)
+		}
+		if note := progress.String(); !strings.Contains(note, "runs inside this check's accounted suite") {
+			t.Fatalf("the ack path printed no statement of what it is doing instead:\n%s", note)
+		}
+	})
+
+	t.Run("no origin degrades to a stated skip", func(t *testing.T) {
+		t.Setenv(genesisSweepEnv, "")
+		root := t.TempDir()
+		writeSweepFixture(t, root)
+		sweepGit(t, root, "init", "-b", "main")
+		sweepGit(t, root, "add", "-A")
+		sweepGit(t, root, "-c", "user.email=probe@example.test", "-c", "user.name=Probe", "commit", "-m", "base")
+		writeTestFile(t, root, "internal/probe/probe.go", []byte("package probe\n\nconst Edited = 2\n"))
+		controller, progress := sweepController(t, root)
+		if err := controller.refuseUnsweptShippedPayloadDiff(context.Background(), root); err != nil {
+			t.Fatalf("a tree with no origin was refused — the skip exists so a fresh clone or a closed tree is never blocked:\n%v", err)
+		}
+		if reason := progress.String(); !strings.Contains(reason, "genesis sweep trigger skipped: no origin/main merge-base") {
+			t.Fatalf("the skip did not state its reason:\n%s", reason)
+		}
+	})
+
+	t.Run("a tree that publishes no catalog skips, stating it", func(t *testing.T) {
+		root := t.TempDir()
+		lock, err := modkit.MarshalLock(modkit.Lock{
+			Schema: 2, RegistryCommit: strings.Repeat("a", 40),
+			Order:   []string{sweepFixtureManifest().ID},
+			Modules: []modkit.LockedModule{sweepLockedModule(sweepFixtureManifest())},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeTestFile(t, root, modkit.LockFileName, lock)
+		_, skipped, derivationErr := shippedPathsForSweep(root)
+		if derivationErr != nil {
+			t.Fatalf("a derivative-shaped tree errored instead of skipping: %v", derivationErr)
+		}
+		if !strings.Contains(skipped, "publishes no registry") {
+			t.Fatalf("the skip reason %q does not say the tree publishes no registry", skipped)
+		}
+	})
+
+	t.Run("a collapsed derivation refuses rather than passing vacuously", func(t *testing.T) {
+		root := t.TempDir()
+		writeSweepFixture(t, root)
+		// The manifest still declares its payloads, but every one of them is
+		// self_host — the derivation runs, the lock installs modules, and the
+		// shipped set comes back empty. A trigger diffing against nothing is
+		// green over every payload diff, which is the collapse this floor
+		// refuses.
+		manifest := sweepFixtureManifest()
+		for i := range manifest.Files {
+			manifest.Files[i].SelfHost = true
+			manifest.Files[i].Class = modkit.FileClassTest
+		}
+		lock, err := modkit.MarshalLock(modkit.Lock{
+			Schema: 2, RegistryCommit: strings.Repeat("a", 40),
+			Order:   []string{manifest.ID},
+			Modules: []modkit.LockedModule{sweepLockedModule(manifest)},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeTestFile(t, root, modkit.LockFileName, lock)
+		_, _, derivationErr := shippedPathsForSweep(root)
+		if derivationErr == nil {
+			t.Fatal("a derivation with zero shipped payloads passed; the floor exists so a collapsed set can never be vacuously green")
+		}
+		if !strings.Contains(derivationErr.Error(), "collapsed") {
+			t.Fatalf("the refusal does not name the collapse:\n%v", derivationErr)
+		}
+	})
+}
+
+// sweepFixtureDigest is any valid hex payload digest; the trigger never reads
+// payload bytes, only the paths the manifest declares.
+const sweepFixtureDigest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+// sweepFixtureManifest is one installed module with two payloads: one that
+// ships to derivatives and one that asserts about the publishing repository.
+func sweepFixtureManifest() modkit.Manifest {
+	return modkit.Manifest{
+		ID: "ggg/system/probe", Kind: modkit.ModuleSystem, Name: "probe",
+		Revision: 1, Contract: 1, Title: "Probe", Description: "Probe module.",
+		Requires:     []modkit.Requirement{},
+		Dependencies: modkit.Dependencies{Go: []modkit.GoDependency{}, Tools: []modkit.ToolArtifact{}, Containers: []modkit.ContainerDependency{}},
+		Files: []modkit.ManifestFile{
+			{Source: "internal/probe/probe.go", Target: "internal/probe/probe.go", Class: modkit.FileClassGo, SHA256: sweepFixtureDigest, RewriteModule: true},
+			{Source: "internal/probe/probe_selfhost_test.go", Target: "internal/probe/probe_selfhost_test.go", Class: modkit.FileClassTest, SHA256: sweepFixtureDigest, SelfHost: true},
+		},
+		Claims:        modkit.NamespaceClaims{},
+		Runtime:       modkit.RuntimeContributions{},
+		Migrations:    []modkit.ManifestMigration{},
+		Environment:   []modkit.EnvironmentVariable{},
+		Docs:          []modkit.DocumentationRef{},
+		Tests:         modkit.TestMetadata{},
+		Data:          []modkit.DataDeclaration{},
+		RemovalPolicy: modkit.RemovalFree,
+	}
+}
+
+// sweepFixtureProfile is a catalog profile nobody installs — the reason the
+// declaration set comes from the catalog and not the lock.
+func sweepFixtureProfile() modkit.Profile {
+	return modkit.Profile{
+		ID: "ggg/profile/probe", Kind: modkit.CatalogProfile, Name: "probe",
+		Revision: 1, Contract: 1, Title: "Probe", Description: "Probe profile.",
+		Members: []string{sweepFixtureManifest().ID}, RequiredProviderSlots: []string{},
+		ProviderDefaults: map[string]modkit.ProviderSelections{},
+	}
+}
+
+// sweepLockedModule locks one manifest with a file row per payload target,
+// the shape ParseLock requires: every manifest file target covered exactly.
+func sweepLockedModule(manifest modkit.Manifest) modkit.LockedModule {
+	files := make([]modkit.LockedFile, 0, len(manifest.Files))
+	for _, file := range manifest.Files {
+		files = append(files, modkit.LockedFile{
+			Path: file.Target, Source: file.Source,
+			BaseSHA256: sweepFixtureDigest, LocalSHA256: sweepFixtureDigest,
+			State: modkit.FileClean,
+		})
+	}
+	return modkit.LockedModule{
+		ID: manifest.ID, Revision: 1, Contract: 1,
+		RegistryNamespace: "ggg", SourceCommit: strings.Repeat("b", 40), SnapshotSHA256: strings.Repeat("c", 64),
+		Reason: "explicit", RequiredBy: []string{},
+		Files: files, Migrations: []modkit.LockedMigration{}, Manifest: manifest,
+	}
+}
+
+// writeSweepFixture lays down the smallest publishing repository the trigger
+// exercises: the payload bytes the manifest declares, a loadable catalog
+// (registry.json, all six indexes, one module document, one profile
+// document), and the lock that installs the module. The lock is what the
+// payload set derives from; the catalog is what the declaration set derives
+// from.
+func writeSweepFixture(t *testing.T, root string) {
+	t.Helper()
+	writeTestFile(t, root, "internal/probe/probe.go", []byte("package probe\n\nconst Probe = 1\n"))
+	writeTestFile(t, root, "internal/probe/probe_selfhost_test.go", []byte("package probe\n\n// an assertion about this repository only\n"))
+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"example.test/probe","includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
+	for _, index := range []struct {
+		path  string
+		kind  string
+		items string
+	}{
+		{"registry/elements.json", "element", "[]"},
+		{"registry/components.json", "component", "[]"},
+		{"registry/pages.json", "page", "[]"},
+		{"registry/workflows.json", "workflow", "[]"},
+		{"registry/systems.json", "system", `["registry/modules/system/probe/module.json"]`},
+		{"registry/profiles.json", "profile", `["registry/profiles/probe.json"]`},
+	} {
+		writeTestFile(t, root, index.path, []byte(fmt.Sprintf(`{"schema":2,"kind":%q,"items":%s}`, index.kind, index.items)))
+	}
+	moduleDocument, err := json.Marshal(modkit.ModuleDocument{Schema: 2, Module: sweepFixtureManifest()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, "registry/modules/system/probe/module.json", moduleDocument)
+	profileDocument, err := json.Marshal(modkit.ProfileDocument{Schema: 2, Profile: sweepFixtureProfile()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, "registry/profiles/probe.json", profileDocument)
+
+	manifest := sweepFixtureManifest()
+	lock, err := modkit.MarshalLock(modkit.Lock{
+		Schema: 2, RegistryCommit: strings.Repeat("a", 40),
+		Order:   []string{manifest.ID},
+		Modules: []modkit.LockedModule{sweepLockedModule(manifest)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, modkit.LockFileName, lock)
+}
+
+// sweepGit runs git in dir and fails the test on any nonzero exit, because a
+// fixture that silently failed to commit proves nothing about the diff.
+func sweepGit(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	command := exec.Command("git", args...)
+	command.Dir = dir
+	command.Env = append(os.Environ(),
+		"GIT_AUTHOR_NAME=Probe", "GIT_AUTHOR_EMAIL=probe@example.test",
+		"GIT_COMMITTER_NAME=Probe", "GIT_COMMITTER_EMAIL=probe@example.test")
+	if out, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
+	}
+}
+
+// sweepController builds a controller whose task runner captures the progress
+// stream, so a skip's stated reason and a note's wording are assertable.
+func sweepController(t *testing.T, root string) (*Controller, *bytes.Buffer) {
+	t.Helper()
+	progress := &bytes.Buffer{}
+	return NewController(ControllerOptions{Root: root, TaskRunner: osTaskRunner{out: io.Discard, err: progress}}), progress
+}
+
+// newSweptRepo is a committed fixture repository with an origin pushed, so
+// the merge-base diff is real: the shipped-payload and declaration subtests
+// exercise actual `git diff --name-only` output, not a hand-fed list.
+func newSweptRepo(t *testing.T) (string, func(context.Context, string) error, *bytes.Buffer) {
+	t.Helper()
+	root := t.TempDir()
+	writeSweepFixture(t, root)
+	sweepGit(t, root, "init", "-b", "main")
+	sweepGit(t, root, "add", "-A")
+	sweepGit(t, root, "commit", "-m", "base")
+	origin := filepath.Join(t.TempDir(), "origin.git")
+	sweepGit(t, root, "init", "--bare", "-b", "main", origin)
+	sweepGit(t, root, "remote", "add", "origin", origin)
+	sweepGit(t, root, "push", "-u", "origin", "main")
+	sweepGit(t, root, "fetch", "origin")
+	controller, progress := sweepController(t, root)
+	return root, controller.refuseUnsweptShippedPayloadDiff, progress
+}

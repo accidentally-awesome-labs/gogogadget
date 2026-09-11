@@ -428,6 +428,12 @@ func (a goTestAccount) summary(withPackages bool) string {
 		out += fmt.Sprintf(", %d with no test files", len(a.Untested))
 	}
 	out += "\n"
+	// The budget line. The totals say what the suite did; this says what it
+	// cost, from the same event stream, so every future conversation about
+	// whether a gate is too slow starts from a printed number instead of a
+	// guess. It prints on every run — a refusal needs its budget data as much
+	// as a pass does.
+	out += a.slowestLine()
 	if !withPackages {
 		return out
 	}
@@ -440,6 +446,40 @@ func (a goTestAccount) summary(withPackages bool) string {
 		return out
 	}
 	return out + a.skipBreakdown()
+}
+
+// slowestLine names the three packages that took the longest, worst first, in
+// the shape `slowest web 160s modkit 136s jobs 37s`. The package's last path
+// element is enough to recognise it at a glance; the per-package lines above
+// already carry the full import path for anyone who needs it.
+func (a goTestAccount) slowestLine() string {
+	if len(a.Packages) == 0 {
+		return ""
+	}
+	slowest := append([]*packageAccount(nil), a.Packages...)
+	sort.SliceStable(slowest, func(i, j int) bool {
+		if slowest[i].Elapsed != slowest[j].Elapsed {
+			return slowest[i].Elapsed > slowest[j].Elapsed
+		}
+		return slowest[i].Name < slowest[j].Name
+	})
+	if len(slowest) > 3 {
+		slowest = slowest[:3]
+	}
+	parts := make([]string, 0, len(slowest))
+	for _, pkg := range slowest {
+		parts = append(parts, fmt.Sprintf("%s %.0fs", shortPackage(pkg.Name), pkg.Elapsed))
+	}
+	return "slowest " + strings.Join(parts, " ") + "\n"
+}
+
+// shortPackage is the recognisable tail of an import path:
+// github.com/gogogadget/gogogadget/internal/web -> web.
+func shortPackage(name string) string {
+	if at := strings.LastIndex(name, "/"); at >= 0 {
+		return name[at+1:]
+	}
+	return name
 }
 
 // unreasonedMarkerRefusal names every test that exempted itself from the skip
@@ -625,4 +665,203 @@ func generatedFrom(path string) string {
 		return " (from " + stem + ".templ)"
 	}
 	return ""
+}
+
+// ------------------------------------------------- the genesis-sweep trigger ----
+
+// genesisSweepEnv is both halves of the sweep's opt-in: CI's `profiles` job
+// sets it to un-skip the four-profile genesis sweep inside a raw `go test`,
+// and `ggg check` treats it as the operator's statement that the sweep is
+// this run's concern — the refusal below does not fire, and because the env
+// reaches the accounted suite, the sweep runs inside `ggg check` itself.
+const genesisSweepEnv = "GGG_GENESIS_SWEEP"
+
+// genesisSweepTest is the sweep's `-run` value. The genesis trigger and the
+// CI `profiles` job both name it; ci_workflow_test.go pins the CI half.
+const genesisSweepTest = "TestEveryShippedProfileCreatesAProjectThatIsSyncClean"
+
+// genesisSweepRemedy is the exact command a refusal names. It is one line an
+// operator can paste, carrying the env and the -count=1 that a cached verdict
+// would hollow out.
+const genesisSweepRemedy = genesisSweepEnv + "=1 go test ./internal/gggcli -run " + genesisSweepTest + " -count=1"
+
+// shippedPathSet is what a working-tree diff is compared against: every path
+// whose bytes reach a derivative.
+type shippedPathSet struct {
+	// payloads maps each non-self_host payload an installed module declares
+	// to the module that ships it. A self_host payload asserts about THIS
+	// repository and never installs anywhere, so it is not in the set.
+	payloads map[string]string
+	// declarations maps every module manifest and profile declaration the
+	// catalog publishes to the id it belongs to. The sweep walks
+	// catalog.Profiles and the catalog loader parses every manifest, so a
+	// declaration edit can break genesis without shipping a single payload
+	// byte — profiles in particular are never locked, and three of the four
+	// shipped ones are not installed here.
+	declarations map[string]string
+}
+
+// shippedPathsForSweep derives the shipped-path set from the lock and the
+// catalog, never from a hand-kept list. The second return is a skip reason:
+// the environments the trigger cannot run in (no lock, no catalog — every
+// derivative) are named and passed, not silently passed.
+func shippedPathsForSweep(root string) (set shippedPathSet, skipped string, err error) {
+	lock, hasLock, lockErr := readProjectLock(root)
+	if lockErr != nil {
+		return shippedPathSet{}, "the lock would not parse (" + errOneLine(lockErr) + "); the sync step will name the cause", nil
+	}
+	if !hasLock || len(lock.Modules) == 0 {
+		return shippedPathSet{}, "no lock recording installed modules, so nothing ships from this tree (a fresh genesis starts here; `ggg setup` is the next command)", nil
+	}
+	set = shippedPathSet{payloads: map[string]string{}, declarations: map[string]string{}}
+	for _, locked := range lock.Modules {
+		for _, file := range locked.Manifest.Files {
+			if file.SelfHost || file.Source == "" {
+				continue
+			}
+			set.payloads[file.Source] = locked.Manifest.ID
+		}
+	}
+	catalog, catalogErr := modkit.LoadCatalog(os.DirFS(root))
+	if catalogErr != nil {
+		// A derivative resolves a remote registry and has no catalog tree at
+		// its root at all, so this is the normal derivative path, not a
+		// failure: the sweep's own fixtures skip [inapplicable] there too.
+		return shippedPathSet{}, "the catalog would not load (" + errOneLine(catalogErr) + "); a tree that publishes no registry has nothing shipped to sweep", nil
+	}
+	for _, module := range catalog.Modules {
+		set.declarations[moduleManifestPath(module)] = module.ID
+	}
+	for _, profile := range catalog.Profiles {
+		set.declarations["registry/profiles/"+profile.Name+".json"] = profile.ID
+	}
+	// The floor, and it is this file's own thesis again: a derivation that
+	// silently produced an empty or partial set would make the trigger
+	// vacuously green over every payload diff — the exact shape of failure
+	// this gate exists to close. Every module contributes exactly one
+	// declaration path and at least one shipped payload (measured today:
+	// 293 locked modules -> 1,297 payload paths and 297 declarations), so
+	// counts below the module count mean the derivation collapsed, not that
+	// the registry shrank.
+	if len(set.declarations) < len(lock.Modules) {
+		return shippedPathSet{}, "", collapsedShippedPaths(len(lock.Modules), len(set.payloads), len(set.declarations))
+	}
+	if len(set.payloads) < len(lock.Modules) {
+		return shippedPathSet{}, "", collapsedShippedPaths(len(lock.Modules), len(set.payloads), len(set.declarations))
+	}
+	return set, "", nil
+}
+
+func collapsedShippedPaths(modules, payloads, declarations int) error {
+	return refusalError(fmt.Errorf(
+		"the shipped-path derivation collapsed: %d locked modules produced %d payload path(s) and %d declaration path(s). "+
+			"A trigger diffing against an empty or partial set is vacuously green over every payload diff — "+
+			"fix the derivation before trusting any `ggg check` that ran through it", modules, payloads, declarations))
+}
+
+// moduleManifestPath is where a catalog module's declaration lives, per the
+// registry's own layout. Profiles are not a module kind — they publish
+// outside registry/modules/ as registry/profiles/<name>.json and are added
+// beside this from catalog.Profiles.
+func moduleManifestPath(module modkit.Manifest) string {
+	return "registry/modules/" + string(module.Kind) + "/" + module.Name + "/module.json"
+}
+
+// refuseUnsweptShippedPayloadDiff is `ggg check`'s third honesty rule. The
+// v0.20.0 incident: a diff that touched shipped test payloads broke
+// derivative compilation, and the only gate that would have caught it — the
+// four-profile genesis sweep — was opt-in, so the first CI run of the release
+// was the first time anyone created a project from the changed registry.
+//
+// It refuses rather than auto-running the sweep (the sweep needs the network
+// and ~93 s; a refusal is cheaper, it teaches, and it names the files), and
+// the refusal is lifted by the same env var that runs the sweep:
+// `GGG_GENESIS_SWEEP=1 ggg check` executes the sweep inside the accounted
+// suite instead of refusing.
+func (c *Controller) refuseUnsweptShippedPayloadDiff(ctx context.Context, root string) error {
+	progress := taskProgress(c.runner())
+	if os.Getenv(genesisSweepEnv) == "1" {
+		writeString(progress, "genesis sweep: "+genesisSweepEnv+"=1 is set, so the sweep runs inside this check's accounted suite instead of being refused\n")
+		return nil
+	}
+	runner, ok := c.runner().(TaskOutputRunner)
+	if !ok {
+		writeString(progress, "genesis sweep trigger skipped: the task runner cannot read git output, so the diff would be a guess\n")
+		return nil
+	}
+	set, skipped, err := shippedPathsForSweep(root)
+	if err != nil {
+		return err
+	}
+	if skipped != "" {
+		writeString(progress, "genesis sweep trigger skipped: "+skipped+"\n")
+		return nil
+	}
+	changed, skip := changedAgainstOriginMain(ctx, runner, root)
+	if skip != "" {
+		writeString(progress, skip+"\n")
+		return nil
+	}
+	var hits []string
+	for _, path := range changed {
+		if module, shipped := set.payloads[path]; shipped {
+			hits = append(hits, path+"  (payload of "+module+")")
+		} else if owner, declared := set.declarations[path]; declared {
+			hits = append(hits, path+"  (declaration of "+owner+")")
+		}
+	}
+	if len(hits) == 0 {
+		return nil
+	}
+	sort.Strings(hits)
+	message := fmt.Sprintf(
+		"this diff changes %d path(s) whose bytes reach derivatives, and nothing has proved the shipped profiles still create a sync-clean project:\n",
+		len(hits))
+	for _, hit := range hits {
+		message += "  " + hit + "\n"
+	}
+	message += "The genesis sweep is opt-in because it needs the network and ~93 s, which is how a derivative-compile break reached a green local gate in v0.20.0. Run it before pushing:\n" +
+		"  " + genesisSweepRemedy + "\n" +
+		"The refusal stands on every re-run of `ggg check` over this diff by design. It is lifted by " + genesisSweepEnv + "=1, which runs the sweep inside the accounted suite instead of refusing."
+	return refusalError(fmt.Errorf("%s", message))
+}
+
+// changedAgainstOriginMain lists the paths the working tree changed since the
+// merge-base with origin/main. The second return is a skip reason: no origin
+// (fresh clone, closed tree), no git at all (a derivative that never init'ed
+// one), or a diff that could not be read all degrade to a stated skip rather
+// than a guess — the same rule the accounted suite applies to a runner that
+// cannot read `go test -json`.
+func changedAgainstOriginMain(ctx context.Context, runner TaskOutputRunner, root string) ([]string, string) {
+	var base strings.Builder
+	if err := runner.RunOutput(ctx, root, []string{"git", "merge-base", "HEAD", "origin/main"}, nil, &base); err != nil {
+		return nil, "genesis sweep trigger skipped: no origin/main merge-base to diff against — a fresh clone, a closed tree, or no git (" + errOneLine(err) + ")"
+	}
+	var diff strings.Builder
+	if err := runner.RunOutput(ctx, root, []string{"git", "diff", "--name-only", strings.TrimSpace(base.String())}, nil, &diff); err != nil {
+		return nil, "genesis sweep trigger skipped: the diff against the merge-base could not be read (" + errOneLine(err) + ")"
+	}
+	var paths []string
+	for line := range strings.SplitSeq(diff.String(), "\n") {
+		if line = strings.TrimSpace(line); line != "" {
+			paths = append(paths, line)
+		}
+	}
+	return paths, ""
+}
+
+// taskProgress is where a gate's own notes belong: the same stream the
+// accounted summary prints to, so one run reads as one voice.
+func taskProgress(runner TaskRunner) io.Writer {
+	capable, ok := runner.(TaskOutputRunner)
+	if !ok {
+		return nil
+	}
+	return capable.Progress()
+}
+
+// errOneLine flattens an error whose text carries a child's indented output
+// tail into a single line, for skip notes that must not bury their own reason.
+func errOneLine(err error) string {
+	return strings.Join(strings.Fields(err.Error()), " ")
 }

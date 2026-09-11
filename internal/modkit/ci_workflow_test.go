@@ -113,35 +113,34 @@ var ciSuiteCommandPrefixes = [][]string{
 // out to be `integration` under another name.
 var ciSuiteModes = []string{"integration", "all"}
 
-// The `test` job's suite step must go through the CLI, because a bare
-// `go test` cannot report what it did. `go test` never summarises skips: a
-// package whose every fixture skipped prints the same `ok` as one that ran,
-// and that is how an entire integration layer skipped against a torn-down
-// stack under four green `ok` lines. CI is the one place a skip cannot be
-// legitimate — this job's own env block names TEST_DATABASE_URL and its
-// service container answers on it — and `ggg test` is what reads the event
-// stream and refuses a nonzero skip count.
+// assertCIJobRunsTheAccountedSuite checks everything a suite step must be:
+// through the CLI (a bare `go test` cannot report what it did — `go test`
+// never summarises skips, so a package whose every fixture skipped prints the
+// same `ok` as one that ran, and that is how an entire integration layer
+// skipped against a torn-down stack under four green `ok` lines), exactly
+// once, after `make setup`, unexempted and unwrapped. CI is the one place a
+// skip cannot be legitimate — the job's own env block names
+// TEST_DATABASE_URL and its service container answers on it — and `ggg test`
+// is what reads the event stream and refuses a nonzero skip count.
 //
-// The command is matched as a COMMAND, not by substring, which is the
-// standard isMakeSetupStep sets in this file: `run: echo "ggg test
-// integration --race --cover"` satisfies a substring match while running no
-// suite, and a gate defeated by an echo is the exact shape this whole change
-// exists to close. The race detector and the coverage flag are both pinned,
-// or closing one hole opens a worse one, and the mode is pinned because
-// `ggg test smoke` would otherwise pass.
+// The command is matched as a COMMAND, not by substring, the standard
+// isMakeSetupStep sets in this file: `run: echo "ggg test integration
+// --race"` satisfies a substring match while running no suite, and a gate
+// defeated by an echo is the exact shape this whole change exists to close.
 //
-// Mutation: put `go test -race -cover ./...` back, wrap the command in an
-// echo, drop --cover, or change the mode to smoke, and this fails naming the
-// command it found.
-func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
-	root, err := canonicalProjectRoot(specRepoRoot(t))
-	if err != nil {
-		t.Fatalf("resolve repository root: %v", err)
-	}
-	workflow, _ := readCIWorkflow(t, root)
-	job, ok := workflow.Jobs["test"]
+// want names flags the command must carry; refuse names flags it must not —
+// the split is the budget, and either direction drifting back is a failure
+// that names the command it found.
+func assertCIJobRunsTheAccountedSuite(t *testing.T, workflow ciWorkflow, jobName string, want, refuse []string) {
+	t.Helper()
+	job, ok := workflow.Jobs[jobName]
 	if !ok {
-		t.Fatal("the workflow has no test job")
+		t.Fatalf("the workflow has no %s job", jobName)
+	}
+	// The suite refuses skips in CI, so the job has to provide what the
+	// database fixtures skip for, or it fails over services it never started.
+	if job.Env["TEST_DATABASE_URL"] == "" {
+		t.Fatalf("job %s names no TEST_DATABASE_URL, so every database fixture skips and the accounted suite refuses the run it was asked to gate", jobName)
 	}
 
 	var found []string
@@ -165,10 +164,10 @@ func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 				continue
 			}
 			if step.If != "" || step.ContinueOnError {
-				t.Fatalf("the suite step is exempt from failing the build (if: %q, continue-on-error: %v)", step.If, step.ContinueOnError)
+				t.Fatalf("%s: the suite step is exempt from failing the build (if: %q, continue-on-error: %v)", jobName, step.If, step.ContinueOnError)
 			}
 			if strings.ContainsAny(strings.TrimSpace(step.Run), "\n|;&>") || strings.Contains(step.Run, "set +e") {
-				t.Fatalf("the suite step wraps the command in shell that can hide its exit status: %q", step.Run)
+				t.Fatalf("%s: the suite step wraps the command in shell that can hide its exit status: %q", jobName, step.Run)
 			}
 			found = append(found, command)
 			suiteIndex = index
@@ -179,22 +178,77 @@ func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	}
 
 	if len(found) != 1 {
-		t.Fatalf("the test job runs the suite %d times: %q; want exactly one accounted run", len(found), found)
+		t.Fatalf("job %s runs the suite %d times: %q; want exactly one accounted run", jobName, len(found), found)
 	}
 	if len(accounted) != 1 {
-		t.Fatalf("the test job runs %q, which is not an accounted invocation: a bare `go test` cannot report a skip and so cannot refuse one", found[0])
+		t.Fatalf("job %s runs %q, which is not an accounted invocation: a bare `go test` cannot report a skip and so cannot refuse one", jobName, found[0])
 	}
 	if setupIndex < 0 || setupIndex > suiteIndex {
-		t.Fatalf("the test job runs the suite before `make setup`, so bin/ggg does not exist yet")
+		t.Fatalf("job %s runs the suite before `make setup`, so bin/ggg does not exist yet", jobName)
 	}
 	args := accounted[0]
 	if len(args) == 0 || !slices.Contains(ciSuiteModes, args[0]) {
-		t.Fatalf("the suite command %q names mode %q, want one of %v: the other layers run no Go test", found[0], args, ciSuiteModes)
+		t.Fatalf("%s: the suite command %q names mode %q, want one of %v: the other layers run no Go test", jobName, found[0], args, ciSuiteModes)
 	}
-	for _, want := range []string{"--race", "--cover"} {
-		if !slices.Contains(args, want) {
-			t.Fatalf("the suite command %q dropped %s", found[0], want)
+	for _, flag := range want {
+		if !slices.Contains(args, flag) {
+			t.Fatalf("%s: the suite command %q dropped %s", jobName, found[0], flag)
 		}
+	}
+	for _, flag := range refuse {
+		if slices.Contains(args, flag) {
+			t.Fatalf("%s: the suite command %q carries %s, which belongs to the other half of the split — re-merging the two instrumentations puts their multiplied cost back on one job's critical path", jobName, found[0], flag)
+		}
+	}
+}
+
+// The `test` job's suite runs under race. Race is the semantic gate — the
+// detector that proves the concurrent paths actually work — so it owns the
+// job named `test`, and coverage runs beside it in `cover` instead of after
+// it: the single `--race --cover` step this replaced was 663 s of an 883 s
+// job, and the green wall waited on both instrumentations for one job's
+// worth of either signal.
+//
+// Mutation: put `go test -race ./...` back, wrap the command in an echo, drop
+// --race, re-add --cover, or change the mode to smoke, and this fails naming
+// the command it found.
+func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	workflow, _ := readCIWorkflow(t, root)
+	assertCIJobRunsTheAccountedSuite(t, workflow, "test", []string{"--race"}, []string{"--cover"})
+}
+
+// The `cover` job's suite runs with coverage and without race. It is the
+// other half of the split: coverage numbers do not need the race detector's
+// verdict, and the race detector does not need coverage's numbers, so the
+// two run in parallel and the green wall is the slower of the two instead of
+// their sum.
+//
+// The job needs the same database the `test` job needs, and for the same
+// reason: the accounted suite refuses a skip in CI, and without a reachable
+// TEST_DATABASE_URL every database fixture would skip and fail the job over
+// services this job never started.
+//
+// Mutation: drop --cover, re-add --race, delete the job, drop the env or the
+// service container, wrap the command in an echo, or change the mode to
+// smoke, and this fails naming what it found.
+func TestCICoverJobRunsTheAccountedSuiteUnderCover(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	workflow, goVersion := readCIWorkflow(t, root)
+	job, ok := workflow.Jobs["cover"]
+	if !ok {
+		t.Fatal("the workflow has no cover job, so coverage has left CI: the split moved it out of `test`, not out of the workflow")
+	}
+	assertCIJobIsARealGate(t, "cover", job, goVersion)
+	assertCIJobRunsTheAccountedSuite(t, workflow, "cover", []string{"--cover"}, []string{"--race"})
+	if _, hasService := job.Services["postgres"]; !hasService {
+		t.Fatal("the cover job runs no postgres service, so TEST_DATABASE_URL names a server nothing answers and the accounted suite refuses over it")
 	}
 }
 
@@ -288,6 +342,35 @@ func TestCIProfilesJobRunsTheGenesisSweep(t *testing.T) {
 	}
 }
 
+// The workflow must cancel superseded runs. The parallel layout trades
+// fail-fast compute economics for wall-time, and that trade is only sound
+// because a superseded push stops burning runners: without cancel-in-progress
+// every push runs the whole nine-job matrix to completion, superseded or not,
+// and the economics quietly invert. The group keys on the workflow and the
+// ref, so pushes to main supersede pushes to main and a PR's pushes supersede
+// that PR — never each other.
+//
+// Mutation: delete the block, drop cancel-in-progress, or key the group on
+// the run id (which never collides and so cancels nothing), and this fails.
+func TestCIWorkflowCancelsSupersededRuns(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	workflow, _ := readCIWorkflow(t, root)
+	if workflow.Concurrency.Group == "" {
+		t.Fatalf("%s declares no concurrency group, so superseded pushes run every job to completion", ciWorkflowPath)
+	}
+	if !workflow.Concurrency.CancelInProgress {
+		t.Fatalf("%s declares a concurrency group without cancel-in-progress: a queued superseded run still executes in full, which is the compute the parallel layout traded on", ciWorkflowPath)
+	}
+	for _, part := range []string{"${{ github.workflow }}", "${{ github.ref }}"} {
+		if !strings.Contains(workflow.Concurrency.Group, part) {
+			t.Fatalf("%s keys its concurrency group on %q, which does not mention %s; a group that never collides cancels nothing", ciWorkflowPath, workflow.Concurrency.Group, part)
+		}
+	}
+}
+
 // gggcliTestNames is every top-level `func TestXxx(t *testing.T)` declared in
 // internal/gggcli, read out of the package's own sources. It is the
 // population `go test -run` filters, derived rather than written down.
@@ -371,18 +454,15 @@ func ciJobForFamily(family ClosureFamily) (string, bool) {
 	return "", false
 }
 
-// assertCIJobIsARealGate checks the wiring every downstream job in this
-// workflow shares, and that nothing exempts the job from failing the build.
+// assertCIJobIsARealGate checks the wiring every job in this workflow shares,
+// and that nothing exempts the job from failing the build.
 func assertCIJobIsARealGate(t *testing.T, name string, job ciJob, goVersion string) {
 	t.Helper()
 	if job.If != "" {
 		t.Fatalf("job %s is gated by if: %q, so it can be skipped silently", name, job.If)
 	}
 	if job.ContinueOnError {
-		t.Fatalf("job %s is continue-on-error, so a failed closure would not fail the build", name)
-	}
-	if !slices.Contains(job.Needs, "test") {
-		t.Fatalf("job %s does not need the test job; every downstream job in %s does", name, ciWorkflowPath)
+		t.Fatalf("job %s is continue-on-error, so a failed gate would not fail the build", name)
 	}
 	if job.RunsOn == "" {
 		t.Fatalf("job %s declares no runner", name)
@@ -527,7 +607,7 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 	if err := yaml.Unmarshal(raw, &workflow); err != nil {
 		t.Fatalf("parse %s: %v", ciWorkflowPath, err)
 	}
-	assertCIRunsOnEveryChange(t, workflow.On)
+	assertCINoJobGatesOnAnother(t, workflow)
 	base, ok := workflow.Jobs["test"]
 	if !ok {
 		t.Fatalf("%s has no test job to take the pinned toolchain from", ciWorkflowPath)
@@ -542,6 +622,30 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 		t.Fatalf("%s test job pins no Go version", ciWorkflowPath)
 	}
 	return workflow, goVersion
+}
+
+// assertCINoJobGatesOnAnother holds the workflow's parallel layout: no job
+// declares `needs`. Every job checks out and builds its own tree and none
+// consumes another's artifacts, so a `needs:` edge buys fail-fast at the
+// price of serialising the matrix behind the longest job — the 24m41s green
+// wall this workflow carried while seven jobs waited on `test` was exactly
+// that. Re-adding a gate is a budget decision: state it beside the
+// workflow-level concurrency comment, not silently here. It runs inside
+// readCIWorkflow so it reaches every job, including the ones no per-job
+// assertion visits.
+func assertCINoJobGatesOnAnother(t *testing.T, workflow ciWorkflow) {
+	t.Helper()
+	names := make([]string, 0, len(workflow.Jobs))
+	for name := range workflow.Jobs {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	for _, name := range names {
+		if needs := workflow.Jobs[name].Needs; len(needs) > 0 {
+			t.Fatalf("job %s needs %v; no job in %s gates on another (each checks out and builds fresh), so the green wall is the slowest job instead of a chain. Re-adding a gate is a budget decision — say it beside the concurrency comment",
+				name, needs, ciWorkflowPath)
+		}
+	}
 }
 
 // assertCIRunsOnEveryChange checks the triggers. Every job in this file is
@@ -582,17 +686,29 @@ func assertCIRunsOnEveryChange(t *testing.T, on yaml.Node) {
 type ciWorkflow struct {
 	// On is read as a node because `pull_request:` legitimately carries no
 	// value, and a nil-able struct cannot tell an absent key from a null one.
-	On   yaml.Node        `yaml:"on"`
-	Jobs map[string]ciJob `yaml:"jobs"`
+	On yaml.Node `yaml:"on"`
+	// Concurrency is the supersession group: without it, every push runs the
+	// whole now-parallel matrix to completion, superseded or not.
+	Concurrency ciConcurrency    `yaml:"concurrency"`
+	Jobs        map[string]ciJob `yaml:"jobs"`
+}
+
+type ciConcurrency struct {
+	Group            string `yaml:"group"`
+	CancelInProgress bool   `yaml:"cancel-in-progress"`
 }
 
 type ciJob struct {
+	// Needs is asserted EMPTY: no job in this workflow gates on another.
 	Needs           ciStringList      `yaml:"needs"`
 	RunsOn          string            `yaml:"runs-on"`
 	If              string            `yaml:"if"`
 	ContinueOnError bool              `yaml:"continue-on-error"`
 	Env             map[string]string `yaml:"env"`
-	Steps           []ciStep          `yaml:"steps"`
+	Services        map[string]struct {
+		Image string `yaml:"image"`
+	} `yaml:"services"`
+	Steps []ciStep `yaml:"steps"`
 }
 
 type ciStep struct {

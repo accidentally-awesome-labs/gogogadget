@@ -5,16 +5,31 @@ on:
     branches: [main]
   pull_request:
 
+# Superseded pushes stop burning runners. Every job below starts in parallel
+# (nothing needs anything: each checks out and builds fresh, and no job
+# consumes another's artifacts), so the green wall is the slowest job, not the
+# sum of two chained ones — measured 24m41s gated, projected 10-11m parallel.
+# That trade gives up fail-fast economics: a broken `test` no longer cancels
+# seven queued jobs' worth of compute. It favours wall-time anyway, because a
+# workflow-level concurrency group with cancel-in-progress reclaims most of
+# the waste (a superseded push's whole run stops), and the repo's Definition
+# of Done already runs `make check` before every push, so the jobs that start
+# early over an about-to-be-superseded commit are bounded by the next push,
+# not by the matrix.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
-    # TEST_DATABASE_URL belongs to THIS job and no other, because this is the
-    # job that runs the server that answers on it. It sat at workflow scope
-    # and reached all seven jobs, which matters now that an explicitly named
-    # but unreachable server is a `testdb` FAILURE rather than a skip:
-    # registry-core and registry-external run with no Postgres service at all,
-    # so a closure fixture that ever grows a database-touching test would turn
-    # those jobs red over a database nobody asked them for.
+    # TEST_DATABASE_URL belongs to THIS job and the `cover` job beside it —
+    # the two that run the server suite against it — and no other. It sat at
+    # workflow scope and reached all jobs, which matters now that an
+    # explicitly named but unreachable server is a `testdb` FAILURE rather
+    # than a skip: registry-core and registry-external run with no Postgres
+    # service at all, so a closure fixture that ever grows a
+    # database-touching test would turn those jobs red over a database
+    # nobody asked them for.
     env:
       TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable
     services:
@@ -51,9 +66,6 @@ jobs:
       - name: Vet
         run: go vet ./...
 
-      - name: Vulnerability check
-        run: go tool govulncheck ./...
-
       # The gate, not a bare `go test`. `go test` never summarises skips, so a
       # package whose every fixture skipped prints the same `ok` as one that
       # passed — which is how an entire integration layer skipped against a
@@ -62,17 +74,77 @@ jobs:
       # own env block names TEST_DATABASE_URL and its service container
       # answers on it, so a skip in this job is a test that had everything it
       # asked for and still did not run.
+      #
+      # Race is this job's half of the split: it is the semantic gate, the
+      # detector that proves the concurrent paths actually work. Coverage runs
+      # in the parallel `cover` job without race — `--race --cover` in one
+      # step was 663 s of this job's 883 s, and the two instrumentations
+      # multiply each other's cost for one job's worth of either signal.
       - name: Test
-        run: bin/ggg test integration --race --cover
-
-      - name: Fuzz
-        run: make fuzz
+        run: bin/ggg test integration --race
 
       - name: Build
         run: go build ./...
 
+  # Coverage, the vuln check and the fuzz soak: the `test` job's former other
+  # halves. It runs in parallel with `test` — coverage does not need the race
+  # detector's verdict, and the race detector does not need coverage's
+  # numbers — so neither signal waits on the other's instrumentation cost.
+  # It needs the same database, for the same reason `test` does: the
+  # accounted suite refuses a skip in CI, and without a reachable
+  # TEST_DATABASE_URL every database fixture would skip and fail the job over
+  # services this job never started.
+  cover:
+    runs-on: ubuntu-latest
+    env:
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gogogadget_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gogogadget_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      - name: Generate
+        run: make generate
+
+      - name: Vulnerability check
+        run: go tool govulncheck ./...
+
+      # The same accounted gate as the `test` job's Test step, for the same
+      # reason — see that step's comment. The only difference is the flag:
+      # this job instruments for coverage instead of racing.
+      - name: Test with coverage
+        run: bin/ggg test integration --cover
+
+      - name: Fuzz
+        run: make fuzz
+
+  # Nothing below here needs `test` (or anything else). Every job checks out
+  # and builds its own tree — none consumes another job's artifacts; the only
+  # artifact steps anywhere in this workflow are failure-report uploads — so
+  # a `needs: test` chain bought fail-fast at the price of serialising the
+  # whole matrix behind the longest job. They start now, and the concurrency
+  # group above reclaims the waste when a push is superseded.
   e2e:
-    needs: test
     runs-on: ubuntu-latest
     # The e2e harness derives its database from the project's own test stack
     # (localhost:15432). This job runs no stack: it uses a service container on
@@ -125,7 +197,6 @@ jobs:
           retention-days: 7
 
   visual:
-    needs: test
     runs-on: ubuntu-latest
     # scripts/visual-run.sh pins its own database through VISUAL_DATABASE_URL
     # and falls through to the project's derived test-stack address when it is
@@ -175,7 +246,6 @@ jobs:
           retention-days: 7
 
   smoke:
-    needs: test
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -242,7 +312,6 @@ jobs:
         run: BASE_URL=http://localhost:18080 ./scripts/smoke.sh
 
   docker:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -268,7 +337,6 @@ jobs:
   # own declared tests inside a throwaway derivative, and none of them touches
   # a database. Adding one would only slow the job down.
   registry-core:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -287,7 +355,6 @@ jobs:
         run: bin/ggg registry validate --closures core
 
   registry-external:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -322,7 +389,6 @@ jobs:
   # No Postgres service: genesis writes and generates a tree and never opens a
   # database.
   profiles:
-    needs: test
     runs-on: ubuntu-latest
     env:
       GGG_GENESIS_SWEEP: "1"

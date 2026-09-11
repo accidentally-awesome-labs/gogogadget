@@ -674,11 +674,17 @@ func selfArgv(args ...string) []string {
 	return append([]string{"go", "run", "./cmd/ggg"}, args...)
 }
 
-// runCheck is THE gate, and it VERIFIES rather than repairs. Generation runs
-// first — it always did — but the tree it produces is now compared with the
+// runCheck is THE gate, and it VERIFIES rather than repairs. The genesis-sweep
+// trigger runs before anything expensive: a diff that changes what derivatives
+// install is refused in milliseconds, not after generate and the suite have
+// run over a tree the operator is about to be told not to push. Generation
+// then runs — it always did — but the tree it produces is compared with the
 // tree it started from, so a generated file whose declared source no longer
 // produces it is a refusal instead of a silent rewrite followed by `ok`.
 func (c *Controller) runCheck(ctx context.Context, root string, run func(string, ...string) error) error {
+	if err := c.refuseUnsweptShippedPayloadDiff(ctx, root); err != nil {
+		return err
+	}
 	before, err := generatedOutputDigests(root)
 	if err != nil {
 		return err

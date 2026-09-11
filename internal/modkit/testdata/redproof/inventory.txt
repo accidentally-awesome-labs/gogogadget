@@ -56,6 +56,7 @@ TestNoProductionTemplateFallsBackToWindowConfirm	web	web-hxconfirm
 TestNoRendererEmitsTwoIDsOnOneElement	web	web-dropdown-ids
 TestNoTemplateHandRollsAComponentRoot	web	allow:sweep web.md row 10 UNDER-SCOPED (set B, top level only; PLANT-O documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
 TestNoTemplateHandRollsAForm	web	allow:sweep web.md row 9 UNDER-SCOPED (set B; PLANT-N documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken
+TestNoUnsweptShippedPayloadDiffPassesCheck	ownership	own-genesis-refusal
 TestNormalizeKindClosesTheEnum	web	allow:sweep web.md row 24 SOUND (closed together with TestEveryDeclaredEnumIsCovered's AST-derived population); plant not transcribed — add one
 TestPublishedRegistryIsConsistent	modkit	allow:catalog self-consistency gate over the published indexes; no plant transcribed — add one
 TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements	modkit	allow:bidirectional per-row agreement; both directions the residual family failed are patched (modkit-schema-conditional adds an unrecorded rule; modkit-enum-gutted guts a recorded one)

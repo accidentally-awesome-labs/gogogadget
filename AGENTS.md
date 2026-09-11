@@ -100,7 +100,7 @@ assertion about THIS repository — the committed snapshot signature, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
 `canonical_module`. So a new self-hosting test goes in a `self_host` payload
-— 56 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+— 57 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
 `ggg/system/server`, because the module that owns the SUBJECT owns the
 assertion about it: the `*_selfhost_test.go` files, the bare
 `selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus
@@ -108,8 +108,8 @@ assertion about it: the `*_selfhost_test.go` files, the bare
 `registry_build_internal_test.go`, `external_template_test.go`,
 `shipped_profiles_test.go`, `stale_sweep_scope_test.go` and
 `profile_genesis_test.go`; the red-proof corpus is self_host data of the same
-kind — `inventory.txt` and the 25 mutation patches
-`modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
+kind — `inventory.txt` and the 26 mutation patches
+`modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-genesis-refusal.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
 core-only paths; anything portable stays in a normal test payload
 so generated projects keep running it. NEVER
 reach for `t.Skip` when an artifact is absent: that lets the core gate pass by
@@ -183,7 +183,7 @@ generation moved any generated file.
 ## Golden commands
 
 - `make dev` — one-terminal loop: `generate`, then `docker compose … up -d --wait --scale app=0` for the development stack's dependency services (Docker must be running), then templ watch + tailwind watch + air as one supervised process group.
-- `make check` — THE gate: generate → **refuse stale generated output** → `ggg sync --check --offline` → vet → accounted `go test` → build. Run before every commit. Three things it refuses that no `registry`, `sync`, `vet` or `build` step does: (1) a generated file that generation just moved, i.e. output its declared source no longer produces — the files are rewritten and the gate fails, commit them and re-run; (2) a skipped test where `CI` is set, unless the skip declares itself `[inapplicable]`; (3) a run that executed no package or no test at all. (2) and (3) are the accounted test layer's, so `make test` (`ggg test integration`) enforces them too; only the drift refusal is `check`'s alone. Once the test step runs it always prints, pass or fail, `tests: N passed, M skipped, I inapplicable, K failed across P packages` (leaf tests) and names every skipping package, because `go test` prints `ok` for a package whose every fixture skipped; an earlier failure aborts before that line exists.
+- `make check` — THE gate: **refuse an unswept shipped-payload diff** (see Gate budget) → generate → **refuse stale generated output** → `ggg sync --check --offline` → vet → accounted `go test` → build. Run before every commit. Four things it refuses that no `registry`, `sync`, `vet` or `build` step does: (1) a generated file that generation just moved, i.e. output its declared source no longer produces — the files are rewritten and the gate fails, commit them and re-run; (2) a skipped test where `CI` is set, unless the skip declares itself `[inapplicable]`; (3) a run that executed no package or no test at all; (4) a diff against `origin/main` that touches a shipped payload or a module manifest with the genesis sweep not run — see Gate budget, and lift it with `GGG_GENESIS_SWEEP=1`, which runs the sweep inside the accounted suite. (2) and (3) are the accounted test layer's, so `make test` (`ggg test integration`) enforces them too; only the drift refusal and (4) are `check`'s alone. Once the test step runs it always prints, pass or fail, `tests: N passed, M skipped, I inapplicable, K failed across P packages` (leaf tests) and names every skipping package, because `go test` prints `ok` for a package whose every fixture skipped; directly after the totals it prints `slowest <pkg> <Ns> …` — the three slowest packages, the budget data for the next gate conversation; an earlier failure aborts before those lines exist.
 - `make seed` / `make db-reset` — demo data / nuke local db.
 - `make e2e` — Playwright suite (`ggg test e2e` brings the test stack's dependency services up itself, app scaled to zero; the server it drives runs on the host at `:18080`). One-time per machine: `cd e2e && npm ci && npx playwright install chromium`; nothing in the toolchain installs Node packages or browsers.
 - `make visual` — compare visual baselines in the pinned Linux container (what CI's `visual` job runs). `make visual-update` — the ONLY thing allowed to overwrite a committed screenshot; macOS screenshots diff by design.
@@ -267,6 +267,42 @@ omission set, so a shrinking table fails.
 `make check` green + new behavior covered at the layer from the rule above. If
 you touched a manifest-owned file, `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` first — then `make check` again, because no
 `registry` or `sync` command runs templ, sqlc or Tailwind.
+
+## Gate budget
+
+Gates cost time, and a gate that costs enough gets skipped — that failure
+mode, not test count, is what this section budgets. Measured figures (local:
+this machine, 2026-09-11; CI: the last fully gated green run): `make check`
+186 s (`internal/web` 160 s, `internal/modkit` 136 s of which ~91 s is the
+red-proof gate, nothing else over 37 s; ~2.3× parallelism across packages);
+the CI `test` job 883 s with `bin/ggg test integration --race --cover` alone
+at 663 s; green CI wall 24m41s, every job chained behind `test`. The
+v0.21.0-era restructure split coverage into a parallel `cover` job (race
+stays in `test` — it is the semantic gate), un-gated the seven jobs that
+share nothing with `test`, and added workflow-level cancellation; projected
+green wall ≈ max(test-race 9–10 m, e2e 10.5 m, cover 5–7 m) ≈ 10–11 m. The
+accounted summary's `slowest` line prints the top three package times on
+every run so these figures never go stale silently.
+
+Standing rules:
+
+- Every new gate states its measured cost in its report and in its skip
+  message. A gate that cannot say what it costs cannot be budgeted.
+- Local `make check` stays under ~5 m; the CI green wall stays under ~15 m.
+  Anything that would cross a line moves to a slower tier (CI-only job,
+  opt-in env) or displaces something already there — state which, here.
+- `ggg check` refuses when the working tree's diff against the merge-base
+  with `origin/main` touches a **shipped** payload (a file a non-`self_host`
+  payload of an installed module declares) or a module/profile manifest —
+  the paths whose bytes reach derivatives. The refusal names the files and
+  the remedy: run
+  `GGG_GENESIS_SWEEP=1 go test ./internal/gggcli -run TestEveryShippedProfileCreatesAProjectThatIsSyncClean -count=1`
+  before pushing (the v0.20.0 derivative-compile break shipped exactly
+  because this gate did not exist). The set is derived from the lock and the
+  catalog, never a hand list. No `origin/main` to diff against (fresh clone,
+  closed tree, a derivative) degrades to a stated skip; a collapsed
+  derivation is a refusal, not a pass. `GGG_GENESIS_SWEEP=1 ggg check` runs
+  the sweep inside the accounted suite instead of refusing.
 
 ## Task playbook
 

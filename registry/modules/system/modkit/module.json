@@ -1284,6 +1284,15 @@
         "self_host": true
       },
       {
+        "source": "internal/modkit/testdata/redproof/own-genesis-refusal.patch",
+        "target": "internal/modkit/testdata/redproof/own-genesis-refusal.patch",
+        "class": "test",
+        "sha256": "2e9098c140ab88c3b5cf0840bd2acc83f19a110bfbbf8dae0cb05adfb1aff09e",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/testdata/redproof/own-notify-tests-deleted.patch",
         "target": "internal/modkit/testdata/redproof/own-notify-tests-deleted.patch",
         "class": "test",

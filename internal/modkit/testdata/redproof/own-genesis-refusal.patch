@@ -1,0 +1,19 @@
+Redproof-Patch: own-genesis-refusal
+Redproof-Family: ownership
+Redproof-Run: TestNoUnsweptShippedPayloadDiffPassesCheck
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: passed the trigger
+Redproof-Summary: The genesis-sweep trigger's refusal disabled — a shipped-payload diff against origin/main passes `ggg check` unswept, which is exactly how v0.20.0's derivative-compile break reached a green local gate.
+diff --git a/internal/gggcli/gate.go b/internal/gggcli/gate.go
+index d525ebbe..688dcdf2 100644
+--- a/internal/gggcli/gate.go
++++ b/internal/gggcli/gate.go
+@@ -810,7 +810,7 @@ func (c *Controller) refuseUnsweptShippedPayloadDiff(ctx context.Context, root s
+ 			hits = append(hits, path+"  (declaration of "+owner+")")
+ 		}
+ 	}
+-	if len(hits) == 0 {
++	if len(hits) == 0 || true {
+ 		return nil
+ 	}
+ 	sort.Strings(hits)
