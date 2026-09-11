@@ -1048,26 +1048,40 @@ func TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements(t *testing.T)
 	}
 }
 
-// The live instance of the divergence this family exists to find, measured
-// rather than asserted.
+// The enum-typed target input, agreed by both engines.
 //
-// validate.go refuses an `enum`-typed target input that carries no values;
-// $defs.TargetInput declares `enum` as an ordinary optional array and states
-// no conditional about it. So a third party's adapter manifest validates
-// clean against the published contract and `ggg` refuses it — and it shipped
-// in v0.19.0 invisibly, because `TargetInput.enum` is one of the fields no
-// published manifest ever sets, which puts it out of reach of the mutation
-// walk in TestValidatorRequiredFieldsAreNotOptionalInTheContract.
+// validate.go's validateServiceTarget refuses an `enum`-typed target input
+// that carries no values — absent and empty are both len(enum) == 0 — and
+// $defs.TargetInput states the same rule as `if type is enum/then required
+// with minItems 1`. That rule was this family's live divergence through
+// v0.20.0: the schema declared `enum` an ordinary optional array, a third
+// party's adapter manifest validated clean against the published contract,
+// and `ggg` refused it. It was recorded in
+// publishedValidatorOnlyConditionals rather than expressed, because stating
+// it rewrites a signed snapshot payload, which belongs to the release order.
 //
-// It is recorded in publishedValidatorOnlyConditionals because stating it in
-// the schema rewrites a signed snapshot payload, which belongs to the release
-// order. This test is the record's teeth: when the schema gains the keyword,
-// the schema half below fails and asks for the record to be deleted.
-func TestValidatorRefusesAnEnumTargetInputTheContractAccepts(t *testing.T) {
+// The schema now states it, so this test is the behavioural half of the
+// publishedConditionalRules record and drives BOTH engines over every shape
+// the rule can take. The rows keep the conditional exactly as strong as the
+// validator: an unconditional `required: ["enum"]` — or a `minItems` parked
+// on the property itself — would refuse a string-typed input the tool
+// accepts, and a `then` with no `minItems` would accept an `enum: []` the
+// tool refuses. The validator does not refuse a populated `enum` on a
+// non-enum input, so the contract must not either.
+func TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs(t *testing.T) {
 	const smtp = "registry/modules/system/mail-smtp/module.json"
 	const key = "TargetInput.enum"
-	if _, recorded := publishedValidatorOnlyConditionals[key]; !recorded {
-		t.Fatalf("%s is no longer recorded as a validator-only conditional; this test measures that record", key)
+	// The record side, inverted from what it was. The rule is stated in the
+	// schema and inventoried in publishedConditionalRules; a record left in
+	// publishedValidatorOnlyConditionals after that is the stale-record
+	// defect this program has shipped before.
+	if _, recorded := publishedValidatorOnlyConditionals[key]; recorded {
+		t.Fatalf("%s is still recorded in publishedValidatorOnlyConditionals; the published "+
+			"schema states the rule, so the record is stale", key)
+	}
+	if _, recorded := publishedConditionalRules[key]; !recorded {
+		t.Fatalf("%s is not recorded in publishedConditionalRules; this test is the "+
+			"behavioural half of that record", key)
 	}
 	repo := os.DirFS("../..")
 	schema := compilePublishedSchema(t, "registry/schema/module.schema.json", "#/$defs/ModuleDocument")
@@ -1075,42 +1089,90 @@ func TestValidatorRefusesAnEnumTargetInputTheContractAccepts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read %s: %v", smtp, err)
 	}
-	// The control. Both engines must accept the manifest as published, or a
-	// disagreement below would be about something else entirely.
+	// The control, and it is also the discriminator-absent row: the base
+	// input is string-typed and carries no enum, which is legal to both
+	// engines. A refusal here means an unconditional requirement has leaked
+	// onto the property.
 	if schemaRefusesModuleDocument(t, schema, base) || validatorRefusesModuleDocument(t, base, smtp) {
-		t.Fatalf("%s is refused unmutated: schema=%v validator=%v", smtp,
+		t.Fatalf("%s is refused unmutated, and a string-typed input with no enum values is "+
+			"legal: schema=%v validator=%v", smtp,
 			schemaRefusesModuleDocument(t, schema, base), validatorRefusesModuleDocument(t, base, smtp))
 	}
 
-	var document map[string]any
-	if err := json.Unmarshal(base, &document); err != nil {
-		t.Fatalf("decode %s: %v", smtp, err)
+	// inputAt returns the one input every row mutates, refusing to run
+	// against a base that stopped carrying the shape the rows assume.
+	inputAt := func(t *testing.T, document map[string]any) map[string]any {
+		t.Helper()
+		module := schemaObjectAt(t, document, "module")
+		target := schemaRecordAt(t, schemaObjectAt(t, module, "runtime", "system", "adapter"), "targets", 1)
+		input := schemaRecordAt(t, target, "inputs", 0)
+		if got := input["type"]; got != "string" {
+			t.Fatalf("the base input's type is %v, want string; the rows below assume it", got)
+		}
+		if _, ok := input["enum"]; ok {
+			t.Fatalf("the base input already declares enum values; the rows below assert nothing")
+		}
+		return input
 	}
-	module := schemaObjectAt(t, document, "module")
-	target := schemaRecordAt(t, schemaObjectAt(t, module, "runtime", "system", "adapter"), "targets", 1)
-	input := schemaRecordAt(t, target, "inputs", 0)
-	if got := input["type"]; got != "string" {
-		t.Fatalf("the base input's type is %v, want string; the mutation below assumes it", got)
-	}
-	input["type"] = "enum"
-	if _, ok := input["enum"]; ok {
-		t.Fatalf("the base input already declares enum values; the mutation proves nothing")
-	}
-	mutated, err := json.Marshal(document)
-	if err != nil {
-		t.Fatalf("encode mutated %s: %v", smtp, err)
-	}
-
-	schemaRefuses := schemaRefusesModuleDocument(t, schema, mutated)
-	validatorRefuses := validatorRefusesModuleDocument(t, mutated, smtp)
-	if !validatorRefuses {
-		t.Fatalf("the validator now accepts an enum-typed target input with no values; %s no longer "+
-			"diverges and its record in publishedValidatorOnlyConditionals is stale", key)
-	}
-	if schemaRefuses {
-		t.Fatalf("the published schema now refuses an enum-typed target input with no values, so %s "+
-			"is no longer a validator-only rule: delete its record from "+
-			"publishedValidatorOnlyConditionals and add it to publishedConditionalRules", key)
+	for _, tc := range []struct {
+		name    string
+		apply   func(*testing.T, map[string]any)
+		refused bool
+	}{
+		{
+			name: "an enum-typed input with values",
+			apply: func(t *testing.T, input map[string]any) {
+				input["type"] = "enum"
+				input["enum"] = []any{"smtp", "starttls"}
+			},
+		},
+		{
+			name: "an enum-typed input with no values at all",
+			apply: func(t *testing.T, input map[string]any) {
+				input["type"] = "enum"
+			},
+			refused: true,
+		},
+		{
+			name: "an enum-typed input with an empty values array",
+			apply: func(t *testing.T, input map[string]any) {
+				input["type"] = "enum"
+				input["enum"] = []any{}
+			},
+			refused: true,
+		},
+		{
+			name: "a string-typed input carrying values it never asked for",
+			apply: func(t *testing.T, input map[string]any) {
+				input["enum"] = []any{"smtp"}
+			},
+		},
+		{
+			name: "a string-typed input carrying an empty values array",
+			apply: func(t *testing.T, input map[string]any) {
+				input["enum"] = []any{}
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var document map[string]any
+			if err := json.Unmarshal(base, &document); err != nil {
+				t.Fatalf("decode %s: %v", smtp, err)
+			}
+			tc.apply(t, inputAt(t, document))
+			mutated, err := json.Marshal(document)
+			if err != nil {
+				t.Fatalf("encode mutated %s: %v", smtp, err)
+			}
+			if got := validatorRefusesModuleDocument(t, mutated, smtp); got != tc.refused {
+				t.Fatalf("validator refuses = %v, want %v — the row no longer describes the "+
+					"rule it names, so the agreement below would assert nothing", got, tc.refused)
+			}
+			if got := schemaRefusesModuleDocument(t, schema, mutated); got != tc.refused {
+				t.Fatalf("published schema refuses = %v, want %v — the external extension "+
+					"contract disagrees with the tool about %s", got, tc.refused, key)
+			}
+		})
 	}
 }
 
@@ -1620,6 +1682,7 @@ var publishedConditionalRules = map[string]string{
 	"RuntimeContributions.system":     "if any target-narrowed environment record/then required",
 	"SystemContribution.adapter":      "if any target-narrowed environment record/then required",
 	"ServiceTarget.provisioner":       "if automation is provision or configure/then required",
+	"TargetInput.enum":                "if type is enum/then required with minItems 1",
 }
 
 // publishedSchemaResiduals are the requirements JSON Schema 2020-12 cannot
@@ -1653,7 +1716,7 @@ var publishedUnexercisedConditionals = map[string]string{
 		"in all 297 manifests and there is no instance to mutate",
 	"TargetInput.enum": "no published service target declares an enum-typed input; every " +
 		"declared input is string, integer or boolean, so `enum` is zero in all 297 manifests. " +
-		"TestValidatorRefusesAnEnumTargetInputTheContractAccepts drives both engines instead",
+		"TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs drives both engines instead",
 }
 
 // publishedValidatorOnlyConditionals are conditional rules the Go validator
@@ -1666,12 +1729,6 @@ var publishedUnexercisedConditionals = map[string]string{
 // states the rule, this row fails and asks to be moved into
 // publishedConditionalRules. It cannot quietly outlive its reason.
 var publishedValidatorOnlyConditionals = map[string]string{
-	"TargetInput.enum": "validate.go's validateServiceTarget refuses an `enum`-typed target " +
-		"input with no values, and $defs.TargetInput declares `enum` as an ordinary optional " +
-		"array: a third party's adapter manifest validates clean against the published contract " +
-		"and ggg refuses it. TestValidatorRefusesAnEnumTargetInputTheContractAccepts measures " +
-		"both engines. State it as if type is enum/then required with minItems 1, in the same " +
-		"change that runs `ggg registry build && ggg registry sign`",
 	"RuntimeContributions.cli": "validateManifest and requireClaims now refuse a claims.cli entry " +
 		"with no runtime.cli record — a `ggg` verb permanently reserved that no code implements and " +
 		"no other module may claim — and $defs.Manifest states only the forward half, `if runtime.cli " +

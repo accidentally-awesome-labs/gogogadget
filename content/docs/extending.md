@@ -438,7 +438,7 @@ The fields that carry weight:
 
 Most manifest fields are required outright or optional outright, and
 `registry/schema/module.schema.json` says which by listing the first kind in
-`required`. Ten rules are neither: the field is required *because of a sibling
+`required`. Eleven rules are neither: the field is required *because of a sibling
 field*, and the published schema states each with `if`/`then`,
 `dependentRequired`, `oneOf` or `not` rather than in `required`, so a
 third-party manifest is refused by a plain JSON Schema validator for the same
@@ -456,6 +456,7 @@ reason `ggg` refuses it.
 | `claims.packages` | required when any `environment[].derivation` names a package |
 | `runtime.system.adapter` | required when any `environment[]` record narrows itself to `targets` |
 | `targets[].provisioner` | required when `automation` is `provision` or `configure`, none for `manual` |
+| `targets[].inputs[].enum` | required, with at least one value, when that input's `type` is `enum` |
 
 Two requirements the tool enforces are **not** in the contract, and both are
 recorded rather than approximated — a keyword that stated a weaker rule would

@@ -2266,7 +2266,28 @@
         "type",
         "required",
         "secret"
-      ]
+      ],
+      "$comment": "An `enum`-typed input offers the operator a closed choice, so it must carry at least one value: modkit.validateServiceTarget refuses an `enum`-typed input whose values are missing or empty. Inputs of every other type are exempt, because the requirement keys on `type` and never lands on the property unconditionally.",
+      "if": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "enum"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "enum"
+        ],
+        "properties": {
+          "enum": {
+            "minItems": 1
+          }
+        }
+      }
     },
     "LocalService": {
       "type": "object",
