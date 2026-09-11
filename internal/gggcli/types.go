@@ -255,6 +255,10 @@ type (
 	RegistryMutation struct {
 		Build         bool
 		SetRegistries []modkit.ProjectRegistry
+		// SetExclude replaces the exclude list when SetRegistries removes a
+		// namespace: the removal sequences its own tombstones out of the
+		// intent in the same transaction.
+		SetExclude []string
 	}
 	TaskMutation struct {
 		Task        string

@@ -299,7 +299,11 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			}
 		}
 		if missing, extra := slotDifference(slots, project.Providers); len(missing) != 0 || len(extra) != 0 {
-			return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots: missing %v, unselected %v", missing, extra)
+			return selectedGraph{}, fmt.Errorf(
+				"project providers must exactly match selected provider slots: missing %v, unselected %v. "+
+					"If gogogadget.json already selects every slot, the lock is stale and a bare `ggg sync` re-stamps it; "+
+					"otherwise select each missing slot with `ggg provider set --provider SLOT:ENV=ADAPTER@TARGET`",
+				missing, extra)
 		}
 		slotsList := make([]string, 0, len(slots))
 		for slot := range slots {

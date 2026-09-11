@@ -376,6 +376,24 @@ func TestTheDocumentedProfileTableMatchesWhatTheProfilesResolveTo(t *testing.T) 
 		"the documented profile table advertises profile(s) this catalog does not publish: %v", sortedStrings(documented))
 }
 
+// The task-AV dogfood (P1-4): `ggg new --profile ggg/profile/minimal` followed
+// by the getting-started walkthrough's `bin/ggg db seed` failed with "stat
+// cmd/seed: directory not found". The seed fragments every closure already
+// ships are generated per module; the loader was the one missing module. A
+// walkthrough that names a profile names its seed loader with it.
+func TestShippedWalkthroughProfilesIncludeTheSeedLoader(t *testing.T) {
+	root := repoRoot(t)
+	catalog, err := modkit.LoadCatalog(os.DirFS(root))
+	require.NoError(t, err)
+	for _, name := range []string{"minimal", "web"} {
+		profile, ok := findShippedProfile(catalog, name)
+		require.Truef(t, ok, "the core catalog no longer ships ggg/profile/%s", name)
+		plan := planShippedProfile(t, root, catalog, profile, profile.ProviderDefaults)
+		require.Containsf(t, plan.Resolved, "ggg/system/seed",
+			"the %s walkthrough's `ggg db seed` has no loader: the closure ships the seed fragments (they generate per module) but not cmd/seed", name)
+	}
+}
+
 func mustAtoi(t *testing.T, value string) int {
 	t.Helper()
 	number, err := strconv.Atoi(value)

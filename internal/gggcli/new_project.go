@@ -310,6 +310,25 @@ func (c *Controller) newProjectSource(root string, core modkit.ProjectRegistry) 
 func (c *Controller) resolveNewCatalog(ctx context.Context, registry modkit.ProjectRegistry) (modkit.SourceResolver, modkit.Snapshot, modkit.Catalog, error) {
 	var resolver modkit.SourceResolver
 	if registry.Source == "directory" {
+		// An absolute PATH is honored, not silently ignored: joining it under
+		// the working directory once made `--registry directory:/abs/repo`
+		// resolve the CWD instead — a stat-miss nobody warned about — and the
+		// genesis then failed on whatever the CWD contained. This is the
+		// bootstrap input only; the created project records the vendored
+		// project-relative copy, never this path.
+		if filepath.IsAbs(filepath.FromSlash(registry.Path)) {
+			absolute := modkit.ProjectRegistry{Namespace: registry.Namespace, Source: registry.Source, Path: "."}
+			resolver = modkit.DirectorySource{Root: filepath.FromSlash(registry.Path)}
+			snapshot, err := resolver.Resolve(ctx, absolute)
+			if err != nil {
+				return nil, modkit.Snapshot{}, modkit.Catalog{}, err
+			}
+			catalog, err := modkit.LoadCatalog(snapshot.FS)
+			if err != nil {
+				return nil, modkit.Snapshot{}, modkit.Catalog{}, err
+			}
+			return resolver, snapshot, catalog, nil
+		}
 		resolver = modkit.DirectorySource{Root: c.rootDir()}
 	} else {
 		cache, err := os.UserCacheDir()

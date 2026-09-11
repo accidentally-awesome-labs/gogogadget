@@ -12,7 +12,8 @@ rendered **at enqueue time**.
 
 ## The Sender seam
 
-`internal/mail/mail.go` is the only file that imports an email SDK:
+`internal/mail/mail.go` defines the seam — the only file a provider author
+needs to read:
 
 ```go
 type Message struct {
@@ -24,20 +25,30 @@ type Sender interface {
 }
 ```
 
-Two implementations ship:
+No implementation is hand-wired anywhere. Three adapters ship, each a module
+that provides the `mail.sender` capability on the `ggg/mail` provider slot,
+and the generated per-environment boot (`bootstrap_registry_gen.go`)
+constructs exactly the one your project selected for that `APP_ENV`:
 
-- **`ResendSender`** — production path via the Resend API, wired when
-  `RESEND_API_KEY` is set, sending from `EMAIL_FROM`. (resend-go has no
-  context support, so `ctx` is accepted for the interface and not forwarded.)
-- **`DevSender`** — the zero-infra default when no key is set. It logs the
-  recipient and subject **and writes the rendered HTML to
-  `tmp/emails/<timestamp>-<to>.html`**, so you can open the exact email in a
-  browser during development. The welcome email from a fresh clone lands
-  there — no account required.
+| Adapter | Targets | Selected for |
+|---|---|---|
+| `ggg/system/mail-dev` | `filesystem` | development, test — logs the recipient and subject **and writes the rendered HTML to `tmp/emails/<timestamp>-<to>.html`**, so you can open the exact email in a browser. The welcome email from a fresh clone lands there — no account required. |
+| `ggg/system/mail-smtp` | `mailpit`, `smtp` | self-hosted production — Mailpit appears in the dev Compose file only when selected |
+| `ggg/system/mail-resend` | `resend` | managed production, sending from `EMAIL_FROM` via the Resend API |
 
-Swapping providers means adding one file that satisfies `Sender` and wiring
-it in `cmd/server/main.go`. Handlers and the job worker never see either
-implementation.
+Swapping providers is a selection, not a source edit:
+
+```sh
+ggg provider set --provider ggg/mail:production=ggg/system/mail-resend@resend
+```
+
+Handlers and the job worker hold the seam's capability and never see an
+implementation. **Writing a new adapter** (your own mail provider, or a
+third-party one) means authoring a module that satisfies `Sender` in its own
+package — never editing `cmd/server` or any generated file; see
+[extending → Swap a provider](/docs/extending#swap-a-provider) for the full
+authoring path, and [the module reference](/docs/module-reference) for the
+slot's capability and contract numbers.
 
 ## templ HTML + text pairs
 
@@ -136,4 +147,5 @@ that is why it exists.
    processor or handler), passing any scheduling `runAt`.
 
 `make generate` after editing the templ file, then exercise it with the
-DevSender and open the file under `tmp/emails/`.
+development selection (`ggg/system/mail-dev@filesystem`) and open the file
+under `tmp/emails/`.

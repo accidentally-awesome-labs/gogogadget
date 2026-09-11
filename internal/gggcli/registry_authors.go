@@ -225,6 +225,7 @@ func runRegistrySet(ctx context.Context, cc CommandContext, action string, parse
 	current := append([]modkit.ProjectRegistry(nil), project.Registries...)
 	var replacement []modkit.ProjectRegistry
 	var payload map[string]any
+	var setExclude []string
 
 	switch action {
 	case "add":
@@ -288,6 +289,19 @@ func runRegistrySet(ctx context.Context, cc CommandContext, action string, parse
 		if len(replacement) == 0 {
 			return failureEnvelope("registry remove", refusalError(fmt.Errorf("refusing to remove the last registry source")))
 		}
+		// The removal sequences its own tombstones: every exclude entry the
+		// removed namespace owns leaves with it, in this same planned
+		// transaction. Left behind, the very next plan refused on "project
+		// exclude contains unknown module" — a registry the project just
+		// removed was still expected to resolve one of its own tombstones,
+		// and the only remedy was a hand edit of gogogadget.json.
+		setExclude = make([]string, 0, len(project.Exclude))
+		for _, id := range project.Exclude {
+			if modkit.ModuleIDNamespace(id) == namespace {
+				continue
+			}
+			setExclude = append(setExclude, id)
+		}
 		payload = map[string]any{"removed": namespace}
 	case "update":
 		namespace := parsed.value("registry", "")
@@ -317,7 +331,7 @@ func runRegistrySet(ctx context.Context, cc CommandContext, action string, parse
 		return Result{}, usageError("unknown registry set action " + action)
 	}
 
-	mutation := RegistryMutation{SetRegistries: replacement}
+	mutation := RegistryMutation{SetRegistries: replacement, SetExclude: setExclude}
 	if payload == nil {
 		payload = map[string]any{}
 	}

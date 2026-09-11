@@ -268,7 +268,7 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 	case RegistryMutation:
 		if mutation.SetRegistries != nil {
 			return c.previewOperation(ctx, "registry", modkit.Operation{
-				Kind: modkit.OpSync, SetRegistries: mutation.SetRegistries,
+				Kind: modkit.OpSync, SetRegistries: mutation.SetRegistries, SetExclude: mutation.SetExclude,
 			}, false)
 		}
 		return Plan{Command: "registry build", mutation: mutation}, nil

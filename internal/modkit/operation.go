@@ -41,4 +41,10 @@ type Operation struct {
 	// SetRegistries replaces the project's registry sources in the same
 	// planned transaction the `ggg registry add|remove|update` flows use.
 	SetRegistries []ProjectRegistry
+	// SetExclude replaces the project's exclude list in the same planned
+	// transaction. `registry remove` uses it to sequence its own tombstones:
+	// the exclude entries of the namespace being removed must leave with it,
+	// or the very next plan refuses on an exclude entry no configured
+	// registry can resolve.
+	SetExclude []string
 }

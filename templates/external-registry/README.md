@@ -210,6 +210,16 @@ mkdir -p registries/acme
 cp -R /path/to/registry/{registry.json,registry,registry.snapshot.json,registry.snapshot.sig} registries/acme/
 bin/ggg registry add directory:registries/acme --namespace acme --json
 
+# A GitHub source instead of the copy — a PRIVATE repository needs a token:
+#   export GITHUB_TOKEN=$(gh auth token)
+# Every online command (registry add, update, even `ggg info`) re-resolves
+# every GitHub registry, and GitHub answers 404 for a private repository an
+# anonymous request cannot see. Without a token that 404 is indistinguishable
+# from a deleted repository; with one, `ggg` names the token as the likely
+# cause when access is still denied. Offline commands never touch the network.
+# bin/ggg registry add github:acme/ggg-registry --namespace acme --ref v1.0.0 \
+#   --public-key "$(cat registry-public-key.b64)" --json
+
 bin/ggg provider set --provider ggg/audit-export:production=acme/system/audit-export-ledger@ledger-cloud …
 bin/ggg sync --check                 # a second reconcile must move nothing
 bin/ggg generate && go build ./...

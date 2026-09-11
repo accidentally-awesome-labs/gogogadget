@@ -351,6 +351,111 @@ func ValidateManifestRevisions(root string) error {
 			}
 		}
 	}
+	return refuseStaleRevisions(stale)
+}
+
+// ValidateManifestRevisionsAgainstSnapshot is the same gate for a tree with no
+// lock beside it: a standalone third-party publisher's repository. There the
+// previous signed snapshot is the published state, and it pins every manifest
+// byte — so a manifest still byte-identical to what was published carries an
+// unchanged revision by construction. If its payloads have moved anyway, the
+// one edit the convention demands (the bump) did not happen, and the build
+// refuses instead of signing a lie. A manifest that was touched passes this
+// half silently — which side of the range moved is not recoverable from a
+// digest — and the lock half above is the strong form wherever a lock exists.
+//
+// It runs BEFORE the digest refresh: refresh rewrites manifests, and with them
+// the byte-identity to the published snapshot this rule turns on.
+func ValidateManifestRevisionsAgainstSnapshot(root string) error {
+	raw, err := os.ReadFile(filepath.Join(root, RegistrySnapshotPath))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var snapshot RegistrySnapshot
+	if err := json.Unmarshal(raw, &snapshot); err != nil {
+		// An unreadable snapshot is `registry verify`'s refusal to raise;
+		// the build's own writer will replace it this run either way.
+		return nil
+	}
+	published := make(map[string]string, len(snapshot.Files))
+	for _, file := range snapshot.Files {
+		published[file.Path] = file.SHA256
+	}
+
+	stale := make([]string, 0)
+	for _, include := range catalogIncludes {
+		if include.kind == CatalogProfile {
+			continue
+		}
+		dir := filepath.Join(root, "registry", "modules", string(include.kind))
+		entries, readErr := os.ReadDir(dir)
+		if errors.Is(readErr, fs.ErrNotExist) {
+			continue
+		}
+		if readErr != nil {
+			return fmt.Errorf("scan %s: %w", dir, readErr)
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			rel := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
+			data, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+			if readErr != nil {
+				continue
+			}
+			if pinned, listed := published[rel]; !listed || pinned != digestBytes(data) {
+				// The manifest moved since the last published snapshot, so
+				// the revision may have moved with it: not provably stale.
+				continue
+			}
+			var document ModuleDocument
+			if err := decodeStrict(data, &document); err != nil {
+				continue
+			}
+			if manifestPayloadsMoved(root, document.Module) {
+				stale = append(stale, fmt.Sprintf("%s (revision %d)", document.Module.ID, document.Module.Revision))
+			}
+		}
+	}
+	return refuseStaleRevisions(stale)
+}
+
+// manifestPayloadsMoved reports whether any payload byte under a manifest no
+// longer matches the digest the manifest declares. A payload that cannot be
+// read is refresh's refusal to raise, not evidence of a moved digest.
+func manifestPayloadsMoved(root string, m Manifest) bool {
+	for _, file := range m.Files {
+		if file.Class == FileClassGenerated {
+			continue
+		}
+		digest, err := payloadDigest(root, file.Source)
+		if err != nil {
+			continue
+		}
+		if digest != file.SHA256 {
+			return true
+		}
+	}
+	for _, migration := range m.Migrations {
+		digest, err := payloadDigest(root, migration.Source)
+		if err != nil {
+			continue
+		}
+		if digest != migration.SHA256 {
+			return true
+		}
+	}
+	return false
+}
+
+// refuseStaleRevisions renders the shared refusal of both revision gates:
+// sorted module list, the convention the list breaks, and the one edit that
+// clears it.
+func refuseStaleRevisions(stale []string) error {
 	if len(stale) == 0 {
 		return nil
 	}

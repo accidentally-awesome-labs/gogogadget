@@ -447,6 +447,14 @@ func (e *Engine) planRemove(
 		Registries: append([]LockedRegistry{}, currentLock.Registries...),
 		Snapshots:  append([]LockedSnapshot{}, currentLock.Snapshots...),
 		Order:      order, RuntimeOrders: currentLock.RuntimeOrders,
+		// A removal does not touch any provider selection — the loop above
+		// already refused to remove a selected adapter — so the lock keeps
+		// recording them exactly as the intent holds it. Dropping the maps
+		// here once blanked every slot: the next `provider set` then refused
+		// with "missing [17 slots]" and blamed the intent file, whose values
+		// were correct all along; only an undocumented bare `ggg sync`
+		// re-stamped them.
+		Providers: maps.Clone(desired.Providers), Ports: maps.Clone(desired.Ports),
 		GoTools:      append([]string{}, currentLock.GoTools...),
 		Dependencies: append([]LockedDependency{}, currentLock.Dependencies...),
 		Modules:      modules,

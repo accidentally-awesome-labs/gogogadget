@@ -189,12 +189,13 @@ func reconcilePlannedState(
 	ctx context.Context,
 	root string,
 	snapshot Snapshot,
+	registrySources []resolvedRegistry,
 	graph selectedGraph,
 	payloads []plannedAuthoredPayload,
 	existing Lock,
 	hasLock bool,
 	claims map[string]struct{},
-	retire map[string]struct{},
+	retire map[string]retirement,
 	retained map[string]struct{},
 ) (Lock, []Change, []Conflict, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
@@ -297,7 +298,7 @@ func reconcilePlannedState(
 		}
 		if _, selected := newModules[id]; !selected {
 			if _, retiring := retire[id]; retiring {
-				tombstone, deletions, err := planRetirement(ctx, root, id, module)
+				tombstone, deletions, err := planRetirement(ctx, root, id, module, retire[id])
 				if err != nil {
 					return Lock{}, nil, nil, nil, err
 				}
@@ -431,17 +432,35 @@ func reconcilePlannedState(
 					LocalSHA256: localDigest, State: state,
 				})
 			}
+			// The pending candidate is pinned to the registry that PUBLISHES
+			// this module, never to whichever registry happens to sit first in
+			// the configured list. A conflicted module in the second registry
+			// once recorded the first registry's commit here, and `resolve`
+			// then wrote that foreign commit — and its snapshot digest — into
+			// the module's own lock row: the provenance ledger named a cache
+			// entry the module's bytes never came from, which is the one lie
+			// the ledger exists to prevent.
+			ownSnapshot := snapshot
+			for _, source := range registrySources {
+				if source.config.Namespace == moduleNamespace(module.ID) {
+					ownSnapshot = source.snapshot
+				}
+			}
 			pending := &PendingUpdate{
-				RunID: runID, RegistryCommit: snapshot.Commit, SourceCommit: snapshot.Commit,
+				RunID: runID, RegistryCommit: ownSnapshot.Commit, SourceCommit: ownSnapshot.Commit,
 				Manifest: module, Conflicts: append([]PendingConflict{}, pendingConflicts[module.ID]...),
 			}
+			// While the conflict stands the installed bytes are still the ones
+			// the OLD snapshot pinned, so the row keeps that provenance — the
+			// same carry-forward the retained branch above applies verbatim.
+			// `resolve` moves both fields to the pending snapshot once the
+			// operator has decided.
 			states[module.ID] = reconciledModule{
 				manifest: oldModule.Manifest, sourceCommit: oldModule.SourceCommit,
-				files: lockedFiles, pending: pending,
+				snapshotSHA256: oldModule.SnapshotSHA256, files: lockedFiles, pending: pending,
 			}
 			continue
 		}
-
 		oldFiles := map[string]LockedFile{}
 		if hadOld {
 			oldFiles = lockedFilesByPath(oldModule.Files)
@@ -743,29 +762,65 @@ func buildConflictArtifacts(root, runID string, detected []detectedConflict) ([]
 	return conflicts, pending, staged, nil
 }
 
+// unifiedConflictDiff renders the operator-facing delta between local and
+// upstream bytes as a real unified diff: matching lines collapse into context,
+// so a two-line change reads as two lines. Its whole job is to be the thing
+// the docs tell the operator to read before choosing --keep-local, and the
+// whole-file rewrite this replaces opened @@ -1,223 +1,223 @@ with every line
+// marked both ways on a delta that `diff` reports in eight lines — noise that
+// made the one decision artifact indistinguishable from a rewrite.
 func unifiedConflictDiff(target string, local, upstream []byte) []byte {
 	if !utf8.Valid(local) || !utf8.Valid(upstream) {
 		return []byte("Binary conflict for " + target + "; inspect the complete .candidate file.\n")
 	}
-	oldLines, oldNewline := splitDiffLines(string(local))
-	newLines, newNewline := splitDiffLines(string(upstream))
-	oldStart, newStart := 1, 1
-	if len(oldLines) == 0 {
-		oldStart = 0
-	}
-	if len(newLines) == 0 {
-		newStart = 0
+	oldLines, oldFinalNewline := splitDiffLines(string(local))
+	newLines, newFinalNewline := splitDiffLines(string(upstream))
+	ops := lcsDiffOps(oldLines, newLines)
+	if ops == nil {
+		return wholeFileConflictDiff(target, oldLines, newLines, oldFinalNewline, newFinalNewline)
 	}
 	var out strings.Builder
-	fmt.Fprintf(
-		&out, "--- a/%s\n+++ b/%s\n@@ -%d,%d +%d,%d @@\n",
-		target, target, oldStart, len(oldLines), newStart, len(newLines),
-	)
+	fmt.Fprintf(&out, "--- a/%s\n+++ b/%s\n", target, target)
+	changeAt := make([]int, 0, len(ops))
+	for k, op := range ops {
+		if op.kind != '=' {
+			changeAt = append(changeAt, k)
+		}
+	}
+	if len(changeAt) == 0 {
+		return []byte(out.String())
+	}
+	for hunkStart := 0; hunkStart < len(changeAt); {
+		// A hunk spans one change plus diffContextLines of context on each
+		// side; consecutive changes whose contexts touch or overlap are one
+		// hunk, which is the merge rule diff(1) itself uses.
+		hunkEnd := hunkStart
+		first := max(0, changeAt[hunkStart]-diffContextLines)
+		last := min(len(ops)-1, changeAt[hunkStart]+diffContextLines)
+		for hunkEnd+1 < len(changeAt) && changeAt[hunkEnd+1]-diffContextLines <= last+1 {
+			hunkEnd++
+			last = min(len(ops)-1, changeAt[hunkEnd]+diffContextLines)
+		}
+		emitConflictHunk(&out, ops, first, last,
+			oldLines, newLines, oldFinalNewline, newFinalNewline)
+		hunkStart = hunkEnd + 1
+	}
+	return []byte(out.String())
+}
+
+// wholeFileConflictDiff is the fallback for a pair of files too large to diff
+// pairwise: one hunk, every old line minus, every new line plus. It states
+// what it is, because a reader must be able to tell a rewrite-diff from a
+// real one.
+func wholeFileConflictDiff(target string, oldLines, newLines []string, oldFinalNewline, newFinalNewline bool) []byte {
+	var out strings.Builder
+	fmt.Fprintf(&out, "--- a/%s\n+++ b/%s\n@@ -1,%d +1,%d @@\n",
+		target, target, len(oldLines), len(newLines))
 	for i, line := range oldLines {
 		out.WriteByte('-')
 		out.WriteString(line)
 		out.WriteByte('\n')
-		if i == len(oldLines)-1 && !oldNewline {
+		if i == len(oldLines)-1 && !oldFinalNewline {
 			out.WriteString("\\ No newline at end of file\n")
 		}
 	}
@@ -773,11 +828,147 @@ func unifiedConflictDiff(target string, local, upstream []byte) []byte {
 		out.WriteByte('+')
 		out.WriteString(line)
 		out.WriteByte('\n')
-		if i == len(newLines)-1 && !newNewline {
+		if i == len(newLines)-1 && !newFinalNewline {
 			out.WriteString("\\ No newline at end of file\n")
 		}
 	}
+	out.WriteString("# whole-file fallback: too many lines to diff pairwise; compare against the .candidate\n")
 	return []byte(out.String())
+}
+
+const (
+	// diffContextLines is the unified-diff context window, matching diff(1).
+	diffContextLines = 3
+	// diffLineBudget caps each side of the pairwise LCS: the matrix is
+	// (n+1)*(m+1) cells, and a conflict between two files larger than this
+	// falls back to the whole-file form rather than allocating hundreds of
+	// megabytes inside a plan.
+	diffLineBudget = 20_000
+)
+
+// diffOp is one line of the edit script: '=' shared, '-' local-only, '+'
+// upstream-only. The indexes name the line on their side; an op of the other
+// kind carries the paired position at emission time.
+type diffOp struct {
+	kind           byte
+	oldIdx, newIdx int
+}
+
+// lcsDiffOps computes the edit script between two line slices by
+// longest-common-subsequence, preferring deletions before insertions so runs
+// read as "the old lines, then their replacements". nil means the pair
+// exceeded diffLineBudget and the caller must fall back.
+func lcsDiffOps(oldLines, newLines []string) []diffOp {
+	n, m := len(oldLines), len(newLines)
+	if n > diffLineBudget || m > diffLineBudget {
+		return nil
+	}
+	// suffix[i][j] = LCS length of oldLines[i:] and newLines[j:], kept as one
+	// flat array so a large pair is one allocation, not n slices.
+	suffix := make([]int32, (n+1)*(m+1))
+	stride := m + 1
+	for i := n - 1; i >= 0; i-- {
+		for j := m - 1; j >= 0; j-- {
+			switch {
+			case oldLines[i] == newLines[j]:
+				suffix[i*stride+j] = suffix[(i+1)*stride+j+1] + 1
+			case suffix[(i+1)*stride+j] >= suffix[i*stride+j+1]:
+				suffix[i*stride+j] = suffix[(i+1)*stride+j]
+			default:
+				suffix[i*stride+j] = suffix[i*stride+j+1]
+			}
+		}
+	}
+	ops := make([]diffOp, 0, n+m)
+	i, j := 0, 0
+	for i < n && j < m {
+		switch {
+		case oldLines[i] == newLines[j]:
+			ops = append(ops, diffOp{kind: '=', oldIdx: i, newIdx: j})
+			i++
+			j++
+		case suffix[(i+1)*stride+j] >= suffix[i*stride+j+1]:
+			ops = append(ops, diffOp{kind: '-', oldIdx: i, newIdx: j})
+			i++
+		default:
+			ops = append(ops, diffOp{kind: '+', oldIdx: i, newIdx: j})
+			j++
+		}
+	}
+	for ; i < n; i++ {
+		ops = append(ops, diffOp{kind: '-', oldIdx: i, newIdx: j})
+	}
+	for ; j < m; j++ {
+		ops = append(ops, diffOp{kind: '+', oldIdx: i, newIdx: j})
+	}
+	return ops
+}
+
+// emitConflictHunk writes ops[first:last] with the standard @@ header. The
+// counts are of the lines the hunk touches on each side, and a count of zero
+// is printed against the line BEFORE the hunk, as diff(1) does.
+func emitConflictHunk(out *strings.Builder, ops []diffOp, first, last int,
+	oldLines, newLines []string, oldFinalNewline, newFinalNewline bool) {
+	oldCount, newCount := 0, 0
+	for _, op := range ops[first : last+1] {
+		switch op.kind {
+		case '=', '-':
+			oldCount++
+		}
+		switch op.kind {
+		case '=', '+':
+			newCount++
+		}
+	}
+	oldStart, newStart := 1, 1
+	if ops[first].kind == '+' {
+		oldStart = ops[first].oldIdx // the line before the insertion, 0-based
+	} else {
+		oldStart = ops[first].oldIdx + 1
+	}
+	if ops[first].kind == '-' {
+		newStart = ops[first].newIdx
+	} else {
+		newStart = ops[first].newIdx + 1
+	}
+	fmt.Fprintf(out, "@@ -%s +%s @@\n", diffRange(oldStart, oldCount), diffRange(newStart, newCount))
+	for _, op := range ops[first : last+1] {
+		switch op.kind {
+		case '=':
+			out.WriteByte(' ')
+			out.WriteString(oldLines[op.oldIdx])
+			out.WriteByte('\n')
+			if op.oldIdx == len(oldLines)-1 && !oldFinalNewline {
+				out.WriteString("\\ No newline at end of file\n")
+			}
+		case '-':
+			out.WriteByte('-')
+			out.WriteString(oldLines[op.oldIdx])
+			out.WriteByte('\n')
+			if op.oldIdx == len(oldLines)-1 && !oldFinalNewline {
+				out.WriteString("\\ No newline at end of file\n")
+			}
+		case '+':
+			out.WriteByte('+')
+			out.WriteString(newLines[op.newIdx])
+			out.WriteByte('\n')
+			if op.newIdx == len(newLines)-1 && !newFinalNewline {
+				out.WriteString("\\ No newline at end of file\n")
+			}
+		}
+	}
+}
+
+// diffRange renders one side of a hunk header: a lone line number when the
+// count is one, "start,count" otherwise.
+func diffRange(start, count int) string {
+	if count == 1 {
+		return fmt.Sprintf("%d", start)
+	}
+	if count == 0 {
+		return fmt.Sprintf("%d,0", start)
+	}
+	return fmt.Sprintf("%d,%d", start, count)
 }
 
 func splitDiffLines(value string) ([]string, bool) {
@@ -840,12 +1031,28 @@ func sortPlanOutputs(changes []Change, conflicts []Conflict) {
 	})
 }
 
+// retirement names what is replacing a module this plan itself deselects, so
+// its refusal can name the remedy that actually applies. A replaced
+// deployment and a deselected provider adapter block on the same
+// locally-modified file, but only one of them is a `deployment set` away from
+// resolved — a provider refusal that names the deployment sends the operator
+// hunting for a command that cannot help.
+type retirement struct {
+	deployment bool
+	slot       string
+}
+
 // planRetirement is the in-transaction removal of a module this plan itself
 // deselected — the deployment module a `deployment set` replacement leaves
-// behind. It deletes the module's authored files (whose bytes must match the
-// lock: a modified file is a human decision, not a side effect) and hands
-// back the tombstone that preserves identity and any migration ledger.
-func planRetirement(ctx context.Context, root, id string, module LockedModule) (*LockedModule, []Change, error) {
+// behind, or an adapter a `provider set` selection stops naming. It deletes
+// the module's authored files (whose bytes must match the lock: a modified
+// file is a human decision, not a side effect) and hands back the tombstone
+// that preserves identity and any migration ledger.
+func planRetirement(ctx context.Context, root, id string, module LockedModule, replaced retirement) (*LockedModule, []Change, error) {
+	what := fmt.Sprintf("provider selection for slot %s", replaced.slot)
+	if replaced.deployment {
+		what = "deployment"
+	}
 	changes := make([]Change, 0)
 	for _, file := range module.Files {
 		if err := ctx.Err(); err != nil {
@@ -856,10 +1063,12 @@ func planRetirement(ctx context.Context, root, id string, module LockedModule) (
 			return nil, nil, err
 		}
 		if missing {
-			return nil, nil, fmt.Errorf("owned file %s of module %s is missing; restore it before replacing the deployment", file.Path, id)
+			return nil, nil, fmt.Errorf("owned file %s of module %s is missing; restore it before replacing the %s", file.Path, id, what)
 		}
 		if digest != file.BaseSHA256 {
-			return nil, nil, fmt.Errorf("module %s owns locally modified file %s; resolve it before replacing the deployment", id, file.Path)
+			return nil, nil, fmt.Errorf(
+				"module %s owns locally modified file %s; run ggg diff %s and revert or back up the customization before replacing the %s",
+				id, file.Path, id, what)
 		}
 		changes = append(changes, Change{
 			Path: file.Path, Module: id, Source: file.Source,

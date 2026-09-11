@@ -146,6 +146,18 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		module.Revision = targetManifest.Revision
 		module.Contract = targetManifest.Contract
 		module.SourceCommit = pending.SourceCommit
+		// Provenance is completed from the registry that publishes this
+		// module, re-resolved and pinned to the pending commit above — never
+		// from whichever registry sits first in the project's list. The
+		// snapshot digest was left at the first registry's value once, and the
+		// ledger then pointed offline consumers at a cache entry these bytes
+		// never came from.
+		if own, ok := resolvedSnapshotFor(resolved, module.RegistryNamespace); ok {
+			module.SnapshotSHA256 = own.SnapshotSHA256
+			if module.SnapshotSHA256 == "" {
+				module.SnapshotSHA256 = own.Commit
+			}
+		}
 		module.Pending = nil
 		migrationFiles, migrationChanges, err := planMigrations(
 			ctx, canonicalRoot, targetFS, []Manifest{targetManifest}, currentLock, true, nil,
@@ -158,6 +170,10 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		if err := recomputeLockGraph(ctx, &finalLock); err != nil {
 			return Plan{}, fmt.Errorf("recompute resolved lock graph: %w", err)
 		}
+		// The lock identity is the live per-module provenance, and this
+		// module just moved to a new snapshot: recompute so the envelope and
+		// the lock agree, exactly as a targeted update does.
+		finalLock.RegistryCommit = registryCommitForModules(finalLock.Modules)
 	} else {
 		module.Pending.Conflicts = remaining
 	}
@@ -208,6 +224,18 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		Changes: changes, Diagnostics: []Diagnostic{}, Conflicts: conflicts,
 		rendered: rendered,
 	}, nil
+}
+
+// resolvedSnapshotFor returns the snapshot one resolution produced for a
+// namespace, so a module's own registry is the provenance its lock row keeps —
+// in a multi-registry project the configured order is not a namespace picker.
+func resolvedSnapshotFor(resolved []resolvedRegistry, namespace string) (Snapshot, bool) {
+	for _, source := range resolved {
+		if source.config.Namespace == namespace {
+			return source.snapshot, true
+		}
+	}
+	return Snapshot{}, false
 }
 
 func liveModuleOrder(lock Lock) []string {

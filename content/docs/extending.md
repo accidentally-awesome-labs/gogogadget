@@ -291,12 +291,14 @@ postinstall, no command array. It is data the generators read.
 
 The fields that carry weight:
 
-- **`files`** — exclusive ownership. Two modules may never claim one path, and
-  identical bytes never imply shared ownership. `contract: true` marks a file
-  that defines the module's public interface, so changing it bumps the
-  contract and pins dependents through an update. `rewrite_module: true` lets
-  the installer rewrite a canonical Go import prefix — any configured
-  registry's — into the derivative project's own module path.
+- **`files`** — exclusive ownership, **sorted by `target`** in the canonical
+  form (the refusal names the two lines that are out of order). Two modules
+  may never claim one path, and identical bytes never imply shared ownership.
+  `contract: true` marks a file that defines the module's public interface, so
+  changing it bumps the contract and pins dependents through an update.
+  `rewrite_module: true` lets the installer rewrite a canonical Go import
+  prefix — any configured registry's — into the derivative project's own
+  module path.
   `self_host: true` (test payloads only) marks an assertion about the
   publishing repository itself, installed only where the project's module path
   *is* that registry's `canonical_module` — see
@@ -434,6 +436,30 @@ The fields that carry weight:
   `replacement-required` or `major-version-only`. See
   [module removal](/docs/module-removal).
 
+### Three shape rules the refusals assume you know
+
+- **`files` and `migrations` are sorted** by `target`/`id` in the canonical
+  form. `registry build` refuses an unsorted array naming the pair.
+- **Every service target carries `title` and `docs_url`** (plus `id`, `mode`,
+  `environments`, `automation`), and every `runtime.cli[].name` is a **Go
+  identifier**: letters, digits, underscore, no hyphens — the name becomes a
+  subcommand and a generated symbol, so `aaw-uuid` is refused with the
+  spelling that works (`aawuuid`).
+- **An adapter's interface is the seam's, and the seam's page is where it
+  lives**: `mail.Sender` in [Email](/docs/email.md), `storage.Store` in
+  [Storage](/docs/storage.md), `identity.Verifier` and friends in
+  [Authentication](/docs/authentication.md), `billing.Client` in
+  [Billing](/docs/billing.md) — every feature page documents its seam before
+  its adapters. The slot id, capability, and Go type for all 18 slots —
+  `ggg/mail` → `mail.sender` → `mail.Sender` — and each dependency's current
+  contract number are in the generated
+  [module reference](/docs/module-reference); in any consumer project,
+  `ggg info ggg/system/mail --json` prints them from the seam's own manifest
+  (its `runtime.provider_slots` entry) without the reference. A
+  third-party registry's own repository has no module reference, so read the
+  seam page and `ggg info` from a consumer — that is the pair the authoring
+  path below assumes.
+
 ### The conditional rules the contract states
 
 Most manifest fields are required outright or optional outright, and
@@ -484,6 +510,16 @@ ggg registry validate    # check the catalog, then prove the closure lifecycle i
 ggg sync --offline       # install into this tree: writes the lock and the registry-owned aggregates
 ggg generate             # and ONLY this runs templ, sqlc and Tailwind — `sync` never does
 ```
+
+`registry build` refuses a module whose payloads changed at an unchanged
+revision, against whichever previous published state the tree has: a lock
+beside the tree (a self-hosting or consuming repository) compares revision
+numbers directly, and a standalone publisher's tree — no lock there — compares
+against the last signed snapshot, refusing when the manifest is still
+byte-identical to what was published while its payloads moved, which is the
+forgot-both case. The snapshot half cannot see a manifest that was edited
+without its revision being bumped; the lock half can, and a tree that carries
+both references always gets the strong form.
 
 `registry build` is the authoring step you will forget once: in a self-hosting
 registry the payload and its manifest live in the same tree, so editing a
@@ -597,6 +633,16 @@ ggg registry add github:acme/ggg-registry --namespace acme --ref v1.0.0 \
   --public-key "$(cat registry-public-key.b64)"
 ggg provider set --provider ggg/audit-export:production=acme/system/audit-export-ledger@ledger-cloud
 ```
+
+**A private repository requires `GITHUB_TOKEN`**, and every *online* command
+re-resolves every GitHub registry: `registry add`, `update`, and even
+read-only `info`/`catalog --latest`. Export a token with read access to the
+repository before any of them; without one, GitHub answers 404 for a private
+repository — the same status as a deleted one — and `ggg` appends exactly
+that explanation to the refusal. Offline commands (`setup`, `generate`,
+`check`, `sync --offline`) never touch the network and resolve through the
+lock-pinned cache instead, which is why a project that synced once keeps
+working with no token at all.
 
 Remote registries must be signed: an unsigned tree is consumable only as an
 explicitly configured project-relative `directory` source. `registry add`
@@ -971,9 +1017,14 @@ is a module like any other:
    targets, inputs, environment keys, dependencies, lifecycle and health; the
    capabilities come from the slot itself, so an adapter cannot advertise a
    capability set the seam did not declare.
-2. Implement the seam interface in that package. The vendor SDK is imported
-   **there** and nowhere else, and every vendor env key is declared on that
-   module.
+2. Implement the seam interface in that package — the interface itself is
+   documented on the feature page that owns the seam (`mail.Sender` in
+   [Email](/docs/email.md), `storage.Store` in [Storage](/docs/storage.md),
+   …; the full slot/capability/type table is in the
+   [module reference](/docs/module-reference), and a consumer's
+   `ggg info SEAM --json` prints the slot's entry from the seam's manifest —
+   `ggg/system/mail` for `mail.sender`/`mail.Sender`). The vendor SDK is imported **there** and nowhere else,
+   and every vendor env key is declared on that module.
 3. Run the seam's contract suite against it — `internal/mail/contract.Run`,
    `runClientContract`, and so on. An adapter that passes a narrower table
    than the managed one is an adapter that will fail in one environment only.

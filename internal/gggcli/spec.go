@@ -14,9 +14,22 @@ type CommandSpec struct {
 	// Flags declares the command's flags. Parsing, help, and completions
 	// derive from this list.
 	Flags []FlagSpec
+	// Subcommands declares a command's named sub-forms, like registry's ten.
+	// Help renders them and `ggg help COMMAND SUB` resolves against them, so
+	// the documented help form reaches one subcommand's usage instead of
+	// "unknown command" over a flat flag list.
+	Subcommands []SubcommandSpec
 	// SourceModule names the installed module that contributed the command.
 	// Empty for built-ins.
 	SourceModule string
+}
+
+// SubcommandSpec is one named sub-form of a command.
+type SubcommandSpec struct {
+	// Name is the subcommand word.
+	Name string
+	// Usage is the canonical argument shape `ggg help COMMAND SUB` renders.
+	Usage string
 }
 
 // FlagSpec declares one flag in a command's spec.

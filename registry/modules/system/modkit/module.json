@@ -158,6 +158,14 @@
         "contract": true
       },
       {
+        "source": "internal/gggcli/dogfood_av_regression_test.go",
+        "target": "internal/gggcli/dogfood_av_regression_test.go",
+        "class": "test",
+        "sha256": "92531cb9009110e10baf3d31a1c50f9eedc86811fe088a3964c5145d868c20db",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/gggcli/executors.go",
         "target": "internal/gggcli/executors.go",
         "class": "go",
@@ -561,6 +569,14 @@
         "target": "internal/modkit/doc.go",
         "class": "go",
         "sha256": "a325cb87fe64aa554a69db05ed036fe8ea616c5f0e5a867faf0bcba43978cf2d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modkit/dogfood_av_regression_test.go",
+        "target": "internal/modkit/dogfood_av_regression_test.go",
+        "class": "test",
+        "sha256": "e9ce62e477881ada4811e19c5d2c6387ee88c2ae70e06f7b2c164b6e9710a527",
         "rewrite_module": true,
         "contract": false
       },

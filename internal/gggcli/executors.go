@@ -441,9 +441,20 @@ func (c *Controller) applyRegistryBuild(dir string) (Result, error) {
 		}
 		return failureEnvelope("registry build", cause)
 	}
+	// refresh rewrites manifests, and with them the byte-identity to the last
+	// published snapshot that this half of the gate turns on. A standalone
+	// publisher's tree has no lock, and before this ran, its build absorbed a
+	// payload edit at an unchanged revision silently — the exact lie the
+	// lock-referenced half refuses in a self-hosting tree.
+	if err := modkit.ValidateManifestRevisionsAgainstSnapshot(dir); err != nil {
+		return failed(refusalError(err))
+	}
 	refreshed, err := modkit.RefreshManifestDigests(dir)
 	if err != nil {
-		return failed(runtimeError(err))
+		// A manifest that cannot decode, or a payload that is not there, is
+		// an authoring refusal like every other one below — not a runtime
+		// failure. "My manifest is invalid" is one class with one exit code.
+		return failed(refusalError(err))
 	}
 	// Refusing here rather than warning: revision is what every consumer reads
 	// to decide an update exists, so publishing changed bytes under an
@@ -455,6 +466,14 @@ func (c *Controller) applyRegistryBuild(dir string) (Result, error) {
 	built, discovered, err := modkit.BuildRegistryIndexes(dir)
 	if err != nil {
 		return failed(runtimeError(err))
+	}
+	// The indexes are now current, so this validates every manifest in the
+	// tree — including one authored since the last build — as one authoring
+	// class: decode errors, missing required fields, and later invariants
+	// (sorted files, cli names) all refuse with exit 3 before the snapshot
+	// exists, instead of splitting across exit 3 and a runtime exit 1.
+	if _, err := modkit.LoadCatalog(os.DirFS(dir)); err != nil {
+		return failed(refusalError(err))
 	}
 	// After the indexes, before the snapshot. The indexes are the registry's
 	// statement of which documents belong to it, so ownership cannot be

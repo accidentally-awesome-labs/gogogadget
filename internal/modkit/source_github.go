@@ -148,6 +148,22 @@ func validateGitHubSnapshot(snapshot Snapshot, registry ProjectRegistry) (Snapsh
 	return snapshot, nil
 }
 
+// githubAccessHint names the likely cause of a 404/403 from the GitHub API
+// without leaking anything about the credential itself. GitHub answers 404 —
+// not 403 — for a private repository the request carries no token for, so a
+// consumer of a private registry reading a bare "Not Found" cannot tell a
+// missing GITHUB_TOKEN from a mistyped repository from a deleted ref. The
+// hint separates exactly those cases.
+func (s GitHubSource) githubAccessHint(statusCode int) string {
+	if statusCode != http.StatusNotFound && statusCode != http.StatusForbidden {
+		return ""
+	}
+	if s.Token == "" {
+		return "; GitHub answers 404 for a repository it will not show anonymously — export GITHUB_TOKEN with read access to this repository (private registries require it), or check the repository name and ref"
+	}
+	return "; GITHUB_TOKEN is set, so either the token lacks access to this repository or the ref does not exist"
+}
+
 func (s GitHubSource) resolveGitHubCommit(ctx context.Context, client *http.Client, apiBaseURL, repository, ref string) (string, error) {
 	owner, repo, _ := strings.Cut(repository, "/")
 	requestURL := strings.TrimRight(apiBaseURL, "/") + "/repos/" + owner + "/" + repo + "/commits/" + url.PathEscape(ref)
@@ -166,7 +182,7 @@ func (s GitHubSource) resolveGitHubCommit(ctx context.Context, client *http.Clie
 		if readErr != nil {
 			return "", fmt.Errorf("read GitHub ref error response for %q at %q: %w", repository, ref, readErr)
 		}
-		return "", fmt.Errorf("resolve GitHub ref for %q at %q: HTTP %s: %s", repository, ref, response.Status, text)
+		return "", fmt.Errorf("resolve GitHub ref for %q at %q: HTTP %s: %s%s", repository, ref, response.Status, text, s.githubAccessHint(response.StatusCode))
 	}
 
 	body, err := readAndCloseBounded(response.Body, maxGitHubAPIResponse, "GitHub ref response")
@@ -265,7 +281,7 @@ func (s GitHubSource) downloadGitHubArchive(ctx context.Context, client *http.Cl
 		if readErr != nil {
 			return fmt.Errorf("read GitHub archive error response for %q at %s: %w", repository, commit, readErr)
 		}
-		return fmt.Errorf("download GitHub archive for %q at %s: HTTP %s: %s", repository, commit, response.Status, text)
+		return fmt.Errorf("download GitHub archive for %q at %s: HTTP %s: %s%s", repository, commit, response.Status, text, s.githubAccessHint(response.StatusCode))
 	}
 	defer closeSource(&err, response.Body, "GitHub archive response body")
 	if response.ContentLength > maxGitHubArchive {

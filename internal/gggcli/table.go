@@ -127,7 +127,18 @@ func builtInCommands() []CommandSpec {
 			{Name: "ref", Help: "GitHub registry ref", Value: true}, {Name: "answers", Help: "JSON answers file", Value: true},
 			{Name: "non-interactive", Help: "refuse missing answers instead of prompting"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "registry", Summary: "Author, verify, and manage registry sources", Usage: "ggg registry build|validate|init|keygen|sign|verify|rotate|add|remove|update", Flags: []FlagSpec{
+		{Name: "registry", Summary: "Author, verify, and manage registry sources", Usage: "ggg registry build|validate|init|keygen|sign|verify|rotate|add|remove|update", Subcommands: []SubcommandSpec{
+			{Name: "build", Usage: "ggg registry build [--dir DIR]"},
+			{Name: "validate", Usage: "ggg registry validate [--closures core|external|all]"},
+			{Name: "init", Usage: "ggg registry init --namespace NAMESPACE --canonical-module MODULE"},
+			{Name: "keygen", Usage: "ggg registry keygen --private PATH --public PATH"},
+			{Name: "sign", Usage: "ggg registry sign --dir DIR (--key-file PATH | GGG_REGISTRY_SIGNING_KEY)"},
+			{Name: "verify", Usage: "ggg registry verify --dir DIR --public-key KEY"},
+			{Name: "rotate", Usage: "ggg registry rotate --dir DIR --old-key-file PATH --new-key-file PATH --not-before RFC3339"},
+			{Name: "add", Usage: "ggg registry add github:OWNER/REPO|directory:PATH --namespace NAMESPACE [--ref REF --public-key KEY]"},
+			{Name: "remove", Usage: "ggg registry remove NAMESPACE"},
+			{Name: "update", Usage: "ggg registry update [--registry NAMESPACE --ref REF]"},
+		}, Flags: []FlagSpec{
 			{Name: "json", Help: "emit the machine envelope"},
 			{Name: "closures", Help: "closure family to exercise: core, external, or all (validate)", Value: true},
 			{Name: "namespace", Help: "registry namespace (init, add, remove)", Value: true},
@@ -186,11 +197,35 @@ func renderHelp(table []CommandSpec, command string) string {
 		b.WriteString("\nRun `ggg help COMMAND` for a command's flags. `ggg` with no arguments\nopens the interactive console when attached to a terminal.\n")
 		return b.String()
 	}
+	// `ggg help COMMAND SUB` reaches one subcommand's usage. Only a declared
+	// subcommand resolves — the documented help form used to answer "unknown
+	// command" for exactly the commands that have subcommands, leaving the
+	// one flat flag list as the only help there was.
+	words := strings.Fields(command)
+	if len(words) > 1 {
+		spec, ok := lookupSpec(table, words[0])
+		if !ok {
+			return fmt.Sprintf("unknown command %q\n\n%s", command, renderHelp(table, ""))
+		}
+		for _, sub := range spec.Subcommands {
+			if sub.Name == words[1] {
+				fmt.Fprintf(&b, "%s %s - %s\n\nUsage:\n  %s\n", spec.Name, sub.Name, spec.Summary, sub.Usage)
+				return b.String()
+			}
+		}
+		return fmt.Sprintf("unknown %s subcommand %q\n\n%s", spec.Name, words[1], renderHelp(table, spec.Name))
+	}
 	spec, ok := lookupSpec(table, command)
 	if !ok {
 		return fmt.Sprintf("unknown command %q\n\n%s", command, renderHelp(table, ""))
 	}
 	fmt.Fprintf(&b, "%s - %s\n\nUsage:\n  %s\n", spec.Name, spec.Summary, spec.Usage)
+	if len(spec.Subcommands) > 0 {
+		b.WriteString("\nSubcommands:\n")
+		for _, sub := range spec.Subcommands {
+			fmt.Fprintf(&b, "  %s\n", sub.Usage)
+		}
+	}
 	if len(spec.Flags) > 0 {
 		b.WriteString("\nFlags:\n")
 		for _, flag := range spec.Flags {

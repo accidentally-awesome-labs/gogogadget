@@ -195,7 +195,9 @@ touches manifests, never payloads.
 from the same command table the dispatcher reads** (`CommandTable()` in
 `internal/gggcli/table.go`), so a command or flag cannot exist in one place
 and be invisible in another. That table is the authoritative list; run
-`ggg help COMMAND` rather than trusting a copy.
+`ggg help COMMAND` rather than trusting a copy. Commands with subcommands
+resolve one level down: `ggg help registry init` prints that subcommand's
+usage, and `ggg help registry` lists all ten with their forms.
 
 Notable behavior, all enforced rather than advisory:
 

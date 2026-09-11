@@ -444,7 +444,7 @@ func validateManifestFiles(files []ManifestFile, canonical bool) error {
 		}
 		seen[file.Target] = struct{}{}
 		if canonical && i > 0 && last > file.Target {
-			return fmt.Errorf("manifest files must be sorted by target")
+			return fmt.Errorf("manifest files[%d] must be sorted by target (\x22%s\x22 sorts before \x22%s\x22; the canonical form is the sorted-by-target order)", i, file.Target, last)
 		}
 		last = file.Target
 	}
@@ -660,7 +660,8 @@ func validateCLIContributions(commands []CLIContribution, canonical bool) error 
 	last := ""
 	for i, command := range commands {
 		if !validIdentifier(command.Name) {
-			return fmt.Errorf("manifest runtime cli[%d] name is invalid", i)
+			return fmt.Errorf(
+				"manifest runtime cli[%d] name %q is invalid: a cli name is a Go identifier (letters, digits, underscore; no hyphens) because it becomes a subcommand and a generated symbol — write \x22%s\x22", i, command.Name, strings.ReplaceAll(command.Name, "-", ""))
 		}
 		if strings.TrimSpace(command.Summary) == "" {
 			return fmt.Errorf("manifest runtime cli[%d] summary is required", i)

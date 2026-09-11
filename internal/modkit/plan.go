@@ -246,6 +246,15 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		}
 		desiredProject.Registries = append([]ProjectRegistry(nil), op.SetRegistries...)
 	}
+	if op.SetExclude != nil {
+		if op.Kind != OpSync {
+			return Plan{}, fmt.Errorf("operation %q does not accept an exclude set", op.Kind)
+		}
+		// A non-nil empty slice means "the list is now empty" and must stay
+		// one: appending onto nil would leave the exclude array absent, and
+		// the project document refuses to marshal without it.
+		desiredProject.Exclude = append([]string{}, op.SetExclude...)
+	}
 	previousDeployment := currentProject.Deployment
 	if op.SetProviders != nil {
 		desiredProject.Providers = maps.Clone(op.SetProviders)
@@ -532,17 +541,20 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			return Plan{}, fmt.Errorf("deployment module %q must provide exactly one deploy target", op.SetDeployment)
 		}
 	}
-	retiring := map[string]struct{}{}
+	retiring := map[string]retirement{}
 	if op.SetDeployment != "" && previousDeployment != "" && previousDeployment != op.SetDeployment {
 		if _, installed := oldModuleByID(existingLock, previousDeployment); installed {
-			retiring[previousDeployment] = struct{}{}
+			retiring[previousDeployment] = retirement{deployment: true}
 		}
 	}
 	for id := range retiredAdapters(existingLock, desiredProject) {
-		retiring[id] = struct{}{}
+		// The slot the deselected adapter served is part of the refusal's
+		// remedy, so it is recorded with the retirement rather than derived
+		// again where the message is written.
+		retiring[id] = retirement{slot: adapterSlot(moduleByID, existingLock, id)}
 	}
 	finalLock, changes, conflicts, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims, retiring, retained,
+		ctx, canonicalRoot, snapshot, registrySources, graph, payloads, existingLock, hasLock, claims, retiring, retained,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -645,6 +657,12 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		rendered:             rendered,
 	}, nil
 }
+
+// ModuleIDNamespace returns the namespace segment of a scoped module id
+// ("" when the id is unscoped), so callers outside the engine — like the
+// registry-remove flow, which must drop the exclude tombstones of the
+// namespace it removes — share the one definition of the split.
+func ModuleIDNamespace(id string) string { return moduleNamespace(id) }
 
 func moduleNamespace(id string) string {
 	namespace, _, _, ok := splitScopedModuleID(id)
@@ -761,6 +779,19 @@ func normalizedClaims(claims []string) (map[string]struct{}, error) {
 		normalized[trimmed] = struct{}{}
 	}
 	return normalized, nil
+}
+
+// adapterSlot names the provider slot an installed adapter serves, preferring
+// the catalog's current declaration and falling back to the locked manifest —
+// either is the truth a retirement refusal should quote.
+func adapterSlot(moduleByID map[string]Manifest, lock Lock, id string) string {
+	if module, ok := moduleByID[id]; ok && module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+		return module.Runtime.System.Adapter.Slot
+	}
+	if module, installed := oldModuleByID(lock, id); installed && module.Manifest.Runtime.System != nil && module.Manifest.Runtime.System.Adapter != nil {
+		return module.Manifest.Runtime.System.Adapter.Slot
+	}
+	return ""
 }
 
 // retiredAdapters lists the adapters an explicit provider replacement stops

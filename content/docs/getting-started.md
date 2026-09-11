@@ -82,8 +82,8 @@ over a tree no command can run.
 
 | Profile | Members | Closure | Required provider slots | What it is |
 |---|---|---|---|---|
-| `minimal` | 48 | 159 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
-| `web` | 190 | 254 | 18 | Minimal's floor plus public content, internationalization and the discovery surfaces |
+| `minimal` | 49 | 160 | 18 | The smallest closure that **boots** — not a small application. See the floor below |
+| `web` | 191 | 255 | 18 | Minimal's floor plus public content, internationalization and the discovery surfaces |
 | `saas` | 296 | 289 | 18 | Web plus organizations, billing, jobs, notifications, admin and the product workflows — the largest closure here |
 | `full` | 286 | 288 | 18 | Every product module plus the registry-publishing template. The name overstates it; see below |
 
@@ -92,7 +92,7 @@ actually resolves to. The two differ in both directions. Members that are
 adapter candidates do not enter the closure unless the provider selections
 choose them — which is why `saas` names 296 and installs 289 — and a seam
 pulled in only through some member's `requires` enters without being named,
-which is why `minimal` names 48 and installs 159. That second direction is
+which is why `minimal` names 49 and installs 160. That second direction is
 also why every profile requires all 18 slots: a seam pulled in transitively
 declares its slot just as loudly as one named in the list.
 
@@ -106,7 +106,7 @@ These numbers are asserted, not remembered.
 `internal/modkit` plans every shipped profile and fails on the commit that
 moves a count without moving this table.
 
-#### Why `minimal` is 159 modules
+#### Why `minimal` is 160 modules
 
 Because the floor is not a taste decision, and `minimal` is where you see it.
 What it no longer contains is a hand-curated component list: every page,
@@ -167,7 +167,7 @@ Three floors remain:
   theme picker and an impersonation banner. Those two hooks are middleware,
   not a payload in the wrong module, so the fix is a request-pipeline
   contribution kind that does not exist yet. Measured, it is worth **six**
-  modules (159 → 153: `workflow/{appearance,impersonation}`,
+  modules (160 → 154: `workflow/{appearance,impersonation}`,
   `system/impersonation`, `page/{admin-overview,admin-users}` and
   `component/toolbar`) and taking them needs one more change, because the
   admin sidebar's `after` chain has no matching `requires`: with those two
@@ -214,7 +214,7 @@ advertising a shape that does not exist.
 
 #### `ggg/profile/api` is gone, and `full` is not the whole catalog
 
-**`api` was deleted.** It resolved to the same 254-module closure as `web`,
+**`api` was deleted.** It resolved to the same closure as `web`,
 module for module, because the JSON API transport it existed to add is
 something `ggg/system/server` requires. Two advertised names for one closure
 is a lie no documentation fixes, so the name went rather than the explanation.
