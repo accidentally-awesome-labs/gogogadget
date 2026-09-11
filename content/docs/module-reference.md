@@ -535,7 +535,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/billing` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/billing-local` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/billing-polar` | `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
-| `ggg/system/cli-ui` | `charm.land/bubbletea/v2 v2.0.0` `charm.land/bubbles/v2 v2.0.0` `charm.land/huh/v2 v2.0.0` `charm.land/lipgloss/v2 v2.0.0` | — | — |
+| `ggg/system/cli-ui` | `charm.land/bubbles/v2 v2.0.0` `charm.land/bubbletea/v2 v2.0.0` `charm.land/huh/v2 v2.0.0` `charm.land/lipgloss/v2 v2.0.0` | — | — |
 | `ggg/system/config` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/content` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `github.com/yuin/goldmark v1.8.5` `gopkg.in/yaml.v3 v3.0.1` | — | — |
 | `ggg/system/database` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/pressly/goose/v3 v3.27.3` `github.com/stretchr/testify v1.11.1` | — | — |
