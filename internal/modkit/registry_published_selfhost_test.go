@@ -404,7 +404,7 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 			continue
 		}
 		walked[goName] = true
-		assertSchemaDefinition(t, definitions, name, modelType, conditional, publishedConditionalRules)
+		assertSchemaDefinition(t, definitions, name, modelType, conditional, publishedConditionalRules, schemaDefinitionAliases)
 	}
 
 	// The other direction: a model type the documents state inline rather

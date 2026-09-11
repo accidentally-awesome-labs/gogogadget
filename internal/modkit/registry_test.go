@@ -354,14 +354,14 @@ func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
 // conditional keyword.
 func assertSchemaDefinition(
 	t *testing.T, definitions map[string]map[string]any, definitionName string, modelType reflect.Type,
-	conditional map[string]bool, recorded map[string]string,
+	conditional map[string]bool, recorded map[string]string, aliases map[string]string,
 ) {
 	t.Helper()
 	definition, ok := definitions[definitionName]
 	if !ok {
 		t.Fatalf("schema definition %s is missing", definitionName)
 	}
-	assertSchemaShape(t, definitions, definitionName, definition, modelType, conditional, recorded)
+	assertSchemaShape(t, definitions, definitionName, definition, modelType, conditional, recorded, aliases)
 }
 
 // assertSchemaShape is the body of the above over one schema NODE. A struct
@@ -371,7 +371,7 @@ func assertSchemaDefinition(
 func assertSchemaShape(
 	t *testing.T, definitions map[string]map[string]any, definitionName string,
 	definition map[string]any, modelType reflect.Type,
-	conditional map[string]bool, recorded map[string]string,
+	conditional map[string]bool, recorded map[string]string, aliases map[string]string,
 ) {
 	t.Helper()
 	if got := definition["type"]; got != "object" {
@@ -387,13 +387,15 @@ func assertSchemaShape(
 	// refersTo reports whether a `$ref` names the definition a Go type is
 	// published as. A type may be published under more than one name — the
 	// project document restates two lock definitions under its own names —
-	// and schemaDefinitionAliases is the only place that is written down.
+	// and aliases is the only place that is written down. It arrives as a
+	// parameter because this file ships to derivative projects, which do not
+	// carry the self-host inventory that defines it.
 	refersTo := func(ref string, goType string) bool {
 		_, name, found := strings.Cut(ref, "#/$defs/")
 		if !found {
 			return false
 		}
-		if alias, ok := schemaDefinitionAliases[name]; ok {
+		if alias, ok := aliases[name]; ok {
 			name = alias
 		}
 		return name == goType
@@ -486,7 +488,7 @@ func assertSchemaShape(
 					t.Fatalf("schema definition %s property %s neither $refs %s nor states its properties inline",
 						definitionName, parts[0], fieldType.Name())
 				}
-				assertSchemaShape(t, definitions, definitionName+"."+parts[0], property, fieldType, conditional, recorded)
+				assertSchemaShape(t, definitions, definitionName+"."+parts[0], property, fieldType, conditional, recorded, aliases)
 				break
 			}
 			if !refersTo(ref, fieldType.Name()) {
