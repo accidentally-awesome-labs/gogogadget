@@ -2,6 +2,7 @@ package modkit
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -906,5 +907,172 @@ func TestValidateManifestRevisionsRefusesChangedPayloadsAtTheSameRevision(t *tes
 	}
 	if err := ValidateManifestRevisions(bare); err != nil {
 		t.Fatalf("a registry with no lock was refused: %v", err)
+	}
+}
+
+// releaseBaselineModule writes one module into a registry tree: the payload on
+// disk and the manifest that declares its digest, the way `registry build`
+// leaves them after a refresh. It returns the manifest bytes, which is what a
+// release publishes and what the baseline is loaded from.
+func releaseBaselineModule(t *testing.T, root, name string, revision int, payload []byte) []byte {
+	t.Helper()
+	source := "internal/" + name + "/" + name + ".go"
+	if err := os.MkdirAll(filepath.Join(root, "internal", name), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(source)), payload, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dir := filepath.Join(root, "registry", "modules", "system", name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := []byte(fmt.Sprintf(`{"schema":2,"module":{"id":"ggg/system/%s","kind":"system","name":"%s",
+"revision":%d,"contract":1,"title":"Module","description":"One module.","requires":[],
+"dependencies":{"go":[],"tools":[],"containers":[]},
+"files":[{"source":%q,"target":%q,"class":"go","sha256":%q,"rewrite_module":true,"contract":true}],
+"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},"data":[],"removal_policy":"free"}}`,
+		name, name, revision, source, source, digestBytes(payload)))
+	if err := os.WriteFile(filepath.Join(dir, "module.json"), manifest, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return manifest
+}
+
+// publishReleaseBaseline signs nothing and pins everything: the snapshot a
+// release writes is an index of paths to digests, and the baseline loader
+// authenticates each manifest against it.
+func publishReleaseBaseline(t *testing.T, ref string, manifests map[string][]byte) ReleaseBaseline {
+	t.Helper()
+	snapshot := RegistrySnapshot{Schema: 1}
+	for path, data := range manifests {
+		snapshot.Files = append(snapshot.Files, SnapshotFile{Path: path, SHA256: digestBytes(data)})
+	}
+	slices.SortFunc(snapshot.Files, func(a, b SnapshotFile) int { return strings.Compare(a.Path, b.Path) })
+	data, err := json.Marshal(snapshot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline, err := LoadReleaseBaseline(ref, data, func(path string) ([]byte, error) {
+		published, ok := manifests[path]
+		if !ok {
+			return nil, fmt.Errorf("%s is not in the released tree", path)
+		}
+		return published, nil
+	})
+	if err != nil {
+		t.Fatalf("load the %s baseline: %v", ref, err)
+	}
+	return baseline
+}
+
+// The hole the lock and snapshot halves cannot see: one edit that moves a
+// payload AND refreshes the digest recorded for it leaves manifest and disk
+// agreeing at the old revision. The released snapshot is the third point, and
+// it is immutable — no working-tree command rewrites a tag.
+func TestValidateRevisionsAgainstReleaseBaselineRefusesBytesThatMovedWithoutABump(t *testing.T) {
+	const manifestPath = "registry/modules/system/hatch/module.json"
+
+	// The release: one module at revision 3, payload and manifest agreeing.
+	published := t.TempDir()
+	baseline := publishReleaseBaseline(t, "v1.2.0", map[string][]byte{
+		manifestPath: releaseBaselineModule(t, published, "hatch", 3, []byte("package hatch\n\nconst Version = 1\n")),
+	})
+
+	// Untouched since the release: passes, and needs no bump. This is the
+	// false-positive half — most modules in any cycle are this one.
+	if err := ValidateRevisionsAgainstReleaseBaseline(published, baseline); err != nil {
+		t.Fatalf("a module untouched since the release was refused: %v", err)
+	}
+
+	// The incident shape: the payload moves and the manifest absorbs its new
+	// digest in the same edit, at the same revision. Both existing gates see
+	// two artifacts in agreement; this one sees the release.
+	tree := t.TempDir()
+	releaseBaselineModule(t, tree, "hatch", 3, []byte("package hatch\n\nconst Version = 2\n"))
+	err := ValidateRevisionsAgainstReleaseBaseline(tree, baseline)
+	if err == nil {
+		t.Fatal("a module that republished new bytes under its published revision was accepted")
+	}
+	for _, want := range []string{"ggg/system/hatch", "published revision 3", "tree revision 3", "v1.2.0"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("the refusal must name the module, both revisions and the baseline; %q is missing from: %v", want, err)
+		}
+	}
+
+	// The remedy, and its scope: one bump clears the module for the whole
+	// release cycle, however many further edits it takes. Per release, not
+	// per commit.
+	bumped := t.TempDir()
+	releaseBaselineModule(t, bumped, "hatch", 4, []byte("package hatch\n\nconst Version = 2\n"))
+	if err := ValidateRevisionsAgainstReleaseBaseline(bumped, baseline); err != nil {
+		t.Fatalf("a bumped module was refused: %v", err)
+	}
+	releaseBaselineModule(t, bumped, "hatch", 4, []byte("package hatch\n\nconst Version = 3\n"))
+	if err := ValidateRevisionsAgainstReleaseBaseline(bumped, baseline); err != nil {
+		t.Fatalf("a second edit at the same bumped revision was refused, so the gate demands a bump per commit: %v", err)
+	}
+
+	// A revision that moved BACKWARD is not a bump: the published revision is
+	// a floor, not a difference.
+	lowered := t.TempDir()
+	releaseBaselineModule(t, lowered, "hatch", 2, []byte("package hatch\n\nconst Version = 2\n"))
+	if err := ValidateRevisionsAgainstReleaseBaseline(lowered, baseline); err == nil {
+		t.Fatal("a module whose revision moved backward while its bytes moved was accepted")
+	}
+
+	// A module absent from the release has nothing to compare: new modules
+	// arrive at revision 1 and must not be refused for it.
+	fresh := t.TempDir()
+	releaseBaselineModule(t, fresh, "hatch", 3, []byte("package hatch\n\nconst Version = 1\n"))
+	releaseBaselineModule(t, fresh, "newcomer", 1, []byte("package newcomer\n"))
+	if err := ValidateRevisionsAgainstReleaseBaseline(fresh, baseline); err != nil {
+		t.Fatalf("a module absent from the baseline was refused: %v", err)
+	}
+
+	// Published then deleted: passes. The refusal's remedy is an edit to a
+	// manifest that no longer exists, and removal is the catalog's business,
+	// not the version of record's.
+	removed := t.TempDir()
+	if err := ValidateRevisionsAgainstReleaseBaseline(removed, baseline); err != nil {
+		t.Fatalf("a module deleted since the release was refused: %v", err)
+	}
+}
+
+// The baseline is only worth comparing against if it is the release. A
+// manifest whose bytes disagree with the digest the signed snapshot pins for
+// it is a corrupted tree, and an empty index would pass everything while
+// reporting a clean line.
+func TestLoadReleaseBaselineRefusesATreeThatDisagreesWithItsSnapshot(t *testing.T) {
+	const manifestPath = "registry/modules/system/hatch/module.json"
+	published := t.TempDir()
+	manifest := releaseBaselineModule(t, published, "hatch", 3, []byte("package hatch\n"))
+	snapshot, err := json.Marshal(RegistrySnapshot{Schema: 1, Files: []SnapshotFile{
+		{Path: manifestPath, SHA256: digestBytes(manifest)},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = LoadReleaseBaseline("v1.2.0", snapshot, func(string) ([]byte, error) {
+		return []byte(`{"schema":2,"module":{"id":"ggg/system/hatch","revision":9}}`), nil
+	})
+	if err == nil {
+		t.Fatal("a manifest whose bytes disagree with the signed snapshot was accepted as a baseline")
+	}
+	if !strings.Contains(err.Error(), manifestPath) {
+		t.Fatalf("the refusal must name the file that disagrees: %v", err)
+	}
+
+	if _, err := LoadReleaseBaseline("v1.2.0", []byte(`{"files":[]}`), func(string) ([]byte, error) {
+		return nil, errors.New("nothing published")
+	}); err == nil {
+		t.Fatal("a snapshot indexing no file was accepted as a baseline, so every comparison against it would pass vacuously")
+	}
+
+	if _, err := LoadReleaseBaseline("", []byte(`{"files":[{"path":"registry.json","sha256":"x"}]}`), func(string) ([]byte, error) {
+		return nil, errors.New("nothing published")
+	}); err == nil {
+		t.Fatal("a baseline with no ref was accepted, so its refusals could not say what the tree changed since")
 	}
 }

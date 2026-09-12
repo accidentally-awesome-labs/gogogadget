@@ -112,7 +112,19 @@ jobs:
           --health-timeout 3s
           --health-retries 20
     steps:
+      # fetch-depth: 0, and only in this job. The accounted suite carries a
+      # guard that measures every module's bytes against the registry
+      # snapshot of the last RELEASED tag
+      # (TestEveryModuleChangedSinceTheLastReleaseCarriesAHigherRevision):
+      # it reads that snapshot out of git, so a single-commit checkout with
+      # no tags would make it skip [inapplicable] on every push — a guard
+      # that is real on contributors' machines and vacuous in the one place
+      # that gates the branch. The cost is the full history (51.6 MiB packed
+      # against a 37 MB tree) on the job that already pulls two container
+      # images. internal/modkit/ci_workflow_test.go pins this.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       # The other half of the protocol-container tier. See the `services`
       # comment above for why MinIO cannot be a service container: `services`

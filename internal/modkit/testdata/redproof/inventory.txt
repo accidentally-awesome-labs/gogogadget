@@ -49,6 +49,7 @@ TestEveryKindIsStyledForEveryStateFamily	web	allow:sweep web.md row 16 DECLARATI
 TestEveryLiveCanaryKeyIsMappedInTheWorkflow	modkit	own-canary-key-unmapped
 TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion	modkit	own-canary-leaves-unstated
 TestEveryManagedAdapterIsCanariedOrExcused	modkit	own-canary-adapter-unexcused
+TestEveryModuleChangedSinceTheLastReleaseCarriesAHigherRevision	modkit	allow:a scratch-copy patch cannot turn this guard red: the proof runner strips .git and gives the copy a fresh identity, so the scratch has no release tag and a plant would meet the guard's [inapplicable] skip — a masquerade, not a proof. Its reds were driven by hand against real history and are quoted in .superpowers/sdd/framework-followups/task-be-report.md (the four-module v0.26.0 incident tree refused by name with both revisions, a bumped module green, an untouched module green without a bump), and the first of those is wired in permanently as TestReleaseBaselineGateRefusesTheV0260IntegrationIncident. A patch becomes possible once redproofPatch can carry a baseline ref
 TestEveryRendererPropagatesItsAttrs	web	web-plantwidget
 TestEverySizeIsStyledForEveryControlFamily	web	allow:sweep web.md row 14 DECLARATION-DERIVED (same filter as row 15); compensated by the rendered-output universal patched as web-badge-xxl
 TestEveryTemplRawCallSiteIsJustified	web	web-templ-raw

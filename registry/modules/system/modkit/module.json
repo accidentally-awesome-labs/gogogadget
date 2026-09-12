@@ -1026,6 +1026,23 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/revision_baseline.go",
+        "target": "internal/modkit/revision_baseline.go",
+        "class": "go",
+        "sha256": "94db140363d792c17e474111bbaa2cd1e68a6d51f4ac621423b589f3b4513ff3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modkit/revision_baseline_selfhost_test.go",
+        "target": "internal/modkit/revision_baseline_selfhost_test.go",
+        "class": "test",
+        "sha256": "71f726d399ce5c93e8ca3d055b10b1834ee606e1449a9b77093f539a8395cfd7",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/rewrite.go",
         "target": "internal/modkit/rewrite.go",
         "class": "go",

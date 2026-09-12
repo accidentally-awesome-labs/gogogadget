@@ -210,9 +210,17 @@ func assertCIJobRunsTheAccountedSuite(t *testing.T, workflow ciWorkflow, jobName
 // job, and the green wall waited on both instrumentations for one job's
 // worth of either signal.
 //
+// It is also the one `ci.yml` job whose checkout is pinned to fetch-depth: 0.
+// The accounted suite carries a guard that measures every module's bytes
+// against the registry snapshot of the last RELEASED tag, reading it out of
+// git; on the default single-commit checkout that guard skips
+// [inapplicable] on every push, which is a guard that is real on a
+// contributor's machine and vacuous on the branch it gates. No other job
+// runs it, so no other job pays the full history.
+//
 // Mutation: put `go test -race ./...` back, wrap the command in an echo, drop
-// --race, re-add --cover, or change the mode to smoke, and this fails naming
-// the command it found.
+// --race, re-add --cover, change the mode to smoke, or drop the checkout's
+// fetch-depth, and this fails naming what it found.
 func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	root, err := canonicalProjectRoot(specRepoRoot(t))
 	if err != nil {
@@ -220,6 +228,24 @@ func TestCITestJobRunsTheAccountedSuiteUnderRace(t *testing.T) {
 	}
 	workflow, _ := readCIWorkflow(t, root)
 	assertCIJobRunsTheAccountedSuite(t, workflow, "test", []string{"--race"}, []string{"--cover"})
+
+	job, ok := workflow.Jobs["test"]
+	if !ok {
+		t.Fatal("ci.yml declares no `test` job")
+	}
+	var checkouts int
+	for _, step := range job.Steps {
+		if step.Uses != "actions/checkout@v7" {
+			continue
+		}
+		checkouts++
+		if step.With["fetch-depth"] != "0" {
+			t.Fatalf("the `test` job's checkout pins fetch-depth %q; the release-baseline revision guard reads the last released registry.snapshot.json out of git and would skip [inapplicable] on every push without the full history (fetch-depth: 0)", step.With["fetch-depth"])
+		}
+	}
+	if checkouts != 1 {
+		t.Fatalf("the `test` job checks out the repository %d times; one checkout carries the fetch-depth this job's guards need", checkouts)
+	}
 }
 
 // The `cover` job's suite runs with coverage and without race. It is the

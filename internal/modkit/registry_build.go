@@ -313,42 +313,22 @@ func ValidateManifestRevisions(root string) error {
 		previous[module.ID] = module
 	}
 
+	scanned, err := scanRegistryManifests(root)
+	if err != nil {
+		return err
+	}
 	stale := make([]string, 0)
-	for _, include := range catalogIncludes {
-		if include.kind == CatalogProfile {
+	for _, manifest := range scanned {
+		document := manifest.document
+		locked, known := previous[document.Module.ID]
+		if !known {
 			continue
 		}
-		dir := filepath.Join(root, "registry", "modules", string(include.kind))
-		entries, readErr := os.ReadDir(dir)
-		if errors.Is(readErr, fs.ErrNotExist) {
+		if document.Module.Revision != locked.Revision {
 			continue
 		}
-		if readErr != nil {
-			return fmt.Errorf("scan %s: %w", dir, readErr)
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
-			rel := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
-			data, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
-			if readErr != nil {
-				continue
-			}
-			var document ModuleDocument
-			if err := decodeStrict(data, &document); err != nil {
-				continue
-			}
-			locked, known := previous[document.Module.ID]
-			if !known {
-				continue
-			}
-			if document.Module.Revision != locked.Revision {
-				continue
-			}
-			if manifestPayloadDigest(document.Module) != lockedPayloadDigest(locked) {
-				stale = append(stale, fmt.Sprintf("%s (revision %d)", document.Module.ID, locked.Revision))
-			}
+		if manifestPayloadDigest(document.Module) != lockedPayloadDigest(locked) {
+			stale = append(stale, fmt.Sprintf("%s (revision %d)", document.Module.ID, locked.Revision))
 		}
 	}
 	return refuseStaleRevisions(stale)
@@ -385,40 +365,19 @@ func ValidateManifestRevisionsAgainstSnapshot(root string) error {
 		published[file.Path] = file.SHA256
 	}
 
+	scanned, err := scanRegistryManifests(root)
+	if err != nil {
+		return err
+	}
 	stale := make([]string, 0)
-	for _, include := range catalogIncludes {
-		if include.kind == CatalogProfile {
+	for _, manifest := range scanned {
+		if pinned, listed := published[manifest.path]; !listed || pinned != digestBytes(manifest.raw) {
+			// The manifest moved since the last published snapshot, so
+			// the revision may have moved with it: not provably stale.
 			continue
 		}
-		dir := filepath.Join(root, "registry", "modules", string(include.kind))
-		entries, readErr := os.ReadDir(dir)
-		if errors.Is(readErr, fs.ErrNotExist) {
-			continue
-		}
-		if readErr != nil {
-			return fmt.Errorf("scan %s: %w", dir, readErr)
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
-			rel := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
-			data, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
-			if readErr != nil {
-				continue
-			}
-			if pinned, listed := published[rel]; !listed || pinned != digestBytes(data) {
-				// The manifest moved since the last published snapshot, so
-				// the revision may have moved with it: not provably stale.
-				continue
-			}
-			var document ModuleDocument
-			if err := decodeStrict(data, &document); err != nil {
-				continue
-			}
-			if manifestPayloadsMoved(root, document.Module) {
-				stale = append(stale, fmt.Sprintf("%s (revision %d)", document.Module.ID, document.Module.Revision))
-			}
+		if manifestPayloadsMoved(root, manifest.document.Module) {
+			stale = append(stale, fmt.Sprintf("%s (revision %d)", manifest.document.Module.ID, manifest.document.Module.Revision))
 		}
 	}
 	return refuseStaleRevisions(stale)

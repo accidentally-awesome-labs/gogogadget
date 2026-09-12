@@ -100,7 +100,7 @@ assertion about THIS repository — the committed snapshot signature, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
 `canonical_module`. So a new self-hosting test goes in a `self_host` payload
-— 64 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+— 65 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
 `ggg/system/server`, because the module that owns the SUBJECT owns the
 assertion about it: the `*_selfhost_test.go` files, the bare
 `selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus
@@ -134,7 +134,21 @@ lock, so one bump covers a whole editing session): revision moves on any
 implementation change, contract only when a consumer must change code.
 `make generate` refreshes digests too but runs neither the revision gate nor
 the snapshot writer, so it absorbs a payload edit without refusal and leaves
-`registry.snapshot.json` stale — hence the pair. `update` never overwrites
+`registry.snapshot.json` stale — hence the pair. Both build-time halves
+compare the manifest against something the same workflow rewrites (the lock,
+the bytes on disk), so one edit that moves a payload AND refreshes the digest
+recorded for it is invisible to them — it published four modules' new bytes
+under their old revisions at v0.26.0. The third point is immutable: `make
+check` runs
+`TestEveryModuleChangedSinceTheLastReleaseCarriesAHigherRevision`
+(`modkit.ValidateRevisionsAgainstReleaseBaseline`), which measures every
+module's manifest and payload bytes against the signed
+`registry.snapshot.json` of the last RELEASED tag and REFUSES anything that
+moved without a revision above the one it published there — per release, not
+per commit, so one bump covers the whole cycle. It reads git, so bump the
+revision in the commit that moves the bytes; a shallow clone gets a stated
+`[inapplicable]` skip with its remedy, and CI's `test` job checks out at
+`fetch-depth: 0` so the guard is never vacuous there. `update` never overwrites
 locally modified source: it stages the upstream candidate under
 `tmp/ggg/conflicts/` and exits 4 for
 `ggg resolve MODULE --path PATH --accept-upstream|--keep-local|--merged`. Exit
