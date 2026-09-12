@@ -12,7 +12,7 @@ package modkit
 // reached Docker from three places — CI service blocks, `ggg services up`,
 // and scripts/visual-run.sh — and none of the three consulted a manifest, so
 // `dependencies.containers` and `local_service` were metadata that only ever
-// had to parse. Running them once, by hand, found two defects in the two
+// had to parse. Running them once, by hand, found three defects in the two
 // declarations nobody had ever started:
 //
 //   - ggg/system/storage-s3 pinned `minio/minio@sha256:fce0a90a…`, and MinIO
@@ -27,9 +27,16 @@ package modkit
 //     binary the image does not have can never pass, so the service would
 //     have sat unhealthy forever and `depends_on: service_healthy` would have
 //     hung the app.
+//   - and then the one the first two exposed: `LocalService` had no field for
+//     a container command, so the `server /data` that image needs could not
+//     be declared at all and GenerateComposeFiles emitted no `command:`. The
+//     service was unstartable BY SCHEMA — no manifest edit could fix it. That
+//     gap was held here by a named `unstartableLocalServices` row until
+//     LocalService.Command closed it; the row is gone, and this gate now has
+//     no exemption path at all. A declaration that cannot start is red.
 //
-// Both are mechanical, and neither needed a person: one resolves a digest,
-// the other runs one command in one image. So this is that check, over every
+// All three are mechanical, and none needed a person: one resolves a digest,
+// the others run one command in one image. So this is that check, over every
 // declaration rather than the two somebody happened to touch.
 //
 // It needs Docker and the network, so it is off by default with a declared
@@ -51,40 +58,19 @@ import (
 // GGG_GENESIS_SWEEP un-skip theirs.
 const containerDeclarationsEnv = "GGG_CONTAINER_DECLARATIONS"
 
-// unstartableLocalServices enumerates every local_service this repository
-// declares that CANNOT be started from its declaration alone, with the reason.
-//
-// It exists for the same reason inapplicableSkipSites and
-// publishedUnexercisedConditionals exist: a known gap held by a named row is
-// a gap somebody can close, while a gap held by an absent assertion is a gap
-// nobody can see. The walk below refuses a row that no longer names a
-// declaration, so closing the gap forces the row out.
-//
-// The one entry is a SCHEMA gap, not a manifest mistake. `LocalService` has
-// no field for a container command (model.go: Container, Ports, Environment,
-// Volumes, Health) and GenerateComposeFiles therefore emits no `command:`, so
-// there is no way to declare the `server /data` this image requires. Closing
-// it means adding the field to the Go model, the four JSON schema contracts,
-// validate, and the Compose emitter — a schema change, not an edit here.
-var unstartableLocalServices = map[string]string{
-	"ggg/system/storage-s3@minio": "LocalService declares no container command and the official MinIO image's CMD is bare " +
-		"`minio`, which prints usage and exits, so `server /data` cannot be expressed: the generated Compose service for " +
-		"this target can never start either. Closing it is a schema change (add a command field to LocalService, the four " +
-		"registry/schema contracts, validate, and the Compose emitter), after which this row must be deleted.",
-}
-
 // declaredContainer is one container declaration with the manifest coordinates
 // to name it by in a failure.
 type declaredContainer struct {
-	Owner  string
-	Where  string
-	Image  string
-	Target string
-	Env    []LocalServiceEnv
-	Health *LocalServiceHealth
+	Owner   string
+	Where   string
+	Image   string
+	Target  string
+	Command string
+	Env     []LocalServiceEnv
+	Health  *LocalServiceHealth
 }
 
-// key identifies a local_service declaration in unstartableLocalServices.
+// key identifies one declaration in a subtest name and a failure.
 func (d declaredContainer) key() string { return d.Owner + "@" + d.Target }
 
 func TestEveryDeclaredContainerIsExecutable(t *testing.T) {
@@ -166,38 +152,23 @@ func TestEveryDeclaredContainerIsExecutable(t *testing.T) {
 
 	t.Run("every declared health probe exits 0 against a running instance", func(t *testing.T) {
 		// The whole claim, end to end: start the container from NOTHING BUT
-		// its declaration — declared image, declared literal environment —
-		// and poll the declared probe. A probe that exists but never returns
-		// 0 leaves the service unhealthy forever, and `depends_on:
-		// service_healthy` turns that into a hung `ggg services up` rather
-		// than an error.
-		exercised := map[string]bool{}
+		// its declaration — declared image, declared command, declared
+		// literal environment — and poll the declared probe. A probe that
+		// exists but never returns 0 leaves the service unhealthy forever,
+		// and `depends_on: service_healthy` turns that into a hung
+		// `ggg services up` rather than an error.
+		//
+		// There is no exemption list. There was one, for the single
+		// declaration the schema could not express a command for, and
+		// LocalService.Command retired it: every declaration that names a
+		// probe is started here, and one that cannot start is red.
 		for _, declaration := range declarations {
 			if declaration.Health == nil || declaration.Health.Command == "" {
-				continue
-			}
-			if reason, exempt := unstartableLocalServices[declaration.key()]; exempt {
-				exercised[declaration.key()] = true
-				t.Logf("%s is declared unstartable: %s", declaration.key(), reason)
 				continue
 			}
 			t.Run(declaration.key(), func(t *testing.T) {
 				assertProbeGoesHealthy(t, declaration)
 			})
-		}
-		// A row that no longer names a declaration is an exemption that
-		// outlived its reason, which is how the next one gets added without
-		// argument.
-		var dead []string
-		for key := range unstartableLocalServices {
-			if !exercised[key] {
-				dead = append(dead, key)
-			}
-		}
-		sort.Strings(dead)
-		if len(dead) > 0 {
-			t.Fatalf("these unstartableLocalServices rows name no declaration with a health command any more: %v.\n"+
-				"Delete each one.", dead)
 		}
 	})
 }
@@ -218,6 +189,10 @@ func assertProbeGoesHealthy(t *testing.T, declaration declaredContainer) {
 		args = append(args, "-e", variable.Key+"="+variable.Value)
 	}
 	args = append(args, declaration.Image)
+	// The declared argv, appended exactly the way the generated Compose file
+	// carries it: one literal token per element, no shell. An image whose own
+	// CMD is not a runnable service starts only from this.
+	args = append(args, strings.Fields(declaration.Command)...)
 	out, err := exec.Command("docker", args...).CombinedOutput()
 	if err != nil {
 		t.Fatalf("%s: `docker %s` failed: %v\n%s", declaration.key(), strings.Join(args, " "), err, strings.TrimSpace(string(out)))
@@ -295,12 +270,13 @@ func declaredContainers(t *testing.T, root string) []declaredContainer {
 				}
 				health := target.LocalService.Health
 				found = append(found, declaredContainer{
-					Owner:  module.ID,
-					Where:  "local_service",
-					Target: target.ID,
-					Image:  target.LocalService.Container,
-					Env:    target.LocalService.Environment,
-					Health: &health,
+					Owner:   module.ID,
+					Where:   "local_service",
+					Target:  target.ID,
+					Image:   target.LocalService.Container,
+					Command: target.LocalService.Command,
+					Env:     target.LocalService.Environment,
+					Health:  &health,
 				})
 			}
 		}

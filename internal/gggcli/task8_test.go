@@ -173,6 +173,52 @@ func TestComposeGenerationSelectsEnvironmentAndRefusesPortCollision(t *testing.T
 	}
 }
 
+// A declared container command reaches Compose as exec form, and only when it
+// is declared.
+//
+// This is the field ggg/system/storage-s3@minio could not start without: that
+// image's own CMD is bare `minio`, which prints usage and exits, so a
+// generated service with no `command:` could never come up and nothing in the
+// generator said so. Exec form is the whole point of the rule validate.go
+// enforces on the declaration — a Compose `command:` STRING goes through
+// Compose's own shell-like splitter, and a declared argv that is validated as
+// plain tokens must not depend on anyone's quoting rules. The healthcheck
+// beside it stays CMD-SHELL, because a probe like `mc ready local` is shell
+// text the image's own /bin/sh runs; the two forms are deliberately opposite
+// and this asserts both in one file.
+func TestComposeRendersADeclaredContainerCommandAsExecForm(t *testing.T) {
+	graph := []modkit.Manifest{
+		composeAdapter("ggg/system/store", "ggg/storage", "minio", "minio@sha256:"+strings.Repeat("c", 64), 9000),
+	}
+	lock := modkit.Lock{Providers: map[string]modkit.ProviderSelections{
+		"ggg/storage": {Development: modkit.ProviderSelection{Adapter: "ggg/system/store", Target: "minio"}},
+	}}
+	// Undeclared first: the field is optional, and an emitted empty `command`
+	// would override the image's own CMD with nothing.
+	files, err := modkit.GenerateComposeFiles(lock, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(files[0].Content, "command:") {
+		t.Fatalf("a service declaring no command emitted one:\n%s", files[0].Content)
+	}
+
+	graph[0].Runtime.System.Adapter.Targets[0].LocalService.Command = "server /data --console-address :9001"
+	files, err = modkit.GenerateComposeFiles(lock, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const want = "        command:\n            - server\n            - /data\n            - --console-address\n            - :9001\n"
+	if !strings.Contains(files[0].Content, want) {
+		t.Fatalf("declared command did not render as exec form; wanted\n%s\ngot\n%s", want, files[0].Content)
+	}
+	// The generated argv must carry the tokens and nothing else: a rendered
+	// scalar `command: server /data …` would be handed to Compose's splitter.
+	if strings.Contains(files[0].Content, "command: server") {
+		t.Fatalf("declared command rendered as a shell-split string:\n%s", files[0].Content)
+	}
+}
+
 func composeAdapter(id, slot, target, image string, port int) modkit.Manifest {
 	targets := []modkit.ServiceTarget{{
 		ID: target, Mode: "self-hosted", Environments: []string{"development"},

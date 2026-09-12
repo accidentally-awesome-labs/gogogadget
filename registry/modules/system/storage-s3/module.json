@@ -146,6 +146,7 @@
               "inputs": [],
               "local_service": {
                 "container": "quay.io/minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20",
+                "command": "server /data --console-address :9001",
                 "ports": [
                   {
                     "name": "api",

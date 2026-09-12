@@ -1,0 +1,25 @@
+Redproof-Patch: modkit-argv-shellable
+Redproof-Family: modkit
+Redproof-Run: TestPublishedSchemaAndValidatorAgreeOnLocalServiceCommands
+Redproof-Package: ./internal/modkit
+Redproof-Expect: the row no longer describes the rule it names
+Redproof-Summary: validateLocalService's argv refusal deleted, so the validator accepts `server /data && rm -rf /` as a container command while the published schema's pattern refuses it — a manifest-carried shell fragment behind intact floors (task-bd, LocalService.Command).
+diff --git a/internal/modkit/validate.go b/internal/modkit/validate.go
+index 121b5aa..0761dac 100644
+--- a/internal/modkit/validate.go
++++ b/internal/modkit/validate.go
+@@ -858,14 +858,6 @@ func validateLocalService(service LocalService) error {
+ 	if strings.TrimSpace(service.Container) == "" || service.Ports == nil || service.Environment == nil || service.Volumes == nil {
+ 		return fmt.Errorf("local service container, ports, environment, and volumes are required")
+ 	}
+-	// The declared command is rendered as Compose's exec form, so nothing
+-	// expands it: a shell metacharacter would arrive at the entrypoint as a
+-	// literal argument, and a quoted string would arrive with its quotes.
+-	// Refusing them here is what keeps this field a fixed argv and not the
+-	// shell fragment a manifest is never allowed to carry.
+-	if service.Command != "" && !validContainerArgv(service.Command) {
+-		return fmt.Errorf("local service command %q must be one argv of plain tokens separated by single spaces", service.Command)
+-	}
+ 	// A port's name is addressable: it is the second segment of the
+ 	// `<service>/<port>` key a project's `ports` override names, so a blank
+ 	// or duplicated name is a port an operator cannot move.

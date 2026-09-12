@@ -858,6 +858,14 @@ func validateLocalService(service LocalService) error {
 	if strings.TrimSpace(service.Container) == "" || service.Ports == nil || service.Environment == nil || service.Volumes == nil {
 		return fmt.Errorf("local service container, ports, environment, and volumes are required")
 	}
+	// The declared command is rendered as Compose's exec form, so nothing
+	// expands it: a shell metacharacter would arrive at the entrypoint as a
+	// literal argument, and a quoted string would arrive with its quotes.
+	// Refusing them here is what keeps this field a fixed argv and not the
+	// shell fragment a manifest is never allowed to carry.
+	if service.Command != "" && !validContainerArgv(service.Command) {
+		return fmt.Errorf("local service command %q must be one argv of plain tokens separated by single spaces", service.Command)
+	}
 	// A port's name is addressable: it is the second segment of the
 	// `<service>/<port>` key a project's `ports` override names, so a blank
 	// or duplicated name is a port an operator cannot move.
@@ -886,6 +894,43 @@ func validateLocalService(service LocalService) error {
 		}
 	}
 	return nil
+}
+
+// validContainerArgv reports whether a declared container command is one argv
+// the Compose emitter can render in exec form without a shell.
+//
+// A token may carry only what a container argument needs — letters, digits,
+// and `-_./:=@+,` — which covers a subcommand (`server`), a path (`/data`), a
+// long flag with an inline value (`--console-address :9001`, `-c
+// max_connections=200`) and a version-suffixed name. Everything else is
+// refused: the emitter never invokes a shell, so `|`, `&`, `;`, `$`, a
+// backtick, a glob or a quote in this string would reach the image's
+// entrypoint as a literal argument rather than doing what it looks like it
+// does. Whitespace is exactly one space between tokens, because a tab or a
+// double space is invisible in a diff and would split into an empty argument.
+func validContainerArgv(value string) bool {
+	if value == "" {
+		return false
+	}
+	for _, token := range strings.Split(value, " ") {
+		if token == "" {
+			return false
+		}
+		for _, r := range token {
+			if !validArgvRune(r) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func validArgvRune(r rune) bool {
+	switch {
+	case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		return true
+	}
+	return strings.ContainsRune("-_./:=@+,", r)
 }
 
 func validHostPort(port int) bool { return port >= 1 && port <= maxHostPort }

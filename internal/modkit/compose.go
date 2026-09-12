@@ -290,6 +290,15 @@ func renderCompose(plan composePlan) (string, error) {
 	for _, item := range plan.selected {
 		node := &yaml.Node{Kind: yaml.MappingNode}
 		appendYAMLMap(node, "image", yamlScalar(item.service.Container))
+		// Exec form, never a string: Compose would hand a string to its own
+		// shell-like splitter, and the declared argv is validated as plain
+		// tokens precisely so no splitter's quoting rules get a say. The
+		// healthcheck below is the deliberate opposite — CMD-SHELL, because a
+		// probe like `mc ready local` is shell text the image's own /bin/sh
+		// runs.
+		if item.service.Command != "" {
+			appendYAMLMap(node, "command", yamlSequence(strings.Fields(item.service.Command)...))
+		}
 		if len(item.published) > 0 {
 			ports := &yaml.Node{Kind: yaml.SequenceNode}
 			for _, port := range item.published {

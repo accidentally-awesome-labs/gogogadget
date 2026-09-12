@@ -67,6 +67,7 @@ TestParseLockAcceptsEraManifests	modkit	modkit-era-lock-authoring
 TestPublishedRegistryIsConsistent	modkit	allow:catalog self-consistency gate over the published indexes; no plant transcribed — add one
 TestPublishedSchemaAndValidatorAgreeOnConditionalRequirements	modkit	allow:bidirectional per-row agreement; both directions the residual family failed are patched (modkit-schema-conditional adds an unrecorded rule; modkit-enum-gutted guts a recorded one)
 TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs	modkit	modkit-enum-gutted
+TestPublishedSchemaAndValidatorAgreeOnLocalServiceCommands	modkit	modkit-argv-shellable
 TestPublishedSchemaAndValidatorAgreeOnRendererSignatures	modkit	allow:renderer-signature agreement between schema and validator; no plant transcribed — add one
 TestPublishedSchemaInstancesValidate	modkit	own-pcre-lookbehind
 TestPublishedSchemaPatternsArePortableAndStrict	modkit	allow:portability half is closed by the PCRE plant (own-pcre-lookbehind, on TestPublishedSchemaInstancesValidate which compiles all five documents); the strictness half's narrowing is sweep ownership.md R6, unwritten

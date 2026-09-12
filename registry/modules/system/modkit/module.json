@@ -1264,6 +1264,15 @@
         "self_host": true
       },
       {
+        "source": "internal/modkit/testdata/redproof/modkit-argv-shellable.patch",
+        "target": "internal/modkit/testdata/redproof/modkit-argv-shellable.patch",
+        "class": "test",
+        "sha256": "c2ae4af67fd751a5e2b3082221498bdf5be311b34eefd882b0b619eaa3b671f6",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/testdata/redproof/modkit-enum-gutted.patch",
         "target": "internal/modkit/testdata/redproof/modkit-enum-gutted.patch",
         "class": "test",

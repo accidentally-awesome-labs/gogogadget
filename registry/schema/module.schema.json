@@ -2296,6 +2296,11 @@
         "container": {
           "type": "string"
         },
+        "command": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.,:=@+/-]+( [A-Za-z0-9_.,:=@+/-]+)*$",
+          "$comment": "The argv this image is started with, replacing its own CMD, rendered as Compose's exec form. It is never passed to a shell, so modkit.validateLocalService refuses anything a shell would have had to interpret: single spaces between tokens, and each token limited to letters, digits and `-_./:=@+,`. A metacharacter or a quote here would reach the entrypoint as a literal argument."
+        },
         "ports": {
           "type": "array",
           "items": {

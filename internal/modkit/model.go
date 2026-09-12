@@ -536,7 +536,23 @@ type TargetInput struct {
 }
 
 type LocalService struct {
-	Container   string               `json:"container"`
+	Container string `json:"container"`
+	// Command is the argv this image is started with, replacing whatever CMD
+	// it ships. An image whose own CMD is not a runnable service could not be
+	// declared at all without it: the official MinIO image's CMD is bare
+	// `minio`, which prints usage and exits, and its server mode is
+	// `minio server /data`.
+	//
+	// It is ONE argv separated by single spaces, never a shell fragment. The
+	// generator renders it as Compose's exec form — `command: [server, /data]`
+	// — so no /bin/sh ever sees it and every token reaches the image's
+	// entrypoint as one literal argument. That is the opposite of
+	// LocalServiceHealth.Command, which is rendered `["CMD-SHELL", command]`
+	// and is therefore legitimately shell text. validateLocalService refuses a
+	// shell metacharacter here for exactly that reason: a `$VAR`, a pipe or a
+	// quote would be handed to the entrypoint verbatim and mean something the
+	// author did not write, with nothing to say so.
+	Command     string               `json:"command,omitempty"`
 	Ports       []LocalServicePort   `json:"ports"`
 	Environment []LocalServiceEnv    `json:"environment"`
 	Volumes     []LocalServiceVolume `json:"volumes"`

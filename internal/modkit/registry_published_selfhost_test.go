@@ -1176,6 +1176,107 @@ func TestPublishedSchemaAndValidatorAgreeOnEnumTargetInputs(t *testing.T) {
 	}
 }
 
+// The container command, agreed by both engines.
+//
+// `LocalService.Command` is the field whose absence made
+// ggg/system/storage-s3@minio unstartable by schema: the image's own CMD is
+// bare `minio`, which prints usage and exits, and no manifest could express
+// the `server /data` it needs. Adding it added a shape a third party can get
+// wrong, and the shape is unusual for this catalog — it is the one string a
+// manifest carries that becomes ARGV.
+//
+// That is the whole reason for the rule both engines state. The Compose
+// emitter renders it in exec form, so nothing expands it: `server /data &&
+// rm -rf /` would not run two commands, it would hand the entrypoint five
+// literal arguments. A contract that accepted shell text there would be
+// promising semantics the generator does not implement, so validate.go's
+// validContainerArgv and $defs.LocalService.command's pattern refuse the same
+// set — plain tokens of letters, digits and `-_./:=@+,`, separated by exactly
+// one space.
+//
+// Two controls hold the rule to that and no more: the target that declares no
+// command at all stays legal to both (the field is optional, and postgres and
+// mailpit declare none), and every token form a real image needs — a
+// subcommand, an absolute path, a long flag with a `:port` value, a `-c
+// key=value` — stays accepted.
+func TestPublishedSchemaAndValidatorAgreeOnLocalServiceCommands(t *testing.T) {
+	const storage = "registry/modules/system/storage-s3/module.json"
+	repo := os.DirFS("../..")
+	schema := compilePublishedSchema(t, "registry/schema/module.schema.json", "#/$defs/ModuleDocument")
+	base, err := fs.ReadFile(repo, storage)
+	if err != nil {
+		t.Fatalf("read %s: %v", storage, err)
+	}
+	// The control. The published declaration carries the argv that makes the
+	// service start, so a refusal here is the rule leaking onto a legal value.
+	if schemaRefusesModuleDocument(t, schema, base) || validatorRefusesModuleDocument(t, base, storage) {
+		t.Fatalf("%s is refused unmutated: schema=%v validator=%v", storage,
+			schemaRefusesModuleDocument(t, schema, base), validatorRefusesModuleDocument(t, base, storage))
+	}
+
+	// serviceAt returns the local service every row mutates, refusing a base
+	// that stopped carrying the declared command the rows assume.
+	serviceAt := func(t *testing.T, document map[string]any) map[string]any {
+		t.Helper()
+		module := schemaObjectAt(t, document, "module")
+		target := schemaRecordAt(t, schemaObjectAt(t, module, "runtime", "system", "adapter"), "targets", 0)
+		service := schemaObjectAt(t, target, "local_service")
+		if got, ok := service["command"].(string); !ok || got == "" {
+			t.Fatalf("the base local service declares command %v; the rows below assume a declared argv", service["command"])
+		}
+		return service
+	}
+	for _, tc := range []struct {
+		name    string
+		command any
+		drop    bool
+		refused bool
+	}{
+		{name: "the argv the image needs", command: "server /data"},
+		{name: "a flag carrying a port value", command: "server /data --console-address :9001"},
+		{name: "a short flag with an inline key=value", command: "postgres -c max_connections=200"},
+		{name: "no command at all", drop: true},
+		{name: "a shell chain", command: "server /data && rm -rf /", refused: true},
+		{name: "a pipeline", command: "server /data | tee /log", refused: true},
+		{name: "a variable expansion", command: "server $DATA_DIR", refused: true},
+		{name: "a quoted argument", command: `server "/data dir"`, refused: true},
+		{name: "a glob", command: "server /data/*", refused: true},
+		{name: "a tab between tokens", command: "server\t/data", refused: true},
+		{name: "a double space between tokens", command: "server  /data", refused: true},
+		{name: "a trailing space", command: "server /data ", refused: true},
+		{name: "a newline", command: "server /data\nrm -rf /", refused: true},
+		{name: "not a string at all", command: []any{"server", "/data"}, refused: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var document map[string]any
+			if err := json.Unmarshal(base, &document); err != nil {
+				t.Fatalf("decode %s: %v", storage, err)
+			}
+			service := serviceAt(t, document)
+			if tc.drop {
+				schemaDropKeys(t, service, "command")
+			} else {
+				schemaReplaceKey(t, service, "command", tc.command)
+			}
+			mutated, err := json.Marshal(document)
+			if err != nil {
+				t.Fatalf("encode mutated %s: %v", storage, err)
+			}
+			if bytes.Equal(mutated, base) {
+				t.Fatalf("the mutation left %s unchanged, so this row asserts nothing", storage)
+			}
+			if got := validatorRefusesModuleDocument(t, mutated, storage); got != tc.refused {
+				t.Fatalf("validator refuses = %v, want %v — the row no longer describes the rule "+
+					"it names, so the agreement below would assert nothing", got, tc.refused)
+			}
+			if got := schemaRefusesModuleDocument(t, schema, mutated); got != tc.refused {
+				t.Fatalf("published schema refuses = %v, want %v — the external extension contract "+
+					"disagrees with the tool about LocalService.command", got, tc.refused)
+			}
+		})
+	}
+}
+
 // manifestFieldSite is one settable manifest field, reached by walking a real
 // decoded manifest rather than by naming paths: a new contribution type joins
 // the sweep by existing, not by being added to a list.
