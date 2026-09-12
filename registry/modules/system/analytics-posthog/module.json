@@ -4,7 +4,7 @@
     "id": "ggg/system/analytics-posthog",
     "kind": "system",
     "name": "analytics-posthog",
-    "revision": 10,
+    "revision": 11,
     "contract": 1,
     "title": "analytics-posthog",
     "description": "analytics-posthog adapter",
@@ -64,7 +64,7 @@
         "source": "internal/web/ingest_posthog_test.go",
         "target": "internal/web/ingest_posthog_test.go",
         "class": "test",
-        "sha256": "fbf14479c262e8706b256a6e3f5c366e7ad4c7c78e08435c59b3815a7c0485a0",
+        "sha256": "c7dd7ddd18054bf4bae524e0500d57e3de63e06de60615f92d2fece9b9b02516",
         "rewrite_module": true,
         "contract": false
       },
