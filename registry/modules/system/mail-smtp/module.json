@@ -56,6 +56,14 @@
         "contract": false
       },
       {
+        "source": "internal/mail/smtp/mailpit_test.go",
+        "target": "internal/mail/smtp/mailpit_test.go",
+        "class": "test",
+        "sha256": "f1812b7ed49b17ac705789898aeaed80b6250b3abb8337f463b47c2c9a78e5f4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/mail/smtp/smtp.go",
         "target": "internal/mail/smtp/smtp.go",
         "class": "go",

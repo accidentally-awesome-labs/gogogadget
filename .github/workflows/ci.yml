@@ -30,8 +30,41 @@ jobs:
     # service at all, so a closure fixture that ever grows a
     # database-touching test would turn those jobs red over a database
     # nobody asked them for.
+    #
+    # The six storage/mail variables below are the protocol-container tier.
+    # They follow the same rule, and that rule is why they are HERE rather
+    # than at workflow scope: naming an endpoint is a REQUEST, so a job that
+    # names one with nothing answering on it is a red job, not a skipping one
+    # (internal/storage/s3/minio_test.go:requireReachableEndpoint and
+    # internal/mail/smtp/mailpit_test.go:requireReachableSMTP, both mirroring
+    # internal/db/testdb/testdb.go:103-138).
+    #
+    # Only this job names them, so only this job runs the tier. `cover` counts
+    # those two tests as `[inapplicable]` instead, which the accounted gate
+    # never refuses: the claim is "the adapter works against a real server",
+    # it is settled once, and a second container pull for coverage numbers
+    # over two tests buys nothing. Every value is a key the adapters
+    # themselves DECLARE for their minio/mailpit targets, so what CI drives is
+    # the documented configuration surface and not a second one invented here.
+    #
+    # GGG_CONTAINER_DECLARATIONS un-skips the gate over every container any
+    # manifest declares (internal/modkit/container_declarations_selfhost_test.go):
+    # each pinned digest must resolve at its declared host, and each declared
+    # health probe must be runnable in its image and reach exit 0 against a
+    # running instance. It belongs to THIS job because this job already has
+    # every image it needs on the runner. Measured 19 s warm, 16 s of that
+    # registry round-trips; the one extra pull is the manifest-pinned postgres
+    # digest (110 MB compressed), which differs from the postgres:16-alpine
+    # this job's service container uses.
     env:
       TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable
+      STORAGE_S3_ENDPOINT: http://localhost:9000
+      STORAGE_R2_ACCESS_KEY_ID: minioadmin
+      STORAGE_R2_SECRET_ACCESS_KEY: minioadmin
+      STORAGE_R2_BUCKET: gogogadget-contract
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      GGG_CONTAINER_DECLARATIONS: "1"
     services:
       postgres:
         image: postgres:16-alpine
@@ -46,8 +79,75 @@ jobs:
           --health-interval 2s
           --health-timeout 3s
           --health-retries 20
+      # Mailpit is the mail adapter's declared `mailpit` service target,
+      # pinned to the SAME digest its manifest declares
+      # (registry/modules/system/mail-smtp/module.json) so CI cannot drift
+      # onto a different build of the server than a contributor's
+      # `ggg services up` would start, and probed with that manifest's own
+      # declared health command so a green service here means what a green
+      # Compose healthcheck means.
+      #
+      # Measured cost for the whole tier: 69.5 MB of compressed layers to
+      # pull (12.6 MB of it Mailpit, 56.8 MB MinIO, both amd64, read from the
+      # registries), 0.29 s and 0.46 s from container start to healthy, and
+      # 0.02 s and 0.03 s of test time. That is why this tier is a
+      # contributor gate on an existing job instead of an optional job of its
+      # own: at well under a minute it is cheaper than the job's own `make
+      # setup`, and a tier nobody's PR runs is a tier that rots.
+      #
+      # MinIO is NOT here, and cannot be. `services` has no `command` key —
+      # the runner appends nothing after the image — and the official MinIO
+      # image's CMD is bare `minio`, which prints usage and exits, so a MinIO
+      # service container can never reach healthy. It is started as a step
+      # below instead, same digest, same declared probe. Do not "restore the
+      # symmetry" by moving it up here.
+      mailpit:
+        image: axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a7525b0486f9365555253b6c5376c6350f1a
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "wget -qO- http://127.0.0.1:8025/"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v7
+
+      # The other half of the protocol-container tier. See the `services`
+      # comment above for why MinIO cannot be a service container: `services`
+      # has no `command` key and this image needs `server /data`.
+      #
+      # Everything a service container would have given it is here instead
+      # and nowhere else: the digest its manifest declares, the root
+      # credentials its local_service block declares, the published API port
+      # its local_service block declares, and its manifest's own declared
+      # health probe polled to a bounded deadline. It runs this early so the
+      # pull and the first-start cost overlap nothing later; by the Test step
+      # the server has been up for minutes.
+      #
+      # `--wait` is not used because `docker run` cannot wait on a
+      # healthcheck it was not given, and giving the container a healthcheck
+      # here would be a second copy of the manifest's. Polling the declared
+      # probe from the runner keeps one copy and reports the timeout with the
+      # server's own log tail.
+      - name: Start MinIO
+        run: |
+          docker run -d --name ci-minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            quay.io/minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20 \
+            server /data
+          for _ in $(seq 1 40); do
+            if docker exec ci-minio mc ready local; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MinIO never became ready; STORAGE_S3_ENDPOINT names it, so the tier below would fail rather than skip:"
+          docker logs ci-minio
+          exit 1
 
       - uses: actions/setup-go@v7
         with:

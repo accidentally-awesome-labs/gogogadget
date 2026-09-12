@@ -54,7 +54,7 @@
       "containers": [
         {
           "name": "minio",
-          "image": "minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20"
+          "image": "quay.io/minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20"
         }
       ]
     },
@@ -63,7 +63,15 @@
         "source": "internal/storage/s3/contract_test.go",
         "target": "internal/storage/s3/contract_test.go",
         "class": "test",
-        "sha256": "47df3e65de428393cd34cd2fe6676e7aa117e1070642ba7b9f8ac5c28fbe539c",
+        "sha256": "9401828de54fb69de5890e3fb8eeb13ef15e22fc6f95a34556a5e7a8223d1053",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/storage/s3/minio_test.go",
+        "target": "internal/storage/s3/minio_test.go",
+        "class": "test",
+        "sha256": "5eae729b5790f4e8f4b689ee72a44a3955b8430d20c534af1f38d1db52da8e0e",
         "rewrite_module": true,
         "contract": false
       },
@@ -137,7 +145,7 @@
               "docs_url": "https://min.io/docs",
               "inputs": [],
               "local_service": {
-                "container": "minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20",
+                "container": "quay.io/minio/minio@sha256:fce0a90a37bb2887c850b68b61a0ac8ac02ea218b58eaea96bb7ca69eb503e20",
                 "ports": [
                   {
                     "name": "api",
@@ -170,7 +178,7 @@
                   "kind": "http",
                   "port": 9000,
                   "path": "/minio/health/live",
-                  "command": "wget -qO- http://127.0.0.1:9000/minio/health/live"
+                  "command": "mc ready local"
                 }
               }
             },

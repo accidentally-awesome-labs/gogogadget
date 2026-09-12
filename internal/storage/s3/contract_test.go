@@ -18,7 +18,21 @@ func TestS3StoreContract(t *testing.T) {
 	defer backend.Close()
 	store, err := NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "contract-bucket", backend.URL())
 	require.NoError(t, err)
-	storagecontract.RunWithOptions(t, func() storage.Store { return store }, storagecontract.Options{
+	storagecontract.RunWithOptions(t, func() storage.Store { return store }, presignedContractOptions())
+}
+
+// presignedContractOptions is the adapter-agnostic Store contract read
+// through a REDIRECTING provider: this adapter answers 303 and the bytes live
+// behind Location, so the contract is told how to reach them and what a
+// missing key looks like.
+//
+// It is one function rather than one literal per test because both runs of
+// the table — the in-process fake above and the MinIO run in minio_test.go —
+// have to make the same claim. A container run that quietly relaxed
+// ServeStatus or ReadServed would still print as a pass while asserting
+// something weaker than the fake already does.
+func presignedContractOptions() storagecontract.Options {
+	return storagecontract.Options{
 		ServeStatus: func(t *testing.T, code int) {
 			require.Equal(t, http.StatusSeeOther, code)
 		},
@@ -45,5 +59,5 @@ func TestS3StoreContract(t *testing.T) {
 			defer resp.Body.Close()
 			require.Equal(t, http.StatusNotFound, resp.StatusCode)
 		},
-	})
+	}
 }
