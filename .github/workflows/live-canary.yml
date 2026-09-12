@@ -33,7 +33,7 @@ name: live-canary
 # names are the operator's checklist and are documented in
 # content/docs/testing.md; internal/modkit/ci_workflow_test.go pins this
 # job's wiring so deleting it cannot leave the suite green-by-skip
-# everywhere, and internal/gggcli/live_canary_selfhost_test.go pins that
+# everywhere, and internal/canary/live_canary_selfhost_test.go pins that
 # every key a row declares is actually mapped here.
 #
 # POLAR_SERVER is pinned to the literal `sandbox` rather than taken from a
@@ -184,7 +184,7 @@ jobs:
       # deadline, times the row count, plus a cold build can pass go test's 10m
       # package default.
       - name: Managed-target live canaries
-        run: go test -count=1 -run TestManagedTargetLiveCanaries ./internal/gggcli -v -timeout 20m
+        run: go test -count=1 -run TestManagedTargetLiveCanaries ./internal/canary -v -timeout 20m
 
       # The job's own runtime, in its log summary, per the measured-cost rule.
       - name: Runtime summary

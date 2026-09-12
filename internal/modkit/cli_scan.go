@@ -190,6 +190,31 @@ func ValidateCoreCLIPackages(modules []Manifest, files map[string][]byte) error 
 // internal/web/billing_local_test.go, which is the sanctioned shape for
 // testing one adapter's surface.
 //
+// `self_host: true` payloads are outside this rule's DOMAIN rather than an
+// exception to it, and the distinction matters. The harm the rule prevents is
+// a payload whose compilation depends on a provider selection landing in a
+// project that made a different selection — "this file compiles only while
+// providers.identity.test is ggg/system/identity-dev" is a constraint the
+// manifest vocabulary cannot express, so the only safe rule is that no
+// installed payload may hold such a dependency. A self_host payload is never
+// installed into a derivative at all: the installer skips it wherever
+// `go.mod` does not match the registry's canonical_module, and
+// `ggg registry validate` builds its closures from non-self_host payloads, so
+// no narrow closure can inherit the pin either. It is installed into exactly
+// one project — the publishing repository — whose gogogadget.json sits beside
+// it in the same commit and whose lock is verified by the same gate, so its
+// dependency on those selections is declared, fixed, and checked rather than
+// undeclarable. That is what makes the carve-out sound, and it is narrow: it
+// turns on the payload's own self_host flag and nothing else.
+//
+// What needs it: internal/canary's managed-target live canary suite must
+// import every managed adapter, because the generated per-slot accessors
+// expose only the SELECTED adapter per slot and the suite's entire purpose is
+// to exercise the unselected ones too. TestValidatePayloadAdapterImports
+// drives both directions — the self_host payload passes, the same import in a
+// shipped payload still refuses — so the carve-out cannot be used to sneak an
+// adapter import into a file that reaches a derivative.
+//
 // KNOWN BLIND SPOT, deliberately not chased: this is an import scan, so it
 // cannot see a payload that inlines an adapter's WIRE FORMAT while importing
 // nothing. internal/web/identity_webhook_test.go was exactly that — JSON
@@ -203,9 +228,13 @@ func ValidateCoreCLIPackages(modules []Manifest, files map[string][]byte) error 
 func ValidatePayloadAdapterImports(modules []Manifest, files map[string][]byte) error {
 	adapters := map[string]string{}
 	owners := map[string]string{}
+	selfHost := map[string]bool{}
 	for _, module := range modules {
 		for _, file := range module.Files {
 			owners[file.Target] = module.ID
+			if file.SelfHost {
+				selfHost[file.Target] = true
+			}
 		}
 		sys := module.Runtime.System
 		if sys == nil || sys.Adapter == nil {
@@ -235,6 +264,12 @@ func ValidatePayloadAdapterImports(modules []Manifest, files map[string][]byte) 
 		if owner == "" {
 			// Generated outputs have no owning module; the generated boot and
 			// the per-slot accessors are the sanctioned place adapters are named.
+			continue
+		}
+		if selfHost[target] {
+			// Never installed into a derivative, so it cannot carry a
+			// selection-dependent compile into a project that chose
+			// differently. See the domain argument above the function.
 			continue
 		}
 		parsed, err := parser.ParseFile(token.NewFileSet(), target, files[target], parser.ImportsOnly)

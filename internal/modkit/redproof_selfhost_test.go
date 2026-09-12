@@ -32,7 +32,7 @@ package modkit
 // per violation, its metadata in Redproof-* headers above the diff. The guard
 // inventory (testdata/redproof/inventory.txt) is DERIVED, not hand-written:
 // every test matching the repository's guard naming families in the guard
-// files — every `*_selfhost_test.go` under internal/{modkit,gggcli,web} and
+// files — every `*_selfhost_test.go` under internal/{modkit,canary,gggcli,web} and
 // the web/modkit guard files the sweep walked — plus the named contract
 // guards. The corpus is the inventory's floor: every inventoried guard has a
 // patch or a stated allowance, and a family with no patches fails the run by
@@ -104,6 +104,7 @@ var redproofScratchSkipNames = []string{"node_modules", "playwright-report", "te
 // self-hosting test goes in a self_host payload named just so.
 var redproofGuardSelfhostDirs = []string{
 	"internal/modkit",
+	"internal/canary",
 	"internal/gggcli",
 	"internal/web",
 	"internal/web/templates",
@@ -561,7 +562,7 @@ func redproofWriteInventory(t *testing.T, root string, derived map[string]string
 	fmt.Fprintf(&buf, "# Regenerate: GGG_REDPROOF_UPDATE_INVENTORY=1 go test ./internal/modkit -run TestRedProofGate\n")
 	fmt.Fprintf(&buf, "# Derivation: every test matching the guard naming families\n")
 	fmt.Fprintf(&buf, "# (TestAgents*|TestEvery*|TestNo*|TestPublished*|TestValidator*|TestThe*) in the\n")
-	fmt.Fprintf(&buf, "# guard files — every *_selfhost_test.go under internal/{modkit,gggcli,web} plus the\n")
+	fmt.Fprintf(&buf, "# guard files — every *_selfhost_test.go under internal/{modkit,canary,gggcli,web} plus the\n")
 	fmt.Fprintf(&buf, "# swept non-selfhost guard files — cross-checked against the named contract guards.\n")
 	fmt.Fprintf(&buf, "# One line per guard: name, family, and either the patch id that proves it red or\n")
 	fmt.Fprintf(&buf, "# allow:<why it carries no red proof today>.\n")

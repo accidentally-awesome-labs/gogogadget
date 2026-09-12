@@ -632,8 +632,8 @@ func TestCILiveCanaryWorkflowIsNotAContributorGate(t *testing.T) {
 	if at < 0 || fields[at+1] != ciLiveCanaryTest {
 		t.Fatalf("the live-canary command %q does not select %s by -run", found[0], ciLiveCanaryTest)
 	}
-	assertRunFilterSelectsAGGGCLITest(t, fields[at+1])
-	for _, want := range []string{"-count=1", "./internal/gggcli"} {
+	assertRunFilterSelectsATest(t, "canary", fields[at+1])
+	for _, want := range []string{"-count=1", "./internal/canary"} {
 		if !slices.Contains(fields, want) {
 			t.Fatalf("the live-canary command %q is missing %s", found[0], want)
 		}
@@ -688,9 +688,20 @@ func TestCIWorkflowCancelsSupersededRuns(t *testing.T) {
 // gggcliTestNames is every top-level `func TestXxx(t *testing.T)` declared in
 // internal/gggcli, read out of the package's own sources. It is the
 // population `go test -run` filters, derived rather than written down.
-func gggcliTestNames(t *testing.T) []string {
+func gggcliTestNames(t *testing.T) []string { return packageTestNames(t, "gggcli") }
+
+// packageTestFloors is the minimum number of top-level tests each swept
+// package must declare. The floor is per-package because it exists to catch a
+// walk that found the WRONG DIRECTORY — which answers zero for every pattern
+// and turns the guard into the vacuity it refuses — and internal/gggcli
+// declares hundreds where internal/canary declares the suite plus its five
+// guards. A shared floor would either be vacuous for the large package or
+// unsatisfiable for the small one.
+var packageTestFloors = map[string]int{"gggcli": 50, "canary": 5}
+
+func packageTestNames(t *testing.T, pkg string) []string {
 	t.Helper()
-	dir := filepath.Join("..", "gggcli")
+	dir := filepath.Join("..", pkg)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		t.Fatalf("read %s: %v", dir, err)
@@ -713,8 +724,12 @@ func gggcliTestNames(t *testing.T) []string {
 	// The floor. A walk that found the wrong directory, or a regexp that
 	// stopped matching, would otherwise answer "nothing matches" for every
 	// pattern and turn this guard into the vacuity it exists to refuse.
-	if len(names) < 50 {
-		t.Fatalf("only %d top-level tests were read out of %s; the walk has collapsed, not the package", len(names), dir)
+	floor, known := packageTestFloors[pkg]
+	if !known {
+		t.Fatalf("package %q has no packageTestFloors entry; a swept package with no floor cannot report a collapsed walk", pkg)
+	}
+	if len(names) < floor {
+		t.Fatalf("only %d top-level tests were read out of %s, want at least %d; the walk has collapsed, not the package", len(names), dir, floor)
 	}
 	return names
 }
@@ -725,7 +740,16 @@ func gggcliTestNames(t *testing.T) []string {
 // test passes while running nothing.
 func assertRunFilterSelectsAGGGCLITest(t *testing.T, pattern string) {
 	t.Helper()
-	names := gggcliTestNames(t)
+	assertRunFilterSelectsATest(t, "gggcli", pattern)
+}
+
+// assertRunFilterSelectsATest is the same check over any internal package
+// directory. It became a parameter when the live-canary suite moved out of
+// internal/gggcli: internal/gggcli may not name an adapter package at all
+// (ValidateCoreCLIPackages), and a canary over every managed adapter must.
+func assertRunFilterSelectsATest(t *testing.T, pkg, pattern string) {
+	t.Helper()
+	names := packageTestNames(t, pkg)
 	if !slices.Contains(names, pattern) {
 		// Reported first and by name, because an exact pin is what the
 		// workflow carries and a near-miss rename is the realistic failure.

@@ -155,6 +155,7 @@ generation moved any generated file.
 - `cmd/ggg` — the module CLI (thin shell over `internal/gggcli`). `cmd/server` — `apphost.OS` → `modules.Boot` → run → `Runtime.Close`; all wiring is generated. `cmd/seed` — `-reset`, `-registry dev|e2e`.
 - `internal/modkit` — registry engine: catalog, planner, apply transaction, generators. `internal/modules` — generated boot/lifecycle DAG. `internal/apphost` — the leaf `Host` seam.
 - `internal/gggcli` — the CLI's whole presentation/dispatch layer: command table (`spec.go`, `table.go`), `Controller`, prompts, trusted task handlers, `commands/`, redaction; `gggcli/ui` is the Charm TUI (`ggg/system/cli-ui`). Resolution/planning/apply stay in `internal/modkit`.
+- `internal/canary` — the managed-target live canary suite (`TestManagedTargetLiveCanaries`), test files only. It lives here rather than in `internal/gggcli` because `ValidateCoreCLIPackages` forbids the CLI tree from naming an adapter package at all, and a canary over EVERY managed adapter cannot use the generated per-slot accessors: those expose only the SELECTED adapter per slot, and the point is to exercise the unselected ones too. Its payload is `self_host: true`, which is what puts it outside `ValidatePayloadAdapterImports` — never installed into a derivative, so it cannot carry a selection-dependent compile anywhere.
 - `internal/config` — generic env/dotenv reading; the typed struct, its validation, its production refusals and its cross-key derivations are all generated from manifest `environment` records. Authored code here NEVER reads an adapter-declared field: a module that does not declare a key uses `cfg.Value("KEY")`/`cfg.BoolValue("KEY")`, so removing the adapter removes the field without breaking the reader. `modkit.ValidateConfigFieldOwnership` refuses the plan otherwise, anywhere in the tree.
 - `internal/db` — pgx pool, embedded goose migrations (`migrations/`, immutable and forward-only), sqlc queries (`queries/` → `sqlc/`), `testdata/seed/{dev,e2e}/` module-owned fixtures, `testdb/` per-package test DBs (`TEST_DB_SUFFIX` for concurrent workers). NOT `internal/database`.
 - `internal/web` — HTTP surface: middleware chain, HTMX helpers, handlers, templ templates (`templates/`).
@@ -295,7 +296,7 @@ Standing rules:
   what it needs.** Tier 1 drives an adapter against a local protocol
   container where one exists (MinIO for `storage-s3`, Mailpit for
   `mail-smtp`) in CI's `test` job. Tier 2 is `TestManagedTargetLiveCanaries`
-  in `internal/gggcli` — one declarative row per managed adapter, driving the
+  in `internal/canary` — one declarative row per managed adapter, driving the
   real provider and asserting the same wire shape that adapter's fake
   asserts, opt-in through `GGG_LIVE_CANARY=1`, set only by the separate
   `live-canary` workflow (`workflow_dispatch` plus one weekly cron, no

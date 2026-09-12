@@ -1,13 +1,13 @@
 Redproof-Patch: own-canary-leaves-unstated
 Redproof-Family: ownership
 Redproof-Run: TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion
-Redproof-Package: ./internal/gggcli
+Redproof-Package: ./internal/canary
 Redproof-Expect: states what it leaves behind in
 Redproof-Summary: A canary row that cannot clean up and does not tell the operator what accumulates in their paid account — the audit-export row's Leaves prose replaced by three words, which is how a safety claim degrades: not by being deleted, by being shortened until it says nothing.
-diff --git a/internal/gggcli/live_canary_selfhost_test.go b/internal/gggcli/live_canary_selfhost_test.go
+diff --git a/internal/canary/live_canary_selfhost_test.go b/internal/canary/live_canary_selfhost_test.go
 index e3eaf31d..957684d6 100644
---- a/internal/gggcli/live_canary_selfhost_test.go
-+++ b/internal/gggcli/live_canary_selfhost_test.go
+--- a/internal/canary/live_canary_selfhost_test.go
++++ b/internal/canary/live_canary_selfhost_test.go
 @@ -810,7 +810,7 @@ var liveCanaryProviders = []liveCanaryProvider{
  		Slot: "ggg/audit-export", Module: "ggg/system/audit-export-otlp", Target: "otlp",
  		Keys:    []liveCanaryKey{{Env: "OTLP_AUDIT_EXPORT_URL", Required: true, Credential: true}},

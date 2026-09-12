@@ -79,7 +79,7 @@
 // exist in the owning manifest, so a renamed env key fails here instead of
 // making a canary silently skip forever.
 
-package gggcli
+package canary
 
 import (
 	"bytes"
@@ -98,6 +98,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gogogadget/gogogadget/internal/gggcli"
 
 	posthogadapter "github.com/gogogadget/gogogadget/internal/analytics/posthog"
 	"github.com/gogogadget/gogogadget/internal/audit"
@@ -1041,14 +1043,14 @@ func liveCanaryForbiddenSelector(row liveCanaryProvider, env liveCanaryEnv) erro
 func TestManagedTargetLiveCanaries(t *testing.T) {
 	if os.Getenv(liveCanaryEnvVar) != "1" {
 		t.Skipf("%s the managed-target canaries call the real maintained providers with live credentials (one network round trip per step, real remote state on every row that cannot clean up, and provider spend on the llm-openai-compatible row; each row is bounded at %s, so the suite is bounded at %s); CI's `live-canary` workflow owns it — set GGG_LIVE_CANARY=1 to run it here",
-			InapplicableSkipMarker, liveCanaryRowDeadline, time.Duration(len(liveCanaryProviders))*liveCanaryRowDeadline)
+			gggcli.InapplicableSkipMarker, liveCanaryRowDeadline, time.Duration(len(liveCanaryProviders))*liveCanaryRowDeadline)
 	}
 	for _, row := range liveCanaryProviders {
 		t.Run(row.Module, func(t *testing.T) {
 			env, missing := liveCanaryResolve(row, os.Getenv)
 			if len(missing) > 0 {
 				t.Skipf("%s the %s canary (%s@%s, %s) needs live credentials and %s %s unset here (bounded at %s per run); CI's `live-canary` workflow owns it and maps every key from repository secrets — set %s to run it here",
-					InapplicableSkipMarker, row.Module, row.Slot, row.Target, row.Cleanup,
+					gggcli.InapplicableSkipMarker, row.Module, row.Slot, row.Target, row.Cleanup,
 					strings.Join(missing, ", "), liveCanaryPlural(missing), liveCanaryRowDeadline,
 					liveCanaryAssignments(missing))
 			}
@@ -1079,7 +1081,7 @@ func TestManagedTargetLiveCanaries(t *testing.T) {
 // what makes "adding a provider is a row, not a new file" true rather than
 // aspirational: a new managed adapter fails here until it is one or the other.
 func TestEveryManagedAdapterIsCanariedOrExcused(t *testing.T) {
-	root := repositoryRoot(t)
+	root := liveCanaryRepositoryRoot(t)
 	managed := liveCanaryManagedAdapters(t, root)
 	// The floor. A walk that found no managed adapter has broken, not the
 	// registry: this repository ships eighteen.
@@ -1376,7 +1378,7 @@ var liveCanaryPinnedWorkflowValues = map[string]string{
 // forever while checking nothing — which is precisely the green-by-skip
 // failure the marker's accounting exists to make visible.
 func TestEveryLiveCanaryKeyIsMappedInTheWorkflow(t *testing.T) {
-	root := repositoryRoot(t)
+	root := liveCanaryRepositoryRoot(t)
 	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(liveCanaryWorkflowPath)))
 	if err != nil {
 		t.Fatalf("read %s: %v", liveCanaryWorkflowPath, err)
@@ -1442,6 +1444,35 @@ func TestEveryLiveCanaryKeyIsMappedInTheWorkflow(t *testing.T) {
 	sort.Strings(dead)
 	if len(dead) > 0 {
 		t.Fatalf("these liveCanaryPinnedWorkflowValues rows name no key any row declares: %v.\nDelete each one.", dead)
+	}
+}
+
+// liveCanaryRepositoryRoot resolves this repository's root from the test's own
+// directory. The suite lives in its own package rather than internal/gggcli
+// for a structural reason worth stating here: internal/gggcli may not name an
+// adapter package at all (internal/modkit/cli_scan.go:111
+// ValidateCoreCLIPackages), because the CLI must reach the SELECTED adapter
+// through the generated per-slot accessors so an unselected one stays out of
+// every derivative's build. A canary over EVERY managed adapter cannot use
+// those accessors — they expose one adapter per slot per environment, and the
+// whole point is to exercise the sixteen that are not selected in this
+// process — so direct imports are the only way, and this package is where
+// they may legitimately live.
+func liveCanaryRepositoryRoot(t *testing.T) string {
+	t.Helper()
+	dir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("resolve the working directory: %v", err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "gogogadget.json")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatalf("no gogogadget.json above %s, so the repository root is unresolvable", dir)
+		}
+		dir = parent
 	}
 }
 

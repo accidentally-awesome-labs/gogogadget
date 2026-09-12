@@ -103,10 +103,21 @@ func ownedManifest(id, target string) Manifest {
 func TestValidatePayloadAdapterImports(t *testing.T) {
 	clerk := adapterManifest("ggg/system/identity-clerk", "internal/identity/clerk")
 	clerk.Files = []ManifestFile{{Source: "internal/web/clerk_test.go", Target: "internal/web/clerk_test.go", Class: "test"}}
+	// The self_host carve-out's two directions, in one fixture pair: the SAME
+	// adapter import, in the SAME owning module, refused in the shipped
+	// payload and accepted in the self_host one. If the carve-out ever widened
+	// from the payload's own flag to anything else, the first of these goes
+	// green and this test says so.
+	canary := ownedManifest("ggg/system/modkit", "internal/canary/live_canary_selfhost_test.go")
+	canary.Files[0].SelfHost = true
+	canary.Files = append(canary.Files, ManifestFile{
+		Source: "internal/canary/shipped.go", Target: "internal/canary/shipped.go", Class: "go",
+	})
 	modules := []Manifest{
 		clerk,
 		adapterManifest("ggg/system/identity-dev", "internal/identity/devadapter"),
 		ownedManifest("ggg/system/server", "internal/web/testhelpers_test.go"),
+		canary,
 	}
 
 	for name, tc := range map[string]struct {
@@ -129,6 +140,21 @@ func TestValidatePayloadAdapterImports(t *testing.T) {
 		"generated output is not a payload": {
 			target: "internal/modules/bootstrap_registry_gen.go",
 			source: "package modules\n\nimport _ \"m/internal/identity/clerk\"\n",
+		},
+		// The canary suite is the reason the carve-out exists: it must import
+		// every managed adapter, because the generated per-slot accessors
+		// expose only the selected one per slot and its purpose is to exercise
+		// the unselected ones too.
+		"self_host payload importing an adapter accepted": {
+			target: "internal/canary/live_canary_selfhost_test.go",
+			source: "package canary\n\nimport identityclerk \"m/internal/identity/clerk\"\n",
+		},
+		// And the half that makes it a carve-out rather than a hole: a payload
+		// of the same module, in the same directory, that IS shipped.
+		"shipped payload beside it still refused": {
+			target:  "internal/canary/shipped.go",
+			source:  "package canary\n\nimport identityclerk \"m/internal/identity/clerk\"\n",
+			refused: true,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

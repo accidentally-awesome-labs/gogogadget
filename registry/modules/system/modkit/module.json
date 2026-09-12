@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 86,
+    "revision": 87,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -51,6 +51,15 @@
         "sha256": "8bf3b958bb75940ade3525b01dda6122ada725ec022f189b74f1fcabd318a163",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/canary/live_canary_selfhost_test.go",
+        "target": "internal/canary/live_canary_selfhost_test.go",
+        "class": "test",
+        "sha256": "d740c342bea11e760a4fb4dd81757f1a2ed23937e985bcc78c4835f687e39d02",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/gggcli/agents_loop_selfhost_test.go",
@@ -231,15 +240,6 @@
         "contract": false
       },
       {
-        "source": "internal/gggcli/live_canary_selfhost_test.go",
-        "target": "internal/gggcli/live_canary_selfhost_test.go",
-        "class": "test",
-        "sha256": "281a49aa34d8ba657f7d8afe9881de712afff82f58374d0374ead53e36fb4c97",
-        "rewrite_module": true,
-        "contract": false,
-        "self_host": true
-      },
-      {
         "source": "internal/gggcli/migrate_test.go",
         "target": "internal/gggcli/migrate_test.go",
         "class": "test",
@@ -356,7 +356,7 @@
         "source": "internal/gggcli/selfhost_test.go",
         "target": "internal/gggcli/selfhost_test.go",
         "class": "test",
-        "sha256": "54f0fb0fc71f4a1f3ac35240881e5f00cb65c7f2ea1d9eede15b255991085d83",
+        "sha256": "06d118676f9f9bdb0cec2d542d39e4ec06ca8114950638f21f6029dc8d216b64",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -389,7 +389,7 @@
         "source": "internal/gggcli/task8_test.go",
         "target": "internal/gggcli/task8_test.go",
         "class": "test",
-        "sha256": "e05c6d9aaf253889b224268ddc0ffafa73397097cf5376a5096ed5e5e5682de0",
+        "sha256": "911b18cc0c765f05cdd50093d256578a6c5079f19465f2a1674010256ab86f55",
         "rewrite_module": true,
         "contract": false
       },
@@ -505,7 +505,7 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "65432ca23c8a08bca1b5d516035365c0dff187c1a900e2f70acf727354c300e3",
+        "sha256": "432f58b4f0066fcbb0c02bb0b0215964995318b8014d5d7e8c112b68566d0c4f",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -514,7 +514,7 @@
         "source": "internal/modkit/cli_scan.go",
         "target": "internal/modkit/cli_scan.go",
         "class": "go",
-        "sha256": "867230ae95e8323a0a856587f994530cfdbeddaca6bbe33d5f2f101afb583b6d",
+        "sha256": "dc5afe481cced71791bf150c3f578202d7b99c0d0334d2ac8c7c13b1ffb4a029",
         "rewrite_module": true,
         "contract": true
       },
@@ -522,7 +522,7 @@
         "source": "internal/modkit/cli_scan_core_test.go",
         "target": "internal/modkit/cli_scan_core_test.go",
         "class": "test",
-        "sha256": "6fccb4cb2dce417de1a5985dc35ba5aeac481e7d914bfafad85b9a8fc6063171",
+        "sha256": "caf102102d11a3a80657c163aabaee249b1f3a84382bd3a2e791f6832497844d",
         "rewrite_module": true,
         "contract": false
       },
@@ -906,7 +906,7 @@
         "source": "internal/modkit/redproof_selfhost_test.go",
         "target": "internal/modkit/redproof_selfhost_test.go",
         "class": "test",
-        "sha256": "4d00433b4b5a51237fd17ee7ae769f804f1a5bb208674452af11a8ca5680a866",
+        "sha256": "ed5cb4469690bc770ac68139d5bf0e763873992aeee004f3051e1188bed9fe77",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -980,7 +980,7 @@
         "source": "internal/modkit/registry_published_selfhost_test.go",
         "target": "internal/modkit/registry_published_selfhost_test.go",
         "class": "test",
-        "sha256": "0039e7e60cf74753332437ca028b3fa206e39c0d77d9099c04e02f9cf8130812",
+        "sha256": "f0c413ec1a3e64ba300523d25e346cd4553f4f966f8812fb7eb7cf2e062a8a1c",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -1258,7 +1258,7 @@
         "source": "internal/modkit/testdata/redproof/inventory.txt",
         "target": "internal/modkit/testdata/redproof/inventory.txt",
         "class": "test",
-        "sha256": "fd96391e4d3d3d438bed65964da07028d46d65211052c5223d3d8745771e01e2",
+        "sha256": "96aaf3bd76df5595447faf99c5633b48d0775179e3bd42f17e2a2badf411c79c",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1328,7 +1328,7 @@
         "source": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
         "class": "test",
-        "sha256": "9536985f26b356040263e1909682f979ba55b6b053407aa92fbbbbc2ffbf4acc",
+        "sha256": "7ea3fdb5949706628d37a8e5a6bb4044a00c6ec1d1b35cf843305eb20892c45a",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1337,7 +1337,7 @@
         "source": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "class": "test",
-        "sha256": "f846dbc04714efe376260d29b45d8acf62d5c4f7d5afecb32b1b53b6e9dbcd52",
+        "sha256": "faea28175bde3d83057da2613751a1d08a1be70d3401b0413034511805ef00be",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1346,7 +1346,7 @@
         "source": "internal/modkit/testdata/redproof/own-canary-leaves-unstated.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-leaves-unstated.patch",
         "class": "test",
-        "sha256": "9da5fe22e72bbb995d0199a8d45f24edfd09a6d4426671b55c56940bd6b6fe5c",
+        "sha256": "7ac6bf8ac014275164625ffa6884c3fa8066d6c7321fa07dfe04f5d09af97a47",
         "rewrite_module": false,
         "contract": false,
         "self_host": true

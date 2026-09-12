@@ -1,13 +1,13 @@
 Redproof-Patch: own-canary-adapter-unexcused
 Redproof-Family: ownership
 Redproof-Run: TestEveryManagedAdapterIsCanariedOrExcused
-Redproof-Package: ./internal/gggcli
+Redproof-Package: ./internal/canary
 Redproof-Expect: appear in neither liveCanaryProviders nor liveCanaryNothingToProbe
 Redproof-Summary: A managed reference target with no live canary and no stated excuse — the feature-flags-launchdarkly allowlist entry deleted while the registry still publishes its managed target, which is exactly the shape a newly added managed adapter has before anyone writes its row.
-diff --git a/internal/gggcli/live_canary_selfhost_test.go b/internal/gggcli/live_canary_selfhost_test.go
+diff --git a/internal/canary/live_canary_selfhost_test.go b/internal/canary/live_canary_selfhost_test.go
 index e3eaf31d..15cfb461 100644
---- a/internal/gggcli/live_canary_selfhost_test.go
-+++ b/internal/gggcli/live_canary_selfhost_test.go
+--- a/internal/canary/live_canary_selfhost_test.go
++++ b/internal/canary/live_canary_selfhost_test.go
 @@ -239,7 +239,6 @@ type liveCanaryProvider struct {
  // rows in liveCanaryProviders instead — TestEveryManagedAdapterIsCanariedOrExcused
  // refuses the halfway state in both directions.

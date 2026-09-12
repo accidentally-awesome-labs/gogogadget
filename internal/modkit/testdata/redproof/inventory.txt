@@ -2,7 +2,7 @@
 # Regenerate: GGG_REDPROOF_UPDATE_INVENTORY=1 go test ./internal/modkit -run TestRedProofGate
 # Derivation: every test matching the guard naming families
 # (TestAgents*|TestEvery*|TestNo*|TestPublished*|TestValidator*|TestThe*) in the
-# guard files — every *_selfhost_test.go under internal/{modkit,gggcli,web} plus the
+# guard files — every *_selfhost_test.go under internal/{modkit,canary,gggcli,web} plus the
 # swept non-selfhost guard files — cross-checked against the named contract guards.
 # One line per guard: name, family, and either the patch id that proves it red or
 # allow:<why it carries no red proof today>.
@@ -46,9 +46,9 @@ TestEveryGoPackageDeclaresTestsOrSaysWhyNot	ownership	own-notify-tests-deleted
 TestEveryInapplicableSkipSiteIsDeclared	ownership	own-skip-site
 TestEveryInputSizeIsStyledForEveryFormControl	web	allow:sweep web.md row 15 DECLARATION-DERIVED (top-level Size field of type ui.Size); the compensating rendered-output universal is patched as web-badge-xxl on TestEveryClassARendererEmitsIsStyled
 TestEveryKindIsStyledForEveryStateFamily	web	allow:sweep web.md row 16 DECLARATION-DERIVED (literal family list); compensated by the rendered-output universal patched as web-badge-xxl
-TestEveryLiveCanaryKeyIsMappedInTheWorkflow	ownership	own-canary-key-unmapped
-TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion	ownership	own-canary-leaves-unstated
-TestEveryManagedAdapterIsCanariedOrExcused	ownership	own-canary-adapter-unexcused
+TestEveryLiveCanaryKeyIsMappedInTheWorkflow	modkit	own-canary-key-unmapped
+TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion	modkit	own-canary-leaves-unstated
+TestEveryManagedAdapterIsCanariedOrExcused	modkit	own-canary-adapter-unexcused
 TestEveryRendererPropagatesItsAttrs	web	web-plantwidget
 TestEverySizeIsStyledForEveryControlFamily	web	allow:sweep web.md row 14 DECLARATION-DERIVED (same filter as row 15); compensated by the rendered-output universal patched as web-badge-xxl
 TestEveryTemplRawCallSiteIsJustified	web	web-templ-raw

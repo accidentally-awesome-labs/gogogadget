@@ -684,7 +684,7 @@ Valkey container cannot serve them without a REST shim.
 
 ### Tier 2 — the managed-target live canaries
 
-`TestManagedTargetLiveCanaries` in `internal/gggcli` drives the real
+`TestManagedTargetLiveCanaries` in `internal/canary` drives the real
 maintained managed targets with live credentials and asserts the same wire
 shapes the fakes assert. It is a declarative table — one row per managed
 adapter, carrying the slot, the module, the target, the credential keys, a
