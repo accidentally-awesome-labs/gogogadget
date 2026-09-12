@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "7e438b64b4ea9b62ed6f3972a2c6f2f041e04f1a5bd6fd5e09d1bea13014cec2"
+      "sha256": "a4f22c1daf9297e8e5b536c07ff7b7dbb76ebe9df5a207024da2502e829c1e1f"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "cd0154b7b5dd3a861b293d17612311a36e7f1ad2ca3685990fc804667562450f"
+      "sha256": "8966a67f1fe5671855298fa6c20f66c28e169684e795a06b3390532efbac6d91"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -988,7 +988,7 @@
     },
     {
       "path": "registry/modules/system/mail-smtp/module.json",
-      "sha256": "8eef1fb2880189b3ddf339bccbef163140f547d3350af7704cda63923e8c0e14"
+      "sha256": "baa386ebc8308496b4abb602c125cf8b3913986b811794ac50080c47af41334e"
     },
     {
       "path": "registry/modules/system/mail/module.json",
@@ -1000,11 +1000,11 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "5409c523da0be0c11791274f999b5e2e829504b6070a868f10a574bdec1ddc74"
+      "sha256": "d622123bed576071c84a3562c5f6f78fc2b3d340e4db7f2cb1670afac3902ea5"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
-      "sha256": "52ec32362c1c4cf11bd15c688975c05d841e05048bfdab10c58704f9ad931f8c"
+      "sha256": "47d1dd770784c4383e182a62eec9f6e0084febf58be86ec72d786fd1260232d4"
     },
     {
       "path": "registry/modules/system/notifications-postgres/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "e3eb4464ed5933d99233c8b9cf029029b1be10270a3b2a7f360904e84348b3f7"
+      "sha256": "5119088e4b633470583ebaf8016099977cb5b43fc0d65f50e6b669f20d2a1a8e"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1108,7 +1108,7 @@
     },
     {
       "path": "registry/modules/system/storage-s3/module.json",
-      "sha256": "330c69f1d55a99886a9f115c43a39b5b7418641db255b01a8dc584805be23ac7"
+      "sha256": "c17f81855d81517b058e65123edde1027b586b061821ff835c92dadfb373298a"
     },
     {
       "path": "registry/modules/system/storage/module.json",
@@ -1132,7 +1132,7 @@
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",
-      "sha256": "27c6ce006b3b48ad2e041ea15ca0c38b23c1cf4e7f5a61e8f8130225badf7f02"
+      "sha256": "50e7beaf034f237ee3ef270b4e73baf67abcfa5afdfb7ee96493a40f26cacc24"
     },
     {
       "path": "registry/modules/system/usage-postgres/module.json",
@@ -1148,7 +1148,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",
-      "sha256": "6f2affa7bcae2bb081a9a632353213ea0094cd9b461daa7de994954c1a59c33d"
+      "sha256": "b63e4c9eab129fa31bd48e54ee82f83cf07c2d01a2e12d4effbff02320531214"
     },
     {
       "path": "registry/modules/system/webhooks/module.json",
@@ -1296,7 +1296,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "a00ef2da00ea4f8cea4392b3780c0272b0ea8859b8842fb8e60b1e960e57cdc3"
+      "sha256": "d0bec936dcb40a07e43c95fd813ccd0e64b0288981f47e6fa287eb0c95113f80"
     },
     {
       "path": "registry/schema/project.schema.json",

@@ -4,7 +4,7 @@
     "id": "ggg/system/notifications-knock",
     "kind": "system",
     "name": "notifications-knock",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Notifications Knock",
     "description": "notifications-knock infrastructure capability.",
@@ -32,7 +32,7 @@
         "source": "internal/notifications/knock/knock.go",
         "target": "internal/notifications/knock/knock.go",
         "class": "go",
-        "sha256": "d28761556879152c44c7841764e8067e3004cd895211267ab9868bc287d8f512",
+        "sha256": "c0852f76ec0ef4470d3e67977405c1854fdeb150c9c309189f84b3c35de18a9a",
         "rewrite_module": true,
         "contract": true
       },
@@ -112,8 +112,6 @@
         "field": "KnockUrl",
         "type": "string",
         "description": "Knock API base URL override; empty uses https://api.knock.app",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/notifications-knock@knock"
         ]

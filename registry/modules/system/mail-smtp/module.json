@@ -4,7 +4,7 @@
     "id": "ggg/system/mail-smtp",
     "kind": "system",
     "name": "mail-smtp",
-    "revision": 3,
+    "revision": 4,
     "contract": 1,
     "title": "SMTP mail",
     "description": "Self-hosted SMTP delivery, with Mailpit for local development.",

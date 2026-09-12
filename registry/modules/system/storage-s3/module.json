@@ -4,7 +4,7 @@
     "id": "ggg/system/storage-s3",
     "kind": "system",
     "name": "storage-s3",
-    "revision": 4,
+    "revision": 5,
     "contract": 1,
     "title": "S3-compatible storage",
     "description": "S3-compatible object storage with MinIO self-hosting and Cloudflare R2 managed targets.",

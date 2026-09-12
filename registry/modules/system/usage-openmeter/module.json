@@ -4,7 +4,7 @@
     "id": "ggg/system/usage-openmeter",
     "kind": "system",
     "name": "usage-openmeter",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Usage Openmeter",
     "description": "usage-openmeter infrastructure capability.",
@@ -32,7 +32,7 @@
         "source": "internal/usage/openmeter/openmeter.go",
         "target": "internal/usage/openmeter/openmeter.go",
         "class": "go",
-        "sha256": "63ab60aafe82e4c27c331aba63bbd0cd89895b7fb94a0b95ba131cf13e727d5f",
+        "sha256": "5e301a09fa06be3549672cdc63d0014bf0e3a6b741ed1f92d39d443effcc7f62",
         "rewrite_module": true,
         "contract": true
       },
@@ -40,7 +40,7 @@
         "source": "internal/usage/openmeter/openmeter_test.go",
         "target": "internal/usage/openmeter/openmeter_test.go",
         "class": "test",
-        "sha256": "7d04bf9ac26a990209597dae432dc7305fd824720b3a88525d666226fae290f0",
+        "sha256": "2c1f094ed1ba6512337c862d50cfd0af8024949c22585efcc4d766a9caff70a3",
         "rewrite_module": true,
         "contract": true
       }
@@ -112,8 +112,6 @@
         "field": "OpenmeterUrl",
         "type": "string",
         "description": "OpenMeter API base URL override; empty uses https://openmeter.cloud",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/usage-openmeter@openmeter"
         ]
