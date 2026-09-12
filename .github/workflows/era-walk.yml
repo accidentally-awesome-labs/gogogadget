@@ -1,0 +1,84 @@
+name: era-walk
+
+# The cross-release upgrade gate: old-tag derivatives versus today's binary.
+#
+# TIER — this is not a contributor gate and must never become one:
+#   - It runs on workflow_dispatch and a weekly schedule only, never on push
+#     or pull_request, so it cannot add a minute to any contributor's wall.
+#     The concurrency budget in ci.yml (green wall < ~15m) is untouched.
+#   - Its job is in no `needs` chain and nothing needs it, so it can never
+#     become a required check by accident of ordering.
+#   - Weekly schedule, not per-push, and the reasoning: the failure mode this
+#     gate catches (a new manifest rule wired into the lock-read path bricking
+#     every derivative older than the rule) is caught by NO other gate — the
+#     unit fixtures pin the two known refusal shapes, but the class recurs by
+#     construction, and only the real walk (era binary, era genesis, era lock,
+#     today's update) exercises the lock-read path against genuine era
+#     records. Weekly bounds the exposure window at seven days for ~15
+#     minutes of one runner; per-push would pay that on every change for a
+#     regression that lands at most a few times a year, and dispatch-only
+#     means the gate runs only when someone remembers, which is how the two
+#     original bricks shipped. Run it on demand before a release; the schedule
+#     is the net underneath the forgetting.
+#
+# The walk needs the repository's full history and its tags: the eras are
+# materialized with `git archive <tag>`, so the checkout is fetch-depth: 0.
+# Without the tags the test refuses loudly (a stated skip with its remedy,
+# never a vacuous pass), and internal/modkit/ci_workflow_test.go pins this
+# job's wiring so deleting it cannot leave the walk green-by-skip everywhere.
+#
+# Measured warm ~165 s for both eras on an M1 Max; cold-cache CI is minutes
+# (two era binaries, two genesis runs, two walks), so the go test step pins a
+# -timeout well above the default 10m.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 6 * * 1"
+
+jobs:
+  era-walk:
+    runs-on: ubuntu-latest
+    env:
+      GGG_ERA_WALK: "1"
+      # Genesis per the era's documented flow fetches the core registry
+      # tarball per ref from GitHub; authenticated, it is not rate-limited.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Record start
+        run: echo "ERA_WALK_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      # -count=1 because a cached verdict is a report on a run that did not
+      # happen, and this test's inputs — the whole tree and the tag history —
+      # are not inputs `go test` can observe. -timeout because the cold-cache
+      # walk exceeds go test's 10m package default.
+      - name: Old-era derivatives walk to current
+        run: go test -count=1 -run TestOldEraDerivativesWalkToCurrent ./internal/gggcli -v -timeout 45m
+
+      # The job's own runtime, in its log summary, per the measured-cost rule.
+      - name: Runtime summary
+        if: always()
+        run: |
+          secs=$(( $(date +%s) - ERA_WALK_STARTED ))
+          {
+            echo "## Era walk"
+            echo "Runtime: $(( secs / 60 ))m$(( secs % 60 ))s"
+          } >> "$GITHUB_STEP_SUMMARY"

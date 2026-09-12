@@ -100,7 +100,7 @@ assertion about THIS repository — the committed snapshot signature, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
 `canonical_module`. So a new self-hosting test goes in a `self_host` payload
-— 57 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+— 58 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
 `ggg/system/server`, because the module that owns the SUBJECT owns the
 assertion about it: the `*_selfhost_test.go` files, the bare
 `selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus

@@ -10,6 +10,7 @@ package modkit
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -339,6 +340,161 @@ func TestCIProfilesJobRunsTheGenesisSweep(t *testing.T) {
 	}
 	if setupIndex < 0 || setupIndex > sweepIndex {
 		t.Fatal("the profiles job runs the sweep before `make setup`, so the pinned tools are absent")
+	}
+}
+
+// eraWalkWorkflowPath is the era walk's own workflow: the cross-release
+// upgrade gate (old-tag derivatives versus today's binary), owned by
+// ggg/system/ci-github beside ci.yml. It is asserted here for the same
+// reason ci.yml is: nobody in this repository executes it on a schedule, so
+// only a test that reads it can catch the job being deleted, gated off,
+// narrowed to push (which would make it a contributor gate), or checked out
+// shallow (which would turn every run into the walk's own loud refusal).
+const eraWalkWorkflowPath = ".github/workflows/era-walk.yml"
+
+// ciEraWalkTest is the one test the `era-walk` job exists to run, named for
+// the same reason ciGenesisSweepTest is: the walk skips itself as
+// [inapplicable] unless GGG_ERA_WALK is set, and this job is the only place
+// that sets it. Delete the job and the only end-to-end cross-release upgrade
+// gate goes green-by-skip in every environment without one test turning red.
+const ciEraWalkTest = "TestOldEraDerivativesWalkToCurrent"
+
+// The era-walk workflow must run the walk on a full checkout, on the two
+// non-contributor triggers only, in no job's needs chain, and with the env
+// that un-skips the test — and it must never narrow to push/pull_request or
+// grow a needs edge, either of which would quietly convert a weekly-tier
+// gate into a contributor gate or a required check.
+//
+// The "never required" half is what the YAML can state: no needs edge
+// anywhere in either workflow (ci.yml's own no-gating assertion covers its
+// side), and no trigger that fires on a change. Branch protection marking
+// the check required is a repository-settings act outside any file here;
+// this test is the enforceable half.
+//
+// Mutation: delete the workflow, drop fetch-depth, drop the env, add
+// push/pull_request, add a needs edge, wrap the go test in an echo, point
+// -run at another test, drop -count=1, drop -timeout, or delete the runtime
+// summary step, and this fails naming what it found.
+func TestCIEraWalkWorkflowRunsTheEraWalk(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(eraWalkWorkflowPath)))
+	if err != nil {
+		t.Fatalf("read %s: %v", eraWalkWorkflowPath, err)
+	}
+	var workflow ciWorkflow
+	if err := yaml.Unmarshal(raw, &workflow); err != nil {
+		t.Fatalf("parse %s: %v", eraWalkWorkflowPath, err)
+	}
+
+	// The tier, stated as triggers: workflow_dispatch for on-demand runs
+	// (before a release), one weekly schedule as the net under the
+	// forgetting, and nothing that fires on a change. A push or pull_request
+	// trigger here would put a minutes-long job on every contributor's wall
+	// and break ci.yml's concurrency budget.
+	if workflow.On.Kind != yaml.MappingNode {
+		t.Fatalf("%s declares no trigger mapping, so nothing states when it runs", eraWalkWorkflowPath)
+	}
+	triggers := map[string]*yaml.Node{}
+	for index := 0; index+1 < len(workflow.On.Content); index += 2 {
+		triggers[workflow.On.Content[index].Value] = workflow.On.Content[index+1]
+	}
+	for _, refuse := range []string{"push", "pull_request"} {
+		if _, ok := triggers[refuse]; ok {
+			t.Fatalf("%s runs on %s; the era walk is a weekly-tier gate and must never fire on a change", eraWalkWorkflowPath, refuse)
+		}
+	}
+	if _, ok := triggers["workflow_dispatch"]; !ok {
+		t.Fatalf("%s has no workflow_dispatch trigger, so it cannot be run on demand before a release; triggers are %v",
+			eraWalkWorkflowPath, maps.Keys(triggers))
+	}
+	schedule, ok := triggers["schedule"]
+	if !ok {
+		t.Fatalf("%s has no schedule trigger; without one the gate runs only when someone remembers, which is how the two original bricks shipped", eraWalkWorkflowPath)
+	}
+	var scheduled []struct {
+		Cron string `yaml:"cron"`
+	}
+	if err := schedule.Decode(&scheduled); err != nil || len(scheduled) != 1 || scheduled[0].Cron == "" {
+		t.Fatalf("%s declares %d usable schedule entries; the weekly tier is exactly one cron", eraWalkWorkflowPath, len(scheduled))
+	}
+	// No needs edge, in this file or pointed at it from ci.yml (whose own
+	// assertion forbids needs entirely).
+	assertCINoJobGatesOnAnother(t, workflow)
+
+	job, ok := workflow.Jobs["era-walk"]
+	if !ok {
+		t.Fatalf("%s has no era-walk job, so nothing sets GGG_ERA_WALK and %s never runs anywhere", eraWalkWorkflowPath, ciEraWalkTest)
+	}
+	_, goVersion := readCIWorkflow(t, root)
+	assertCIJobIsARealGate(t, "era-walk", job, goVersion)
+
+	// The full history: the walk materializes era trees with `git archive
+	// <tag>`, and a default shallow checkout has no tags — the run would
+	// degrade to the walk's own refusal every week, a gate that never gates.
+	for _, step := range job.Steps {
+		if step.Uses == "actions/checkout@v7" && step.With["fetch-depth"] != "0" {
+			t.Fatalf("the era-walk checkout pins fetch-depth %q; the walk needs the tags and full history (fetch-depth: 0)", step.With["fetch-depth"])
+		}
+	}
+	if got := job.Env["GGG_ERA_WALK"]; got != "1" {
+		t.Fatalf("the era-walk job sets GGG_ERA_WALK=%q, want \"1\"; without it %s skips itself", got, ciEraWalkTest)
+	}
+
+	var found []string
+	setupIndex, walkIndex, summaryIndex := -1, -1, -1
+	for index, step := range job.Steps {
+		if isMakeSetupStep(step) {
+			setupIndex = index
+		}
+		for line := range strings.SplitSeq(step.Run, "\n") {
+			fields := strings.Fields(strings.TrimSpace(line))
+			// Matched as a COMMAND by its first words, the standard the
+			// rest of this file sets: an echo runs no test.
+			if len(fields) < 2 || fields[0] != "go" || fields[1] != "test" {
+				continue
+			}
+			if step.If != "" || step.ContinueOnError {
+				t.Fatalf("the era-walk step is exempt from failing the build (if: %q, continue-on-error: %v)", step.If, step.ContinueOnError)
+			}
+			if strings.ContainsAny(strings.TrimSpace(step.Run), "\n|;&>") || strings.Contains(step.Run, "set +e") {
+				t.Fatalf("the era-walk step wraps the command in shell that can hide its exit status: %q", step.Run)
+			}
+			found = append(found, strings.Join(fields, " "))
+			walkIndex = index
+		}
+		if strings.Contains(step.Run, "GITHUB_STEP_SUMMARY") && step.If == "always()" {
+			summaryIndex = index
+		}
+	}
+	if len(found) != 1 {
+		t.Fatalf("the era-walk job runs `go test` %d time(s): %q; want exactly one walk", len(found), found)
+	}
+	fields := strings.Fields(found[0])
+	at := slices.Index(fields, "-run")
+	if at < 0 || fields[at+1] != ciEraWalkTest {
+		t.Fatalf("the era-walk command %q does not select %s by -run", found[0], ciEraWalkTest)
+	}
+	assertRunFilterSelectsAGGGCLITest(t, fields[at+1])
+	for _, want := range []string{"-count=1", "./internal/gggcli"} {
+		if !slices.Contains(fields, want) {
+			t.Fatalf("the era-walk command %q is missing %s", found[0], want)
+		}
+	}
+	// -timeout because the cold-cache walk runs minutes past go test's 10 m
+	// package default; without it the job reports a timeout instead of a
+	// verdict.
+	timeoutAt := slices.Index(fields, "-timeout")
+	if timeoutAt < 0 || timeoutAt+1 >= len(fields) {
+		t.Fatalf("the era-walk command %q carries no -timeout, so a cold run dies at go test's 10m default instead of reporting a verdict", found[0])
+	}
+	if setupIndex < 0 || setupIndex > walkIndex {
+		t.Fatal("the era-walk job runs the walk before `make setup`, so the pinned tools are absent")
+	}
+	if summaryIndex < 0 || summaryIndex < walkIndex {
+		t.Fatal("the era-walk job reports no runtime in its step summary after the walk; the measured-cost rule applies to this job too")
 	}
 }
 

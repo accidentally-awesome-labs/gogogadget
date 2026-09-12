@@ -594,6 +594,24 @@ offline. The test therefore skips as `[inapplicable]` unless
 `TestTheProfileSweepCIJobRunsThisTest` parses the workflow so that deleting
 the job cannot leave the sweep green-by-skip everywhere.
 
+The era walk is the fourth tier, one rung further out: it proves the
+cross-release upgrade promise itself — a derivative created by an old
+release's own binary walks forward to the current one with local edits
+preserved byte for byte through a staged conflict. It materializes two era
+trees with `git archive` (`v0.1.1`, the earliest schema-2 genesis, and
+`v0.16.0`, the last era the pre-v0.24 authoring rules bricked), builds each
+era's binary, creates a derivative per that era's documented flow, makes one
+local edit in a module whose payload churns, and drives the whole
+exit-4 → `resolve --keep-local` → completing-update sequence with the current
+binary, then asserts provenance over the walked lock and a green
+`sync --check --offline`. Measured ~165 s warm on an M1 Max, minutes
+cold-cache, and it needs the network for the era-flow genesis, so it can
+never be a contributor gate: it skips as `[inapplicable]` unless
+`GGG_ERA_WALK=1`, which only the separate `era-walk` workflow sets —
+`workflow_dispatch` plus one weekly schedule, never push or pull_request,
+in no needs chain, never required — and `TestCIEraWalkWorkflowRunsTheEraWalk`
+parses that workflow so deleting it cannot leave the walk green-by-skip.
+
 The other two rows are in `go test` and therefore in `make check`:
 `TestEveryShippedProfileResolvesIntoACoherentProject` plans each profile and
 asserts two coherence properties over the planned bytes — every package a
