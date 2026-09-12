@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 87,
+    "revision": 88,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -356,7 +356,7 @@
         "source": "internal/gggcli/selfhost_test.go",
         "target": "internal/gggcli/selfhost_test.go",
         "class": "test",
-        "sha256": "06d118676f9f9bdb0cec2d542d39e4ec06ca8114950638f21f6029dc8d216b64",
+        "sha256": "d2bc98e3e53ca30581a975368ab6ba1ff1a6b64ec8428d4066e48da578e20e0b",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -505,7 +505,7 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "432f58b4f0066fcbb0c02bb0b0215964995318b8014d5d7e8c112b68566d0c4f",
+        "sha256": "614e17bb682f5bbc2aba4d444c37155727eae30afda0ac0abc4fd4c160576ee1",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -947,7 +947,7 @@
         "source": "internal/modkit/registry_build.go",
         "target": "internal/modkit/registry_build.go",
         "class": "go",
-        "sha256": "a22c9934399c28e3e779ba10472fbea18586ea8f74a770be9f231aaf9cf96d30",
+        "sha256": "db0d143af5bf32bc38e6ced7b71ec7bc61c97dba397ac6e0630f122d1a84eb9b",
         "rewrite_module": true,
         "contract": false
       },
@@ -989,7 +989,7 @@
         "source": "internal/modkit/registry_test.go",
         "target": "internal/modkit/registry_test.go",
         "class": "test",
-        "sha256": "78a0aaaf651e9850a0b4a5d237aed6efab55d7ee0dec4943fa0c6ec2f2a41129",
+        "sha256": "6b5baf0aba112382d78a7c271cbcb27c08019498550145ada1efeea6e9ba35fc",
         "rewrite_module": true,
         "contract": false
       },
@@ -1037,7 +1037,7 @@
         "source": "internal/modkit/revision_baseline_selfhost_test.go",
         "target": "internal/modkit/revision_baseline_selfhost_test.go",
         "class": "test",
-        "sha256": "71f726d399ce5c93e8ca3d055b10b1834ee606e1449a9b77093f539a8395cfd7",
+        "sha256": "8c4c7776da6386ea91fcff15b63993231d57481df9ac0942e737f1211603bd9d",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -1275,7 +1275,7 @@
         "source": "internal/modkit/testdata/redproof/inventory.txt",
         "target": "internal/modkit/testdata/redproof/inventory.txt",
         "class": "test",
-        "sha256": "96aaf3bd76df5595447faf99c5633b48d0775179e3bd42f17e2a2badf411c79c",
+        "sha256": "58f5c8c80d9e81be0e0902cc8896bfe6d5105105bb88e619d39d0b537d5f1552",
         "rewrite_module": false,
         "contract": false,
         "self_host": true

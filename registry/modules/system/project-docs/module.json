@@ -4,7 +4,7 @@
     "id": "ggg/system/project-docs",
     "kind": "system",
     "name": "project-docs",
-    "revision": 21,
+    "revision": 22,
     "contract": 1,
     "title": "Project Docs",
     "description": "Project scaffold ownership for project-docs.",
@@ -27,7 +27,7 @@
         "source": "AGENTS.md",
         "target": "AGENTS.md",
         "class": "docs",
-        "sha256": "063ffe97e032773313bda6de0155e711613cd8472c51fe2a705bbc4709ed1692",
+        "sha256": "ce586f480df5d2ee8e643e366d3ebca78bad84479a332a61ef2729a1fbc2bb91",
         "rewrite_module": false,
         "contract": false
       },
