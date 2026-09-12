@@ -18,7 +18,12 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -27,7 +32,7 @@
         "source": "internal/webhooks/svix/svix.go",
         "target": "internal/webhooks/svix/svix.go",
         "class": "go",
-        "sha256": "3e605c03384425bea026563623bad7df717f0d2b7949a8bb005dfbdaffece1ff",
+        "sha256": "0fa7e65cf8facee1da2c5cf5bf3698e0494cacaf6d6d34469d473dbd416ae264",
         "rewrite_module": true,
         "contract": true
       },
@@ -35,7 +40,7 @@
         "source": "internal/webhooks/svix/svix_test.go",
         "target": "internal/webhooks/svix/svix_test.go",
         "class": "test",
-        "sha256": "24cb9ad62b502b1027320ec27e76d8c1c34867234984a03d9f83b9a456c9a415",
+        "sha256": "17ad38144343bc21b864f5b4e483af174d77f4cd84a59aa9cfade75bee2db1ec",
         "rewrite_module": true,
         "contract": true
       }
@@ -49,7 +54,14 @@
       "system": {
         "package": "internal/webhooks/svix",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -58,10 +70,11 @@
           }
         ],
         "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
           "internal/webhooks"
         ],
         "start": false,
-        "stop": false,
+        "stop": true,
         "health": true,
         "adapter": {
           "slot": "ggg/webhooks",
@@ -87,9 +100,20 @@
         "key": "SVIX_API_KEY",
         "field": "SvixApiKey",
         "type": "string",
-        "description": "Svix Api Key",
-        "required": false,
+        "description": "Svix auth token; required when this adapter is selected",
+        "required": true,
         "secret": true,
+        "targets": [
+          "ggg/system/webhooks-svix@svix"
+        ]
+      },
+      {
+        "key": "SVIX_URL",
+        "field": "SvixUrl",
+        "type": "string",
+        "description": "Svix API base URL override; empty uses https://api.svix.com, a regional host is https://api.us.svix.com",
+        "required": false,
+        "secret": false,
         "targets": [
           "ggg/system/webhooks-svix@svix"
         ]

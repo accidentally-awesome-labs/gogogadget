@@ -18,7 +18,12 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -27,7 +32,7 @@
         "source": "internal/usage/openmeter/openmeter.go",
         "target": "internal/usage/openmeter/openmeter.go",
         "class": "go",
-        "sha256": "57beebfb8dcd93b04e4bf3d938867659db348f0180380bc67856f0bca0f6e357",
+        "sha256": "63ab60aafe82e4c27c331aba63bbd0cd89895b7fb94a0b95ba131cf13e727d5f",
         "rewrite_module": true,
         "contract": true
       },
@@ -49,7 +54,14 @@
       "system": {
         "package": "internal/usage/openmeter",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -58,10 +70,11 @@
           }
         ],
         "type_imports": [
+          "internal/db/sqlc",
           "internal/usage"
         ],
         "start": false,
-        "stop": false,
+        "stop": true,
         "health": true,
         "adapter": {
           "slot": "ggg/usage",
@@ -87,8 +100,8 @@
         "key": "OPENMETER_API_KEY",
         "field": "OpenmeterApiKey",
         "type": "string",
-        "description": "Openmeter Api Key",
-        "required": false,
+        "description": "OpenMeter API key; required when this adapter is selected",
+        "required": true,
         "secret": true,
         "targets": [
           "ggg/system/usage-openmeter@openmeter"
@@ -98,7 +111,7 @@
         "key": "OPENMETER_URL",
         "field": "OpenmeterUrl",
         "type": "string",
-        "description": "Openmeter Url",
+        "description": "OpenMeter API base URL override; empty uses https://openmeter.cloud",
         "required": false,
         "secret": false,
         "targets": [
