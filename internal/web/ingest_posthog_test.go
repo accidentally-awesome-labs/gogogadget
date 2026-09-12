@@ -130,22 +130,30 @@ func TestPostHogIngestUnparseableEndpointAnswers503(t *testing.T) {
 // tighter-than-status-quo cap would have introduced for session recordings,
 // which is why the declared value is the prior ceiling.
 func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
-	// The upstream handler runs on the server's goroutine while the test reads
-	// the count on its own, and for an over-cap request the proxy gives up
-	// before that handler returns — so the count must be synchronized or the
-	// read is a data race that only -race reports.
+	// Both requests share one upstream, and for an over-cap request the proxy
+	// gives up before that handler returns — so the over-cap handler can still
+	// be draining its body while the next request is measured, and a single
+	// shared counter reports the wrong request's bytes (a -cover-timing flake,
+	// not a data race: the mutex below never prevented it). Keying the count by
+	// the body's filler byte makes each measurement belong to exactly one
+	// request, and writing it before WriteHeader means a handler's own response
+	// orders its write ahead of the proxy returning to the test.
 	var mu sync.Mutex
-	upstreamBytes := 0
-	received := func() int {
+	upstreamBytes := map[byte]int{}
+	received := func(filler byte) int {
 		mu.Lock()
 		defer mu.Unlock()
-		return upstreamBytes
+		return upstreamBytes[filler]
 	}
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n, _ := io.Copy(io.Discard, r.Body)
-		mu.Lock()
-		upstreamBytes = int(n)
-		mu.Unlock()
+		var head [1]byte
+		lead, _ := io.ReadFull(r.Body, head[:])
+		rest, _ := io.Copy(io.Discard, r.Body)
+		if lead > 0 {
+			mu.Lock()
+			upstreamBytes[head[0]] = lead + int(rest)
+			mu.Unlock()
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer upstream.Close()
@@ -155,7 +163,7 @@ func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
 	oversized := bytes.Repeat([]byte("x"), int(globalMaxBodyBytes)+1024)
 	code, _, _ := serve(t, s, "POST", "/ingest/e/", oversized, nil)
 	assert.NotEqual(t, http.StatusOK, code, "a body over the cap must not proxy successfully")
-	assert.Less(t, received(), len(oversized),
+	assert.Less(t, received('x'), len(oversized),
 		"the upstream must never receive more than the cap allows")
 
 	// And a body under the cap still goes through untouched, so the cap is a
@@ -164,5 +172,5 @@ func TestPostHogIngestRejectsABodyOverTheCap(t *testing.T) {
 	sized := bytes.Repeat([]byte("y"), 512<<10)
 	code, _, _ = serve(t, s, "POST", "/ingest/e/", sized, nil)
 	assert.Equal(t, http.StatusOK, code)
-	assert.Equal(t, len(sized), received())
+	assert.Equal(t, len(sized), received('y'))
 }
