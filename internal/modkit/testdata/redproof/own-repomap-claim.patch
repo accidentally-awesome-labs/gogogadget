@@ -5,13 +5,13 @@ Redproof-Package: ./internal/modkit
 Redproof-Expect: has no row for it
 Redproof-Summary: A fabricated exclusivity bullet — internal/llm is the ONLY jackc/pgx importer — in the manual an agent reads first: zero imports there, ninety-two elsewhere (sweep ownership.md 4.3, task-ar item 6).
 diff --git a/AGENTS.md b/AGENTS.md
-index c72207d..a57d8e6 100644
+index a67b8b43..21bdba58 100644
 --- a/AGENTS.md
 +++ b/AGENTS.md
-@@ -165,6 +165,7 @@ generation moved any generated file.
+@@ -168,6 +168,7 @@ generation moved any generated file.
  - `internal/api` — Bearer token auth + `/api/v1` JSON (second transport, same rules).
  - `internal/i18n` — locale detection middleware, `T()` lookup; the en+es catalogs are GENERATED from manifest `locales` blocks.
- - `internal/storage` — `Store` seam. Adapters `storage/filesystem` (`DevStore`→`tmp/uploads`), `storage/s3` (`R2Store`, S3-compatible: R2 or MinIO by endpoint); `storage/contract` is the shared table. `storage/s3/r2.go` is the ONLY aws-sdk import in the tree.
+ - `internal/storage` — `Store` seam. Adapters `storage/filesystem` (`DevStore`→`tmp/uploads`), `storage/s3` (`R2Store`, S3-compatible: R2 or MinIO by endpoint); `storage/contract` is the shared table. `storage/s3` is the ONLY package with an aws-sdk import in the tree — `r2.go` holds the adapter and `minio_test.go` reaches for the SDK directly to create the canary bucket the protocol-container run needs.
 +- `internal/llm` is the ONLY jackc/pgx importer in the tree.
  - `internal/notify` — fire-and-forget in-app notification rows (`Send`/`SendOrg`) read by the sidebar badge; a broadcast fans out one row per member. NOT `internal/notifications`, the provider-neutral slot.
  - `internal/webhooks` — outbound `Emitter` seam: emit + secret minting (`whsec_` + 43B base64url). Adapters `webhooks/postgres` (deliveries run in `internal/jobs`) and `webhooks/svix`.

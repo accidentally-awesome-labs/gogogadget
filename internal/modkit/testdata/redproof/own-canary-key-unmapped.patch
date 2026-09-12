@@ -1,0 +1,18 @@
+Redproof-Patch: own-canary-key-unmapped
+Redproof-Family: ownership
+Redproof-Run: TestEveryLiveCanaryKeyIsMappedInTheWorkflow
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: never sets it, so the row would skip in CI forever
+Redproof-Summary: A canary key the live-canary workflow does not map — SENTRY_DSN removed from the job env. The suite stays green: the row simply skips as [inapplicable] in every run forever, reporting a clean line while checking nothing, which is the green-by-skip failure the marker's accounting exists to make visible.
+diff --git a/.github/workflows/live-canary.yml b/.github/workflows/live-canary.yml
+index 5b13a388..4c54f1af 100644
+--- a/.github/workflows/live-canary.yml
++++ b/.github/workflows/live-canary.yml
+@@ -99,7 +99,6 @@ jobs:
+ 
+       # ggg/observability — ggg/system/observability-sentry@sentry. Leaves one
+       # immutable event per run; point it at a throwaway project.
+-      SENTRY_DSN: ${{ secrets.CANARY_SENTRY_DSN }}
+ 
+       # ggg/llm — ggg/system/llm-openai-compatible@openai. Spends tokens.
+       LLM_API_KEY: ${{ secrets.CANARY_LLM_API_KEY }}

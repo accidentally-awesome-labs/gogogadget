@@ -100,7 +100,7 @@ assertion about THIS repository — the committed snapshot signature, the
 vendored bytes, the git-index ownership sweep — and the installer skips it in
 any project whose `go.mod` module path is not the registry's
 `canonical_module`. So a new self-hosting test goes in a `self_host` payload
-— 58 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
+— 63 today, owned by `ggg/element/ui-core`, `ggg/system/modkit` and
 `ggg/system/server`, because the module that owns the SUBJECT owns the
 assertion about it: the `*_selfhost_test.go` files, the bare
 `selfhost_test.go` in `internal/modkit` and `internal/gggcli`, plus
@@ -108,8 +108,8 @@ assertion about it: the `*_selfhost_test.go` files, the bare
 `registry_build_internal_test.go`, `external_template_test.go`,
 `shipped_profiles_test.go`, `stale_sweep_scope_test.go` and
 `profile_genesis_test.go`; the red-proof corpus is self_host data of the same
-kind — `inventory.txt` and the 26 mutation patches
-`modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-genesis-refusal.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
+kind — `inventory.txt` and the 29 mutation patches
+`modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-canary-adapter-unexcused.patch`, `own-canary-key-unmapped.patch`, `own-canary-leaves-unstated.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-genesis-refusal.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
 core-only paths; anything portable stays in a normal test payload
 so generated projects keep running it. NEVER
 reach for `t.Skip` when an artifact is absent: that lets the core gate pass by
@@ -167,7 +167,7 @@ generation moved any generated file.
 - `internal/analytics` — vendor-neutral `Capturer` seam (`NoopCapturer` default) + the `/ingest` reverse proxy, whose two routes register only while `analytics-posthog` is active. Adapters `analytics/noop`, `analytics/posthog`.
 - `internal/api` — Bearer token auth + `/api/v1` JSON (second transport, same rules).
 - `internal/i18n` — locale detection middleware, `T()` lookup; the en+es catalogs are GENERATED from manifest `locales` blocks.
-- `internal/storage` — `Store` seam. Adapters `storage/filesystem` (`DevStore`→`tmp/uploads`), `storage/s3` (`R2Store`, S3-compatible: R2 or MinIO by endpoint); `storage/contract` is the shared table. `storage/s3/r2.go` is the ONLY aws-sdk import in the tree.
+- `internal/storage` — `Store` seam. Adapters `storage/filesystem` (`DevStore`→`tmp/uploads`), `storage/s3` (`R2Store`, S3-compatible: R2 or MinIO by endpoint); `storage/contract` is the shared table. `storage/s3` is the ONLY package with an aws-sdk import in the tree — `r2.go` holds the adapter and `minio_test.go` reaches for the SDK directly to create the canary bucket the protocol-container run needs.
 - `internal/notify` — fire-and-forget in-app notification rows (`Send`/`SendOrg`) read by the sidebar badge; a broadcast fans out one row per member. NOT `internal/notifications`, the provider-neutral slot.
 - `internal/webhooks` — outbound `Emitter` seam: emit + secret minting (`whsec_` + 43B base64url). Adapters `webhooks/postgres` (deliveries run in `internal/jobs`) and `webhooks/svix`.
 - `internal/usage` — fire-and-forget metering seam (`usage/postgres`, `usage/openmeter`); the `usage.flush` schedule drains events through the injected `billing.Client` — Polar while `billing-polar` is active, a no-op with no client — deduped on `ue-<usage_events.id>`.
@@ -291,6 +291,23 @@ Standing rules:
 - Local `make check` stays under ~5 m; the CI green wall stays under ~15 m.
   Anything that would cross a line moves to a slower tier (CI-only job,
   opt-in env) or displaces something already there — state which, here.
+- **Provider verification is two tiers and neither is a contributor gate for
+  what it needs.** Tier 1 drives an adapter against a local protocol
+  container where one exists (MinIO for `storage-s3`, Mailpit for
+  `mail-smtp`) in CI's `test` job. Tier 2 is `TestManagedTargetLiveCanaries`
+  in `internal/gggcli` — one declarative row per managed adapter, driving the
+  real provider and asserting the same wire shape that adapter's fake
+  asserts, opt-in through `GGG_LIVE_CANARY=1`, set only by the separate
+  `live-canary` workflow (`workflow_dispatch` plus one weekly cron, no
+  `needs` edge, never required). Adding a managed adapter means adding a row
+  or a stated allowlist entry: `TestEveryManagedAdapterIsCanariedOrExcused`
+  walks the registry and refuses one that is neither. A canary row must
+  declare its cleanup class and cite the seam that lacks a delete when it
+  cannot clean up, must refuse rather than skip on a production selector
+  (`POLAR_SERVER=production`), and must never render a credential — probes
+  return errors so one redacting path reports them all. Never point a canary
+  at an account anyone depends on; `/docs/testing` lists what each one leaves
+  behind.
 - `ggg check` refuses when the working tree's diff against the merge-base
   with `origin/main` touches a **shipped** payload (a file a non-`self_host`
   payload of an installed module declares) or a module/profile manifest —

@@ -1,0 +1,199 @@
+name: live-canary
+
+# The managed-target canary suite: this repository's maintained managed
+# reference targets, driven with live credentials.
+#
+# TIER — this is not a contributor gate and must never become one:
+#   - It runs on workflow_dispatch and a weekly schedule only, never on push
+#     or pull_request, so it cannot add a second to any contributor's wall.
+#     The concurrency budget in ci.yml (green wall < ~15m) is untouched.
+#   - Its job is in no `needs` chain and nothing needs it, so it can never
+#     become a required check by accident of ordering.
+#   - It needs credentials no fork and no contributor has. A contributor who
+#     dispatched it would get one reasoned [inapplicable] skip per row and a
+#     pass — never a failure — because every row skips itself by name when
+#     its own keys are absent. That is the design: a gate that fails for
+#     lacking a Polar account is a gate that gets deleted.
+#   - Weekly, not per-push, and the reasoning: the failure mode this suite
+#     catches is a PROVIDER changing under us, not a change in this
+#     repository. Every managed adapter's contributor-gate test drives an
+#     httptest fake that encodes a belief about a provider's wire shape; the
+#     provider is free to move a header, a path or a response field at any
+#     time, and when it does, every fake stays green and only a derivative in
+#     production finds out. Per-push would pay every provider's latency and
+#     spend on a change that cannot affect the answer. Dispatch-only would
+#     mean the check runs when someone remembers, which is the same as never.
+#     Weekly bounds the exposure window at seven days; run it on demand
+#     before a release.
+#
+# The checkout is deliberately shallow, unlike era-walk's: no row reads git
+# history. What each row DOES read is its own credentials, mapped below from
+# repository secrets — an absent secret expands to the empty string, so an
+# unconfigured provider skips with its reason instead of failing. The secret
+# names are the operator's checklist and are documented in
+# content/docs/testing.md; internal/modkit/ci_workflow_test.go pins this
+# job's wiring so deleting it cannot leave the suite green-by-skip
+# everywhere, and internal/gggcli/live_canary_selfhost_test.go pins that
+# every key a row declares is actually mapped here.
+#
+# POLAR_SERVER is pinned to the literal `sandbox` rather than taken from a
+# secret. The suite refuses POLAR_SERVER=production outright — the probe
+# creates a checkout session and ingests an immutable metered event — and
+# pinning the value here means a misconfigured repository secret cannot even
+# present the refusal.
+#
+# Cost: one row per managed adapter, each bounded at 30s by its own context
+# deadline (liveCanaryRowDeadline), so the suite is bounded at 30s times the
+# row count even when a provider hangs; the go test -timeout is set well above that so the job reports a
+# verdict rather than a timeout. Runs to date are dominated by the cold Go
+# build, not the providers.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 2"
+
+jobs:
+  live-canary:
+    runs-on: ubuntu-latest
+    env:
+      GGG_LIVE_CANARY: "1"
+
+      # ggg/mail — ggg/system/mail-resend@resend. Delivers one real email per
+      # run; CANARY_MAIL_TO must be a throwaway sink.
+      RESEND_API_KEY: ${{ secrets.CANARY_RESEND_API_KEY }}
+      GGG_CANARY_MAIL_FROM: ${{ secrets.CANARY_MAIL_FROM }}
+      GGG_CANARY_MAIL_TO: ${{ secrets.CANARY_MAIL_TO }}
+
+      # ggg/storage — ggg/system/storage-s3@r2. Self-cleaning.
+      STORAGE_R2_ACCOUNT_ID: ${{ secrets.CANARY_R2_ACCOUNT_ID }}
+      STORAGE_R2_ACCESS_KEY_ID: ${{ secrets.CANARY_R2_ACCESS_KEY_ID }}
+      STORAGE_R2_SECRET_ACCESS_KEY: ${{ secrets.CANARY_R2_SECRET_ACCESS_KEY }}
+      STORAGE_R2_BUCKET: ${{ secrets.CANARY_R2_BUCKET }}
+
+      # ggg/billing — ggg/system/billing-polar@polar. Sandbox only, pinned.
+      POLAR_ACCESS_TOKEN: ${{ secrets.CANARY_POLAR_ACCESS_TOKEN }}
+      POLAR_PRODUCT_PRO: ${{ secrets.CANARY_POLAR_PRODUCT_PRO }}
+      POLAR_SERVER: "sandbox"
+
+      # ggg/identity — ggg/system/identity-clerk@clerk. Reads only. The three
+      # GGG_CANARY_CLERK_* values are optional and widen the row from the
+      # JWKS document to the Backend API user read and the v2 organisation
+      # claim block; without them the row still runs, narrower.
+      CLERK_SECRET_KEY: ${{ secrets.CANARY_CLERK_SECRET_KEY }}
+      CLERK_FRONTEND_API_URL: ${{ secrets.CANARY_CLERK_FRONTEND_API_URL }}
+      GGG_CANARY_CLERK_USER_SUBJECT: ${{ secrets.CANARY_CLERK_USER_SUBJECT }}
+      GGG_CANARY_CLERK_SESSION_JWT: ${{ secrets.CANARY_CLERK_SESSION_JWT }}
+      GGG_CANARY_CLERK_ORG_SUBJECT: ${{ secrets.CANARY_CLERK_ORG_SUBJECT }}
+
+      # ggg/analytics — ggg/system/analytics-posthog@posthog. Leaves one
+      # immutable event per run; point it at a throwaway project.
+      POSTHOG_API_KEY: ${{ secrets.CANARY_POSTHOG_API_KEY }}
+      POSTHOG_HOST: ${{ secrets.CANARY_POSTHOG_HOST }}
+
+      # ggg/observability — ggg/system/observability-sentry@sentry. Leaves one
+      # immutable event per run; point it at a throwaway project.
+      SENTRY_DSN: ${{ secrets.CANARY_SENTRY_DSN }}
+
+      # ggg/llm — ggg/system/llm-openai-compatible@openai. Spends tokens.
+      LLM_API_KEY: ${{ secrets.CANARY_LLM_API_KEY }}
+      LLM_MODEL: ${{ secrets.CANARY_LLM_MODEL }}
+      LLM_BASE_URL: ${{ secrets.CANARY_LLM_BASE_URL }}
+
+      # ggg/cache — ggg/system/cache-redis@upstash. Self-cleaning.
+      CACHE_REDIS_URL: ${{ secrets.CANARY_CACHE_REDIS_URL }}
+      CACHE_REDIS_TOKEN: ${{ secrets.CANARY_CACHE_REDIS_TOKEN }}
+
+      # ggg/rate-limit — ggg/system/rate-limit-redis@upstash. Leaves one
+      # self-expiring counter key.
+      RATE_LIMIT_REDIS_URL: ${{ secrets.CANARY_RATE_LIMIT_REDIS_URL }}
+      RATE_LIMIT_REDIS_TOKEN: ${{ secrets.CANARY_RATE_LIMIT_REDIS_TOKEN }}
+
+      # ggg/search — ggg/system/search-typesense@typesense. Self-cleaning;
+      # CANARY_TYPESENSE_COLLECTION must already exist.
+      TYPESENSE_URL: ${{ secrets.CANARY_TYPESENSE_URL }}
+      TYPESENSE_API_KEY: ${{ secrets.CANARY_TYPESENSE_API_KEY }}
+      GGG_CANARY_TYPESENSE_COLLECTION: ${{ secrets.CANARY_TYPESENSE_COLLECTION }}
+
+      # ggg/realtime — ggg/system/realtime-ably@ably. Leaves one message on
+      # the ggg-live-canary channel.
+      ABLY_ENDPOINT: ${{ secrets.CANARY_ABLY_ENDPOINT }}
+      ABLY_API_KEY: ${{ secrets.CANARY_ABLY_API_KEY }}
+
+      # ggg/telemetry — ggg/system/telemetry-otlp@otlp. Leaves one span. The
+      # exporter sends no authorization header, so OTLP_API_KEY is mapped for
+      # completeness and the endpoint must accept unauthenticated OTLP.
+      OTLP_ENDPOINT: ${{ secrets.CANARY_OTLP_ENDPOINT }}
+      OTLP_API_KEY: ${{ secrets.CANARY_OTLP_API_KEY }}
+
+      # ggg/audit-export — ggg/system/audit-export-otlp@otlp. Leaves one
+      # exported audit entry.
+      OTLP_AUDIT_EXPORT_URL: ${{ secrets.CANARY_OTLP_AUDIT_EXPORT_URL }}
+
+      # ggg/database — ggg/system/database-postgres@neon. Reads only; Plan and
+      # Apply are never called, so no project or branch is provisioned.
+      NEON_API_KEY: ${{ secrets.CANARY_NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.CANARY_NEON_PROJECT_ID }}
+
+      # The three delivery adapters. Until the delivery slice landed, these
+      # made no network call in production wiring at all — NewModule passed a
+      # nil delivery client — so the canary suite excused them by name. They
+      # now POST after a durable local write, which makes them canariable,
+      # and the rows that canary them are owned by that slice. These mappings
+      # exist ahead of the rows on purpose: the suite refuses a row whose keys
+      # this workflow does not map, and an unmapped key would otherwise make a
+      # new row skip in CI forever while reporting a clean line. An unused
+      # mapping costs nothing; a missing one costs the check.
+      #
+      # ggg/notifications — ggg/system/notifications-knock@knock.
+      KNOCK_API_KEY: ${{ secrets.CANARY_KNOCK_API_KEY }}
+      GGG_CANARY_KNOCK_WORKFLOW: ${{ secrets.CANARY_KNOCK_WORKFLOW }}
+      GGG_CANARY_KNOCK_RECIPIENT: ${{ secrets.CANARY_KNOCK_RECIPIENT }}
+
+      # ggg/webhooks — ggg/system/webhooks-svix@svix.
+      SVIX_API_KEY: ${{ secrets.CANARY_SVIX_API_KEY }}
+      GGG_CANARY_SVIX_APP: ${{ secrets.CANARY_SVIX_APP }}
+
+      # ggg/usage — ggg/system/usage-openmeter@openmeter.
+      OPENMETER_API_KEY: ${{ secrets.CANARY_OPENMETER_API_KEY }}
+      OPENMETER_URL: ${{ secrets.CANARY_OPENMETER_URL }}
+      GGG_CANARY_OPENMETER_SUBJECT: ${{ secrets.CANARY_OPENMETER_SUBJECT }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Record start
+        run: echo "LIVE_CANARY_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      # -count=1 because a cached verdict is a report on a run that did not
+      # happen, and this suite's inputs — a dozen-plus third-party services — are
+      # not inputs `go test` can observe. -timeout because every row's own 30s
+      # deadline, times the row count, plus a cold build can pass go test's 10m
+      # package default.
+      - name: Managed-target live canaries
+        run: go test -count=1 -run TestManagedTargetLiveCanaries ./internal/gggcli -v -timeout 20m
+
+      # The job's own runtime, in its log summary, per the measured-cost rule.
+      - name: Runtime summary
+        if: always()
+        run: |
+          secs=$(( $(date +%s) - LIVE_CANARY_STARTED ))
+          {
+            echo "## Managed-target live canaries"
+            echo "Runtime: $(( secs / 60 ))m$(( secs % 60 ))s"
+            echo ""
+            echo "Rows with no configured credentials skip as [inapplicable]; see the job log for which."
+          } >> "$GITHUB_STEP_SUMMARY"

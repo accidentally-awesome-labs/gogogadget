@@ -35,7 +35,7 @@
         "source": ".github/workflows/ci.yml",
         "target": ".github/workflows/ci.yml",
         "class": "asset",
-        "sha256": "83c2ee18528f2d8dfc80589ce8a0cbb7fd6cb52fb7a0657903293c59b3b3a721",
+        "sha256": "d9f84c7db8bafe32459e621ee7508b6d56223ff5f8816d9c6772de7fe2964db3",
         "rewrite_module": false,
         "contract": false
       },
@@ -44,6 +44,14 @@
         "target": ".github/workflows/era-walk.yml",
         "class": "asset",
         "sha256": "61b394f977ed77cf4a27676ed411dfa6ce2680822012a5c8c1db9d4549a24a17",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": ".github/workflows/live-canary.yml",
+        "target": ".github/workflows/live-canary.yml",
+        "class": "asset",
+        "sha256": "439546a404d1b110715c10a1593df248653d0fbfdeca34518ac25c589b7e6ad4",
         "rewrite_module": false,
         "contract": false
       }

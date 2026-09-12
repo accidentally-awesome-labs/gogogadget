@@ -231,6 +231,15 @@
         "contract": false
       },
       {
+        "source": "internal/gggcli/live_canary_selfhost_test.go",
+        "target": "internal/gggcli/live_canary_selfhost_test.go",
+        "class": "test",
+        "sha256": "281a49aa34d8ba657f7d8afe9881de712afff82f58374d0374ead53e36fb4c97",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/gggcli/migrate_test.go",
         "target": "internal/gggcli/migrate_test.go",
         "class": "test",
@@ -347,7 +356,7 @@
         "source": "internal/gggcli/selfhost_test.go",
         "target": "internal/gggcli/selfhost_test.go",
         "class": "test",
-        "sha256": "985cc324308b9534f2a486d16d8ccde8427a2d5f639a6327d4adb807e7024f82",
+        "sha256": "54f0fb0fc71f4a1f3ac35240881e5f00cb65c7f2ea1d9eede15b255991085d83",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -447,7 +456,7 @@
         "source": "internal/modkit/agents_repomap_selfhost_test.go",
         "target": "internal/modkit/agents_repomap_selfhost_test.go",
         "class": "test",
-        "sha256": "b04af2411f86aa35c3e8f32d40ce12a047f6e82f7a62f84d063314688f35b176",
+        "sha256": "bdffc8f793677131275039867cf0f54cc2b3e61f61214d7f1645a1cff8107082",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -496,7 +505,7 @@
         "source": "internal/modkit/ci_workflow_test.go",
         "target": "internal/modkit/ci_workflow_test.go",
         "class": "test",
-        "sha256": "28c2b14757448b6662522ed8c80c73d4d0a861b63724727b57c94851821af150",
+        "sha256": "65432ca23c8a08bca1b5d516035365c0dff187c1a900e2f70acf727354c300e3",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -529,7 +538,7 @@
         "source": "internal/modkit/compose.go",
         "target": "internal/modkit/compose.go",
         "class": "go",
-        "sha256": "c763c299ed943fefd82df23d219116263eb3e2b02078e0d8b7be92c0966d23f0",
+        "sha256": "c0c50229ab4a24b4c2803760231cfe7256c2d26542092cf6485647402f2900d2",
         "rewrite_module": true,
         "contract": true
       },
@@ -540,6 +549,15 @@
         "sha256": "cefebc03dd23f40b3725d9b6799e7de38c5496cea1b8ba2369cc91993e9ce7ac",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/modkit/container_declarations_selfhost_test.go",
+        "target": "internal/modkit/container_declarations_selfhost_test.go",
+        "class": "test",
+        "sha256": "5e46b7cfdd56faa07357beb2cb44b744c5ccbb51fe880c82e5816dc4bb1610e7",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
       },
       {
         "source": "internal/modkit/contract.go",
@@ -783,7 +801,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "d861beea4b5e3a88eebc38e137a8f2f7187c595adc9b736d2fb3122c04e9845b",
+        "sha256": "0104ca6c601ad0bda2214caadae7ea5add80628ff28cab1284c381dfbe1c1061",
         "rewrite_module": true,
         "contract": true
       },
@@ -1240,7 +1258,7 @@
         "source": "internal/modkit/testdata/redproof/inventory.txt",
         "target": "internal/modkit/testdata/redproof/inventory.txt",
         "class": "test",
-        "sha256": "d411ee76b71846356a6c8ff489ab349d87c07c40e57fc401d588c428e4ab014e",
+        "sha256": "fd96391e4d3d3d438bed65964da07028d46d65211052c5223d3d8745771e01e2",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1293,6 +1311,33 @@
         "target": "internal/modkit/testdata/redproof/modkit-schema-godep.patch",
         "class": "test",
         "sha256": "3f870321e2f2eebcdf65e823b77d309c701832eb8103eecafcf6bfe156a803c7",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
+        "class": "test",
+        "sha256": "9536985f26b356040263e1909682f979ba55b6b053407aa92fbbbbc2ffbf4acc",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
+        "class": "test",
+        "sha256": "f846dbc04714efe376260d29b45d8acf62d5c4f7d5afecb32b1b53b6e9dbcd52",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-canary-leaves-unstated.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-leaves-unstated.patch",
+        "class": "test",
+        "sha256": "9da5fe22e72bbb995d0199a8d45f24edfd09a6d4426671b55c56940bd6b6fe5c",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1382,7 +1427,7 @@
         "source": "internal/modkit/testdata/redproof/own-repomap-claim.patch",
         "target": "internal/modkit/testdata/redproof/own-repomap-claim.patch",
         "class": "test",
-        "sha256": "7a588f3ef06ff6b82b8bda2b5a20244cb96bee74b1bda3a14dbeb0dfe0d7414d",
+        "sha256": "7bb466397cc072c3bf16624e8e691ddcac6f3e6266797a921325a7d3378d5041",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1542,7 +1587,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "a12741685c5ee9a4220a9524dbf6d68b4aaceccb14e714d502734eab9e33b53b",
+        "sha256": "49a5558030020799eabec438bcbf01724ce9170acae6533481649e6c7806ed19",
         "rewrite_module": true,
         "contract": false
       },

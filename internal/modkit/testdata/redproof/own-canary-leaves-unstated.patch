@@ -1,0 +1,19 @@
+Redproof-Patch: own-canary-leaves-unstated
+Redproof-Family: ownership
+Redproof-Run: TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: states what it leaves behind in
+Redproof-Summary: A canary row that cannot clean up and does not tell the operator what accumulates in their paid account — the audit-export row's Leaves prose replaced by three words, which is how a safety claim degrades: not by being deleted, by being shortened until it says nothing.
+diff --git a/internal/gggcli/live_canary_selfhost_test.go b/internal/gggcli/live_canary_selfhost_test.go
+index e3eaf31d..957684d6 100644
+--- a/internal/gggcli/live_canary_selfhost_test.go
++++ b/internal/gggcli/live_canary_selfhost_test.go
+@@ -810,7 +810,7 @@ var liveCanaryProviders = []liveCanaryProvider{
+ 		Slot: "ggg/audit-export", Module: "ggg/system/audit-export-otlp", Target: "otlp",
+ 		Keys:    []liveCanaryKey{{Env: "OTLP_AUDIT_EXPORT_URL", Required: true, Credential: true}},
+ 		Cleanup: liveCanaryLeavesImmutable,
+-		Leaves:  "one exported audit entry per run, with action `ggg-live-canary` and no real org or user. audit.Exporter has only Export (internal/audit/export.go:9-11) and there is no delete; the entry is off-box the moment it is accepted. The transactional Postgres audit row is untouched — the exporter runs after the ledger insert and can never replace it (internal/audit/export.go:12).",
++		Leaves:  "nothing much",
+ 		Asserts: "that POST {OTLP_AUDIT_EXPORT_URL} with `Content-Type: application/json` carrying a marshalled audit.Entry — {ID, OrgID, UserID, Action, Metadata} — is still accepted (internal/audit_export/otlp/otlp.go:27-44). Acceptance is all the seam exposes: Export returns only an error. internal/audit_export/otlp/otlp_test.go:8 asserts an empty endpoint refusal and nothing else, so this is the first check of the real sink. The URL itself is treated as a credential here even though the manifest does not mark it secret (registry/modules/system/audit-export-otlp/module.json:86-96): a collector URL with an embedded token is the normal case and a canary must not print it.",
+ 		Probe: func(ctx context.Context, env liveCanaryEnv) (string, error) {
+ 			endpoint := strings.TrimRight(env.Get("OTLP_AUDIT_EXPORT_URL"), "/")

@@ -38,6 +38,7 @@ TestEveryBoostedLayoutClassSharesChrome	web	web-admin-chrome
 TestEveryChainCommentInThisPackageAgreesWithTheAssembledChain	web	web-chain-comment
 TestEveryClassARendererEmitsIsStyled	web	web-badge-xxl
 TestEveryControlHonoursAnExplicitID	web	allow:sweep web.md row 20 DECLARATION-DERIVED, knowingly: the filter is stated in its own comment and the compensating behavioural derivation is row 19, patched as web-dropdown-ids
+TestEveryDeclaredContainerIsExecutable	modkit	allow:a scratch-copy patch cannot turn this guard red: it skips itself [inapplicable] unless GGG_CONTAINER_DECLARATIONS is set, and the proof runner passes no environment, so a plant would meet a skip. Its four reds were driven by hand and are quoted in .superpowers/sdd/framework-followups/task-ba-report.md (dead Docker Hub pin, a health command the image has no binary for, a probe that never reaches exit 0, and a dead unstartableLocalServices row). A patch becomes possible once redproofPatch can carry env
 TestEveryExportedRendererTakesOneOptionsStruct	web	allow:sweep web.md row 17 DECLARATION-DERIVED (the *_templ.go alphabet); the escape (PLANT-J, a .go renderer) is patched as web-plantwidget on the parity guards that catch it
 TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner	ownership	own-registry-undeclared
 TestEveryGatedRouteIDExistsInThePublishedCatalog	modkit	allow:behavioural existence gate over the published catalog (route_scan_selfhost); no plant transcribed — add one
@@ -45,6 +46,9 @@ TestEveryGoPackageDeclaresTestsOrSaysWhyNot	ownership	own-notify-tests-deleted
 TestEveryInapplicableSkipSiteIsDeclared	ownership	own-skip-site
 TestEveryInputSizeIsStyledForEveryFormControl	web	allow:sweep web.md row 15 DECLARATION-DERIVED (top-level Size field of type ui.Size); the compensating rendered-output universal is patched as web-badge-xxl on TestEveryClassARendererEmitsIsStyled
 TestEveryKindIsStyledForEveryStateFamily	web	allow:sweep web.md row 16 DECLARATION-DERIVED (literal family list); compensated by the rendered-output universal patched as web-badge-xxl
+TestEveryLiveCanaryKeyIsMappedInTheWorkflow	ownership	own-canary-key-unmapped
+TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion	ownership	own-canary-leaves-unstated
+TestEveryManagedAdapterIsCanariedOrExcused	ownership	own-canary-adapter-unexcused
 TestEveryRendererPropagatesItsAttrs	web	web-plantwidget
 TestEverySizeIsStyledForEveryControlFamily	web	allow:sweep web.md row 14 DECLARATION-DERIVED (same filter as row 15); compensated by the rendered-output universal patched as web-badge-xxl
 TestEveryTemplRawCallSiteIsJustified	web	web-templ-raw

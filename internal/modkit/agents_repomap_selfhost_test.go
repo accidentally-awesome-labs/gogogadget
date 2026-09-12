@@ -57,9 +57,16 @@ var exclusivityClaims = []exclusivityClaim{
 		owner:    "internal/identity/clerk/",
 	},
 	{
-		sentence: "`storage/s3/r2.go` is the ONLY aws-sdk import in the tree",
+		// Widened from `r2.go` to the package when the MinIO
+		// protocol-container run landed: minio_test.go reaches for the SDK
+		// directly to create its bucket, which no seam method exposes. The
+		// invariant that matters is unchanged and is the one the manifest
+		// declares — the aws dependency enters and leaves go.mod with
+		// ggg/system/storage-s3 — so the allow-list is that adapter's
+		// package, not one file inside it.
+		sentence: "`storage/s3` is the ONLY package with an aws-sdk import in the tree",
 		vendor:   "github.com/aws/aws-sdk-go",
-		owner:    "internal/storage/s3/r2.go",
+		owner:    "internal/storage/s3/",
 	},
 	{
 		sentence: "`observability/sentryadapter/sentry.go` is the ONLY sentry-go import in the tree",

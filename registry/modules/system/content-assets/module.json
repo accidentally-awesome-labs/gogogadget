@@ -323,7 +323,7 @@
         "source": "content/docs/roadmap.md",
         "target": "content/docs/roadmap.md",
         "class": "content",
-        "sha256": "a1139d164620a86d0aac85551d9ef4c882132b3532a5adf397c045b5b0f890b5",
+        "sha256": "871295689ae8afdbc0df2b598f3a2b3e861e35cddf94c031835d5d3c4f614bd3",
         "rewrite_module": false,
         "contract": false
       },
@@ -355,7 +355,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "bd568cb07d08f52f181a8e575c770946f85f6675842d42ade06e4aafe58548bd",
+        "sha256": "9f3a0e90568c5266953e617d35c854bdc2251d85a923312cf2203cf4b0988c8d",
         "rewrite_module": false,
         "contract": false
       },

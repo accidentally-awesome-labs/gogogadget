@@ -1,0 +1,18 @@
+Redproof-Patch: own-canary-adapter-unexcused
+Redproof-Family: ownership
+Redproof-Run: TestEveryManagedAdapterIsCanariedOrExcused
+Redproof-Package: ./internal/gggcli
+Redproof-Expect: appear in neither liveCanaryProviders nor liveCanaryNothingToProbe
+Redproof-Summary: A managed reference target with no live canary and no stated excuse — the feature-flags-launchdarkly allowlist entry deleted while the registry still publishes its managed target, which is exactly the shape a newly added managed adapter has before anyone writes its row.
+diff --git a/internal/gggcli/live_canary_selfhost_test.go b/internal/gggcli/live_canary_selfhost_test.go
+index e3eaf31d..15cfb461 100644
+--- a/internal/gggcli/live_canary_selfhost_test.go
++++ b/internal/gggcli/live_canary_selfhost_test.go
+@@ -239,7 +239,6 @@ type liveCanaryProvider struct {
+ // rows in liveCanaryProviders instead — TestEveryManagedAdapterIsCanariedOrExcused
+ // refuses the halfway state in both directions.
+ var liveCanaryNothingToProbe = map[string]string{
+-	"ggg/system/feature-flags-launchdarkly": "a different reason, and not DeliveryAdapters': the adapter holds no HTTP client at all. It is function-injected (EnabledFn/ListFn/OverridesFn, internal/flags/launchdarkly/launchdarkly.go:17-33), every mutation returns flags.ErrReadOnly (:46,:47,:54,:55), and NewModule refuses a nil Deps.Client (:74-76) while no generated wiring anywhere provides a launchdarkly.Client — so selecting this adapter cannot boot, let alone reach LaunchDarkly. Canarying it would require the client to exist first",
+ }
+ 
+ // liveCanaryManifestKeyScopeExceptions records adapter keys a row reads that

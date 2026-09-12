@@ -31,6 +31,7 @@ at; everything under **Delegated** is a decision not to build something.
 | Targeted updates | `ggg update MODULES…` and `ggg update --registry NAMESPACE --ref REF`, per-module snapshots, conflict staging and `ggg resolve` |
 | Publishing | `ggg registry init\|keygen\|build\|sign\|verify\|rotate\|add\|remove\|update\|validate` plus the maintained `templates/external-registry/` template and its CI workflow |
 | Verification | `ggg registry validate --closures core\|external\|all` as two CI jobs, per-module e2e spec ownership with a mechanical no-orphan check, seam contract suites, provider permutation fixtures for the mail, storage and identity slots, race, fuzz, smoke, docker and visual gates. Assertions about the publishing repository itself are declared `self_host: true` and installed only where `go.mod` matches the registry's `canonical_module`, so `ggg check` is the same passing gate in a generated project |
+| Provider verification, two tiers | Tier 1: local protocol containers — MinIO for `storage-s3` and Mailpit for `mail-smtp`, digest-pinned in their own manifests, driven in CI's `test` job beside Postgres, named-but-unreachable fails and merely-derived skips. Tier 2: `TestManagedTargetLiveCanaries`, a declarative table of one row per managed adapter driving the real provider with live credentials and asserting the same wire shape its fake asserts, with declared cleanup, a production-selector refusal and credential redaction. Only the `live-canary` workflow (`workflow_dispatch` plus one weekly cron, no `needs` edge, never required) sets `GGG_LIVE_CANARY`; every row skips with its own reasoned `[inapplicable]` line when its keys are absent, so neither tier is a contributor gate. `TestEveryManagedAdapterIsCanariedOrExcused` refuses a managed adapter that is neither canaried nor excused, so adding a provider is a row |
 
 ## Known gaps
 
@@ -55,5 +56,3 @@ Recorded, reproducible, and not yet fixed.
 
 - **In-app help, breadcrumbs, a command palette** — absent from
   `internal/web/templates/`; additive whenever someone wants them.
-- **A managed-target canary suite** — provider CI uses fake HTTP and local
-  protocol containers by design; live credentials are not a contributor gate.

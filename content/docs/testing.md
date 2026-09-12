@@ -642,6 +642,164 @@ external family adds the same shape for a third-party slot adapter
 That is what makes "development chooses the local adapter, production chooses
 the managed one" a tested statement rather than a configuration convention.
 
+## Provider verification: two tiers, neither a contributor gate for its credentials
+
+Every managed adapter's package test drives a fake. That fake encodes a
+**belief** about a provider's wire shape — Resend's `POST /emails` body and
+its `{id}` response, Polar's `Polar-Version: 2026-04` header, Clerk's JWKS
+document, the presigned-GET signature parameters R2 must honour. The belief is
+what `make check` verifies; the provider is free to change under it at any
+time, and when it does, every fake stays green and only a derivative in
+production finds out.
+
+So provider verification is two tiers. Tier 1 is the contributor gate and
+stays one; tier 2 is the check on the belief itself. **Neither tier's
+credential-bearing or container-bearing half is ever a required check for a
+contributor**, and both refuse to pass vacuously: each skips with a stated,
+reasoned `[inapplicable]` line naming exactly what is missing and the one
+assignment that supplies it.
+
+### Tier 1 — local protocol containers
+
+Where a provider's protocol has a zero-account implementation, the adapter is
+driven against a real server rather than an in-process fake. Two run today:
+MinIO for `ggg/system/storage-s3` (the same adapter and the same path-style
+SigV4 code that talks to R2, pointed at `STORAGE_S3_ENDPOINT`) and Mailpit for
+`ggg/system/mail-smtp`, whose HTTP read-back API on port 8025 gives the test an
+assertion an in-process fake cannot make — that the message really arrived, and
+with the headers the adapter set. Both images are digest-pinned in their own
+manifests and both are already declared `local_service` blocks, so selecting
+those targets emits them into the generated Compose files.
+
+The tests follow the repository's one service-dependency convention
+(`internal/db/testdb`): an explicitly named but unreachable server **fails**,
+while a merely derived one **skips**. They run in CI's existing `test` job
+beside Postgres, so tier 1 costs a contributor nothing locally and is a real
+gate in CI. Each test's own skip reason carries its measured warm cost.
+
+No protocol container exists for the rest. Clerk, Polar, Resend, Ably,
+LaunchDarkly, Knock, Svix and OpenMeter have no zero-account server, and the
+two Redis adapters speak the Upstash REST dialect rather than RESP, so a plain
+Valkey container cannot serve them without a REST shim.
+
+### Tier 2 — the managed-target live canaries
+
+`TestManagedTargetLiveCanaries` in `internal/gggcli` drives the real
+maintained managed targets with live credentials and asserts the same wire
+shapes the fakes assert. It is a declarative table — one row per managed
+adapter, carrying the slot, the module, the target, the credential keys, a
+cleanup class, the prose for what a run leaves behind, and the probe — so
+**adding a provider is a row, not a file**.
+`TestEveryManagedAdapterIsCanariedOrExcused` walks the registry for every
+module publishing a `managed` service target and refuses one that appears in
+neither the table nor the stated `liveCanaryNothingToProbe` allowlist, in both
+directions, so a new managed adapter cannot be forgotten and a stale excuse
+cannot outlive its reason.
+
+It runs only from the separate `live-canary` workflow —
+`workflow_dispatch` plus one weekly schedule, never push or pull_request, in
+no needs chain, never required — which is the only thing that sets
+`GGG_LIVE_CANARY=1`. `TestCILiveCanaryWorkflowIsNotAContributorGate` parses
+that workflow so narrowing it to `push`, adding a `needs` edge, gating the
+step, or repointing `-run` fails by name;
+`TestEveryLiveCanaryKeyIsMappedInTheWorkflow` checks the other direction, that
+every key a row declares is actually mapped there, because an unmapped key
+would make a new row skip in CI forever while reporting a clean line.
+
+Weekly rather than per-push for one reason: the failure this catches is a
+**provider** moving, which no change to this repository can trigger. Per-push
+would pay every provider's latency and spend for an answer that cannot have
+changed; dispatch-only would mean it runs when someone remembers.
+
+Three safety rules are enforced, not trusted:
+
+1. **Cleanup is declared per row.** Self-cleaning rows remove what they
+   created through the seam and verify the removal. Rows that cannot must
+   cite, with a file and line, the seam declaration that has no delete — and
+   the table refuses a row that does not.
+2. **No probe points at production.** A row declares the selectors that would
+   aim it at a production tenant and the suite **refuses the run** — a
+   failure, not a skip. `POLAR_SERVER=production` is the one that exists:
+   the Polar probe creates a checkout session and ingests an immutable metered
+   event. The workflow additionally pins the literal `sandbox`, so a
+   misconfigured repository secret cannot even reach the refusal.
+3. **No failure prints a credential.** Probes return errors rather than
+   failing directly, and the one reporting path scrubs every credential value
+   the row declares, plus any userinfo inside one. A failing row names the
+   provider and the endpoint and not the secret. One bound is worth stating:
+   a transport-level DNS error can still echo the *hostname* of a credential
+   that is itself a URL, because the host is the endpoint the report exists to
+   name; the path, the token and the userinfo do not survive.
+
+### What each canary leaves behind
+
+Read this before configuring a secret. The suite is pointed at throwaway
+accounts by design.
+
+| Slot / adapter | Cleans up? | What a run leaves |
+|---|---|---|
+| `ggg/storage` — `storage-s3@r2` | yes | nothing; the object is deleted and the deletion verified |
+| `ggg/cache` — `cache-redis@upstash` | yes | nothing; the key is deleted, and a failed run's key expires within a minute |
+| `ggg/search` — `search-typesense` | yes | nothing; the document is deleted. The collection is operator-owned and never created or dropped |
+| `ggg/llm` — `llm-openai-compatible` | n/a | no resource — but real tokens, on every run, in the account's usage record |
+| `ggg/identity` — `identity-clerk` | n/a | nothing; every call is a read. The fixture user is deliberately **not** deleted |
+| `ggg/database` — `database-postgres@neon` | n/a | nothing; only the provisioner's read-only `Check` is called, never `Plan` or `Apply` |
+| `ggg/billing` — `billing-polar` | bounded | one checkout session per run, and at most **one** metered event ever, because the probe uses a stable `ExternalID` that Polar deduplicates on. Sandbox only |
+| `ggg/rate-limit` — `rate-limit-redis@upstash` | bounded | one counter key, stable and self-expiring within the window the adapter sets |
+| `ggg/usage` — `usage-openmeter` | bounded | one usage event on `CANARY_OPENMETER_SUBJECT`, and only ever one: the stable external id is carried as the CloudEvents id and OpenMeter deduplicates on `(source, id)`. Use a throwaway customer — a metered event on a real one reaches an invoice |
+| `ggg/mail` — `mail-resend` | **no** | one real email per run to `CANARY_MAIL_TO`, against the account's quota. `mail.Sender` has only `Send`; there is no recall |
+| `ggg/analytics` — `analytics-posthog` | **no** | one immutable event per run under a stable distinct id. Use a throwaway project |
+| `ggg/observability` — `observability-sentry` | **no** | one immutable error event per run, against the project's quota and its alert rules. Use a throwaway project |
+| `ggg/realtime` — `realtime-ably` | **no** | one channel message per run, retained if the channel persists history |
+| `ggg/telemetry` — `telemetry-otlp` | **no** | one exported span per run, under the collector's retention |
+| `ggg/audit-export` — `audit-export-otlp` | **no** | one exported audit entry per run. The transactional Postgres audit row is untouched and can never be bypassed |
+| `ggg/notifications` — `notifications-knock` | **no** | one real workflow run per run, delivered to `CANARY_KNOCK_RECIPIENT` through whatever channels the canary workflow enables, against the account's quota. `notifications.Notifier` has only `Send`/`SendOrg`, and the adapter sends no cancellation key |
+| `ggg/webhooks` — `webhooks-svix` | **no** | one real Svix message per run on `CANARY_SVIX_APP`, fanned out to every endpoint that application subscribes, retained for the account's payload-retention window. Use a throwaway application |
+
+### The operator's secret checklist
+
+Every key is optional. An unset repository secret expands to the empty string,
+so the row skips with its reason instead of failing — configure the providers
+you care about and leave the rest. The env variable each secret feeds is the
+adapter's own declared key, so the mapping is the adapter's contract, not the
+canary's invention.
+
+| Repository secret | Feeds |
+|---|---|
+| `CANARY_RESEND_API_KEY`, `CANARY_MAIL_FROM`, `CANARY_MAIL_TO` | `RESEND_API_KEY` and the throwaway sink the canary mails |
+| `CANARY_R2_ACCOUNT_ID`, `CANARY_R2_ACCESS_KEY_ID`, `CANARY_R2_SECRET_ACCESS_KEY`, `CANARY_R2_BUCKET` | the four `STORAGE_R2_*` keys |
+| `CANARY_POLAR_ACCESS_TOKEN`, `CANARY_POLAR_PRODUCT_PRO` | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_PRO`. `POLAR_SERVER` is pinned to `sandbox` in the workflow and is not a secret |
+| `CANARY_CLERK_SECRET_KEY`, `CANARY_CLERK_FRONTEND_API_URL` | `CLERK_SECRET_KEY`, `CLERK_FRONTEND_API_URL` |
+| `CANARY_CLERK_USER_SUBJECT`, `CANARY_CLERK_SESSION_JWT`, `CANARY_CLERK_ORG_SUBJECT` | optional; each widens the Clerk row from the JWKS document to the Backend API user read and the v2 organisation claim block |
+| `CANARY_POSTHOG_API_KEY`, `CANARY_POSTHOG_HOST` | `POSTHOG_API_KEY`, `POSTHOG_HOST` (host defaults to the manifest's) |
+| `CANARY_SENTRY_DSN` | `SENTRY_DSN` |
+| `CANARY_LLM_API_KEY`, `CANARY_LLM_MODEL`, `CANARY_LLM_BASE_URL` | `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL` |
+| `CANARY_CACHE_REDIS_URL`, `CANARY_CACHE_REDIS_TOKEN` | `CACHE_REDIS_URL`, `CACHE_REDIS_TOKEN` |
+| `CANARY_RATE_LIMIT_REDIS_URL`, `CANARY_RATE_LIMIT_REDIS_TOKEN` | `RATE_LIMIT_REDIS_URL`, `RATE_LIMIT_REDIS_TOKEN` |
+| `CANARY_TYPESENSE_URL`, `CANARY_TYPESENSE_API_KEY`, `CANARY_TYPESENSE_COLLECTION` | `TYPESENSE_URL`, `TYPESENSE_API_KEY`, and the pre-created collection the probe writes into |
+| `CANARY_ABLY_ENDPOINT`, `CANARY_ABLY_API_KEY` | `ABLY_ENDPOINT`, `ABLY_API_KEY` |
+| `CANARY_OTLP_ENDPOINT`, `CANARY_OTLP_API_KEY` | `OTLP_ENDPOINT`, `OTLP_API_KEY` |
+| `CANARY_OTLP_AUDIT_EXPORT_URL` | `OTLP_AUDIT_EXPORT_URL` |
+| `CANARY_NEON_API_KEY`, `CANARY_NEON_PROJECT_ID` | `NEON_API_KEY`, `NEON_PROJECT_ID` |
+| `CANARY_KNOCK_API_KEY`, `CANARY_KNOCK_WORKFLOW`, `CANARY_KNOCK_RECIPIENT` | `KNOCK_API_KEY`, plus the throwaway workflow key and recipient the canary triggers |
+| `CANARY_SVIX_API_KEY`, `CANARY_SVIX_APP` | `SVIX_API_KEY`, plus the throwaway consumer application the canary messages |
+| `CANARY_OPENMETER_API_KEY`, `CANARY_OPENMETER_URL`, `CANARY_OPENMETER_SUBJECT` | `OPENMETER_API_KEY`, `OPENMETER_URL`, plus the throwaway metering subject |
+
+To run one row locally, export its keys and `GGG_LIVE_CANARY=1`; the skip line
+for every unconfigured row prints the exact assignment it wants.
+
+### What a canary cannot check
+
+Stated rather than implied, because a probe that only proves a call returned
+2xx is worth little and pretending otherwise is worse. Three rows are in that
+position and say so in the table itself: `realtime-ably` has no read-back at
+all (the seam's only read path needs a websocket transport the adapter
+refuses), `analytics-posthog` gets nothing back from ingestion beyond a status
+code, and `audit-export-otlp` exposes only an error from `Export`. Polar's
+subscription-event payload arrives only from a real purchase, so its webhook
+parser keeps the fake as its only coverage, and Clerk's v2 organisation claim
+block is checked only when a session token is supplied.
+
 ## Fuzz
 
 `make fuzz` runs every trust-boundary fuzz target, `FUZZTIME` (default `8s`)

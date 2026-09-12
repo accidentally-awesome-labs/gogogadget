@@ -422,7 +422,7 @@ func TestCIEraWalkWorkflowRunsTheEraWalk(t *testing.T) {
 	}
 	// No needs edge, in this file or pointed at it from ci.yml (whose own
 	// assertion forbids needs entirely).
-	assertCINoJobGatesOnAnother(t, workflow)
+	assertCINoJobGatesOnAnother(t, eraWalkWorkflowPath, workflow)
 
 	job, ok := workflow.Jobs["era-walk"]
 	if !ok {
@@ -495,6 +495,164 @@ func TestCIEraWalkWorkflowRunsTheEraWalk(t *testing.T) {
 	}
 	if summaryIndex < 0 || summaryIndex < walkIndex {
 		t.Fatal("the era-walk job reports no runtime in its step summary after the walk; the measured-cost rule applies to this job too")
+	}
+}
+
+// liveCanaryWorkflowPath is the managed-target canary suite's own workflow:
+// tier 2 of provider verification, the one that drives the real Resend, R2,
+// Polar sandbox, Clerk, PostHog, Sentry, OpenAI-compatible, Upstash,
+// Typesense, Ably, OTLP and Neon accounts this repository maintains. It is
+// asserted here for the same reason era-walk.yml is: nobody executes it by
+// hand on a schedule, so only a test that reads it can catch the job being
+// deleted, gated off, or narrowed to push — which would put a dozen-plus
+// third-party services on every contributor's wall and, worse, fail every
+// fork that has none of the credentials.
+const liveCanaryWorkflowPath = ".github/workflows/live-canary.yml"
+
+// ciLiveCanaryTest is the one test the `live-canary` job exists to run. The
+// suite skips itself as [inapplicable] unless GGG_LIVE_CANARY is set and this
+// job is the only place that sets it, so deleting the job would take the only
+// check on every believed-but-never-verified managed provider wire shape without
+// one test turning red.
+const ciLiveCanaryTest = "TestManagedTargetLiveCanaries"
+
+// The live-canary workflow must run the canary suite on the two
+// non-contributor triggers only, in no job's needs chain, with the env that
+// un-skips the suite, and it must never narrow to push/pull_request or grow a
+// needs edge — either of which would convert a weekly credential-bearing
+// suite into a contributor gate or a required check.
+//
+// This is the same shape TestCIEraWalkWorkflowRunsTheEraWalk asserts, and
+// deliberately so: the tier is the invariant, not the subject. One difference
+// is asserted rather than shared — this checkout is NOT pinned to
+// fetch-depth: 0, because no row reads git history and a full fetch would be
+// pure cost.
+//
+// The complement lives with the table: internal/gggcli's
+// TestEveryLiveCanaryKeyIsMappedInTheWorkflow checks that every credential a
+// row declares is actually mapped here, so a new row cannot skip in CI
+// forever while reporting a clean line. This test owns the tier; that one
+// owns the wiring.
+//
+// Mutation: delete the workflow, drop the env, add push/pull_request, add a
+// needs edge, gate the job or the step behind `if:`, mark either
+// continue-on-error, wrap the go test in an echo or a `|| true`, point -run
+// at another test, drop -count=1, drop -timeout, or delete the runtime
+// summary step, and this fails naming what it found.
+func TestCILiveCanaryWorkflowIsNotAContributorGate(t *testing.T) {
+	root, err := canonicalProjectRoot(specRepoRoot(t))
+	if err != nil {
+		t.Fatalf("resolve repository root: %v", err)
+	}
+	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(liveCanaryWorkflowPath)))
+	if err != nil {
+		t.Fatalf("read %s: %v", liveCanaryWorkflowPath, err)
+	}
+	var workflow ciWorkflow
+	if err := yaml.Unmarshal(raw, &workflow); err != nil {
+		t.Fatalf("parse %s: %v", liveCanaryWorkflowPath, err)
+	}
+
+	// The tier, stated as triggers.
+	if workflow.On.Kind != yaml.MappingNode {
+		t.Fatalf("%s declares no trigger mapping, so nothing states when it runs", liveCanaryWorkflowPath)
+	}
+	triggers := map[string]*yaml.Node{}
+	for index := 0; index+1 < len(workflow.On.Content); index += 2 {
+		triggers[workflow.On.Content[index].Value] = workflow.On.Content[index+1]
+	}
+	for _, refuse := range []string{"push", "pull_request"} {
+		if _, ok := triggers[refuse]; ok {
+			t.Fatalf("%s runs on %s; the live canaries need credentials no contributor and no fork has, so firing on a change would fail every outside change and put every maintained managed provider on the contributor wall", liveCanaryWorkflowPath, refuse)
+		}
+	}
+	if _, ok := triggers["workflow_dispatch"]; !ok {
+		t.Fatalf("%s has no workflow_dispatch trigger, so it cannot be run on demand before a release; triggers are %v",
+			liveCanaryWorkflowPath, maps.Keys(triggers))
+	}
+	schedule, ok := triggers["schedule"]
+	if !ok {
+		t.Fatalf("%s has no schedule trigger; the drift this suite catches is a provider moving under us, which no change to this repository will ever trigger, so without a schedule it runs when someone remembers", liveCanaryWorkflowPath)
+	}
+	var scheduled []struct {
+		Cron string `yaml:"cron"`
+	}
+	if err := schedule.Decode(&scheduled); err != nil || len(scheduled) != 1 || scheduled[0].Cron == "" {
+		t.Fatalf("%s declares %d usable schedule entries; the weekly tier is exactly one cron", liveCanaryWorkflowPath, len(scheduled))
+	}
+	assertCINoJobGatesOnAnother(t, liveCanaryWorkflowPath, workflow)
+
+	job, ok := workflow.Jobs["live-canary"]
+	if !ok {
+		t.Fatalf("%s has no live-canary job, so nothing sets GGG_LIVE_CANARY and %s never runs anywhere", liveCanaryWorkflowPath, ciLiveCanaryTest)
+	}
+	_, goVersion := readCIWorkflow(t, root)
+	assertCIJobIsARealGate(t, "live-canary", job, goVersion)
+
+	if got := job.Env["GGG_LIVE_CANARY"]; got != "1" {
+		t.Fatalf("the live-canary job sets GGG_LIVE_CANARY=%q, want \"1\"; without it %s skips itself and the job is a green report on nothing", got, ciLiveCanaryTest)
+	}
+	// The one selector the suite refuses rather than skips. Pinned to the
+	// literal here so a misconfigured repository secret cannot present it.
+	if got := job.Env["POLAR_SERVER"]; got != "sandbox" {
+		t.Fatalf("the live-canary job sets POLAR_SERVER=%q, want \"sandbox\"; the Polar probe creates a checkout session and ingests an immutable metered event, and this pin is what keeps a repository-secret mistake away from a production tenant", got)
+	}
+
+	var found []string
+	setupIndex, canaryIndex, summaryIndex := -1, -1, -1
+	for index, step := range job.Steps {
+		if isMakeSetupStep(step) {
+			setupIndex = index
+		}
+		for line := range strings.SplitSeq(step.Run, "\n") {
+			fields := strings.Fields(strings.TrimSpace(line))
+			// Matched as a COMMAND by its first words, the standard the rest
+			// of this file sets: an echo runs no test.
+			if len(fields) < 2 || fields[0] != "go" || fields[1] != "test" {
+				continue
+			}
+			if step.If != "" || step.ContinueOnError {
+				t.Fatalf("the live-canary step is exempt from failing the build (if: %q, continue-on-error: %v); every row already skips itself when its credentials are absent, so there is nothing left for an exemption to buy", step.If, step.ContinueOnError)
+			}
+			if strings.ContainsAny(strings.TrimSpace(step.Run), "\n|;&>") || strings.Contains(step.Run, "set +e") {
+				t.Fatalf("the live-canary step wraps the command in shell that can hide its exit status: %q", step.Run)
+			}
+			found = append(found, strings.Join(fields, " "))
+			canaryIndex = index
+		}
+		if strings.Contains(step.Run, "GITHUB_STEP_SUMMARY") && step.If == "always()" {
+			summaryIndex = index
+		}
+	}
+	if len(found) != 1 {
+		t.Fatalf("the live-canary job runs `go test` %d time(s): %q; want exactly one suite", len(found), found)
+	}
+	fields := strings.Fields(found[0])
+	at := slices.Index(fields, "-run")
+	if at < 0 || fields[at+1] != ciLiveCanaryTest {
+		t.Fatalf("the live-canary command %q does not select %s by -run", found[0], ciLiveCanaryTest)
+	}
+	assertRunFilterSelectsAGGGCLITest(t, fields[at+1])
+	for _, want := range []string{"-count=1", "./internal/gggcli"} {
+		if !slices.Contains(fields, want) {
+			t.Fatalf("the live-canary command %q is missing %s", found[0], want)
+		}
+	}
+	// -v because a run whose rows all skipped and a run whose rows all passed
+	// are the same exit code; the reasoned skip lines are the report.
+	if !slices.Contains(fields, "-v") {
+		t.Fatalf("the live-canary command %q is missing -v, so the per-provider [inapplicable] reasons — the only record of which providers were actually checked — never reach the log", found[0])
+	}
+	// -timeout because every row's own 30s deadline, times the row count, plus a cold
+	// build can pass go test's 10m package default.
+	if timeoutAt := slices.Index(fields, "-timeout"); timeoutAt < 0 || timeoutAt+1 >= len(fields) {
+		t.Fatalf("the live-canary command %q carries no -timeout, so a slow provider run dies at go test's 10m default instead of reporting a verdict", found[0])
+	}
+	if setupIndex < 0 || setupIndex > canaryIndex {
+		t.Fatal("the live-canary job runs the suite before `make setup`, so the pinned tools are absent")
+	}
+	if summaryIndex < 0 || summaryIndex < canaryIndex {
+		t.Fatal("the live-canary job reports no runtime in its step summary after the suite; the measured-cost rule applies to this job too")
 	}
 }
 
@@ -763,7 +921,7 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 	if err := yaml.Unmarshal(raw, &workflow); err != nil {
 		t.Fatalf("parse %s: %v", ciWorkflowPath, err)
 	}
-	assertCINoJobGatesOnAnother(t, workflow)
+	assertCINoJobGatesOnAnother(t, ciWorkflowPath, workflow)
 	base, ok := workflow.Jobs["test"]
 	if !ok {
 		t.Fatalf("%s has no test job to take the pinned toolchain from", ciWorkflowPath)
@@ -788,8 +946,13 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 // that. Re-adding a gate is a budget decision: state it beside the
 // workflow-level concurrency comment, not silently here. It runs inside
 // readCIWorkflow so it reaches every job, including the ones no per-job
-// assertion visits.
-func assertCINoJobGatesOnAnother(t *testing.T, workflow ciWorkflow) {
+// assertion visits, and from the two weekly-tier workflows' own guards, for
+// which a needs edge would additionally mean an accidentally-required check.
+//
+// The path is a parameter rather than the ci.yml constant because three
+// workflows are checked through here: a refusal that named ci.yml while
+// reading live-canary.yml sends the reader to the wrong file.
+func assertCINoJobGatesOnAnother(t *testing.T, path string, workflow ciWorkflow) {
 	t.Helper()
 	names := make([]string, 0, len(workflow.Jobs))
 	for name := range workflow.Jobs {
@@ -799,7 +962,7 @@ func assertCINoJobGatesOnAnother(t *testing.T, workflow ciWorkflow) {
 	for _, name := range names {
 		if needs := workflow.Jobs[name].Needs; len(needs) > 0 {
 			t.Fatalf("job %s needs %v; no job in %s gates on another (each checks out and builds fresh), so the green wall is the slowest job instead of a chain. Re-adding a gate is a budget decision — say it beside the concurrency comment",
-				name, needs, ciWorkflowPath)
+				name, needs, path)
 		}
 	}
 }
