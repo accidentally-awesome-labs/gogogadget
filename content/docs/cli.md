@@ -150,7 +150,7 @@ transaction journal that restores the exact pre-run bytes on any failure.
 | `ggg init` | **yes** | Initializes or adopts the current directory |
 | `ggg add MODULE...` / `ggg remove MODULE...` | **yes** | Selects or deselects modules, then reconciles |
 | `ggg update [MODULES...]` | **yes** | Advances named modules, or one registry's ref |
-| `ggg sync` | **yes** | Reconciles the tree to the declared intent |
+| `ggg sync` | **yes** | Reconciles the tree to the declared intent; `--prune-tombstones` additionally forgets lock tombstones that retain no migration ledger and name a module no configured registry publishes |
 | `ggg resolve MODULE` | **yes** | Records a decision for one conflicted file |
 | `ggg create KIND NAME` | **yes** | Writes a module into the project's mutable registry |
 | `ggg provider set\|configure\|provision` | **yes** | Changes a slot's selection, its declared inputs, or provisions its target |

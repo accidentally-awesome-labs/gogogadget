@@ -249,6 +249,7 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 	case SyncMutation:
 		return c.previewOperation(ctx, "sync", modkit.Operation{
 			Kind: modkit.OpSync, Offline: mutation.Offline, DryRun: mutation.Check, Claims: mutation.Claims,
+			PruneTombstones: mutation.PruneTombstones,
 		}, mutation.Check)
 
 	case ResolveMutation:

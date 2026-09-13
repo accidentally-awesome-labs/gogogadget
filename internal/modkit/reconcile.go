@@ -218,6 +218,7 @@ func reconcilePlannedState(
 	claims map[string]struct{},
 	retire map[string]retirement,
 	retained map[string]struct{},
+	pruneTombstones bool,
 ) (Lock, []Change, []Conflict, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
 	// claim them, so a manifest that points at a registry-owned artifact is a
@@ -619,24 +620,21 @@ func reconcilePlannedState(
 	finalLock := buildReconciledLock(snapshot.Commit, finalGraph, states, migrationFiles)
 	// Tombstones of previously removed modules are permanent ledger rows:
 	// carry them forward verbatim so their immutable migration mappings are
-	// never lost and re-adds reuse the retained numbers.
+	// never lost and re-adds reuse the retained numbers. A bare sync does
+	// exactly that and nothing else.
 	//
-	// With one exception, and it is the exception the definition itself
-	// implies: a tombstone whose migration ledger is EMPTY and whose module no
-	// configured registry publishes any more retains nothing. There are no
-	// numbers to keep, and nothing can ever re-add the module to reuse them,
-	// so the row is a ledger with no ledger — and it is not free. It is a lock
-	// member, so the lock's module count stops being derivable from the
-	// project's own intent: ggg/system/feature-flags-launchdarkly was retired
-	// from the catalog and its files deleted, and its empty tombstone was four
-	// of the five rows that made this repository's 293 unreproducible by a
-	// fresh genesis' 288.
+	// `Operation.PruneTombstones` is the one way a row leaves, and it is
+	// opt-in because a tombstone retains more than its migration ledger: it is
+	// the lock remembering that a module was installed at all, which
+	// assertLockRestored requires and `ggg registry validate` exercises by
+	// removing an example and then unpublishing it. Pruning that automatically
+	// deleted a record another gate demands. See Operation.PruneTombstones.
 	//
-	// Both halves are required. An empty-ledger tombstone for a module still
-	// in the catalog stays, because `ggg remove` of a migration-free module
-	// must leave the removal on the record and a re-add must see it. A
-	// non-empty ledger stays whatever the catalog says, because those
-	// migration files are on disk and their numbers must never be reused.
+	// Both halves of the condition are required. An empty-ledger tombstone for
+	// a module still in the catalog stays even under the flag, because a
+	// re-add must see the removal. A non-empty ledger stays whatever the
+	// catalog says, because those migration files are on disk and their
+	// numbers must never be reused.
 	published := make(map[string]struct{}, len(catalog.Modules))
 	for _, module := range catalog.Modules {
 		published[module.ID] = struct{}{}
@@ -648,7 +646,12 @@ func reconcilePlannedState(
 		if _, selectedAgain := newModules[module.ID]; selectedAgain {
 			continue
 		}
-		if _, stillPublished := published[module.ID]; !stillPublished && len(module.Migrations) == 0 {
+		if pruneTombstones && tombstoneRetainsNothing(module, published) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Code: "tombstone_pruned", Severity: "info", Module: module.ID,
+				Message: "forgot the tombstone for " + module.ID +
+					": no configured registry publishes it and it retained no migration ledger, so nothing could ever reuse it",
+			})
 			continue
 		}
 		finalLock.Modules = append(finalLock.Modules, module)
@@ -663,6 +666,25 @@ func reconcilePlannedState(
 	// one rollback, one `changes[]` the operator can read before applying.
 	changes = append(changes, staged...)
 	return finalLock, changes, conflicts, diagnostics, nil
+}
+
+// tombstoneRetainsNothing reports whether a tombstone has nothing left to
+// retain: no migration ledger to protect from renumbering, and a module no
+// configured registry publishes, so no future plan can re-add it and reuse
+// anything. It is only ever consulted under Operation.PruneTombstones, and it
+// is a function so both of its answers can be driven without building a lock.
+//
+// The two halves are not interchangeable. A module still in the catalog can be
+// re-added, and the re-add must see the removal — that is the record
+// `ggg registry validate` exercises when it removes an example and then
+// unpublishes it. A non-empty ledger names migration files that are still on
+// disk, and their numbers must never be reused whatever the catalog says.
+func tombstoneRetainsNothing(module LockedModule, published map[string]struct{}) bool {
+	if len(module.Migrations) != 0 {
+		return false
+	}
+	_, stillPublished := published[module.ID]
+	return !stillPublished
 }
 
 func lockedFilesByPath(files []LockedFile) map[string]LockedFile {

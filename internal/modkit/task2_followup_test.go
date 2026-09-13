@@ -610,3 +610,43 @@ func TestAddRefusesAnAdapterNoEnvironmentSelects(t *testing.T) {
 		t.Fatalf("add of a selected adapter was refused: %v", err)
 	}
 }
+
+// The tombstone-prune predicate, both answers, and the reason it is opt-in.
+//
+// It was NOT opt-in for one commit, and `ggg registry validate` said so:
+// "lock has no record of removed module ggg/element/example-token; removal
+// must leave a tombstone". The validator installs an example, removes it, then
+// unpublishes it — which is exactly the shape of retiring a module for real —
+// and assertLockRestored requires the tombstone to survive, because a
+// tombstone is also the lock's record that a module was installed at all, not
+// just a migration ledger. So the prune moved behind
+// Operation.PruneTombstones, following the posture the registry cache already
+// sets: never auto-prune something the lock references, add an explicit verb.
+func TestTombstoneRetainsNothingNeedsBothHalves(t *testing.T) {
+	published := map[string]struct{}{"ggg/system/kept": {}}
+	ledger := []LockedMigration{{ID: "0001_thing", Number: 1, Path: "internal/db/migrations/0001_thing.sql"}}
+
+	for name, testCase := range map[string]struct {
+		module LockedModule
+		want   bool
+	}{
+		"unpublished and ledger-free retains nothing": {
+			LockedModule{ID: "ggg/system/gone", Reason: TombstoneReason}, true,
+		},
+		"still published retains the removal record": {
+			LockedModule{ID: "ggg/system/kept", Reason: TombstoneReason}, false,
+		},
+		"a migration ledger is retained whatever the catalog says": {
+			LockedModule{ID: "ggg/system/gone", Reason: TombstoneReason, Migrations: ledger}, false,
+		},
+		"both halves present is still retained": {
+			LockedModule{ID: "ggg/system/kept", Reason: TombstoneReason, Migrations: ledger}, false,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := tombstoneRetainsNothing(testCase.module, published); got != testCase.want {
+				t.Fatalf("tombstoneRetainsNothing(%s) = %t, want %t", testCase.module.ID, got, testCase.want)
+			}
+		})
+	}
+}

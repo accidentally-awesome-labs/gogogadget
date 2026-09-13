@@ -408,3 +408,199 @@ resolves the registry reports
 mismatch`. All of them pass in the rebuilt copy, quoted above. `make check`, `make e2e`,
 `make visual`, `make smoke`, `make docker-build` and the two `ggg registry validate` jobs are the
 parent's.
+
+---
+
+# Appendix A — `ggg registry validate` exit 3, and why the automatic tombstone prune was wrong
+
+## A.1 The reported blocker
+
+```
+preparing derivative from /Users/salar/Projects/gogogadget
+derivative kept for inspection at …-all/derivative
+  error    command_failed project verification_installs "ggg/system/feature-flags-flagsmith" overlaps modules
+```
+
+`prepareTemplateDerivative` (`internal/modkit/example.go`) pins the resolved graph as the
+derivative's explicit module set — `pinned.Modules = graph.order` — and `graph.order` now contains
+the five verification installs, while `pinned.VerificationInstalls` still names them. One document,
+two contradictory claims about one module.
+
+**Which rule should speak: neither, because neither is wrong.** The overlap refusal did its job. The
+distinction it protects is the whole point of the declaration: `modules` means "this project selects
+it", `verification_installs` means "this project installs it and selects it for nothing". A document
+asserting both is incoherent, and the caller that composed it is the defect. Note that my publisher
+refusal correctly stayed silent — see A.2.
+
+**And stripping the declaration would have been wrong.** `copyProjectTree` copies `go.mod` verbatim,
+so the derivative's module path is `github.com/gogogadget/gogogadget` — the registry's
+`canonical_module`. Measured by driving `prepareTemplateDerivative` directly:
+
+```
+DERIVATIVE rows: 293 reasons: map[deployment:1 explicit:287 verification:5]
+DERIVATIVE canary payload lock owner: ggg/system/modkit
+  verification: ggg/system/feature-flags-flagsmith 2 files
+  verification: ggg/system/notifications-knock 2 files
+  verification: ggg/system/search-typesense 3 files
+  verification: ggg/system/usage-openmeter 2 files
+  verification: ggg/system/webhooks-svix 2 files
+$ head -1 go.mod
+module github.com/gogogadget/gogogadget
+$ go test -run XXXNONE -gcflags=-e ./internal/canary
+ok  github.com/gogogadget/gogogadget/internal/canary  0.372s [no tests to run]
+```
+
+By the concept's own discriminator the derivative **is** the publishing repository, which is why it
+installs `ggg/system/modkit`'s self_host payloads — `internal/canary/live_canary_selfhost_test.go`
+among them, lock-owned there. Strip the declaration and those five adapters install nowhere while
+that payload still imports all five, which is the unowned-source state `verification_installs` was
+added to end.
+
+**Checked rather than assumed, as you asked: the validator does NOT compile `internal/canary`.** Its
+compile step is `runGoTool(ctx, derivative, "build", "./...")`, and `go build` never reads a
+`_test.go`; the only tests it runs are the closure's own declared packages
+(`module tests passed in ./internal/example/clock`). So a stripped declaration would have sailed
+past this gate and been caught later by `make check`'s full test compile and by
+`TestEveryCanaryRowIsInstalledAndEveryVerificationInstallIsProbed`. Carrying it forward is correct
+on the merits, not lucky. The 2085-entry byte-for-byte restoration does cover those five payload
+paths, so it is only a statement about *owned* source while the declaration is carried.
+
+**The fix**: the pin subtracts the verification installs from `pinned.Modules` and carries
+`pinned.VerificationInstalls` forward unchanged. 288 land as explicit (287 + the deployment module,
+which takes its own reason) and the five keep reason `verification` — the same 293-row decomposition
+the canonical lock has.
+
+## A.2 The second failure, and a determination I am reversing
+
+With the pin fixed, `--closures core` refused again, this time on my own rule:
+
+```
+ggg/element/example-token
+  installed 3 file(s)
+  compiled ./... and generated 30 file(s)
+  module tests passed in ./internal/web/templates/ui
+  error    command_failed ggg/element/example-token: lock has no record of removed module
+           ggg/element/example-token; removal must leave a tombstone
+```
+
+`exerciseStandardClosure` removes the example (leaving a tombstone), then `unpublishExamples` takes
+it out of the registry, then runs a settling sync. At that sync the tombstone had an empty ledger
+**and** an unpublished module, so §3's automatic prune dropped it and `assertLockRestored` found no
+record.
+
+**That is not a validator artifact. It is the same scenario as launchdarkly** — remove a module from
+projects, then delete it from the catalog — and the repository already had a recorded position on
+it, in `assertLockRestored`'s own words:
+
+> A tombstone is the lock remembering that a module was installed, what its removal policy was, and
+> which migration numbers it owns forever.
+
+So §3's justification — "a tombstone with an empty ledger retains nothing" — was false. It retains
+the install record, and an automatic prune deletes a record another gate requires. **I was wrong,
+and the prune as shipped in `4eb22e3b` is reverted.**
+
+**What replaces it**: `Operation.PruneTombstones`, surfaced as `ggg sync --prune-tombstones`. A bare
+`ggg sync` now carries every tombstone forward verbatim. The flag forgets only rows where
+`tombstoneRetainsNothing` holds — no migration ledger **and** no configured registry publishes the
+module — and emits an `info` `tombstone_pruned` diagnostic naming each. It is refused with
+`--check` (`--prune-tombstones mutates the lock and cannot be combined with --check`).
+
+This follows the posture the registry cache already sets rather than inventing a third convention:
+never auto-prune something the lock references, add an explicit verb (`ggg cache prune`).
+
+**Consequence, stated plainly.** The prune ran once, in the release order that settled `c814e08d`,
+so `ggg/system/feature-flags-launchdarkly` is already gone from the committed lock and carry-forward
+has nothing to bring back. Its disposition in §3 stands as an outcome; the *mechanism* is now "an
+explicit `ggg sync --prune-tombstones`", not an automatic rule. No future retirement loses its
+tombstone unless someone asks for it by name. The lock stays 293 = 288 selected + 5 verification + 0
+tombstones, and the decomposition guard's tombstone term is 0 today rather than assumed to be 0.
+
+The guard's fourth assertion was reworded accordingly: it remains a statement that *this*
+repository's lock carries no row that retains nothing, and its failure message now names the verb
+(`Forget them with \`ggg sync --prune-tombstones\`, or restore the module to the catalog`) instead of
+claiming a bare sync does it. `own-lock-unreproducible.patch` is unaffected — it plants an
+intent/lock disagreement, not a tombstone.
+
+## A.3 Validate, both families, quoted
+
+`--closures core` — 11 closures, every one installed, compiled, tested, removed and restored:
+
+```
+preparing derivative from /Users/salar/Projects/gogogadget
+  rebuilt 1 manifest digest(s) in the derivative (stale upstream, reported by sync --check)
+…
+  info  example_closure_verified element closure ggg/element/example-token: installed 3 file(s), regenerated 30, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified component closure ggg/element/example-token+ggg/component/example-callout: installed 7 file(s), regenerated 32, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified page closure …+ggg/page/example-status: installed 9 file(s), regenerated 34, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified workflow closure ggg/workflow/example-feed: … retained migration(s) internal/db/migrations/0028_ggg_example_feed.sql
+  info  example_closure_verified workflow closure ggg/workflow/example-notice: … retained migration(s) internal/db/migrations/0028_ggg_example_notice.sql
+  info  example_closure_verified workflow closure …+ggg/workflow/example-ping: … retained migration(s) internal/db/migrations/0028_example_ping_events.sql
+  info  example_closure_verified workflow closure ggg/workflow/example-resource: … retained migration(s) internal/db/migrations/0028_ggg_example_resource.sql
+  info  example_closure_verified system closure fixture/system/identity-hosted+identity-local+identity-providers: installed 4 file(s), regenerated 32, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified system closure fixture/system/mail-local+mail-managed+mail-providers: installed 4 file(s), regenerated 32, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified system closure fixture/system/storage-local+storage-managed+storage-providers: installed 4 file(s), regenerated 32, compiled, 2085 tree entries restored byte for byte
+  info  example_closure_verified system closure ggg/system/example-clock: installed 2 file(s), regenerated 32, compiled, 2085 tree entries restored byte for byte
+```
+
+`--closures external` — the signed third-party registry:
+
+```
+gadgetworks/system/audit-export-ledger
+  closure: gadgetworks/system/audit-export-ledger
+  registry gadgetworks verified at snapshot 9a537e95b0ed1f286a749ffd7b1aa0a18ac76dae2cbd25f63dd95fc5cc6f22da
+  installed 4 file(s)
+  compiled ./... and generated 33 file(s)
+  module tests passed in ./internal/gadgetworks/ledger
+  removed; 2085 tree entries restored, 29 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  info  example_closure_verified system closure gadgetworks/system/audit-export-ledger: installed 4 file(s), regenerated 33, compiled, 2085 tree entries restored byte for byte, published by registry gadgetworks at signed snapshot 9a537e95b0ed1f286a749ffd7b1aa0a18ac76dae2cbd25f63dd95fc5cc6f22da
+```
+
+`--closures all` re-run after the predicate extraction: same 12 `example_closure_verified` lines,
+exit 0, 269 s.
+
+## A.4 Tests added
+
+`TestTombstoneRetainsNothingNeedsBothHalves` (`internal/modkit/task2_followup_test.go`) drives all
+four combinations of the predicate — unpublished + ledger-free retains nothing; still published
+retains the removal record; a ledger is retained whatever the catalog says; both halves present is
+still retained — and states in its own comment why the prune is opt-in, quoting the validator
+refusal that proved it.
+
+The opt-in half is proven behaviourally by `registry validate` itself: it was the exact failure
+before, and it passes now with a bare sync carrying the tombstone. The flag gate is smoke-proven:
+
+```
+$ bin/ggg sync --check --prune-tombstones
+error: --prune-tombstones mutates the lock and cannot be combined with --check
+$ bin/ggg sync --help | grep -A1 prune
+  --prune-tombstones
+      forget lock tombstones that retain no migration ledger and name a module no configured registry publishes
+```
+
+## A.5 Verification and bumps
+
+```
+$ gofmt -l internal/modkit internal/gggcli                        (no output)
+$ go build ./...                                                  (no output)
+$ go vet ./internal/modkit ./internal/gggcli ./internal/canary
+VET-OK
+$ go test ./internal/modkit -run 'TestTombstoneRetainsNothingNeedsBothHalves|TestVerificationInstallRefusals|TestAddRefuses'
+PASS  (all subtests)
+$ go test ./internal/modkit -run 'TestRemoveKeepsProviderSelectionsAndPortsInTheLock|TestSetExcludeSequencesRegistryRemovalTombstones|TestResolveConflictKeepsTombstonesOutOfResolved'
+ok
+$ go test ./internal/gggcli -run 'TestHelp|TestCompletion|TestUsage|TestPortedCLI|TestEveryCommand|TestAccount'
+ok
+$ bin/ggg registry validate --closures core      exit 0, 230 s
+$ bin/ggg registry validate --closures external  exit 0,  20 s
+$ bin/ggg registry validate --closures all       exit 0, 269 s
+```
+
+| module | payloads changed in this commit | revision |
+|---|---|---|
+| `ggg/system/modkit` | `example.go` (the pin), `operation.go`, `reconcile.go`, `internal/gggcli/{types,controller,handlers,table}.go`, `task2_followup_test.go`, `lock_reproducibility_selfhost_test.go` | **90 → 91** |
+| `ggg/system/content-assets` | `content/docs/cli.md` (the `ggg sync` row) | **45 → 46** |
+
+`gogogadget.lock.json`, the `*_registry_gen.*` set and `registry.snapshot.{json,sig}` are untouched;
+`bin/ggg` is ignored build output. `ggg sync --check --offline` in-tree reports
+`registry snapshot payload "registry/modules/system/modkit/module.json" digest mismatch` by
+construction until the release order runs.

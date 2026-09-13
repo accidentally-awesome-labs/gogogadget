@@ -167,9 +167,10 @@ func builtInCommands() []CommandSpec {
 			{Name: "volumes", Help: "remove named volumes with services down"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "setup", Summary: "Install verified tools and build bin/ggg", Usage: "ggg setup [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
-		{Name: "sync", Summary: "Reconcile the tree with the project intent", Usage: "ggg sync [--check] [--offline] [--claim PATH]... [--json]", Flags: []FlagSpec{
+		{Name: "sync", Summary: "Reconcile the tree with the project intent", Usage: "ggg sync [--check] [--offline] [--claim PATH]... [--prune-tombstones] [--json]", Flags: []FlagSpec{
 			{Name: "check", Help: "fail on drift without writing"}, {Name: "offline", Help: "resolve only from the local registry cache"},
 			{Name: "claim", Help: "adopt a pre-existing divergent file as a recorded modification (repeatable)", Value: true, Repeatable: true},
+			{Name: "prune-tombstones", Help: "forget lock tombstones that retain no migration ledger and name a module no configured registry publishes"},
 			{Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "test", Summary: "Run one test layer", Usage: "ggg test integration|e2e|visual|smoke|all [--race] [--cover] [--json]", Flags: []FlagSpec{

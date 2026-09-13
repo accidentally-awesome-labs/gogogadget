@@ -594,7 +594,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		retiring[id] = retirement{slot: adapterSlot(moduleByID, existingLock, id)}
 	}
 	finalLock, changes, conflicts, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, registrySources, catalog, graph, payloads, existingLock, hasLock, claims, retiring, retained,
+		ctx, canonicalRoot, snapshot, registrySources, catalog, graph, payloads, existingLock, hasLock, claims, retiring, retained, op.PruneTombstones,
 	)
 	if err != nil {
 		return Plan{}, err

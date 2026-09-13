@@ -810,7 +810,35 @@ func prepareTemplateDerivative(ctx context.Context, root, template string, log i
 		return err
 	}
 	pinned := project
-	pinned.Modules = append([]string{}, graph.order...)
+	// The pin freezes the RESOLVED set as explicit modules, and a verification
+	// install must not be frozen that way. `modules` means "this project
+	// selects it"; a verification install means "this project installs it and
+	// selects it for nothing", which is the whole distinction the declaration
+	// exists to draw — so pinning one would have the derivative claim a
+	// selection it does not make, and `validateProject` refuses the overlap
+	// rather than let the document say both. The refusal is right and stays;
+	// this is the caller that composed the contradiction.
+	//
+	// The declaration itself is carried forward, NOT stripped. This derivative
+	// copies go.mod verbatim, so its module path is the registry's
+	// canonical_module: by the concept's own discriminator it IS the
+	// publishing repository, which is why it installs ggg/system/modkit's
+	// self_host payloads — including internal/canary's live-canary suite,
+	// which imports every managed adapter directly. Strip the declaration and
+	// those five adapters install nowhere while the suite still imports them,
+	// which is precisely the unowned-source state verification_installs was
+	// added to end.
+	verification := make(map[string]struct{}, len(project.VerificationInstalls))
+	for _, id := range project.VerificationInstalls {
+		verification[id] = struct{}{}
+	}
+	pinned.Modules = make([]string, 0, len(graph.order))
+	for _, id := range graph.order {
+		if _, installedForVerification := verification[id]; installedForVerification {
+			continue
+		}
+		pinned.Modules = append(pinned.Modules, id)
+	}
 	sort.Strings(pinned.Modules)
 	pinned.Exclude = []string{}
 	pinnedData, err := MarshalProject(pinned)

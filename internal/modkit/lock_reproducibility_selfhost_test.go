@@ -104,11 +104,21 @@ func TestTheCommittedLockDecomposesIntoTheFullProfileClosureAndItsVerificationIn
 	require.Len(t, lock.Modules, len(fresh)+len(project.VerificationInstalls)+len(tombstones),
 		"the lock's row count must be the full-profile closure plus the verification installs plus any live tombstone")
 
-	// The prune invariant, stated where the arithmetic depends on it: a
-	// tombstone is admissible only while it retains something. A migration
-	// ledger is something; a module the catalog still publishes can be
-	// re-added and would reuse the retained numbers. Neither, and the row is
-	// a lock member that no operation can explain.
+	// The tombstone term is separate above rather than folded in, so this can
+	// be a statement about THIS repository instead of a rule about tombstones
+	// in general: the committed lock carries no row that retains nothing. A
+	// tombstone whose migration ledger is empty and whose module no configured
+	// registry publishes is a record nothing can ever reuse — the shape
+	// ggg/system/feature-flags-launchdarkly had for a release, and four of the
+	// five rows that made 293 look underivable from a 288-module genesis.
+	//
+	// It is not refused by the engine. A tombstone is also the lock's
+	// permanent record that a module was installed at all, which
+	// assertLockRestored requires and `ggg registry validate` exercises by
+	// removing an example and then unpublishing it — so pruning automatically
+	// deleted a record another gate demands. `ggg sync --prune-tombstones` is
+	// the opt-in verb, named here because a reader who fails this assertion
+	// needs the command and not the theory.
 	published := make(map[string]bool, len(catalog.Modules))
 	for _, module := range catalog.Modules {
 		published[module.ID] = true
@@ -123,8 +133,8 @@ func TestTheCommittedLockDecomposesIntoTheFullProfileClosureAndItsVerificationIn
 		}
 	}
 	require.Empty(t, dead,
-		"these tombstones retain no migration ledger and name no published module, so they explain nothing and make the count above underivable: %v. "+
-			"A bare `ggg sync` prunes them", dead)
+		"these tombstones retain no migration ledger and name a module no configured registry publishes, so nothing can ever reuse them: %v. "+
+			"Forget them with `ggg sync --prune-tombstones`, or restore the module to the catalog", dead)
 }
 
 // repoProject reads this repository's committed intent through the parser

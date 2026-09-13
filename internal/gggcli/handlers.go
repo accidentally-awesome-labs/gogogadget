@@ -314,7 +314,11 @@ func runSync(ctx context.Context, cc CommandContext, args []string) (Result, err
 	if check && len(claims) > 0 {
 		return Result{}, usageError("--claim mutates the lock and cannot be combined with --check")
 	}
-	mutation := SyncMutation{Check: check, Offline: parsed.Bool("offline"), Claims: claims}
+	prune := parsed.Bool("prune-tombstones")
+	if check && prune {
+		return Result{}, usageError("--prune-tombstones mutates the lock and cannot be combined with --check")
+	}
+	mutation := SyncMutation{Check: check, Offline: parsed.Bool("offline"), Claims: claims, PruneTombstones: prune}
 	return drivePlanMutation(ctx, cc, "sync", mutation, check)
 }
 

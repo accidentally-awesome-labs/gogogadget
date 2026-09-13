@@ -47,4 +47,22 @@ type Operation struct {
 	// or the very next plan refuses on an exclude entry no configured
 	// registry can resolve.
 	SetExclude []string
+	// PruneTombstones forgets tombstones that retain nothing a future plan can
+	// use: no migration ledger, and a module no configured registry publishes
+	// any more. It is OPT-IN, and that is the whole design.
+	//
+	// A tombstone is the lock remembering that a module was installed, what
+	// its removal policy was, and which migration numbers it owns forever —
+	// `assertLockRestored` in example.go enforces exactly that, so an
+	// automatic prune is a rule that deletes a record another gate requires.
+	// It was one, briefly: pruning inside reconcilePlannedState made
+	// `ggg registry validate` refuse with "lock has no record of removed
+	// module ggg/element/example-token", because the validator removes an
+	// example and then unpublishes it, which is the same shape as retiring a
+	// module for real.
+	//
+	// So this follows the posture the registry cache already sets — never
+	// auto-prune something the lock references, add an explicit verb — and a
+	// bare `ggg sync` carries every tombstone forward verbatim.
+	PruneTombstones bool
 }

@@ -149,6 +149,11 @@ type (
 		Check   bool
 		Offline bool
 		Claims  []string
+		// PruneTombstones forgets lock tombstones that retain no migration
+		// ledger and name a module no configured registry publishes. Opt-in:
+		// a tombstone is the lock's permanent record that a module was
+		// installed, so nothing drops one behind the operator's back.
+		PruneTombstones bool
 	}
 
 	// ResolveMutation resolves one staged conflict.
