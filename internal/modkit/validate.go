@@ -65,6 +65,29 @@ func validateProject(p Project, canonical bool) error {
 	if len(p.Exclude) != 0 && !hasProfile {
 		return fmt.Errorf("project exclude requires a selected profile")
 	}
+	// Syntax only. An entry must be a scoped system module that neither
+	// `modules` nor `exclude` already names — the semantic half (it publishes
+	// a managed target, the project is its publisher, a canary probes it) needs
+	// the catalog and lives in the resolver and the planner.
+	if err := validateStringSet("project verification_installs", p.VerificationInstalls, canonical, ValidateScopedProjectModuleID); err != nil {
+		return err
+	}
+	excluded := make(map[string]struct{}, len(p.Exclude))
+	for _, id := range p.Exclude {
+		excluded[id] = struct{}{}
+	}
+	for _, id := range p.VerificationInstalls {
+		_, kind, _, _ := splitScopedModuleID(id)
+		if kind != string(ModuleSystem) {
+			return fmt.Errorf("project verification_installs %q must name a system module; only an adapter can be installed for verification", id)
+		}
+		if _, ok := selected[id]; ok {
+			return fmt.Errorf("project verification_installs %q overlaps modules", id)
+		}
+		if _, ok := excluded[id]; ok {
+			return fmt.Errorf("project verification_installs %q overlaps exclude", id)
+		}
+	}
 	for _, slot := range sortedKeys(p.Providers) {
 		if err := validateProviderSelections(slot, p.Providers[slot]); err != nil {
 			return err

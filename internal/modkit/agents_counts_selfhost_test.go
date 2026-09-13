@@ -22,14 +22,22 @@ import (
 	"testing"
 )
 
-// The published and selected counts the loop block advertises. Published is
-// the catalog; selected is the lock minus its tombstones, which are retained
-// migration ledgers rather than selected modules.
+// The published and installed counts the loop block advertises. Published is
+// the catalog; installed is the lock minus its tombstones, which are retained
+// migration ledgers rather than installed modules.
+//
+// "installed here", not "selected here": since verification_installs, the
+// canonical repository installs five managed adapters no environment selects,
+// so the two words name different sets and the document has to use the one it
+// means. The decomposition — installed == the full profile's closure plus the
+// verification installs — is
+// TestTheCommittedLockDecomposesIntoTheFullProfileClosureAndItsVerificationInstalls,
+// which checks it as a set; this stays the count the document publishes.
 func TestAgentsCatalogCountsMatchTheRegistryAndTheLock(t *testing.T) {
 	loop := collapse(agentsSection(t, "The loop"))
 
 	published := docCount(t, loop, "\\(([0-9]+) published")
-	selected := docCount(t, loop, "published, ([0-9]+) selected here\\)")
+	installed := docCount(t, loop, "published, ([0-9]+) installed here\\)")
 
 	catalog, err := LoadCatalog(os.DirFS(filepath.Join("..", "..")))
 	if err != nil {
@@ -48,11 +56,11 @@ func TestAgentsCatalogCountsMatchTheRegistryAndTheLock(t *testing.T) {
 		}
 	}
 	if live == 0 {
-		t.Fatal("the committed lock has no non-tombstone rows; the selected count cannot be derived")
+		t.Fatal("the committed lock has no non-tombstone rows; the installed count cannot be derived")
 	}
-	if selected != live {
-		t.Errorf("AGENTS.md says %d selected here; the lock records %d non-tombstone rows (of %d).\n"+
-			"Update the `catalog` line in \"## The loop\".", selected, live, len(lock.Modules))
+	if installed != live {
+		t.Errorf("AGENTS.md says %d installed here; the lock records %d non-tombstone rows (of %d).\n"+
+			"Update the `catalog` line in \"## The loop\".", installed, live, len(lock.Modules))
 	}
 }
 

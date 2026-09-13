@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
-	"github.com/gogogadget/gogogadget/internal/cache/memory"
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,7 +67,7 @@ func newFake(t *testing.T, routes ...route) (*Service, *fake) {
 		Token:          "tok_management_test",
 		ProjectID:      7,
 		EnvironmentID:  42,
-		Cache:          memory.New(),
+		Cache:          newTestCache(),
 	})
 	return service, f
 }
@@ -552,7 +552,7 @@ func TestServiceSatisfiesTheWholeSeamWithoutErrReadOnly(t *testing.T) {
 	// The reason this vendor replaced LaunchDarkly: not one method is a
 	// read-only stub.
 	failing := New(Service{EnvironmentKey: "k", Token: "t", ProjectID: 1, EnvironmentID: 1,
-		Management: "http://127.0.0.1:1", Flags: "http://127.0.0.1:1", Cache: memory.New()})
+		Management: "http://127.0.0.1:1", Flags: "http://127.0.0.1:1", Cache: newTestCache()})
 	ctx := context.Background()
 	for name, err := range map[string]error{
 		"Upsert":         failing.Upsert(ctx, flags.Flag{Key: "k", Rollout: 100}),
@@ -570,7 +570,7 @@ func TestServiceSatisfiesTheWholeSeamWithoutErrReadOnly(t *testing.T) {
 
 func TestNewModuleRefusesEveryMissingCredentialInOneError(t *testing.T) {
 	host := apphost.Map(map[string]string{}, time.Unix(0, 0).UTC(), "test")
-	_, err := NewModule(context.Background(), host, Deps{Cache: memory.New()})
+	_, err := NewModule(context.Background(), host, Deps{Cache: newTestCache()})
 	require.Error(t, err)
 	message := err.Error()
 	for _, key := range []string{
@@ -592,7 +592,7 @@ func TestNewModuleRefusesAMalformedNumericCoordinate(t *testing.T) {
 		"FLAGSMITH_PROJECT_ID":       "seven",
 		"FLAGSMITH_ENVIRONMENT_ID":   "0",
 	}, time.Unix(0, 0).UTC(), "test")
-	_, err := NewModule(context.Background(), host, Deps{Cache: memory.New()})
+	_, err := NewModule(context.Background(), host, Deps{Cache: newTestCache()})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `FLAGSMITH_PROJECT_ID must be a positive integer, got "seven"`)
 	assert.Contains(t, err.Error(), `FLAGSMITH_ENVIRONMENT_ID must be a positive integer, got "0"`)
@@ -606,7 +606,7 @@ func TestNewModuleBuildsTheAdapterFromItsOwnDeclaredEnvironment(t *testing.T) {
 		"FLAGSMITH_ENVIRONMENT_ID":   "42",
 		"FLAGSMITH_CONSOLE":          "https://app.flagsmith.com/project/7",
 	}, time.Unix(0, 0).UTC(), "test")
-	module, err := NewModule(context.Background(), host, Deps{Cache: memory.New()})
+	module, err := NewModule(context.Background(), host, Deps{Cache: newTestCache()})
 	require.NoError(t, err)
 	require.NotNil(t, module)
 	assert.Equal(t, defaultFlagsBaseURL, module.Value.Flags)
@@ -633,7 +633,7 @@ func TestEndpointOverridesSelectASelfHostedDeployment(t *testing.T) {
 		"FLAGSMITH_API_URL":          "https://flags.internal.example/",
 		"FLAGSMITH_FLAGS_API_URL":    "https://flags.internal.example/",
 	}, time.Unix(0, 0).UTC(), "test")
-	module, err := NewModule(context.Background(), host, Deps{Cache: memory.New()})
+	module, err := NewModule(context.Background(), host, Deps{Cache: newTestCache()})
 	require.NoError(t, err)
 	assert.Equal(t, "https://flags.internal.example", module.Value.Management)
 	assert.Equal(t, "https://flags.internal.example", module.Value.Flags)
@@ -648,7 +648,7 @@ func TestHealthMatchesTheSeamSiblingsAndMakesNoProviderCall(t *testing.T) {
 	require.Error(t, (&Service{}).Health(context.Background()), "unconfigured adapter must be unhealthy")
 	require.NoError(t, New(Service{
 		Flags: unreachable.URL, Management: unreachable.URL,
-		EnvironmentKey: "k", Token: "t", ProjectID: 1, EnvironmentID: 1, Cache: memory.New(),
+		EnvironmentKey: "k", Token: "t", ProjectID: 1, EnvironmentID: 1, Cache: newTestCache(),
 	}).Health(context.Background()))
 
 	// A managed adapter with no cache would cost a provider round trip on
@@ -660,13 +660,13 @@ func TestHealthMatchesTheSeamSiblingsAndMakesNoProviderCall(t *testing.T) {
 	cancelled, cancel := context.WithCancel(context.Background())
 	cancel()
 	require.ErrorIs(t, New(Service{
-		EnvironmentKey: "k", Token: "t", ProjectID: 1, EnvironmentID: 1, Cache: memory.New(),
+		EnvironmentKey: "k", Token: "t", ProjectID: 1, EnvironmentID: 1, Cache: newTestCache(),
 	}).Health(cancelled), context.Canceled)
 }
 
 func TestModuleErrorsNameTheAdapterNotTheCredential(t *testing.T) {
 	service := New(Service{Token: "super-secret-token", EnvironmentKey: "ser.public",
-		ProjectID: 7, EnvironmentID: 42, Cache: memory.New(),
+		ProjectID: 7, EnvironmentID: 42, Cache: newTestCache(),
 		Management: "http://127.0.0.1:1", Flags: "http://127.0.0.1:1"})
 	err := service.Delete(context.Background(), "beta-dashboard")
 	require.Error(t, err)
@@ -688,3 +688,79 @@ func TestReadyNamesEveryMissingCoordinateForAHandBuiltService(t *testing.T) {
 	require.True(t, ok, "ready must return errors.Join, got %T", err)
 	assert.Len(t, joined.Unwrap(), 4)
 }
+
+// ---------------------------------------------------------------------------
+// The cache double this adapter's own tests use.
+//
+// Not internal/cache/memory. That package is ggg/system/cache-memory — an
+// ADAPTER — and ValidatePayloadAdapterImports refuses one adapter's payload
+// importing another's, because an adapter is a per-environment provider
+// selection that no `requires` can express: this file would compile only while
+// providers["ggg/cache"] happened to select cache-memory. The import went
+// unnoticed for a release because nothing installed this module at all; the
+// verification install that finally does is what surfaced it.
+//
+// It lives in this file, owned by ggg/system/feature-flags-flagsmith, which
+// the rule exempts. A double in the ggg/system/cache seam was the alternative
+// and is the wrong one here: internal/cache/memory is ALREADY the in-memory
+// cache, so a second one in the seam is duplication two modules would have to
+// keep in sync — unlike search.NewMemory and realtime.NewMemory, whose
+// adapters are Postgres and have nothing in-memory to duplicate.
+//
+// It honours the TTL rather than ignoring it, because decisionTTL is the
+// bound this adapter's staleness argument rests on and a double that drops it
+// would make the caching test pass for the wrong reason.
+type testCache struct {
+	mu    sync.Mutex
+	items map[string]testCacheItem
+}
+
+type testCacheItem struct {
+	value   []byte
+	expires time.Time
+}
+
+func newTestCache() *testCache { return &testCache{items: map[string]testCacheItem{}} }
+
+func (c *testCache) Get(ctx context.Context, key string) ([]byte, bool, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, false, err
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	item, ok := c.items[key]
+	if !ok {
+		return nil, false, nil
+	}
+	if !item.expires.IsZero() && time.Now().After(item.expires) {
+		delete(c.items, key)
+		return nil, false, nil
+	}
+	return append([]byte(nil), item.value...), true, nil
+}
+
+func (c *testCache) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	expires := time.Time{}
+	if ttl > 0 {
+		expires = time.Now().Add(ttl)
+	}
+	c.mu.Lock()
+	c.items[key] = testCacheItem{append([]byte(nil), value...), expires}
+	c.mu.Unlock()
+	return nil
+}
+
+func (c *testCache) Delete(ctx context.Context, key string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	c.mu.Lock()
+	delete(c.items, key)
+	c.mu.Unlock()
+	return nil
+}
+
+var _ cache.Store = (*testCache)(nil)

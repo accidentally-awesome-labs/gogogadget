@@ -4,7 +4,7 @@
     "id": "ggg/system/feature-flags-flagsmith",
     "kind": "system",
     "name": "feature-flags-flagsmith",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Feature Flags Flagsmith",
     "description": "Managed feature flags through Flagsmith's Flags API and Management API. Replaces feature-flags-launchdarkly: every flags.Service method is satisfiable over a documented HTTP contract in which Flagsmith performs the decision, with no vendored SDK and no reimplementation of vendor targeting.",

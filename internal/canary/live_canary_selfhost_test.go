@@ -121,6 +121,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/gggcli"
+	"github.com/gogogadget/gogogadget/internal/modkit"
 
 	posthogadapter "github.com/gogogadget/gogogadget/internal/analytics/posthog"
 	"github.com/gogogadget/gogogadget/internal/audit"
@@ -1438,6 +1439,185 @@ func TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse(t *testing.T) {
 	if len(fixed) > 0 {
 		t.Fatalf("these liveCanaryManifestKeyScopeExceptions rows describe manifest defects that no longer exist: %v.\nDelete each one.", fixed)
 	}
+}
+
+// ---------------------------------------------------------------------------
+// The tie between a canary row and an install.
+
+// liveCanaryInstallCoverage is the judgement of the canary rows against this
+// repository's own installation intent, in both directions.
+type liveCanaryInstallCoverage struct {
+	// Uninstalled are canary rows whose adapter no environment selects and
+	// `verification_installs` does not declare. The row imports the adapter's
+	// package, so its compilation depends on source no lock row owns.
+	Uninstalled []string
+	// Unprobed are verification installs with no canary row. The declaration
+	// installs an adapter for verification and then verifies nothing.
+	Unprobed []string
+}
+
+// liveCanaryClassifyInstalls is the whole judgement, pure so both directions
+// can be driven on a synthetic population: the real repository carries neither
+// defect once the gate passes, and a refusal nobody can observe is a refusal
+// nobody maintains.
+func liveCanaryClassifyInstalls(selected, verification []string, canaried map[string]liveCanaryProvider) liveCanaryInstallCoverage {
+	var coverage liveCanaryInstallCoverage
+	installed := map[string]bool{}
+	for _, id := range selected {
+		installed[id] = true
+	}
+	for _, id := range verification {
+		installed[id] = true
+		if _, probed := canaried[id]; !probed {
+			coverage.Unprobed = append(coverage.Unprobed, id)
+		}
+	}
+	for id := range canaried {
+		if !installed[id] {
+			coverage.Uninstalled = append(coverage.Uninstalled, id)
+		}
+	}
+	sort.Strings(coverage.Uninstalled)
+	sort.Strings(coverage.Unprobed)
+	return coverage
+}
+
+// liveCanaryUninstalledRefusal is what a canary row for an adapter this
+// project neither selects nor verification-installs gets.
+func liveCanaryUninstalledRefusal(modules []string) string {
+	return fmt.Sprintf("these liveCanaryProviders rows drive adapters this repository neither selects nor installs for verification: %v.\n"+
+		"A row imports the adapter's package directly — that is the whole reason the self_host carve-out in ValidatePayloadAdapterImports exists — so the row compiles against source no lock row owns: invisible to install, to update and to removal, and reproducible by no `ggg sync`.\n"+
+		"Remedy: add each module to gogogadget.json `verification_installs` (installed for verification, selected by nothing), select it with `ggg provider set`, or delete the row.",
+		modules)
+}
+
+// liveCanaryUnprobedInstallRefusal is what a verification install with no row
+// gets. It is the other half of the admission rule: a managed target earns its
+// place by being probed, so an install whose stated purpose is verification
+// and which verifies nothing is the same defect
+// ggg/system/feature-flags-launchdarkly was — a credential declaration nothing
+// reads — wearing a different key.
+func liveCanaryUnprobedInstallRefusal(modules []string) string {
+	return fmt.Sprintf("gogogadget.json declares these verification installs and no liveCanaryProviders row probes them: %v.\n"+
+		"The rule: %s\n"+
+		"A verification install is the ONE way this repository installs an adapter nothing selects, and its entire justification is that the canary must import it. Without a row it installs an adapter for nothing.\n"+
+		"Remedy: write the probe as a liveCanaryProviders row, or delete the entry from verification_installs.",
+		modules, liveCanaryAdmissionRule)
+}
+
+// liveCanaryProjectIntent reads this repository's own committed intent through
+// the same parser `ggg sync` uses, so a declaration this test accepts is a
+// declaration the engine accepts.
+func liveCanaryProjectIntent(t *testing.T, root string) modkit.Project {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(root, "gogogadget.json"))
+	if err != nil {
+		t.Fatalf("read gogogadget.json: %v", err)
+	}
+	project, err := modkit.ParseProject(raw)
+	if err != nil {
+		t.Fatalf("parse gogogadget.json: %v", err)
+	}
+	return project
+}
+
+// liveCanarySelectedAdapters is every adapter some environment selects.
+func liveCanarySelectedAdapters(project modkit.Project) []string {
+	out := make([]string, 0, len(project.Providers)*3)
+	for _, selections := range project.Providers {
+		for _, choice := range []modkit.ProviderSelection{selections.Development, selections.Test, selections.Production} {
+			if choice.Adapter != "" {
+				out = append(out, choice.Adapter)
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// The load-bearing tie, both directions. It is what makes
+// `verification_installs` narrow rather than a hole: an entry costs a probe,
+// and a probe costs an install. Neither declaration can grow without the
+// other, so the canary suite's imports stay declared and this repository's
+// install set stays derivable from its own intent.
+func TestEveryCanaryRowIsInstalledAndEveryVerificationInstallIsProbed(t *testing.T) {
+	root := liveCanaryRepositoryRoot(t)
+	project := liveCanaryProjectIntent(t, root)
+	selected := liveCanarySelectedAdapters(project)
+
+	// Floors. Both directions are vacuous on an empty population, and an
+	// empty population here means the reader broke, not the repository: this
+	// project selects one adapter per slot per environment and declares the
+	// managed adapters its canary reaches.
+	if len(liveCanaryProviders) < 15 {
+		t.Fatalf("only %d canary row(s); the suite has collapsed, not the registry", len(liveCanaryProviders))
+	}
+	if len(selected) < 15 {
+		t.Fatalf("gogogadget.json yielded only %d selected adapter(s); the intent reader has collapsed", len(selected))
+	}
+	if len(project.VerificationInstalls) == 0 {
+		t.Fatal("gogogadget.json declares no verification installs, yet the canary rows below import managed adapters directly; " +
+			"if every row's adapter is genuinely selected this floor is wrong, but silence here is how the unowned-source state returned")
+	}
+
+	canaried := map[string]liveCanaryProvider{}
+	for _, row := range liveCanaryProviders {
+		canaried[row.Module] = row
+	}
+	coverage := liveCanaryClassifyInstalls(selected, project.VerificationInstalls, canaried)
+	// The declaration's own defect is reported first. A single edit can
+	// produce both — renaming a row's Module leaves its verification install
+	// unprobed AND the new name uninstalled — and the entry an author just
+	// wrote is the one they can act on.
+	if len(coverage.Unprobed) > 0 {
+		t.Fatal(liveCanaryUnprobedInstallRefusal(coverage.Unprobed))
+	}
+	if len(coverage.Uninstalled) > 0 {
+		t.Fatal(liveCanaryUninstalledRefusal(coverage.Uninstalled))
+	}
+}
+
+// Both refusals, driven on a synthetic population. The real repository can
+// carry neither once the gate above passes, so this is the only place the
+// classification's branches are observable.
+func TestLiveCanaryInstallClassificationRefusesBothDirections(t *testing.T) {
+	row := func(id string) map[string]liveCanaryProvider {
+		return map[string]liveCanaryProvider{id: {Module: id}}
+	}
+	t.Run("a row for an adapter nothing installs is refused", func(t *testing.T) {
+		coverage := liveCanaryClassifyInstalls(nil, nil, row("ggg/system/probe-managed"))
+		if len(coverage.Uninstalled) != 1 || coverage.Uninstalled[0] != "ggg/system/probe-managed" {
+			t.Fatalf("Uninstalled = %v, want the unselected, non-verification-installed row named", coverage.Uninstalled)
+		}
+		refusal := liveCanaryUninstalledRefusal(coverage.Uninstalled)
+		for _, want := range []string{"ggg/system/probe-managed", "verification_installs", "ggg provider set"} {
+			if !strings.Contains(refusal, want) {
+				t.Fatalf("the refusal must name %q; it said:\n%s", want, refusal)
+			}
+		}
+	})
+	t.Run("selection and verification install both satisfy it", func(t *testing.T) {
+		for name, coverage := range map[string]liveCanaryInstallCoverage{
+			"selected":             liveCanaryClassifyInstalls([]string{"ggg/system/probe-managed"}, nil, row("ggg/system/probe-managed")),
+			"verification install": liveCanaryClassifyInstalls(nil, []string{"ggg/system/probe-managed"}, row("ggg/system/probe-managed")),
+		} {
+			if len(coverage.Uninstalled) != 0 || len(coverage.Unprobed) != 0 {
+				t.Fatalf("%s population refused: %+v", name, coverage)
+			}
+		}
+	})
+	t.Run("a verification install with no row is refused", func(t *testing.T) {
+		coverage := liveCanaryClassifyInstalls(nil, []string{"ggg/system/probe-managed"}, map[string]liveCanaryProvider{})
+		if len(coverage.Unprobed) != 1 || coverage.Unprobed[0] != "ggg/system/probe-managed" {
+			t.Fatalf("Unprobed = %v, want the unprobed verification install named", coverage.Unprobed)
+		}
+		refusal := liveCanaryUnprobedInstallRefusal(coverage.Unprobed)
+		for _, want := range []string{"ggg/system/probe-managed", liveCanaryAdmissionRule, "liveCanaryProviders row"} {
+			if !strings.Contains(refusal, want) {
+				t.Fatalf("the refusal must name %q; it said:\n%s", want, refusal)
+			}
+		}
+	})
 }
 
 // Every row must state its safety claim in full. A row with no Leaves prose

@@ -20,6 +20,68 @@ type selectedGraph struct {
 	reasons map[string]string
 }
 
+// VerificationReason is the lock reason a module installed by
+// Project.VerificationInstalls carries. It is what makes the install set
+// derivable from the lock alone: a row with this reason is an adapter no
+// environment selects, so "installed" minus "verification" is the set a fresh
+// genesis of the same profile and provider choices reproduces.
+const VerificationReason = "verification"
+
+// UnselectedAdapterRefusal is the ONE answer to "this project names an adapter
+// no environment selects". `ggg sync` reached it through Project.Modules and
+// `ggg add` reached it through an operand, and for a release the two disagreed:
+// sync refused with the rule while add silently installed nothing and reported
+// ok. Both now render this, so the remedy an operator reads does not depend on
+// which verb they typed.
+//
+// It names both remedies because there are exactly two: select the adapter for
+// some environment, or — in the repository that publishes it — install it for
+// verification, selected by nothing.
+func UnselectedAdapterRefusal(id, slot string) string {
+	return fmt.Sprintf(
+		"adapter %q is not selected by provider choices; an adapter is installed only where some environment selects it. "+
+			"Select it with `ggg provider set --provider %s:ENVIRONMENT=%s@TARGET`, or — only in the repository that publishes it — "+
+			"add it to gogogadget.json `verification_installs`, which installs it for the live canary in internal/canary and selects it for nothing",
+		id, slot, id)
+}
+
+// ValidateVerificationInstallPublisher is the derivative refusal: a project
+// may declare a verification install only for a module published by a registry
+// whose canonical_module equals its own go.mod module path. That is the same
+// per-entry discriminator ManifestFile.SelfHost turns on and
+// InstallsSelfHostPayloads answers, reused deliberately — the soundness
+// argument is identical, so the test must be identical too.
+//
+// It runs in the planner rather than in validateProject because the answer
+// needs the resolved catalog: which registry published an id, and what that
+// registry's canonical_module is. It runs before the resolver so a derivative
+// is refused before a single byte is planned, let alone written.
+func ValidateVerificationInstallPublisher(project Project, catalog Catalog, modulePath string) error {
+	if len(project.VerificationInstalls) == 0 {
+		return nil
+	}
+	published := make(map[string]struct{}, len(catalog.Modules))
+	for _, module := range catalog.Modules {
+		published[module.ID] = struct{}{}
+	}
+	for _, id := range project.VerificationInstalls {
+		if _, ok := published[id]; !ok {
+			return fmt.Errorf("verification install %q is not present in the catalog", id)
+		}
+		canonical := catalog.ModuleCanonical[id]
+		if InstallsSelfHostPayloads(modulePath, canonical) {
+			continue
+		}
+		return fmt.Errorf(
+			"gogogadget.json declares verification install %q and this project does not publish it: its go.mod module path is %q, while %s is published by a registry whose canonical_module is %q. "+
+				"A verification install is sound only in the publishing repository, where the adapter, the intent that declares it and the canary that probes it sit in one commit and are checked by one gate. "+
+				"In a derivative it is a dependency on an adapter no environment selects, which no `requires` can express. "+
+				"Remove the entry, or select the adapter with `ggg provider set`",
+			id, modulePath, id, canonical)
+	}
+	return nil
+}
+
 func readPlannerInputs(root string) (Project, string, Lock, bool, error) {
 	projectData, err := os.ReadFile(filepath.Join(root, "gogogadget.json"))
 	if err != nil {
@@ -283,6 +345,44 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			adapterByID[id] = module
 		}
 	}
+	// Verification installs join `selected` before the loop for the deployment
+	// module's reason: what they require is part of the closure the slot set
+	// describes, so a verification-installed adapter whose `requires` reaches
+	// an otherwise-unselected seam makes that seam's slot a slot the project
+	// must choose for, rather than a nil capability.
+	//
+	// Only the managed shape is admissible. A development or self-hosted
+	// target is reachable by selecting it in `development` or `test`, which
+	// costs nothing and keeps one rule; `managed` is the shape a slot cannot
+	// hold more than one of per environment and the shape the live canary
+	// exists to probe.
+	verificationInstalls := map[string]struct{}{}
+	for _, id := range project.VerificationInstalls {
+		adapter, ok := adapterByID[id]
+		if !ok {
+			if _, present := moduleByID[id]; !present {
+				return selectedGraph{}, fmt.Errorf("verification install %q is not present in the catalog", id)
+			}
+			return selectedGraph{}, fmt.Errorf("verification install %q is not an adapter; only a module contributing runtime.system.adapter can be installed for verification", id)
+		}
+		managed := false
+		for _, target := range adapter.Runtime.System.Adapter.Targets {
+			if target.Mode == "managed" {
+				managed = true
+				break
+			}
+		}
+		if !managed {
+			return selectedGraph{}, fmt.Errorf(
+				"verification install %q publishes no managed service target; a development or self-hosted target is reachable through `ggg provider set --provider %s:development=%s@TARGET`",
+				id, adapter.Runtime.System.Adapter.Slot, id)
+		}
+		verificationInstalls[id] = struct{}{}
+		if _, exists := selected[id]; !exists {
+			selected[id] = struct{}{}
+			reasons[id] = VerificationReason
+		}
+	}
 	chosenAdapters := map[string]struct{}{}
 	// Terminates because every iteration either selects a module that was not
 	// selected before — and `selected` is bounded by the catalog — or stops.
@@ -356,9 +456,26 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	for _, explicitID := range project.Modules {
 		if adapter, ok := adapterByID[explicitID]; ok {
 			if _, chosen := chosenAdapters[adapter.ID]; !chosen {
-				return selectedGraph{}, fmt.Errorf("explicit adapter %q is not selected by provider choices; use ggg provider set", explicitID)
+				return selectedGraph{}, fmt.Errorf("%s", UnselectedAdapterRefusal(explicitID, adapter.Runtime.System.Adapter.Slot))
 			}
 		}
+	}
+	// Redundant rather than harmless: a verification install exists to reach
+	// an adapter NOTHING selects, so an entry a provider choice already names
+	// claims a reason that is not its reason. Left accepted, the declaration
+	// stops describing the canary's unselected surface and the reproducibility
+	// arithmetic below stops being derivable from it.
+	redundant := make([]string, 0, len(verificationInstalls))
+	for id := range verificationInstalls {
+		if _, chosen := chosenAdapters[id]; chosen {
+			redundant = append(redundant, id)
+		}
+	}
+	sort.Strings(redundant)
+	if len(redundant) != 0 {
+		return selectedGraph{}, fmt.Errorf(
+			"verification installs %v are already selected by provider choices; a verification install installs an adapter NOTHING selects, so remove these entries from gogogadget.json verification_installs",
+			redundant)
 	}
 	// Over the COMPLETE closure, so a second deploy target reachable only
 	// through a selected adapter's requires is refused rather than shipped in

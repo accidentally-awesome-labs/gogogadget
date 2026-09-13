@@ -44,6 +44,15 @@ type detectedConflict struct {
 	upstream    plannedAuthoredPayload
 }
 
+// projectAfterAdd edits intent for `ggg add`. Every operand must end up
+// installed; an operand that cannot be is refused here, naming the rule, not
+// absorbed into an unchanged document. The adapter case is the one that got
+// away: a managed adapter is a member of ggg/profile/full for discoverability
+// and the resolver deliberately skips profile-member adapters, so the
+// "already supplied by a selected profile" branch below saw a member, added
+// nothing, and `ggg add ggg/system/feature-flags-flagsmith` exited 0 with
+// ok:true, empty conflicts and empty diagnostics while installing nothing —
+// against the same intent `ggg sync` refused by name.
 func projectAfterAdd(project Project, catalog Catalog, requested []string) (Project, error) {
 	if len(requested) == 0 {
 		return Project{}, fmt.Errorf("add requires at least one module")
@@ -69,6 +78,17 @@ func projectAfterAdd(project Project, catalog Catalog, requested []string) (Proj
 		if _, moduleOK := modules[id]; !moduleOK {
 			if _, profileOK := profiles[id]; !profileOK {
 				return Project{}, fmt.Errorf("add selects unknown catalog id %q", id)
+			}
+		}
+		if module, isModule := modules[id]; isModule && module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+			chosen := false
+			for _, choices := range project.Providers {
+				for _, choice := range []ProviderSelection{choices.Development, choices.Test, choices.Production} {
+					chosen = chosen || choice.Adapter == id
+				}
+			}
+			if !chosen && !containsString(project.VerificationInstalls, id) {
+				return Project{}, fmt.Errorf("%s", UnselectedAdapterRefusal(id, module.Runtime.System.Adapter.Slot))
 			}
 		}
 		result.Exclude = removeString(result.Exclude, id)
@@ -190,6 +210,7 @@ func reconcilePlannedState(
 	root string,
 	snapshot Snapshot,
 	registrySources []resolvedRegistry,
+	catalog Catalog,
 	graph selectedGraph,
 	payloads []plannedAuthoredPayload,
 	existing Lock,
@@ -599,11 +620,35 @@ func reconcilePlannedState(
 	// Tombstones of previously removed modules are permanent ledger rows:
 	// carry them forward verbatim so their immutable migration mappings are
 	// never lost and re-adds reuse the retained numbers.
+	//
+	// With one exception, and it is the exception the definition itself
+	// implies: a tombstone whose migration ledger is EMPTY and whose module no
+	// configured registry publishes any more retains nothing. There are no
+	// numbers to keep, and nothing can ever re-add the module to reuse them,
+	// so the row is a ledger with no ledger — and it is not free. It is a lock
+	// member, so the lock's module count stops being derivable from the
+	// project's own intent: ggg/system/feature-flags-launchdarkly was retired
+	// from the catalog and its files deleted, and its empty tombstone was four
+	// of the five rows that made this repository's 293 unreproducible by a
+	// fresh genesis' 288.
+	//
+	// Both halves are required. An empty-ledger tombstone for a module still
+	// in the catalog stays, because `ggg remove` of a migration-free module
+	// must leave the removal on the record and a re-add must see it. A
+	// non-empty ledger stays whatever the catalog says, because those
+	// migration files are on disk and their numbers must never be reused.
+	published := make(map[string]struct{}, len(catalog.Modules))
+	for _, module := range catalog.Modules {
+		published[module.ID] = struct{}{}
+	}
 	for _, module := range existing.Modules {
 		if module.Reason != TombstoneReason {
 			continue
 		}
 		if _, selectedAgain := newModules[module.ID]; selectedAgain {
+			continue
+		}
+		if _, stillPublished := published[module.ID]; !stillPublished && len(module.Migrations) == 0 {
 			continue
 		}
 		finalLock.Modules = append(finalLock.Modules, module)

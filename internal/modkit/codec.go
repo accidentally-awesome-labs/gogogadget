@@ -39,12 +39,16 @@ func MarshalProject(project Project) ([]byte, error) {
 	if project.Exclude != nil {
 		clone.Exclude = append(make([]string, 0, len(project.Exclude)), project.Exclude...)
 	}
+	if project.VerificationInstalls != nil {
+		clone.VerificationInstalls = append(make([]string, 0, len(project.VerificationInstalls)), project.VerificationInstalls...)
+	}
 	// `ports` is deliberately not normalised to an empty object: a project
 	// that declares no override must round-trip without gaining the key, so
 	// writing intent never rewrites a file into a shape an older reader has
 	// never seen.
 	sort.Strings(clone.Modules)
 	sort.Strings(clone.Exclude)
+	sort.Strings(clone.VerificationInstalls)
 	if err := validateProject(clone, true); err != nil {
 		return nil, err
 	}

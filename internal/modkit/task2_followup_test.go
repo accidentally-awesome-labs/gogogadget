@@ -462,3 +462,151 @@ func TestGeneratedExecutableContributionsCarryProviderGates(t *testing.T) {
 		t.Fatalf("adapter-owned job missing from generated worker registry:\n%s", jobs.Content)
 	}
 }
+
+// The verification-install rules, each direction driven. A verification
+// install is the ONE way a project installs an adapter no environment selects,
+// so every narrowing that keeps it from becoming a hole is asserted here
+// beside the ordinary provider refusals it sits next to.
+func TestVerificationInstallRefusals(t *testing.T) {
+	const canonical = "github.com/gogogadget/gogogadget"
+	seam := Manifest{ID: "ggg/system/mail", Kind: ModuleSystem, Runtime: RuntimeContributions{
+		ProviderSlots: []ProviderSlotContribution{{ID: "ggg/mail", Capabilities: []CapabilityContribution{{Capability: "mail.sender", Type: "mail.Sender"}}}},
+	}}
+	adapter := func(id, target, mode string, environments []string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter:  &AdapterContribution{Slot: "ggg/mail", Targets: []ServiceTarget{{ID: target, Title: target, Mode: mode, Environments: environments, Automation: "manual", DocsURL: "https://example.test"}}},
+			Provides: []RuntimeProvide{{Field: "Sender", Capability: "mail.sender", Type: "mail.Sender"}},
+		}}}
+	}
+	local := adapter("ggg/system/mail-local", "filesystem", "development", []string{"development", "test"})
+	managed := adapter("ggg/system/mail-remote", "resend", "managed", []string{"production"})
+	// A second managed adapter for the same slot: the one no environment can
+	// reach, and therefore the only thing a verification install is for.
+	spare := adapter("ggg/system/mail-spare", "spare", "managed", []string{"production"})
+	selfHosted := adapter("ggg/system/mail-smtp", "smtp", "self-hosted", []string{"production"})
+	catalog := Catalog{
+		Modules:         []Manifest{seam, local, managed, spare, selfHosted},
+		ModuleCanonical: map[string]string{},
+	}
+	for _, module := range catalog.Modules {
+		catalog.ModuleCanonical[module.ID] = canonical
+	}
+	base := func() Project {
+		return Project{Schema: 2, Modules: []string{seam.ID}, Exclude: []string{}, Providers: map[string]ProviderSelections{"ggg/mail": {
+			Development: ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+			Test:        ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+			Production:  ProviderSelection{Adapter: managed.ID, Target: "resend"},
+		}}}
+	}
+
+	// Green: the publishing repository installs the unreachable managed
+	// adapter, and the graph carries it with the verification reason.
+	project := base()
+	project.VerificationInstalls = []string{spare.ID}
+	if err := ValidateVerificationInstallPublisher(project, catalog, canonical); err != nil {
+		t.Fatalf("the publishing repository was refused its own verification install: %v", err)
+	}
+	graph, err := resolveSelectedGraph(t.Context(), project, catalog)
+	if err != nil {
+		t.Fatalf("a valid verification install was refused: %v", err)
+	}
+	if graph.reasons[spare.ID] != VerificationReason {
+		t.Fatalf("verification install reason = %q, want %q", graph.reasons[spare.ID], VerificationReason)
+	}
+
+	// A derivative is refused by name, and the refusal states the rule rather
+	// than just the verdict.
+	derivative := ValidateVerificationInstallPublisher(project, catalog, "example.com/acme/app")
+	if derivative == nil {
+		t.Fatal("a derivative was allowed a verification install")
+	}
+	for _, want := range []string{spare.ID, "example.com/acme/app", canonical, "publishing repository", "ggg provider set"} {
+		if !strings.Contains(derivative.Error(), want) {
+			t.Fatalf("the derivative refusal must name %q; it said: %v", want, derivative)
+		}
+	}
+
+	for name, testCase := range map[string]struct {
+		installs []string
+		refusal  string
+	}{
+		// Only `managed` qualifies: a development or self-hosted target is
+		// reachable by selecting it, which costs nothing and keeps one rule.
+		"a self-hosted adapter is refused": {[]string{selfHosted.ID}, "publishes no managed service target"},
+		// A seam is not an adapter.
+		"a non-adapter module is refused": {[]string{seam.ID}, "is not an adapter"},
+		// Redundant: the whole point is an adapter NOTHING selects.
+		"an already-selected adapter is refused": {[]string{managed.ID}, "already selected by provider choices"},
+		// A name nothing publishes.
+		"an absent module is refused": {[]string{"ggg/system/mail-ghost"}, "not present in the catalog"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			candidate := base()
+			candidate.VerificationInstalls = testCase.installs
+			publisherErr := ValidateVerificationInstallPublisher(candidate, catalog, canonical)
+			_, resolveErr := resolveSelectedGraph(t.Context(), candidate, catalog)
+			for _, err := range []error{publisherErr, resolveErr} {
+				if err != nil && strings.Contains(err.Error(), testCase.refusal) {
+					return
+				}
+			}
+			t.Fatalf("no refusal named %q; publisher = %v, resolver = %v", testCase.refusal, publisherErr, resolveErr)
+		})
+	}
+}
+
+// `ggg add` of an adapter no environment selects must REFUSE, not report
+// success having changed nothing. This is the exact site of the lie: a managed
+// adapter is a member of ggg/profile/full for discoverability and the resolver
+// skips profile-member adapters, so the "already supplied by a selected
+// profile" branch swallowed the operand and left intent, lock and tree
+// untouched behind ok:true, an empty conflicts array and an empty diagnostics
+// array — while `ggg sync` refused the same intent by name. Both verbs now
+// render UnselectedAdapterRefusal, so the assertion is that the operand
+// produces an error at all AND that the error is the shared one.
+func TestAddRefusesAnAdapterNoEnvironmentSelects(t *testing.T) {
+	adapterID := "ggg/system/mail-spare"
+	seam := Manifest{ID: "ggg/system/mail", Kind: ModuleSystem, Runtime: RuntimeContributions{
+		ProviderSlots: []ProviderSlotContribution{{ID: "ggg/mail", Capabilities: []CapabilityContribution{{Capability: "mail.sender", Type: "mail.Sender"}}}},
+	}}
+	adapter := func(id, target, mode string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter:  &AdapterContribution{Slot: "ggg/mail", Targets: []ServiceTarget{{ID: target, Title: target, Mode: mode, Environments: []string{"production"}, Automation: "manual", DocsURL: "https://example.test"}}},
+			Provides: []RuntimeProvide{{Field: "Sender", Capability: "mail.sender", Type: "mail.Sender"}},
+		}}}
+	}
+	selected := adapter("ggg/system/mail-remote", "resend", "managed")
+	spare := adapter(adapterID, "spare", "managed")
+	// The operand is a profile MEMBER, which is the shape that got away: it is
+	// "already supplied", so the old code appended nothing and returned the
+	// document unchanged.
+	profile := Profile{ID: "ggg/profile/full", Name: "full", Members: []string{seam.ID, selected.ID, spare.ID}}
+	catalog := Catalog{Modules: []Manifest{seam, selected, spare}, Profiles: []Profile{profile}}
+	project := Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "directory", Path: "registry"}},
+		Modules: []string{profile.ID}, Exclude: []string{}, Providers: map[string]ProviderSelections{"ggg/mail": {
+			Development: ProviderSelection{Adapter: selected.ID, Target: "resend"},
+			Test:        ProviderSelection{Adapter: selected.ID, Target: "resend"},
+			Production:  ProviderSelection{Adapter: selected.ID, Target: "resend"},
+		}}}
+
+	after, err := projectAfterAdd(project, catalog, []string{adapterID})
+	if err == nil {
+		t.Fatalf("add accepted an unselected adapter and produced %v; the old defect was exactly this, reported as ok:true", after.Modules)
+	}
+	if err.Error() != UnselectedAdapterRefusal(adapterID, "ggg/mail") {
+		t.Fatalf("add refused with its own words:\n%v\nwant the shared refusal sync renders:\n%s",
+			err, UnselectedAdapterRefusal(adapterID, "ggg/mail"))
+	}
+	// The control: a verification install makes the same operand a genuine
+	// no-op rather than a lie, because the adapter IS installed.
+	declared := project
+	declared.VerificationInstalls = []string{adapterID}
+	if _, err := projectAfterAdd(declared, catalog, []string{adapterID}); err != nil {
+		t.Fatalf("add of a declared verification install was refused: %v", err)
+	}
+	// And the same operand a provider choice names is accepted, so the
+	// refusal turns on selection and nothing else.
+	if _, err := projectAfterAdd(project, catalog, []string{selected.ID}); err != nil {
+		t.Fatalf("add of a selected adapter was refused: %v", err)
+	}
+}

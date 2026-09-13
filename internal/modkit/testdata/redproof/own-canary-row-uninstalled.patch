@@ -1,0 +1,19 @@
+Redproof-Patch: own-canary-row-uninstalled
+Redproof-Family: ownership
+Redproof-Run: TestEveryCanaryRowIsInstalledAndEveryVerificationInstallIsProbed
+Redproof-Package: ./internal/canary
+Redproof-Expect: neither selects nor installs for verification
+Redproof-Summary: A live-canary row whose adapter this repository does not install — ggg/system/webhooks-svix dropped from gogogadget.json `verification_installs` while its row and its direct import of internal/webhooks/svix stay. This is not a hypothetical: it is the exact state the repository shipped in before verification_installs existed. Five managed adapters had canary rows and were selected by no environment, so the suite compiled against payload sources no lock row owned — invisible to install, update and removal, and reproducible by no `ggg sync`. Planted in the intent rather than in the suite on purpose: the guard's population is the committed gogogadget.json read through modkit.ParseProject, so this proof tests the intent read as well as the refusal, and it survives any refactor of the adapter packages. The other direction — a verification install with no row — is refused by the same classification and driven observably in TestLiveCanaryInstallClassificationRefusesBothDirections, because one guard carries one inventory line.
+diff --git a/gogogadget.json b/gogogadget.json
+--- a/gogogadget.json
++++ b/gogogadget.json
+@@ -273,8 +273,7 @@
+     "ggg/system/feature-flags-flagsmith",
+     "ggg/system/notifications-knock",
+     "ggg/system/search-typesense",
+-    "ggg/system/usage-openmeter",
+-    "ggg/system/webhooks-svix"
++    "ggg/system/usage-openmeter"
+   ],
+   "deployment": "ggg/system/deploy-fly"
+ }

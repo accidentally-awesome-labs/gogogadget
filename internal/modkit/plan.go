@@ -203,6 +203,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	desiredProject.Registries = append([]ProjectRegistry{}, currentProject.Registries...)
 	desiredProject.Modules = append([]string{}, currentProject.Modules...)
 	desiredProject.Exclude = append([]string{}, currentProject.Exclude...)
+	desiredProject.VerificationInstalls = append([]string{}, currentProject.VerificationInstalls...)
 	desiredProject.Providers = maps.Clone(currentProject.Providers)
 	desiredProject.Ports = maps.Clone(currentProject.Ports)
 	if op.Kind == OpUpdate {
@@ -306,6 +307,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			return Plan{}, err
 		}
 	}
+	if err := ValidateVerificationInstallPublisher(desiredProject, catalog, modulePath); err != nil {
+		return Plan{}, err
+	}
 	// Operands become canonical ids exactly once, here, before any operation
 	// reads them. `add` and `update` resolve against the catalog because that
 	// is the set they can reach; `remove` resolved against the installed graph
@@ -340,6 +344,42 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	graph, err := resolveSelectedGraph(ctx, desiredProject, catalog)
 	if err != nil {
 		return Plan{}, err
+	}
+	// The `add` honesty gate. `add` used to report ok having installed
+	// nothing: an adapter operand that a selected profile lists as a member
+	// was swallowed by projectAfterAdd's "already supplied" branch, and the
+	// resolver then skips profile-member adapters, so intent, lock and tree
+	// were all unchanged behind exit 0 and an empty diagnostics array — while
+	// `sync` refused the same intent by name. projectAfterAdd now renders the
+	// same refusal sync does for that case; this is the backstop for every
+	// other way an operand could resolve to nothing, so a future skip cannot
+	// reintroduce a silent success.
+	if op.Kind == OpAdd {
+		installed := make(map[string]struct{}, len(graph.modules))
+		for _, module := range graph.modules {
+			installed[module.ID] = struct{}{}
+		}
+		catalogModules := make(map[string]struct{}, len(catalog.Modules))
+		for _, module := range catalog.Modules {
+			catalogModules[module.ID] = struct{}{}
+		}
+		absent := make([]string, 0, len(op.Modules))
+		for _, id := range op.Modules {
+			if _, isModule := catalogModules[id]; !isModule {
+				// A profile operand installs its members, never itself.
+				continue
+			}
+			if _, ok := installed[id]; !ok {
+				absent = append(absent, id)
+			}
+		}
+		sort.Strings(absent)
+		if len(absent) != 0 {
+			return Plan{}, fmt.Errorf(
+				"add resolved but would install nothing for %v: the operands are in the catalog and absent from the resolved graph, so reporting success here would be a lie. "+
+					"Name the reason in the refusal that applies to them rather than widening this backstop",
+				absent)
+		}
 	}
 	if op.Kind == OpUpdate && len(op.Modules) != 0 {
 		graph.modules, err = overlayTargetedGraph(graph.modules, existingLock, targeted)
@@ -554,7 +594,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		retiring[id] = retirement{slot: adapterSlot(moduleByID, existingLock, id)}
 	}
 	finalLock, changes, conflicts, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, registrySources, graph, payloads, existingLock, hasLock, claims, retiring, retained,
+		ctx, canonicalRoot, snapshot, registrySources, catalog, graph, payloads, existingLock, hasLock, claims, retiring, retained,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -816,6 +856,14 @@ func retiredAdapters(existing Lock, desired Project) map[string]struct{} {
 		for _, choice := range []ProviderSelection{selections.Development, selections.Test, selections.Production} {
 			delete(oldSelected, choice.Adapter)
 		}
+	}
+	// A deselected adapter the project now installs for verification is not
+	// retired: the same plan installs it, so deleting its files would put one
+	// transaction on both sides of one module. This is the move an operator
+	// makes when a managed reference stops being the production choice but the
+	// live canary must keep probing it.
+	for _, id := range desired.VerificationInstalls {
+		delete(oldSelected, id)
 	}
 	for id := range oldSelected {
 		if _, installed := oldModuleByID(existing, id); installed {

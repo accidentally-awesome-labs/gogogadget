@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 89,
+    "revision": 90,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -774,6 +774,15 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/lock_reproducibility_selfhost_test.go",
+        "target": "internal/modkit/lock_reproducibility_selfhost_test.go",
+        "class": "test",
+        "sha256": "ef33ae536f3ee47b8e21f61aa5b104134c4d0bf13f218bd5cc4a6532bf04482c",
+        "rewrite_module": true,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/migration_plan.go",
         "target": "internal/modkit/migration_plan.go",
         "class": "go",
@@ -1360,6 +1369,15 @@
         "self_host": true
       },
       {
+        "source": "internal/modkit/testdata/redproof/own-canary-row-uninstalled.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-row-uninstalled.patch",
+        "class": "test",
+        "sha256": "1240f8bff283ea43c4469435c051e5481554a1f74febf2636e6638a5d124a96b",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/testdata/redproof/own-canary-target-unprobed.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-target-unprobed.patch",
         "class": "test",
@@ -1400,6 +1418,15 @@
         "target": "internal/modkit/testdata/redproof/own-genesis-refusal.patch",
         "class": "test",
         "sha256": "2e9098c140ab88c3b5cf0840bd2acc83f19a110bfbbf8dae0cb05adfb1aff09e",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-lock-unreproducible.patch",
+        "target": "internal/modkit/testdata/redproof/own-lock-unreproducible.patch",
+        "class": "test",
+        "sha256": "87922e05a3055370061b596e65e2d0c4a6aaf1d44bcb3fe1782eb9d138e3b945",
         "rewrite_module": false,
         "contract": false,
         "self_host": true

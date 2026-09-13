@@ -90,6 +90,14 @@ func (e *Engine) planRemove(
 				_ = env
 			}
 		}
+		// Symmetric with the refusal above, for the same reason: intent, not
+		// the operand, decides this module is installed. Deleting its files
+		// while `verification_installs` still names it would have the next
+		// `ggg sync` reinstall them, so the remedy is the declaration.
+		if containsString(project.VerificationInstalls, id) {
+			return Plan{}, fmt.Errorf(
+				"cannot remove verification install %s; delete its entry from gogogadget.json verification_installs first, and delete its live-canary row in internal/canary in the same commit", id)
+		}
 	}
 
 	for _, id := range requested {

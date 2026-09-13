@@ -35,6 +35,7 @@ TestCIProfilesJobRunsTheGenesisSweep	modkit	modkit-genesis-run
 TestDesignSystemLayering	web	web-menuitem-design
 TestEveryAlpineComponentUsedIsRegistered	web	allow:sweep web.md row 12 UNDER-SCOPED (set C misses slots/ and Go-composed x-data; PLANT-Z documented the escape); the widening is unwritten, so the honest red is the widening patch plus PLANT-Z — not yet taken
 TestEveryBoostedLayoutClassSharesChrome	web	web-admin-chrome
+TestEveryCanaryRowIsInstalledAndEveryVerificationInstallIsProbed	modkit	own-canary-row-uninstalled
 TestEveryChainCommentInThisPackageAgreesWithTheAssembledChain	web	web-chain-comment
 TestEveryClassARendererEmitsIsStyled	web	web-badge-xxl
 TestEveryControlHonoursAnExplicitID	web	allow:sweep web.md row 20 DECLARATION-DERIVED, knowingly: the filter is stated in its own comment and the compensating behavioural derivation is row 19, patched as web-dropdown-ids
@@ -75,6 +76,7 @@ TestPublishedSchemaPatternsArePortableAndStrict	modkit	allow:portability half is
 TestPublishedSchemasMatchModels	modkit	modkit-schema-godep
 TestRuntimeGrammarAgreesWithThePlanTimeGrammar	web	web-csp-grammar
 TestTheCommittedCoreSnapshotListsOnlyOwnedFiles	ownership	allow:sweep ownership.md section 2 SOUND (caught the UNLISTED plant beside the registry-tree guard); the same violation is patched as own-registry-undeclared on TestEveryFileInThePublishedRegistryTreesHasADeclaringOwner
+TestTheCommittedLockDecomposesIntoTheFullProfileClosureAndItsVerificationInstalls	modkit	own-lock-unreproducible
 TestTheDeclaredUIEdgesAreTheOnesTheCodeReferences	modkit	allow:ui_scan edge agreement gate; no plant transcribed — add one
 TestThePublishedCatalogClaimsEveryTargetExactlyOnce	modkit	own-catalog-collision
 TestTheRouteReferenceGateHoldsOverTheWholeTree	modkit	allow:route-reference existence over the whole tree (route_scan_selfhost); no plant transcribed — add one

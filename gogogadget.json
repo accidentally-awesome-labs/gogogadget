@@ -269,5 +269,12 @@
       }
     }
   },
+  "verification_installs": [
+    "ggg/system/feature-flags-flagsmith",
+    "ggg/system/notifications-knock",
+    "ggg/system/search-typesense",
+    "ggg/system/usage-openmeter",
+    "ggg/system/webhooks-svix"
+  ],
   "deployment": "ggg/system/deploy-fly"
 }

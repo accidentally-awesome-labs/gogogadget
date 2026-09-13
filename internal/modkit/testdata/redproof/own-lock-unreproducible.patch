@@ -1,0 +1,17 @@
+Redproof-Patch: own-lock-unreproducible
+Redproof-Family: ownership
+Redproof-Run: TestTheCommittedLockDecomposesIntoTheFullProfileClosureAndItsVerificationInstalls
+Redproof-Package: ./internal/modkit
+Redproof-Expect: must be the same set
+Redproof-Summary: The lock carrying an install the intent does not declare — ggg/system/usage-openmeter dropped from gogogadget.json `verification_installs` while its `verification` lock row stays. That is the defect this guard exists for, in its smallest form: a module this repository has and its own tooling cannot reproduce, which is how 293 lock rows and a 288-module fresh genesis coexisted for a release. Planted in the intent rather than in the lock because the lock is generated and hand-editing it is the thing AGENTS.md forbids; the intent is the hand-owned side, so this proof also tests that the guard reads intent through ParseProject rather than trusting the lock about itself. Its sibling own-canary-row-uninstalled plants the same shape against the canary tie in ./internal/canary — one patch names one package, so the two halves of the rule cost two patches.
+diff --git a/gogogadget.json b/gogogadget.json
+--- a/gogogadget.json
++++ b/gogogadget.json
+@@ -272,7 +272,6 @@
+     "ggg/system/feature-flags-flagsmith",
+     "ggg/system/notifications-knock",
+     "ggg/system/search-typesense",
+-    "ggg/system/usage-openmeter",
+     "ggg/system/webhooks-svix"
+   ],
+   "deployment": "ggg/system/deploy-fly"

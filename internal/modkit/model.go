@@ -12,6 +12,47 @@ type Project struct {
 	Modules    []string                      `json:"modules"`
 	Exclude    []string                      `json:"exclude"`
 	Providers  map[string]ProviderSelections `json:"providers"`
+	// VerificationInstalls names managed adapters this project installs for
+	// verification and selects for nothing. It is the installation half of the
+	// `self_host` concept: only the repository that PUBLISHES an adapter may
+	// declare it here, and the rule is enforced per entry against that
+	// registry's canonical_module — the same discriminator ManifestFile.SelfHost
+	// turns on.
+	//
+	// Why it must exist. An adapter is installed if and only if some
+	// environment selects it, so `modules` refuses one that no provider choice
+	// names ("explicit adapter ... is not selected by provider choices"). That
+	// rule is right for every project but one. The canonical repository is
+	// where internal/canary's live-canary suite runs, and that suite must
+	// import EVERY managed adapter, because the generated per-slot accessors
+	// expose only the selected adapter per slot and the suite's whole purpose
+	// is to exercise the unselected ones too. A slot selects one adapter per
+	// environment, so the publishing repository cannot reach all of them
+	// through `providers`. Without this key its canary compiled only against
+	// payload sources no lock row owned, which is exactly the undeclared
+	// dependency the ownership planes exist to prevent.
+	//
+	// Why it is safe, and narrow. The argument is the one above
+	// ValidatePayloadAdapterImports: a verification install lands only in the
+	// project whose go.mod module path equals the publishing registry's
+	// canonical_module, whose gogogadget.json sits beside the adapter in one
+	// commit and whose lock is verified by the same gate, so the dependency is
+	// declared, fixed and checked rather than undeclarable. A derivative that
+	// declares one is refused by name. Every entry must publish a `managed`
+	// service target, and every entry must have a live-canary row in
+	// internal/canary — a verification install with no probe is a credential
+	// declaration nothing reads, which is the inversion
+	// feature-flags-launchdarkly already demonstrated once.
+	//
+	// A verification install is never ACTIVE: nothing selects it, so the
+	// generated boot constructs it in no environment and its `required`
+	// environment keys are enforced nowhere. Declaring one that a provider
+	// choice already names is refused as redundant.
+	//
+	// Optional for the same reason `ports` is: it is intent an older writer
+	// legitimately never wrote, and requiring the key would brick a project
+	// file at rest.
+	VerificationInstalls []string `json:"verification_installs,omitempty"`
 	// Ports overrides the host port one generated Compose port publishes on.
 	// A key is `<service>/<port>`: `app/http` for the generated app service,
 	// and `<adapter>@<target>/<declared port name>` for an adapter's local

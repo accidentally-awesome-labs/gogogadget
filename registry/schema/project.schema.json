@@ -37,6 +37,14 @@
             "$ref": "#/$defs/ProjectProviderSelections"
           }
         },
+        "verification_installs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/system/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
         "ports": {
           "type": "object",
           "propertyNames": {
