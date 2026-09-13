@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "894af117a6c29b8290f6df44e2b19ce10ea497b9f9af40481d267f1b69d53474"
+      "sha256": "a59fafa237358975598aadf6b5f709da3f70ef288dc822a096573e3cce7d073a"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
