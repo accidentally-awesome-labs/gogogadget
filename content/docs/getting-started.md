@@ -225,7 +225,7 @@ mean something.
 
 **`full` resolves 288 of the 297 modules the catalog publishes.** Six of the
 nine absent are managed adapters its provider defaults do not select
-(`mail-smtp`, `feature-flags-launchdarkly`, `notifications-knock`,
+(`mail-smtp`, `feature-flags-flagsmith`, `notifications-knock`,
 `search-typesense`, `usage-openmeter`, `webhooks-svix`), one is the deploy
 module its `default_deployment` does not choose (`deploy-fly`), and two are UI
 modules its member list omits (`ggg/component/table-empty`,

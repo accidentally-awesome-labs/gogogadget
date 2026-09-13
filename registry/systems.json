@@ -31,7 +31,7 @@
     "registry/modules/system/docker/module.json",
     "registry/modules/system/e2e-sweeps/module.json",
     "registry/modules/system/e2e/module.json",
-    "registry/modules/system/feature-flags-launchdarkly/module.json",
+    "registry/modules/system/feature-flags-flagsmith/module.json",
     "registry/modules/system/feature-flags-postgres/module.json",
     "registry/modules/system/feature-flags/module.json",
     "registry/modules/system/i18n/module.json",

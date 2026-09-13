@@ -101,7 +101,7 @@ picks `mail-smtp@smtp` over Resend).
 | `ggg/rate-limit` | `rate-limit-memory@memory` | `rate-limit-redis@upstash` | `rate-limit-redis@valkey` |
 | `ggg/search` | `search-postgres@postgres` | `search-postgres@postgres` | `search-typesense@typesense` |
 | `ggg/realtime` | `realtime-postgres@postgres` | `realtime-ably@ably` | — |
-| `ggg/feature-flags` | `feature-flags-postgres@postgres` | `feature-flags-postgres@postgres` | `feature-flags-launchdarkly@launchdarkly` |
+| `ggg/feature-flags` | `feature-flags-postgres@postgres` | `feature-flags-postgres@postgres` | `feature-flags-flagsmith@flagsmith` |
 | `ggg/notifications` | `notifications-postgres@postgres` | `notifications-postgres@postgres` | `notifications-knock@knock` |
 | `ggg/webhooks` | `webhooks-postgres@postgres` | `webhooks-postgres@postgres` | `webhooks-svix@svix` |
 | `ggg/usage` | `usage-postgres@postgres` | `usage-postgres@postgres` | `usage-openmeter@openmeter` |
