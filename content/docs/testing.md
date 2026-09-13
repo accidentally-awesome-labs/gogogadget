@@ -677,10 +677,14 @@ while a merely derived one **skips**. They run in CI's existing `test` job
 beside Postgres, so tier 1 costs a contributor nothing locally and is a real
 gate in CI. Each test's own skip reason carries its measured warm cost.
 
-No protocol container exists for the rest. Clerk, Polar, Resend, Ably,
-LaunchDarkly, Knock, Svix and OpenMeter have no zero-account server, and the
-two Redis adapters speak the Upstash REST dialect rather than RESP, so a plain
-Valkey container cannot serve them without a REST shim.
+No protocol container exists for the rest. Clerk, Polar, Resend, Ably, Knock,
+Svix and OpenMeter have no zero-account server, and the two Redis adapters
+speak the Upstash REST dialect rather than RESP, so a plain Valkey container
+cannot serve them without a REST shim. Flagsmith is the one managed target
+that *does* publish a self-hostable server, and it still has no tier-1
+container: its image needs its own PostgreSQL plus a dashboard signup before
+an Environment Key exists, so a container could be started and could not be
+authenticated.
 
 ### The admission rule the coverage gate stands in for
 
@@ -709,14 +713,20 @@ carrying less is refused by name. The walk refuses a stale declaration in both
 directions too, so a dead row and a dead exemption each fail rather than
 lingering.
 
-The rule was written down because of a target that failed it:
-`ggg/system/feature-flags-launchdarkly` sat in that allowlist for a release.
-LaunchDarkly's server SDKs download rule definitions and evaluate the targeting
-DSL in-process, so no HTTP contract exists in which LaunchDarkly performs the
-decision; the adapter's client was an interface nothing implemented, `NewModule`
-refused a nil one, and no generated wiring provided it — selecting the adapter
-could not boot. Under an either/or default a stated reason kept it in the
-matrix declaring a credential nothing read. Under this one it was retired.
+The rule was written down because of a target that failed it.
+`ggg/system/feature-flags-launchdarkly` — **retired, and no longer in this
+catalog** — sat in that allowlist for a release. LaunchDarkly's server SDKs
+download rule definitions and evaluate the targeting DSL in-process, so no
+HTTP contract exists in which LaunchDarkly performs the decision; the
+adapter's client was an interface nothing implemented, `NewModule` refused a
+nil one, and no generated wiring provided it — selecting the adapter could not
+boot. Under an either/or default a stated reason kept it in the matrix
+declaring a credential nothing read. Under this one it was retired and
+replaced by `ggg/system/feature-flags-flagsmith`, which satisfies all seven
+`flags.Service` methods over Flagsmith's documented HTTP APIs and is a row in
+the table below. Every remaining mention of LaunchDarkly in this repository is
+this paragraph and the same history in `internal/canary`: the module, its
+package, its credentials and its profile membership are gone.
 
 ### Tier 2 — the managed-target live canaries
 
@@ -778,6 +788,7 @@ accounts by design.
 | `ggg/billing` — `billing-polar` | bounded | one checkout session per run, and at most **one** metered event ever, because the probe uses a stable `ExternalID` that Polar deduplicates on. Sandbox only |
 | `ggg/rate-limit` — `rate-limit-redis@upstash` | bounded | one counter key, stable and self-expiring within the window the adapter sets |
 | `ggg/usage` — `usage-openmeter` | bounded | one usage event on `CANARY_OPENMETER_SUBJECT`, and only ever one: the stable external id is carried as the CloudEvents id and OpenMeter deduplicates on `(source, id)`. Use a throwaway customer — a metered event on a real one reaches an invoice |
+| `ggg/feature-flags` — `feature-flags-flagsmith` | bounded | no flag and no override: the per-run feature `ggg-live-canary-<16 hex>` and its per-org override are both deleted through the seam. The per-run name is a safety property, not cosmetics — Flagsmith deletes a feature project-wide, so a fixed name could delete an operator's real flag. What persists is exactly two Flagsmith identities, `ggg-live-canary` and `ggg-live-canary-unidentified`, stable and reused by every later run; `flags.Service` has no identity delete. The deletes are deferred and their errors dropped, so a failed run can leave one feature under its own unique name |
 | `ggg/mail` — `mail-resend` | **no** | one real email per run to `CANARY_MAIL_TO`, against the account's quota. `mail.Sender` has only `Send`; there is no recall |
 | `ggg/analytics` — `analytics-posthog` | **no** | one immutable event per run under a stable distinct id. Use a throwaway project |
 | `ggg/observability` — `observability-sentry` | **no** | one immutable error event per run, against the project's quota and its alert rules. Use a throwaway project |
@@ -815,6 +826,8 @@ canary's invention.
 | `CANARY_KNOCK_API_KEY`, `CANARY_KNOCK_WORKFLOW`, `CANARY_KNOCK_RECIPIENT` | `KNOCK_API_KEY`, plus the throwaway workflow key and recipient the canary triggers |
 | `CANARY_SVIX_API_KEY`, `CANARY_SVIX_APP` | `SVIX_API_KEY`, plus the throwaway consumer application the canary messages |
 | `CANARY_OPENMETER_API_KEY`, `CANARY_OPENMETER_URL`, `CANARY_OPENMETER_SUBJECT` | `OPENMETER_API_KEY`, `OPENMETER_URL`, plus the throwaway metering subject |
+| `CANARY_FLAGSMITH_ENVIRONMENT_KEY`, `CANARY_FLAGSMITH_MANAGEMENT_TOKEN`, `CANARY_FLAGSMITH_PROJECT_ID`, `CANARY_FLAGSMITH_ENVIRONMENT_ID` | the four `FLAGSMITH_*` keys. Two credentials because Flagsmith has two APIs: the Environment Key is public by Flagsmith's own documentation and authenticates evaluation only, while the organisation token is secret and authorises every mutation. Both are repository secrets here anyway — a public key still names someone's environment. Use a throwaway project: the probe creates and deletes a feature |
+| `CANARY_FLAGSMITH_FLAGS_API_URL`, `CANARY_FLAGSMITH_API_URL` | optional; set both to canary a self-hosted Flagsmith, which serves the Flags and Management APIs from one host |
 
 To run one row locally, export its keys and `GGG_LIVE_CANARY=1`; the skip line
 for every unconfigured row prints the exact assignment it wants.

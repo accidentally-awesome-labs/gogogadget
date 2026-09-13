@@ -164,6 +164,20 @@ jobs:
       OPENMETER_API_KEY: ${{ secrets.CANARY_OPENMETER_API_KEY }}
       OPENMETER_URL: ${{ secrets.CANARY_OPENMETER_URL }}
       GGG_CANARY_OPENMETER_SUBJECT: ${{ secrets.CANARY_OPENMETER_SUBJECT }}
+
+      # ggg/feature-flags — ggg/system/feature-flags-flagsmith@flagsmith. Two
+      # credentials because Flagsmith has two APIs: the Environment Key is
+      # PUBLIC (the docs say it may be exposed in client-side code) and
+      # authenticates evaluation only; the organisation token is secret and
+      # authorises every mutation. Both are repository secrets here anyway —
+      # a public key still names someone's project. The two URL overrides map
+      # so a self-hosted Flagsmith can be canaried without editing this file.
+      FLAGSMITH_ENVIRONMENT_KEY: ${{ secrets.CANARY_FLAGSMITH_ENVIRONMENT_KEY }}
+      FLAGSMITH_MANAGEMENT_TOKEN: ${{ secrets.CANARY_FLAGSMITH_MANAGEMENT_TOKEN }}
+      FLAGSMITH_PROJECT_ID: ${{ secrets.CANARY_FLAGSMITH_PROJECT_ID }}
+      FLAGSMITH_ENVIRONMENT_ID: ${{ secrets.CANARY_FLAGSMITH_ENVIRONMENT_ID }}
+      FLAGSMITH_FLAGS_API_URL: ${{ secrets.CANARY_FLAGSMITH_FLAGS_API_URL }}
+      FLAGSMITH_API_URL: ${{ secrets.CANARY_FLAGSMITH_API_URL }}
     steps:
       - uses: actions/checkout@v7
 

@@ -115,6 +115,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -126,7 +127,10 @@ import (
 	auditotlp "github.com/gogogadget/gogogadget/internal/audit_export/otlp"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billing/polar"
+	cachememory "github.com/gogogadget/gogogadget/internal/cache/memory"
 	cacheredis "github.com/gogogadget/gogogadget/internal/cache/redis"
+	"github.com/gogogadget/gogogadget/internal/flags"
+	flagsmithadapter "github.com/gogogadget/gogogadget/internal/flags/flagsmith"
 	"github.com/gogogadget/gogogadget/internal/identity/clerk"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/llm/openai"
@@ -331,20 +335,17 @@ func liveCanaryCitesAFileLine(text string) bool {
 // target that should not ship, so the ordinary remedies are a probe or
 // retirement and this map is the third, narrow one.
 //
-// Three entries have left it: notifications-knock, webhooks-svix and
-// usage-openmeter each wired New(d.Queue, nil, nil) and stopped at the local
-// Postgres queue, and now trigger, create and ingest for real, so they are
-// rows in liveCanaryProviders instead —
+// Four entries have left it, and it is empty today. notifications-knock,
+// webhooks-svix and usage-openmeter each wired New(d.Queue, nil, nil) and
+// stopped at the local Postgres queue; they now trigger, create and ingest for
+// real, so they are rows in liveCanaryProviders instead, and
 // TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse refuses the halfway
-// state in both directions. The one entry left is leaving the other way: it is
-// being retired, because the reason it cannot be probed IS the reason it
-// cannot ship.
-var liveCanaryNothingToProbe = map[string]liveCanaryExcuse{
-	"ggg/system/feature-flags-launchdarkly": {
-		Why: "the adapter holds no HTTP client at all: it is function-injected (EnabledFn/ListFn/OverridesFn), every mutation returns flags.ErrReadOnly, and NewModule refuses a nil Deps.Client while no generated wiring anywhere provides a launchdarkly.Client — so selecting this adapter cannot boot, let alone reach LaunchDarkly. It is being retired rather than probed, because LaunchDarkly's server SDKs download rule definitions and evaluate the targeting DSL locally: there is no documented HTTP contract in which LaunchDarkly performs the decision, which is the admission rule this target fails. This entry dies with the module.",
-		Cites: "internal/flags/launchdarkly/launchdarkly.go:17-33,74-76",
-	},
-}
+// state in both directions. feature-flags-launchdarkly left the other way: it
+// was RETIRED, because the reason it could not be probed — LaunchDarkly
+// evaluates its targeting DSL inside its own SDK, so there is no HTTP contract
+// in which the provider decides — was the reason it could not ship. Its slot is
+// now served by ggg/system/feature-flags-flagsmith, whose row is below.
+var liveCanaryNothingToProbe = map[string]liveCanaryExcuse{}
 
 // liveCanaryManifestKeyScopeExceptions records adapter keys a row reads that
 // the owning manifest declares WITHOUT scoping them to the canaried target,
@@ -1051,6 +1052,95 @@ var liveCanaryProviders = []liveCanaryProvider{
 			if err := client.Ingest(ctx, env.Get("GGG_CANARY_OPENMETER_SUBJECT"), "ggg_live_canary", 1,
 				liveCanaryStableID, map[string]any{"source": "live-canary"}); err != nil {
 				return endpoint, fmt.Errorf("ingest (POST /api/v1/events): %w", err)
+			}
+			return endpoint, nil
+		},
+	},
+	{
+		Slot: "ggg/feature-flags", Module: "ggg/system/feature-flags-flagsmith", Target: "flagsmith",
+		Keys: []liveCanaryKey{
+			// Two credentials because Flagsmith has two APIs. The Environment
+			// Key is documented as public and exposable in client-side code,
+			// and the manifest declares it secret:false — but Credential is
+			// this suite's own judgement, not the manifest's, and a key that
+			// names someone's environment does not belong in a failure
+			// message either.
+			{Env: "FLAGSMITH_ENVIRONMENT_KEY", Required: true, Credential: true},
+			{Env: "FLAGSMITH_MANAGEMENT_TOKEN", Required: true, Credential: true},
+			{Env: "FLAGSMITH_PROJECT_ID", Required: true},
+			{Env: "FLAGSMITH_ENVIRONMENT_ID", Required: true},
+			// Both optional: set them to canary a self-hosted Flagsmith,
+			// which serves both APIs from one host.
+			{Env: "FLAGSMITH_FLAGS_API_URL"},
+			{Env: "FLAGSMITH_API_URL"},
+		},
+		Cleanup: liveCanaryLeavesBounded,
+		Leaves:  "no flag and no override — the first row on this slot that ends with the provider's flag list as it found it. The feature is named `ggg-live-canary-<16 hex>` per run and deleted through flags.Service.Delete (DELETE /api/v1/projects/{project}/features/{id}/), its per-org override through flags.Service.DeleteOverride (DELETE /api/v1/environments/{envKey}/identities/{pk}/featurestates/{id}/). The unique name is a safety property rather than cosmetics: Flagsmith deletes a feature project-wide, so a fixed name could delete an operator's real flag. What DOES persist is two Flagsmith identities, `ggg-live-canary` and `ggg-live-canary-unidentified` — the seam's seven methods include no identity delete (internal/flags/contract.go:19-27), one is created explicitly by the override path (internal/flags/flagsmith/flagsmith.go:614) and the other lazily by evaluation — so the claim is bounded, not clean: exactly two rows, stable identifiers, reused by every later run instead of accumulating. The deletes are also deferred and their errors dropped, so a failed run can leave one feature behind under the run's own name.",
+		Asserts: "POST https://edge.api.flagsmith.com/api/v1/identities/ still accepts {\"identifier\":\"<org>\"} with the PUBLIC Environment Key in X-Environment-Key and still answers {identifier, traits[], flags[{feature:{id,name},enabled}]} — the two halves internal/flags/flagsmith/flagsmith_test.go:150-175 believes, including that `enabled` is FLAGSMITH's decision and not a value this adapter recomputes, which is the whole reason this target is admissible where LaunchDarkly was not. Then that the SECRET organisation token still authorises the Management API as `Authorization: Api-Key <token>` across the four mutating shapes the seam needs: POST /api/v1/projects/{project}/features/ accepting {name,description,default_enabled,initial_value} (201), POST /api/v1/environments/{envKey}/identities/{pk}/featurestates/ accepting {feature,enabled} (201), and the two 204 deletes. And that GET /api/v1/environments/{envKey}/featurestates/?feature_name=<key>&anyIdentity=1 still returns ONLY identity-override rows carrying identity:{id,identifier} — the provider-side filter flagsmith_test.go:380-392 relies on to enumerate per-org overrides without paging every identity. The decisive assertion is precedence: the flag's environment default is OFF and only the canary org's identity override is ON, so a true answer proves Flagsmith applied identity precedence rather than this adapter guessing it.",
+		Probe: func(ctx context.Context, env liveCanaryEnv) (string, error) {
+			endpoint := "https://edge.api.flagsmith.com/api/v1/identities/"
+			if override := env.Get("FLAGSMITH_FLAGS_API_URL"); override != "" {
+				endpoint = strings.TrimRight(override, "/") + "/api/v1/identities/"
+			}
+			projectID, err := strconv.Atoi(env.Get("FLAGSMITH_PROJECT_ID"))
+			if err != nil {
+				return endpoint, fmt.Errorf("FLAGSMITH_PROJECT_ID is not numeric: %w", err)
+			}
+			environmentID, err := strconv.Atoi(env.Get("FLAGSMITH_ENVIRONMENT_ID"))
+			if err != nil {
+				return endpoint, fmt.Errorf("FLAGSMITH_ENVIRONMENT_ID is not numeric: %w", err)
+			}
+			service := flagsmithadapter.New(flagsmithadapter.Service{
+				Flags:          env.Get("FLAGSMITH_FLAGS_API_URL"),
+				Management:     env.Get("FLAGSMITH_API_URL"),
+				EnvironmentKey: env.Get("FLAGSMITH_ENVIRONMENT_KEY"),
+				Token:          env.Get("FLAGSMITH_MANAGEMENT_TOKEN"),
+				ProjectID:      projectID,
+				EnvironmentID:  environmentID,
+				Cache:          cachememory.New(),
+			})
+			// Unique per run: Flagsmith deletes a feature project-wide, so a
+			// fixed name could delete an operator's real flag.
+			key := liveCanaryStableID + "-" + liveCanaryNonce()
+			if err := service.Upsert(ctx, flags.Flag{Key: key, Description: "ggg live canary", Enabled: false, Rollout: 100}); err != nil {
+				return endpoint, fmt.Errorf("create flag (POST /api/v1/projects/%d/features/): %w", projectID, err)
+			}
+			// Registered before the assertions so a failing evaluation cannot
+			// leave the feature behind. WithoutCancel because the row's
+			// deadline may already have fired by the time cleanup runs.
+			defer func() { _ = service.Delete(context.WithoutCancel(ctx), key) }()
+			if err := service.SetOverride(ctx, key, liveCanaryStableID, true); err != nil {
+				return endpoint, fmt.Errorf("set per-org override (POST /api/v1/environments/{env}/identities/{pk}/featurestates/): %w", err)
+			}
+			defer func() { _ = service.DeleteOverride(context.WithoutCancel(ctx), key, liveCanaryStableID) }()
+			overrides, err := service.ListOverrides(ctx, key)
+			if err != nil {
+				return endpoint, fmt.Errorf("list overrides (GET /api/v1/environments/{env}/featurestates/?anyIdentity=1): %w", err)
+			}
+			found := false
+			for _, override := range overrides {
+				if override.OrgID == liveCanaryStableID && override.Enabled {
+					found = true
+				}
+			}
+			if !found {
+				return endpoint, fmt.Errorf("list overrides (GET /api/v1/environments/{env}/featurestates/?anyIdentity=1): the identity override just written was not returned; internal/flags/flagsmith/flagsmith_test.go:380-392 believes `anyIdentity` returns exactly these rows with identity.identifier set")
+			}
+			// The provider performs the decision: the flag's environment
+			// default is OFF and only this identity's override is ON, so a
+			// true here proves Flagsmith applied identity precedence. The two
+			// checks use DIFFERENT org ids on purpose — Service.Enabled caches
+			// one subject's whole decision set for 30s
+			// (internal/flags/flagsmith/flagsmith.go:83), so a repeat on the
+			// same org would read the cache and assert nothing.
+			if !service.Enabled(ctx, liveCanaryStableID, key) {
+				return endpoint, fmt.Errorf("evaluate (POST /api/v1/identities/): the identity override was written but Flagsmith answered disabled; identity overrides outrank the environment default (https://docs.flagsmith.com/flagsmith-concepts/segments#flag-evaluation-precedence)")
+			}
+			if service.Enabled(ctx, liveCanaryStableID+"-unidentified", key) {
+				return endpoint, fmt.Errorf("evaluate (POST /api/v1/identities/): an org with no override answered enabled, but the flag's environment default is off")
+			}
+			if _, err := service.List(ctx); err != nil {
+				return endpoint, fmt.Errorf("list flags (GET /api/v1/projects/%d/features/?environment=%d): %w", projectID, environmentID, err)
 			}
 			return endpoint, nil
 		},
