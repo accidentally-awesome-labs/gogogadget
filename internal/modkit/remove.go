@@ -23,7 +23,7 @@ const TombstoneReason = "removed"
 // has always refused one as "not installed". `diff` and `resolve conflict`
 // built their resolvable sets from every lock row instead, so a tombstoned id
 // resolved for them, matched a row whose `files` are empty, and `ggg diff
-// ggg/system/feature-flags-launchdarkly` printed an empty report at exit 0
+// ggg/system/search-typesense` printed an empty report at exit 0
 // while `ggg remove` on the same id in the same lock refused at exit 3. Same
 // question, two answers — the shape 1416dccd set out to close. The rule lives
 // here once so there is nowhere for a fourth spelling to appear.

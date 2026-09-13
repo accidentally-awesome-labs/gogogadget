@@ -109,7 +109,7 @@ assertion about it: the `*_selfhost_test.go` files, the bare
 `shipped_profiles_test.go`, `stale_sweep_scope_test.go` and
 `profile_genesis_test.go`; the red-proof corpus is self_host data of the same
 kind — `inventory.txt` and the 30 mutation patches
-`modkit-argv-shellable.patch`, `modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-canary-adapter-unexcused.patch`, `own-canary-key-unmapped.patch`, `own-canary-leaves-unstated.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-genesis-refusal.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
+`modkit-argv-shellable.patch`, `modkit-enum-gutted.patch`, `modkit-genesis-run.patch`, `modkit-schema-conditional.patch`, `modkit-schema-godep.patch`, `own-canary-key-unmapped.patch`, `own-canary-leaves-unstated.patch`, `own-canary-target-unprobed.patch`, `own-catalog-collision.patch`, `own-gate-marker.patch`, `own-gate-untested.patch`, `own-genesis-refusal.patch`, `own-notify-tests-deleted.patch`, `own-orphan-file.patch`, `own-pcre-lookbehind.patch`, `own-planes-figure.patch`, `own-registry-undeclared.patch`, `own-repomap-claim.patch`, `own-skip-site.patch`, `web-admin-chrome.patch`, `web-badge-xxl.patch`, `web-chain-comment.patch`, `web-csp-grammar.patch`, `web-dropdown-ids.patch`, `web-hxconfirm.patch`, `web-menuitem-design.patch`, `web-middleware-doc.patch`, `web-plantwidget.patch`, `web-templ-raw.patch`, `web-ui-seam.patch` — because every one of them plants a violation in
 core-only paths; anything portable stays in a normal test payload
 so generated projects keep running it. NEVER
 reach for `t.Skip` when an artifact is absent: that lets the core gate pass by
@@ -314,15 +314,29 @@ Standing rules:
   real provider and asserting the same wire shape that adapter's fake
   asserts, opt-in through `GGG_LIVE_CANARY=1`, set only by the separate
   `live-canary` workflow (`workflow_dispatch` plus one weekly cron, no
-  `needs` edge, never required). Adding a managed adapter means adding a row
-  or a stated allowlist entry: `TestEveryManagedAdapterIsCanariedOrExcused`
-  walks the registry and refuses one that is neither. A canary row must
-  declare its cleanup class and cite the seam that lacks a delete when it
-  cannot clean up, must refuse rather than skip on a production selector
-  (`POLAR_SERVER=production`), and must never render a credential — probes
-  return errors so one redacting path reports them all. Never point a canary
-  at an account anyone depends on; `/docs/testing` lists what each one leaves
-  behind.
+  `needs` edge, never required). A canary row must declare its cleanup class
+  and cite the seam that lacks a delete when it cannot clean up, must refuse
+  rather than skip on a production selector (`POLAR_SERVER=production`), and
+  must never render a credential — probes return errors so one redacting path
+  reports them all. Never point a canary at an account anyone depends on;
+  `/docs/testing` lists what each one leaves behind.
+- **A managed target is admissible only if the seam can be satisfied through a
+  documented HTTP contract in which the provider performs the decision** — no
+  vendored SDK, no reimplementation of vendor semantics. That is a human
+  admission criterion; nothing here reads a vendor's architecture. Its
+  mechanical proxy is the probe, and the probe is the REQUIREMENT, not one of
+  two options: `TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse`
+  walks the registry and refuses a module publishing a `managed` service
+  target with no `liveCanaryProviders` row, naming the remedies in order —
+  implement the probe, or retire the target. `liveCanaryNothingToProbe` is the
+  narrow third option and costs a stated reason plus the `file.go:line` that
+  proves it; an entry carrying less is refused by name. The inversion has a
+  case: `ggg/system/feature-flags-launchdarkly` sat in that allowlist for a
+  release because LaunchDarkly's server SDKs download rule definitions and
+  evaluate the targeting DSL locally, so no HTTP contract exists in which the
+  provider decides — and under an either/or default a stated reason was enough
+  to keep an adapter that could not boot in the matrix, declaring a key
+  nothing read. It was retired, not probed.
 - `ggg check` refuses when the working tree's diff against the merge-base
   with `origin/main` touches a **shipped** payload (a file a non-`self_host`
   payload of an installed module declares) or a module/profile manifest —

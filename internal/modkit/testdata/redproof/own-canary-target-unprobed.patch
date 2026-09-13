@@ -1,0 +1,19 @@
+Redproof-Patch: own-canary-target-unprobed
+Redproof-Family: ownership
+Redproof-Run: TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse
+Redproof-Package: ./internal/canary
+Redproof-Expect: have no live canary probe
+Redproof-Summary: A managed service target nothing probes — mail-smtp's `smtp` target flipped from self-hosted to managed, which is exactly the shape a newly added managed target has before anyone writes its row. Planted in the registry rather than in the suite on purpose: the guard's population is derived from the manifests, so this proof tests the derivation as well as the refusal, and it depends on no particular adapter package surviving a refactor. It replaces own-canary-adapter-unexcused, whose plant deleted the feature-flags-launchdarkly allowlist entry — a proof that died with its subject when that target was retired, and which proved the weaker rule anyway: under the either/or default a stated reason excused a target, so the deleted-excuse plant only showed that SOMETHING had to be said. The rule now is that the probe is required and the excuse is the narrow exception; the excuse side's own red proofs live in the suite as TestLiveCanaryRefusesAnExemptionWithoutItsEvidence.
+diff --git a/registry/modules/system/mail-smtp/module.json b/registry/modules/system/mail-smtp/module.json
+index 5fcf9ffb..24f893db 100644
+--- a/registry/modules/system/mail-smtp/module.json
++++ b/registry/modules/system/mail-smtp/module.json
+@@ -149,7 +149,7 @@
+             {
+               "id": "smtp",
+               "title": "SMTP server",
+-              "mode": "self-hosted",
++              "mode": "managed",
+               "environments": [
+                 "production"
+               ],

@@ -69,15 +69,35 @@
 //     and any URL userinfo inside them. The provider and the endpoint are
 //     named; the secret is not.
 //
-// # Coverage is a row, not a file
+// # Coverage is the rule, not one of two options
 //
-// TestEveryManagedAdapterIsCanariedOrExcused walks the registry, finds every
-// module publishing a `managed` service target, and refuses one that appears
-// in neither liveCanaryProviders nor liveCanaryNothingToProbe. Adding a
-// managed adapter is therefore a row; it cannot be forgotten. The same test
-// refuses a dead row and checks each row's adapter-configuration keys still
-// exist in the owning manifest, so a renamed env key fails here instead of
-// making a canary silently skip forever.
+// A managed target is admissible only if the seam can be satisfied through a
+// documented HTTP contract in which the PROVIDER performs the decision — no
+// vendored SDK, no reimplementation of vendor semantics. That is a human
+// admission criterion and this file cannot check it: nothing here reads a
+// vendor's architecture. What it checks is the proxy —
+// TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse walks the registry,
+// finds every module publishing a `managed` service target, and REQUIRES a
+// liveCanaryProviders row. The proxy is worth having because a target no probe
+// can drive is the shape a target that fails the rule takes: if the provider
+// does not decide over HTTP, there is no wire shape to pin.
+//
+// liveCanaryNothingToProbe is the narrow exception, NOT the second half of an
+// either/or. An entry costs a stated reason AND the file:line that proves it —
+// the same evidence a non-cleaning row owes for the seam that lacks a delete —
+// and liveCanaryExcuseDefect refuses one carrying less. The inversion has a
+// name: ggg/system/feature-flags-launchdarkly sat in that allowlist for a
+// release. LaunchDarkly's server SDKs download rule definitions and evaluate
+// the targeting DSL locally, so no HTTP contract exists in which LaunchDarkly
+// decides; its Deps.Client was an interface nothing implemented, NewModule
+// refused nil, and selecting the adapter could not boot. Under an either/or
+// default a stated reason was enough to keep it in the matrix declaring a key
+// nothing read. Under this default the remedy is a probe or retirement, and it
+// was retired.
+//
+// The same test refuses a dead row and checks each row's adapter-configuration
+// keys still exist in the owning manifest, so a renamed env key fails here
+// instead of making a canary silently skip forever.
 
 package canary
 
@@ -229,19 +249,101 @@ type liveCanaryProvider struct {
 	Probe func(ctx context.Context, env liveCanaryEnv) (string, error)
 }
 
-// liveCanaryNothingToProbe is the explicit allowlist: modules that publish a
-// `managed` service target and yet make NO network call in the wiring a
-// production boot produces, so there is no wire shape for a live canary to
-// check. Each entry states why, with the file:line that makes it true. A
-// module here is excused from liveCanaryProviders and nowhere else.
+// liveCanaryAdmissionRule is the criterion a managed target is admitted
+// under. It is quoted into the refusals below rather than left to this file's
+// header, because a refusal that states only the mechanics teaches the wrong
+// lesson: the next target gets a probe bolted onto an unshippable adapter
+// instead of being reconsidered.
+const liveCanaryAdmissionRule = "A managed target is admissible only if the seam can be satisfied through a documented HTTP contract in which the PROVIDER performs the decision — no vendored SDK, no reimplementation of vendor semantics."
+
+// liveCanaryAdmissionProxy states what is mechanically checked, so no reader
+// mistakes a refusal here for a claim that this suite inspects vendor
+// architecture. It does not; it counts probes.
+const liveCanaryAdmissionProxy = "This guard cannot read a vendor's architecture; the rule above is a human admission criterion. Its mechanical proxy is `the target has a live canary probe`: where the provider does not decide over HTTP there is no wire shape to pin, so an unprobeable target is the shape a target that fails the rule takes."
+
+// liveCanaryExcuse is one managed target's exemption from the probe
+// requirement: a module that publishes a `managed` service target and yet
+// makes NO network call in the wiring a production boot produces, so there is
+// no wire shape for a live canary to check.
 //
-// Three entries have already left: notifications-knock, webhooks-svix and
+// It is two fields rather than one string on purpose. An exemption is the only
+// way past the requirement, so it owes the same evidence a non-cleaning canary
+// row owes for the seam that lacks a delete: the claim, and the line a
+// reviewer opens to check it.
+type liveCanaryExcuse struct {
+	// Why states which wiring a production boot produces and why it reaches
+	// no provider.
+	Why string
+	// Cites is the `file.go:line` that makes Why checkable rather than
+	// asserted.
+	Cites string
+}
+
+// liveCanaryExcuseReasonFloor is the length below which a reason is a
+// gesture. It matches the floor a canary row's Asserts prose carries, for the
+// same reason: a safety claim degrades by being shortened until it says
+// nothing, not by being deleted.
+const liveCanaryExcuseReasonFloor = 80
+
+// liveCanaryExcuseDefect names what makes an exemption inadmissible, or
+// returns "" when it is admissible. It is a function rather than assertions
+// inlined into the walk because the walk's input is the registry, which by
+// construction carries no inadmissible entry once this gate passes — and a
+// refusal that can only be observed by editing the registry is a refusal
+// nobody re-checks. TestLiveCanaryRefusesAnExemptionWithoutItsEvidence drives
+// it in both directions.
+func liveCanaryExcuseDefect(excuse liveCanaryExcuse) string {
+	why := strings.TrimSpace(excuse.Why)
+	cites := strings.TrimSpace(excuse.Cites)
+	switch {
+	case why == "":
+		return "states no reason at all"
+	case len(why) < liveCanaryExcuseReasonFloor:
+		return fmt.Sprintf("states its reason in %d character(s), under the %d-character floor; say which wiring a production boot produces and why it reaches no provider", len(why), liveCanaryExcuseReasonFloor)
+	case cites == "":
+		return "cites nothing; name the `file.go:line` a reviewer opens to check the reason, the way a non-cleaning canary row cites the seam that lacks a delete"
+	case !liveCanaryCitesAFileLine(cites):
+		return fmt.Sprintf("cites %q, which is not a `file.go:line`; a citation a reviewer cannot open is more prose", cites)
+	}
+	return ""
+}
+
+// liveCanaryCitesAFileLine reports whether text carries at least one
+// `<path>.go:<line>` citation. Deliberately a shape check and not a file
+// read: the cited line moves with every edit above it, and a gate that
+// resolved citations would fail on refactors instead of on missing evidence.
+func liveCanaryCitesAFileLine(text string) bool {
+	for rest := text; ; {
+		at := strings.Index(rest, ".go:")
+		if at < 0 {
+			return false
+		}
+		named := at > 0 && !strings.ContainsAny(rest[at-1:at], " \t\"`")
+		rest = rest[at+len(".go:"):]
+		if named && rest != "" && rest[0] >= '0' && rest[0] <= '9' {
+			return true
+		}
+	}
+}
+
+// liveCanaryNothingToProbe is the exemption set, and empty is its intended
+// steady state: under the rule above, a managed target no probe can drive is a
+// target that should not ship, so the ordinary remedies are a probe or
+// retirement and this map is the third, narrow one.
+//
+// Three entries have left it: notifications-knock, webhooks-svix and
 // usage-openmeter each wired New(d.Queue, nil, nil) and stopped at the local
-// Postgres queue. They now trigger, create and ingest for real, so they are
-// rows in liveCanaryProviders instead — TestEveryManagedAdapterIsCanariedOrExcused
-// refuses the halfway state in both directions.
-var liveCanaryNothingToProbe = map[string]string{
-	"ggg/system/feature-flags-launchdarkly": "a different reason, and not DeliveryAdapters': the adapter holds no HTTP client at all. It is function-injected (EnabledFn/ListFn/OverridesFn, internal/flags/launchdarkly/launchdarkly.go:17-33), every mutation returns flags.ErrReadOnly (:46,:47,:54,:55), and NewModule refuses a nil Deps.Client (:74-76) while no generated wiring anywhere provides a launchdarkly.Client — so selecting this adapter cannot boot, let alone reach LaunchDarkly. Canarying it would require the client to exist first",
+// Postgres queue, and now trigger, create and ingest for real, so they are
+// rows in liveCanaryProviders instead —
+// TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse refuses the halfway
+// state in both directions. The one entry left is leaving the other way: it is
+// being retired, because the reason it cannot be probed IS the reason it
+// cannot ship.
+var liveCanaryNothingToProbe = map[string]liveCanaryExcuse{
+	"ggg/system/feature-flags-launchdarkly": {
+		Why: "the adapter holds no HTTP client at all: it is function-injected (EnabledFn/ListFn/OverridesFn), every mutation returns flags.ErrReadOnly, and NewModule refuses a nil Deps.Client while no generated wiring anywhere provides a launchdarkly.Client — so selecting this adapter cannot boot, let alone reach LaunchDarkly. It is being retired rather than probed, because LaunchDarkly's server SDKs download rule definitions and evaluate the targeting DSL locally: there is no documented HTTP contract in which LaunchDarkly performs the decision, which is the admission rule this target fails. This entry dies with the module.",
+		Cites: "internal/flags/launchdarkly/launchdarkly.go:17-33,74-76",
+	},
 }
 
 // liveCanaryManifestKeyScopeExceptions records adapter keys a row reads that
@@ -1076,11 +1178,73 @@ func TestManagedTargetLiveCanaries(t *testing.T) {
 	}
 }
 
-// Every module that publishes a `managed` service target must be canaried or
-// explicitly excused, and every row must still describe the registry. This is
-// what makes "adding a provider is a row, not a new file" true rather than
-// aspirational: a new managed adapter fails here until it is one or the other.
-func TestEveryManagedAdapterIsCanariedOrExcused(t *testing.T) {
+// liveCanaryCoverage is the walk's judgement of one managed-adapter
+// population against the two declarations.
+type liveCanaryCoverage struct {
+	// Unprobed publish a managed service target and have no canary row.
+	Unprobed []string
+	// Both are declared twice — a row AND an exemption.
+	Both []string
+	// Inadmissible are exemptions that do not carry their evidence, each
+	// rendered `<module> (<defect>)`.
+	Inadmissible []string
+}
+
+// liveCanaryClassify is the whole of that judgement, pure so every branch can
+// be driven on a synthetic population: the real registry carries none of
+// these defects once the gate passes, and a refusal nobody can observe is a
+// refusal nobody maintains.
+func liveCanaryClassify(managed []string, canaried map[string]liveCanaryProvider, excused map[string]liveCanaryExcuse) liveCanaryCoverage {
+	var coverage liveCanaryCoverage
+	for _, id := range managed {
+		_, isCanaried := canaried[id]
+		excuse, isExcused := excused[id]
+		switch {
+		case isCanaried && isExcused:
+			coverage.Both = append(coverage.Both, id)
+		case isCanaried:
+		case !isExcused:
+			coverage.Unprobed = append(coverage.Unprobed, id)
+		default:
+			if defect := liveCanaryExcuseDefect(excuse); defect != "" {
+				coverage.Inadmissible = append(coverage.Inadmissible, id+" ("+defect+")")
+			}
+		}
+	}
+	sort.Strings(coverage.Unprobed)
+	sort.Strings(coverage.Both)
+	sort.Strings(coverage.Inadmissible)
+	return coverage
+}
+
+// liveCanaryUnprobedRefusal is what a managed target with no probe gets. It
+// quotes the rule, then states the bound on what was actually checked, then
+// names the remedy — and the remedy is ordered, because the cheap move
+// (bolting a probe onto an adapter that should not ship) is the wrong one.
+func liveCanaryUnprobedRefusal(modules []string) string {
+	return fmt.Sprintf("these modules publish a managed service target and have no live canary probe: %v.\n"+
+		"The rule: %s\n"+
+		"%s\n"+
+		"Remedy, in this order: implement the probe as a liveCanaryProviders row, or RETIRE the target. A managed reference nobody can probe asks every derivative to trust a wire shape this repository has never checked, and ships a credential declaration nothing reads. Exempting it in liveCanaryNothingToProbe is the third option and the narrow one: it costs a stated reason and the file:line that proves it.",
+		modules, liveCanaryAdmissionRule, liveCanaryAdmissionProxy)
+}
+
+// liveCanaryInadmissibleExemptionRefusal is what an exemption without its
+// evidence gets.
+func liveCanaryInadmissibleExemptionRefusal(defects []string) string {
+	return fmt.Sprintf("these liveCanaryNothingToProbe entries are not admissible exemptions: %v.\n"+
+		"The rule: %s\n"+
+		"An exemption is the only way past the probe requirement, so it carries the evidence a non-cleaning canary row carries: prose stating which wiring a production boot produces and why it reaches no provider, plus the `file.go:line` a reviewer opens to check it. Without both it is an opinion, and an opinion is how a dead target keeps its place in the matrix.",
+		defects, liveCanaryAdmissionRule)
+}
+
+// Every module that publishes a `managed` service target must have a live
+// canary probe; an exemption is the narrow alternative and must carry its
+// evidence. Every declaration must still describe the registry. This is what
+// makes "adding a provider is a row, not a new file" true rather than
+// aspirational: a new managed adapter fails here until someone probes it,
+// retires it, or proves on the record that nothing can be probed.
+func TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse(t *testing.T) {
 	root := liveCanaryRepositoryRoot(t)
 	managed := liveCanaryManagedAdapters(t, root)
 	// The floor. A walk that found no managed adapter has broken, not the
@@ -1097,25 +1261,19 @@ func TestEveryManagedAdapterIsCanariedOrExcused(t *testing.T) {
 		canaried[row.Module] = row
 	}
 
-	var undeclared, both []string
+	ids := make([]string, 0, len(managed))
 	for id := range managed {
-		_, isCanaried := canaried[id]
-		_, isExcused := liveCanaryNothingToProbe[id]
-		switch {
-		case isCanaried && isExcused:
-			both = append(both, id)
-		case !isCanaried && !isExcused:
-			undeclared = append(undeclared, id)
-		}
+		ids = append(ids, id)
 	}
-	sort.Strings(undeclared)
-	sort.Strings(both)
-	if len(undeclared) > 0 {
-		t.Fatalf("these modules publish a managed service target and appear in neither liveCanaryProviders nor liveCanaryNothingToProbe: %v.\n"+
-			"A managed reference target with no live canary and no stated reason is a wire shape this repository believes and has never checked. Add a row, or excuse it with the file:line that makes the excuse true.", undeclared)
+	coverage := liveCanaryClassify(ids, canaried, liveCanaryNothingToProbe)
+	if len(coverage.Unprobed) > 0 {
+		t.Fatal(liveCanaryUnprobedRefusal(coverage.Unprobed))
 	}
-	if len(both) > 0 {
-		t.Fatalf("these modules are both canaried and excused from canarying: %v.\nThe excuse is stale — delete the liveCanaryNothingToProbe entry.", both)
+	if len(coverage.Inadmissible) > 0 {
+		t.Fatal(liveCanaryInadmissibleExemptionRefusal(coverage.Inadmissible))
+	}
+	if len(coverage.Both) > 0 {
+		t.Fatalf("these modules are both canaried and exempted from canarying: %v.\nThe exemption is stale — delete the liveCanaryNothingToProbe entry.", coverage.Both)
 	}
 
 	var dead []string
@@ -1229,6 +1387,114 @@ func TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion(t *testing.T) {
 			// convention and the one thing a reviewer can follow.
 			if row.Cleanup != liveCanaryCleans && !strings.Contains(row.Leaves, ".go:") {
 				t.Fatalf("%s cannot clean up and its Leaves prose cites no file:line for the seam that lacks the delete; name the interface and where it is declared", row.Module)
+			}
+		})
+	}
+}
+
+// The probe requirement, driven. The real registry has, by construction, no
+// managed target without a probe once the walk above passes, so the refusal
+// is driven on a synthetic population instead: a guard whose red can only be
+// seen by breaking the registry is a guard whose red nobody sees.
+func TestLiveCanaryRefusesAManagedTargetWithNoProbe(t *testing.T) {
+	const probed = "example/system/thing-managed"
+	const unprobed = "example/system/other-managed"
+	rows := map[string]liveCanaryProvider{probed: {Slot: "example/thing", Module: probed, Target: "managed"}}
+	admissible := map[string]liveCanaryExcuse{unprobed: {
+		Why:   "the adapter makes no network call in the wiring a production boot produces: New takes the local queue and nothing else, so there is no wire shape a probe could pin.",
+		Cites: "internal/example/other/other.go:41",
+	}}
+
+	coverage := liveCanaryClassify([]string{probed, unprobed}, rows, nil)
+	if got := coverage.Unprobed; len(got) != 1 || got[0] != unprobed {
+		t.Fatalf("a managed target with no row and no exemption must be refused; classify reported Unprobed=%v", got)
+	}
+	refusal := liveCanaryUnprobedRefusal(coverage.Unprobed)
+	for _, want := range []string{
+		unprobed,
+		"have no live canary probe",
+		liveCanaryAdmissionRule,
+		liveCanaryAdmissionProxy,
+		"or RETIRE the target",
+	} {
+		if !strings.Contains(refusal, want) {
+			t.Fatalf("the refusal must carry %q so the reader gets the rule and the remedy, not just the mechanics; it read:\n%s", want, refusal)
+		}
+	}
+
+	// The two ways past it, both of which must pass: a probe, or an
+	// exemption that carries its evidence.
+	if coverage := liveCanaryClassify([]string{probed}, rows, nil); len(coverage.Unprobed) > 0 {
+		t.Fatalf("a probed managed target must pass; classify reported Unprobed=%v", coverage.Unprobed)
+	}
+	coverage = liveCanaryClassify([]string{probed, unprobed}, rows, admissible)
+	if len(coverage.Unprobed) > 0 || len(coverage.Inadmissible) > 0 || len(coverage.Both) > 0 {
+		t.Fatalf("a probe plus an admissible exemption must pass; classify reported %+v", coverage)
+	}
+	// And declaring both remains a stale-exemption refusal.
+	if coverage := liveCanaryClassify([]string{probed}, rows, map[string]liveCanaryExcuse{probed: admissible[unprobed]}); len(coverage.Both) != 1 {
+		t.Fatalf("a target that is both probed and exempted must be refused; classify reported %+v", coverage)
+	}
+}
+
+// The exemption gate, driven. An exemption is the one way past the probe
+// requirement, so the evidence it owes is checked in both directions rather
+// than trusted to whoever adds the next one.
+func TestLiveCanaryRefusesAnExemptionWithoutItsEvidence(t *testing.T) {
+	const admissibleWhy = "the adapter makes no network call in the wiring a production boot produces: New takes the local queue and nothing else, so there is no wire shape a probe could pin."
+
+	for name, testCase := range map[string]struct {
+		excuse  liveCanaryExcuse
+		refused string
+	}{
+		"no reason at all": {
+			excuse:  liveCanaryExcuse{Cites: "internal/example/other/other.go:41"},
+			refused: "states no reason at all",
+		},
+		"a reason shortened until it says nothing": {
+			excuse:  liveCanaryExcuse{Why: "nothing to probe here", Cites: "internal/example/other/other.go:41"},
+			refused: "states its reason in 21 character(s), under the 80-character floor",
+		},
+		"a reason with no citation": {
+			excuse:  liveCanaryExcuse{Why: admissibleWhy},
+			refused: "cites nothing",
+		},
+		"a citation that is not a file:line": {
+			excuse:  liveCanaryExcuse{Why: admissibleWhy, Cites: "the adapter package"},
+			refused: `cites "the adapter package", which is not a ` + "`file.go:line`",
+		},
+		"a file with no line": {
+			excuse:  liveCanaryExcuse{Why: admissibleWhy, Cites: "internal/example/other/other.go"},
+			refused: "which is not a `file.go:line`",
+		},
+		"reason and citation both present": {
+			excuse: liveCanaryExcuse{Why: admissibleWhy, Cites: "internal/example/other/other.go:41"},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			defect := liveCanaryExcuseDefect(testCase.excuse)
+			if testCase.refused == "" {
+				if defect != "" {
+					t.Fatalf("an exemption carrying its reason and its file:line must be admissible; it was refused with %q", defect)
+				}
+				return
+			}
+			if !strings.Contains(defect, testCase.refused) {
+				t.Fatalf("the exemption must be refused naming %q; liveCanaryExcuseDefect returned %q", testCase.refused, defect)
+			}
+			// And the refusal the walk renders must carry the module, the
+			// defect and the rule, so the reader learns why the evidence is
+			// owed rather than only that it is.
+			const module = "example/system/other-managed"
+			coverage := liveCanaryClassify([]string{module}, nil, map[string]liveCanaryExcuse{module: testCase.excuse})
+			if len(coverage.Inadmissible) != 1 {
+				t.Fatalf("an inadmissible exemption must be classified as one; classify reported %+v", coverage)
+			}
+			refusal := liveCanaryInadmissibleExemptionRefusal(coverage.Inadmissible)
+			for _, want := range []string{module, defect, liveCanaryAdmissionRule, "not admissible exemptions"} {
+				if !strings.Contains(refusal, want) {
+					t.Fatalf("the refusal must carry %q; it read:\n%s", want, refusal)
+				}
 			}
 		})
 	}
@@ -1601,7 +1867,7 @@ func liveCanaryAssignments(missing []string) string {
 }
 
 // ---------------------------------------------------------------------------
-// The registry walk behind TestEveryManagedAdapterIsCanariedOrExcused.
+// The registry walk behind TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse.
 
 type liveCanaryAdapter struct {
 	path        string

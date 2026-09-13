@@ -682,6 +682,42 @@ LaunchDarkly, Knock, Svix and OpenMeter have no zero-account server, and the
 two Redis adapters speak the Upstash REST dialect rather than RESP, so a plain
 Valkey container cannot serve them without a REST shim.
 
+### The admission rule the coverage gate stands in for
+
+**A managed target is admissible only if the seam can be satisfied through a
+documented HTTP contract in which the provider performs the decision** — no
+vendored SDK, no reimplementation of vendor semantics. That is the criterion a
+managed reference target is accepted under, and it is a *human* criterion:
+nothing in this repository reads a vendor's architecture, so nothing can check
+it mechanically. Stated plainly so the gate it stands in for is not mistaken
+for more than it is.
+
+Its mechanical proxy is the probe, and the probe is the **requirement** rather
+than one of two options.
+`TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse` walks the registry
+for every module publishing a `managed` service target and refuses one with no
+row in the tier-2 table below, naming the remedies in order: implement the
+probe, or retire the target. The proxy is worth having because where the
+provider does not decide over HTTP there is no wire shape to pin, so an
+unprobeable target is the shape a target that fails the rule takes.
+
+`liveCanaryNothingToProbe` is the narrow third option — a module whose
+production wiring makes no network call at all, so there is nothing to probe.
+An entry costs a stated reason **and** the `file.go:line` that proves it, the
+same evidence a non-cleaning row owes for the seam that lacks a delete, and one
+carrying less is refused by name. The walk refuses a stale declaration in both
+directions too, so a dead row and a dead exemption each fail rather than
+lingering.
+
+The rule was written down because of a target that failed it:
+`ggg/system/feature-flags-launchdarkly` sat in that allowlist for a release.
+LaunchDarkly's server SDKs download rule definitions and evaluate the targeting
+DSL in-process, so no HTTP contract exists in which LaunchDarkly performs the
+decision; the adapter's client was an interface nothing implemented, `NewModule`
+refused a nil one, and no generated wiring provided it — selecting the adapter
+could not boot. Under an either/or default a stated reason kept it in the
+matrix declaring a credential nothing read. Under this one it was retired.
+
 ### Tier 2 — the managed-target live canaries
 
 `TestManagedTargetLiveCanaries` in `internal/canary` drives the real
@@ -690,11 +726,6 @@ shapes the fakes assert. It is a declarative table — one row per managed
 adapter, carrying the slot, the module, the target, the credential keys, a
 cleanup class, the prose for what a run leaves behind, and the probe — so
 **adding a provider is a row, not a file**.
-`TestEveryManagedAdapterIsCanariedOrExcused` walks the registry for every
-module publishing a `managed` service target and refuses one that appears in
-neither the table nor the stated `liveCanaryNothingToProbe` allowlist, in both
-directions, so a new managed adapter cannot be forgotten and a stale excuse
-cannot outlive its reason.
 
 It runs only from the separate `live-canary` workflow —
 `workflow_dispatch` plus one weekly schedule, never push or pull_request, in

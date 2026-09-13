@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 88,
+    "revision": 89,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -1342,15 +1342,6 @@
         "self_host": true
       },
       {
-        "source": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
-        "target": "internal/modkit/testdata/redproof/own-canary-adapter-unexcused.patch",
-        "class": "test",
-        "sha256": "7ea3fdb5949706628d37a8e5a6bb4044a00c6ec1d1b35cf843305eb20892c45a",
-        "rewrite_module": false,
-        "contract": false,
-        "self_host": true
-      },
-      {
         "source": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "class": "test",
@@ -1364,6 +1355,15 @@
         "target": "internal/modkit/testdata/redproof/own-canary-leaves-unstated.patch",
         "class": "test",
         "sha256": "7ac6bf8ac014275164625ffa6884c3fa8066d6c7321fa07dfe04f5d09af97a47",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-canary-target-unprobed.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-target-unprobed.patch",
+        "class": "test",
+        "sha256": "3a867a377385d347f131433634b04db2c2fa6949421502b1bf6fb29551090caf",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
