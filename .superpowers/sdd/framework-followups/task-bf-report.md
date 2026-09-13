@@ -374,11 +374,22 @@ call it, would have been the `v0.26.0` failure mode in new clothes.
 **Two follow-ups this leaves**, neither in this slice's ownership:
 
 1. `internal/web`'s admin flag handlers read `s.q` (Postgres) for existence checks while
-   writing through `flags.Service`. Under any non-Postgres adapter the admin page lists flags
-   from the provider (via `List`) but toggle/rollout/delete/override-set 404. This is a
-   pre-existing defect that LaunchDarkly's un-bootability hid; it is now reachable.
-2. Once (1) is fixed, `Upsert` can grow the percentage-split segment path and
+   writing through `flags.Service`. Confirmed independently by `AdmissionRule`: **five of
+   the six admin mutations** gate on the Postgres row before the seam —
+   `workflow_admin_flags.go` toggle `:21`, rollout `:40`, create `:110`, delete `:129`,
+   override-set `:148` — each `http.NotFound` when `s.q.GetFeatureFlag` misses. So under a
+   Flagsmith selection the read path renders fine (`List` goes to the provider) and every
+   one of those controls 404s. Fixing it is a design decision, not a patch: it needs the
+   seam to say which mutations the provider owns and which the Postgres ledger owns.
+2. Once (1) is settled, `Upsert` can grow the percentage-split segment path and
    `ErrRolloutUnsupported` can go. The endpoints are verified and named above.
+
+**This is the admission rule's first dividend, and it is worth stating plainly.** The dead
+target was not merely useless — it was *camouflage*. Because selecting
+`feature-flags-launchdarkly` could not boot, nobody ever ran the admin flag surface against
+a non-Postgres adapter, so a seam the product code does not honour looked healthy for a
+release. Requiring a managed target to be probeable-or-retired is what made the defect
+surface in the slice that adds a working adapter, rather than in someone's production.
 
 ---
 
@@ -462,6 +473,20 @@ The 30 cases in `internal/flags/flagsmith`, verbose:
 --- PASS: TestHealthMatchesTheSeamSiblingsAndMakesNoProviderCall (0.00s)
 --- PASS: TestModuleErrorsNameTheAdapterNotTheCredential (0.00s)
 --- PASS: TestReadyNamesEveryMissingCoordinateForAHandBuiltService (0.00s)
+```
+
+After landing (the two gates that necessarily stayed red until the manifest declared the
+new package, plus the canary suite that imports it):
+
+```
+$ go test ./internal/modkit -run 'TestAgentsProjectPlaneEqualsTheUnownedResidue|TestEveryGoPackageDeclaresTestsOrSaysWhyNot' -count=1
+ok  	github.com/gogogadget/gogogadget/internal/modkit	0.431s
+
+$ go test ./internal/canary/ -count=1
+ok  	github.com/gogogadget/gogogadget/internal/canary	0.519s
+
+$ go build ./... && go vet ./...
+(no output)
 ```
 
 ### 8.1 Known-red, expected, owned by the release order
