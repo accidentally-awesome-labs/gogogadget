@@ -51,7 +51,7 @@
         "source": ".github/workflows/live-canary.yml",
         "target": ".github/workflows/live-canary.yml",
         "class": "asset",
-        "sha256": "c57c0a05a8cb19092ecee656d72953314289f0d148734b7aacc349950562dc3c",
+        "sha256": "7ed2e432b5aaca89b3e0ccc374e8e8891289f11b4feb812b28906be9a696287d",
         "rewrite_module": false,
         "contract": false
       }

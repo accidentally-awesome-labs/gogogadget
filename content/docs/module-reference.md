@@ -252,7 +252,7 @@ itself.
 | `ggg/workflow/projects` | `ggg` | 1 | Project create, update, archive and delete | `ggg/page/project-new` [1,1] `ggg/page/projects` [1,1] `ggg/system/analytics` [1,1] `ggg/system/api` [1,1] `ggg/system/audit` [1,1] `ggg/system/database` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,2] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,2] `ggg/system/webhooks` [1,1] | `free` |
 | `ggg/workflow/seo-discovery` | `ggg` | 1 | Search discovery surfaces | `ggg/system/content` [1,1] `ggg/system/seo` [1,1] `ggg/system/server` [1,2] | `free` |
 
-## Systems (79)
+## Systems (84)
 
 | Module | Source | Contract | Title | Requires | Removal |
 |---|---|---|---|---|---|
@@ -285,6 +285,7 @@ itself.
 | `ggg/system/e2e` | `ggg` | 1 | E2E harness | `ggg/system/project-base` [1,1] `ggg/workflow/dev-session` [2,2] | `free` |
 | `ggg/system/e2e-sweeps` | `ggg` | 1 | E2E cross-cutting sweeps | `ggg/page/admin-jobs` [1,1] `ggg/page/admin-media` [1,1] `ggg/page/blog` [1,1] `ggg/page/changelog` [1,1] `ggg/page/dashboard` [1,1] `ggg/page/docs` [1,1] `ggg/page/docs-index` [1,1] `ggg/page/docs-search` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/workflow/seo-discovery` [1,1] | `free` |
 | `ggg/system/feature-flags` | `ggg` | 1 | Feature flags | `ggg/system/apphost` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/feature-flags-flagsmith` | `ggg` | 1 | Feature Flags Flagsmith | `ggg/system/feature-flags` [1,1] | `free` |
 | `ggg/system/feature-flags-postgres` | `ggg` | 1 | Feature Flags Postgres | `ggg/system/feature-flags` [1,1] | `free` |
 | `ggg/system/i18n` | `ggg` | 1 | Localization | `ggg/component/form` [1,1] `ggg/element/ui-core` [1,1] `ggg/system/apphost` [1,1] | `replacement-required` |
 | `ggg/system/identity` | `ggg` | 2 | Identity | `ggg/system/organizations` [1,1] | `major-version-only` |
@@ -302,6 +303,7 @@ itself.
 | `ggg/system/metrics` | `ggg` | 1 | Runtime metrics endpoint | `ggg/system/server` [1,2] | `free` |
 | `ggg/system/modkit` | `ggg` | 6 | Module registry engine | — | `replacement-required` |
 | `ggg/system/notifications` | `ggg` | 1 | In-app notifications | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/notifications-knock` | `ggg` | 1 | Notifications Knock | `ggg/system/notifications` [1,1] | `free` |
 | `ggg/system/notifications-postgres` | `ggg` | 1 | Notifications Postgres | `ggg/system/notifications` [1,1] | `free` |
 | `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,2] | `free` |
 | `ggg/system/observability-log` | `ggg` | 1 | observability-log | `ggg/system/observability` [1,1] | `free` |
@@ -319,6 +321,7 @@ itself.
 | `ggg/system/schedules` | `ggg` | 1 | Recurring work | `ggg/system/database` [1,1] | `retain-data` |
 | `ggg/system/search` | `ggg` | 1 | Search | — | `replacement-required` |
 | `ggg/system/search-postgres` | `ggg` | 1 | Search Postgres | `ggg/system/database` [1,1] `ggg/system/search` [1,1] | `free` |
+| `ggg/system/search-typesense` | `ggg` | 1 | Search Typesense | `ggg/system/search` [1,1] | `free` |
 | `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/element/ui-core` [1,1] `ggg/system/identity` [2,2] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,2] | `replacement-required` |
 | `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
 | `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,2] `ggg/system/static` [1,1] | `free` |
@@ -332,9 +335,11 @@ itself.
 | `ggg/system/telemetry-otlp` | `ggg` | 1 | Telemetry Otlp | `ggg/system/telemetry` [1,1] | `free` |
 | `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/config` [1,2] `ggg/system/database` [1,1] | `free` |
 | `ggg/system/usage` | `ggg` | 1 | Usage metering | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/usage-openmeter` | `ggg` | 1 | Usage Openmeter | `ggg/system/usage` [1,1] | `free` |
 | `ggg/system/usage-postgres` | `ggg` | 1 | Usage Postgres | `ggg/system/usage` [1,1] | `free` |
 | `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
 | `ggg/system/webhooks-postgres` | `ggg` | 1 | Webhooks Postgres | `ggg/system/webhooks` [1,1] | `free` |
+| `ggg/system/webhooks-svix` | `ggg` | 1 | Webhooks Svix | `ggg/system/webhooks` [1,1] | `free` |
 
 ## Provider slots (18)
 
@@ -364,7 +369,7 @@ degraded health and stays actionable through `ggg doctor --runtime`.
 | `ggg/usage` | `ggg/system/usage` | — | `usage.recorder` `usage.Recorder` |
 | `ggg/webhooks` | `ggg/system/webhooks` | — | `webhooks.emitter` `webhooks.Emitter` |
 
-## Provider adapters (35)
+## Provider adapters (40)
 
 One row per selectable `ADAPTER@TARGET`. **Automation** is what
 `ggg provider provision` can do: `provision` creates the resource,
@@ -384,6 +389,7 @@ checklist and a console URL rather than executing anything.
 | `ggg/cache` | `ggg/system/cache-redis` | `valkey` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/valkey) |
 | `ggg/database` | `ggg/system/database-postgres` | `docker-postgres` | `self-hosted` | development, test | `manual, db `docker_operator`` | — | [docs](https://gogogadget.dev/docs/providers/docker-postgres) |
 | `ggg/database` | `ggg/system/database-postgres` | `neon` | `managed` | production | `provision` | `neon_provisioner` | [docs](https://gogogadget.dev/docs/providers/neon) |
+| `ggg/feature-flags` | `ggg/system/feature-flags-flagsmith` | `flagsmith` | `managed` | production | `manual` | — | [docs](https://docs.flagsmith.com/integrating-with-flagsmith/flagsmith-api-overview) |
 | `ggg/feature-flags` | `ggg/system/feature-flags-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/identity` | `ggg/system/identity-clerk` | `clerk` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
 | `ggg/identity` | `ggg/system/identity-dev` | `local` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
@@ -391,6 +397,7 @@ checklist and a console URL rather than executing anything.
 | `ggg/llm` | `ggg/system/llm-openai-compatible` | `openai` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/llm-openai-compatible) |
 | `ggg/mail` | `ggg/system/mail-dev` | `filesystem` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/mail-filesystem) |
 | `ggg/mail` | `ggg/system/mail-resend` | `resend` | `managed` | production | `manual` | — | [docs](https://resend.com/docs) |
+| `ggg/notifications` | `ggg/system/notifications-knock` | `knock` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/knock) |
 | `ggg/notifications` | `ggg/system/notifications-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/observability` | `ggg/system/observability-log` | `log` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/observability-log) |
 | `ggg/observability` | `ggg/system/observability-sentry` | `sentry` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/observability-sentry) |
@@ -400,16 +407,19 @@ checklist and a console URL rather than executing anything.
 | `ggg/realtime` | `ggg/system/realtime-ably` | `ably` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/ably) |
 | `ggg/realtime` | `ggg/system/realtime-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/search` | `ggg/system/search-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/search` | `ggg/system/search-typesense` | `typesense` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/typesense) |
 | `ggg/storage` | `ggg/system/storage-filesystem` | `filesystem` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/storage-filesystem) |
 | `ggg/storage` | `ggg/system/storage-s3` | `minio` | `self-hosted` | development, test | `manual` | — | [docs](https://min.io/docs) |
 | `ggg/storage` | `ggg/system/storage-s3` | `r2` | `managed` | production | `manual` | — | [docs](https://developers.cloudflare.com/r2/) |
 | `ggg/telemetry` | `ggg/system/telemetry-noop` | `stdout` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/stdout) |
 | `ggg/telemetry` | `ggg/system/telemetry-otlp` | `collector` | `self-hosted` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/collector) |
 | `ggg/telemetry` | `ggg/system/telemetry-otlp` | `otlp` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/otlp) |
+| `ggg/usage` | `ggg/system/usage-openmeter` | `openmeter` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/openmeter) |
 | `ggg/usage` | `ggg/system/usage-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
 | `ggg/webhooks` | `ggg/system/webhooks-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/webhooks` | `ggg/system/webhooks-svix` | `svix` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/svix) |
 
-## Dependencies (185)
+## Dependencies (189)
 
 Declared, not discovered: an authored import the owning manifest does not
 declare is refused before `go.mod` is touched, and the last owner's removal
@@ -542,6 +552,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/database-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | `postgres` |
 | `ggg/system/dev-tools` | — | `github.com/a-h/templ/cmd/templ` `github.com/air-verse/air` `github.com/pressly/goose/v3/cmd/goose` `github.com/sqlc-dev/sqlc/cmd/sqlc` `golang.org/x/vuln/cmd/govulncheck` `darwin/arm64` `linux/amd64` | — |
 | `ggg/system/feature-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/feature-flags-flagsmith` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/feature-flags-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/i18n` | `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
 | `ggg/system/identity` | `github.com/stretchr/testify v1.11.1` | — | — |
@@ -557,6 +568,7 @@ drops the requirement again unless the project already had it.
 | `ggg/system/metrics` | `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/modkit` | `github.com/a-h/templ v0.3.1020` `github.com/santhosh-tekuri/jsonschema/v6 v6.0.2` `github.com/stretchr/testify v1.11.1` `golang.org/x/mod v0.38.0` `gopkg.in/yaml.v3 v3.0.1` | — | — |
 | `ggg/system/notifications` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/notifications-knock` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/notifications-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
 | `ggg/system/observability` | `github.com/getsentry/sentry-go v0.48.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/observability-sentry` | `github.com/getsentry/sentry-go v0.48.0` | — | — |
@@ -578,9 +590,11 @@ drops the requirement again unless the project already had it.
 | `ggg/system/telemetry-otlp` | `go.opentelemetry.io/otel v1.44.0` `go.opentelemetry.io/otel/metric v1.44.0` `go.opentelemetry.io/otel/sdk v1.44.0` `go.opentelemetry.io/otel/sdk/metric v1.44.0` `go.opentelemetry.io/otel/trace v1.44.0` `go.opentelemetry.io/proto/otlp v1.8.0` `google.golang.org/protobuf v1.36.11` | — | — |
 | `ggg/system/testdb` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/usage` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/usage-openmeter` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/usage-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/system/webhooks` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/system/webhooks-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
+| `ggg/system/webhooks-svix` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/account-export` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
 | `ggg/workflow/admin-content` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/admin-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
@@ -603,7 +617,7 @@ drops the requirement again unless the project already had it.
 | `ggg/workflow/projects` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
 | `ggg/workflow/seo-discovery` | `github.com/stretchr/testify v1.11.1` | — | — |
 
-## Lifecycle and health (25)
+## Lifecycle and health (30)
 
 A declared `Stop` must be idempotent and must return `ctx.Err()` when the
 caller's deadline expires, because shutdown can reach it twice and one
@@ -619,11 +633,13 @@ promptly and must fail rather than degrade silently.
 | `ggg/system/cache-memory` | `cache.store` | — | — | yes |
 | `ggg/system/cache-redis` | `cache.store` | — | — | yes |
 | `ggg/system/database-postgres` | `database.pool` `database.queries` | — | yes | yes |
+| `ggg/system/feature-flags-flagsmith` | `flags.service` | — | — | yes |
 | `ggg/system/feature-flags-postgres` | `flags.service` | — | — | yes |
 | `ggg/system/jobs` | `jobs.worker` | yes | yes | — |
 | `ggg/system/llm-fake` | `llm.completer` | — | — | yes |
 | `ggg/system/llm-openai-compatible` | `llm.completer` | — | — | yes |
 | `ggg/system/mail-resend` | `mail.sender` | — | — | yes |
+| `ggg/system/notifications-knock` | `notifications.notifier` | — | yes | yes |
 | `ggg/system/notifications-postgres` | `notifications.notifier` | — | — | yes |
 | `ggg/system/observability-log` | `observability.reporter` | — | — | yes |
 | `ggg/system/observability-sentry` | `observability.reporter` | — | yes | yes |
@@ -632,13 +648,16 @@ promptly and must fail rather than degrade silently.
 | `ggg/system/realtime-ably` | `realtime.broker` | — | — | yes |
 | `ggg/system/realtime-postgres` | `realtime.broker` | — | — | yes |
 | `ggg/system/search-postgres` | `search.index` | — | — | yes |
+| `ggg/system/search-typesense` | `search.index` | — | — | yes |
 | `ggg/system/storage-s3` | `storage.store` | — | — | yes |
 | `ggg/system/telemetry-noop` | `telemetry.providers` | — | — | yes |
 | `ggg/system/telemetry-otlp` | `telemetry.providers` | — | yes | yes |
+| `ggg/system/usage-openmeter` | `usage.recorder` | — | yes | yes |
 | `ggg/system/usage-postgres` | `usage.recorder` | — | — | yes |
 | `ggg/system/webhooks-postgres` | `webhooks.emitter` | — | — | yes |
+| `ggg/system/webhooks-svix` | `webhooks.emitter` | — | yes | yes |
 
-## Verification (204)
+## Verification (209)
 
 The same commands `ggg info <namespace>/<kind>/<name>` prints. **Capabilities** names the
 declared contracts a module's own suite covers.
@@ -781,6 +800,7 @@ declared contracts a module's own suite covers.
 | `ggg/system/database-postgres` | `go test -count=1 ./internal/database/postgres` | — |
 | `ggg/system/e2e-sweeps` | `cd e2e && npx playwright test e2e/a11y-states.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/csp.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/keyboard.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/loading.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/mobile.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/progressive.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/public.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/visual.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y-states.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y.spec.ts --reporter=line` `./scripts/visual.sh` | — |
 | `ggg/system/feature-flags` | `go test -count=1 ./internal/flags` | — |
+| `ggg/system/feature-flags-flagsmith` | `go test -count=1 ./internal/flags/flagsmith` | — |
 | `ggg/system/feature-flags-postgres` | `go test -count=1 ./internal/flags/postgres` | — |
 | `ggg/system/i18n` | `go test -count=1 ./internal/i18n` | — |
 | `ggg/system/identity` | `go test -count=1 ./internal/identity` | — |
@@ -797,6 +817,7 @@ declared contracts a module's own suite covers.
 | `ggg/system/metrics` | `go test -count=1 ./internal/web` | — |
 | `ggg/system/modkit` | `go test -count=1 ./cmd/ggg ./internal/gggcli ./internal/modkit` | — |
 | `ggg/system/notifications` | `go test -count=1 ./internal/notify` | — |
+| `ggg/system/notifications-knock` | `go test -count=1 ./internal/notifications/knock` | — |
 | `ggg/system/notifications-postgres` | `go test -count=1 ./internal/notifications/postgres` | — |
 | `ggg/system/observability` | `go test -count=1 ./internal/observability` | — |
 | `ggg/system/observability-log` | `go test -count=1 ./internal/observability/log` | — |
@@ -808,6 +829,7 @@ declared contracts a module's own suite covers.
 | `ggg/system/realtime-postgres` | `go test -count=1 ./internal/realtime/postgres` | — |
 | `ggg/system/schedules` | `go test -count=1 ./internal/schedules` | — |
 | `ggg/system/search-postgres` | `go test -count=1 ./internal/search/postgres` | — |
+| `ggg/system/search-typesense` | `go test -count=1 ./internal/search/typesense` | — |
 | `ggg/system/security` | `go test -count=1 ./internal/web` | — |
 | `ggg/system/seo` | `go test -count=1 ./internal/web` | — |
 | `ggg/system/server` | `go test -count=1 ./internal/web` | — |
@@ -818,9 +840,11 @@ declared contracts a module's own suite covers.
 | `ggg/system/telemetry-otlp` | `go test -count=1 ./internal/telemetry/otlp` | — |
 | `ggg/system/testdb` | `go test -count=1 ./internal/db/testdb` | — |
 | `ggg/system/usage` | `go test -count=1 ./internal/usage` | — |
+| `ggg/system/usage-openmeter` | `go test -count=1 ./internal/usage/openmeter` | — |
 | `ggg/system/usage-postgres` | `go test -count=1 ./internal/usage/postgres` | — |
 | `ggg/system/webhooks` | `go test -count=1 ./internal/webhooks` | — |
 | `ggg/system/webhooks-postgres` | `go test -count=1 ./internal/webhooks/postgres` | — |
+| `ggg/system/webhooks-svix` | `go test -count=1 ./internal/webhooks/svix` | — |
 | `ggg/workflow/account-delete` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/account-delete.spec.ts --reporter=line` | — |
 | `ggg/workflow/account-export` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/account-export.spec.ts --reporter=line` | — |
 | `ggg/workflow/admin-announcements` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-announcements.spec.ts --reporter=line` | — |

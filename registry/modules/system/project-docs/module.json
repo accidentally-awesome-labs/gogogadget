@@ -27,7 +27,7 @@
         "source": "AGENTS.md",
         "target": "AGENTS.md",
         "class": "docs",
-        "sha256": "ce586f480df5d2ee8e643e366d3ebca78bad84479a332a61ef2729a1fbc2bb91",
+        "sha256": "83855b3bb5f8984ba3332d36970d5c25f3a3c7e18289584685bf1060788f0811",
         "rewrite_module": false,
         "contract": false
       },
@@ -51,7 +51,7 @@
         "source": "README.md",
         "target": "README.md",
         "class": "docs",
-        "sha256": "8d4bf4e5bc9ff23823dc7f0c883625fa1b6ecd4e068e1341d13a11a54ade219e",
+        "sha256": "2e322048d54c9bd6ed5cbbb13c1b25b1d719042e89eedc3e7f0dd9aced27ee2d",
         "rewrite_module": false,
         "contract": false
       }

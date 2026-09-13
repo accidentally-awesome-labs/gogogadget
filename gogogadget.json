@@ -11,8 +11,6 @@
     "ggg/profile/full"
   ],
   "exclude": [
-    "ggg/component/table-empty",
-    "ggg/element/divider",
     "ggg/system/deploy-docker"
   ],
   "providers": {

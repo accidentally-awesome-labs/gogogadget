@@ -696,7 +696,7 @@
     },
     {
       "path": "registry/modules/page/admin-flags/module.json",
-      "sha256": "fc3aef055563b7b68ce0e8808645a0c59f4ab0130b5f526b61ac24904a309052"
+      "sha256": "261753d8354e10024b9c381ba67068cb2a8a636e5643c235e0a955a8afc6fb6e"
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "affd9f3709b8f9582e5ddc6c974997856e6f88d6b447da55d6edd9a2f265180b"
+      "sha256": "27962413db2596fe34c6699d81018218d19af5699840a178c2c07207dc746ac6"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "8966a67f1fe5671855298fa6c20f66c28e169684e795a06b3390532efbac6d91"
+      "sha256": "840497689ac421a19745e7f5c912d8b3fc602a26e29eaaafeb4f70f180f7af15"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -927,8 +927,8 @@
       "sha256": "9f7294b17e536fc8abbde1abbac69b9e218c810f881365b48e4c2ccce25a0015"
     },
     {
-      "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
-      "sha256": "d578693b1888e460bf8d9037967a2cde1740fd609730c38e64d102774ab821e5"
+      "path": "registry/modules/system/feature-flags-flagsmith/module.json",
+      "sha256": "bc1045f52480c2ff6d21cd371d479cd6be25b866b75d3ca878d8227105332375"
     },
     {
       "path": "registry/modules/system/feature-flags-postgres/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "a2e49ce58c8bd2f59438cce142154bfb3660e1a13594a9d3407bbe01f4403459"
+      "sha256": "0eb4341c7a2d25310172a845ddda827e049a411bc0f26ef87ced17580c2f5957"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
-      "sha256": "24ca9ae8e5edafc23a317b9376d5fd0f6419bac33e36617ba8f82426a38409e7"
+      "sha256": "894af117a6c29b8290f6df44e2b19ce10ea497b9f9af40481d267f1b69d53474"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1172,7 +1172,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",
-      "sha256": "8dd4b74a0de8fd72ef3527a4b778cdb37855c44c4efbd9795835ffabdb2caaac"
+      "sha256": "99b8b3557fa119800cd478cf7f949ba47f71a90cf76a0c24885080c67fb84aed"
     },
     {
       "path": "registry/modules/workflow/admin-job-requeue/module.json",
@@ -1276,7 +1276,7 @@
     },
     {
       "path": "registry/profiles/full.json",
-      "sha256": "a1187f823c3c3959b7084a38676dcd04cf7bb4ab9fa0b8a3562c696559a67f02"
+      "sha256": "acd3fe04eef39ebf4ba6ed8ee95853ec54e10d16fa6b248a7c8bc2ca09c8b1d3"
     },
     {
       "path": "registry/profiles/minimal.json",
@@ -1284,7 +1284,7 @@
     },
     {
       "path": "registry/profiles/saas.json",
-      "sha256": "c717bb25940158de82d3c20e431b55a5a8028ba0773e2f30b5aaa6daca892bfa"
+      "sha256": "873213e8274be693a7cebf300805d85264b3ba214c0d75ea025f49ac6fd42b75"
     },
     {
       "path": "registry/profiles/web.json",
@@ -1300,7 +1300,7 @@
     },
     {
       "path": "registry/schema/project.schema.json",
-      "sha256": "430265a86d5aa61b614e9b9ebee98c17f289b7a514e2d6fa2b3ddc9875c79c6d"
+      "sha256": "0218e80292a8d413b97e9e16bc3add8292cc34c3cedc1a99817ace5b16f5b5c9"
     },
     {
       "path": "registry/schema/registry.schema.json",
@@ -1312,7 +1312,7 @@
     },
     {
       "path": "registry/systems.json",
-      "sha256": "b53116852863b9458fc77ad5b3d5fc4d0227729aad8c920c336b992a615c09cd"
+      "sha256": "4586b1780cbef8dd5580804ade6aabb286c5d855dbb6630f10c59d77604b5b19"
     },
     {
       "path": "registry/testdata/registry.json",

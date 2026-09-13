@@ -43,6 +43,13 @@ degradation behave.
 | `ABLY_ENDPOINT` | `ggg/system/realtime-ably` | `ggg` |  |  | Ably Endpoint |
 | `API_RATE_LIMIT_RPM` | `ggg/system/api` | `ggg` |  | `60` | Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated. Integer >= 1 |
 | `AUDIT_RETENTION_DAYS` | `ggg/system/audit` | `ggg` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
+| `FLAGSMITH_API_URL` | `ggg/system/feature-flags-flagsmith` | `ggg` |  |  | Flagsmith Management API base URL; empty uses https://api.flagsmith.com |
+| `FLAGSMITH_CONSOLE` | `ggg/system/feature-flags-flagsmith` | `ggg` |  |  | Flagsmith console URL surfaced by the admin flags page; empty hides the link |
+| `FLAGSMITH_ENVIRONMENT_ID` | `ggg/system/feature-flags-flagsmith` | `ggg` | **always** |  | Numeric Flagsmith environment id the Management API scopes feature states to. Integer |
+| `FLAGSMITH_ENVIRONMENT_KEY` | `ggg/system/feature-flags-flagsmith` | `ggg` | **always** |  | Public Environment Key sent as X-Environment-Key on the Flags API; Flagsmith documents it as non-secret and exposable in client-side code |
+| `FLAGSMITH_FLAGS_API_URL` | `ggg/system/feature-flags-flagsmith` | `ggg` |  |  | Flagsmith Flags API base URL; empty uses https://edge.api.flagsmith.com |
+| `FLAGSMITH_MANAGEMENT_TOKEN` | `ggg/system/feature-flags-flagsmith` | `ggg` | **always** |  | Secret Flagsmith organisation API token authorising every Management API mutation. Secret: ships blank in `.env.example` |
+| `FLAGSMITH_PROJECT_ID` | `ggg/system/feature-flags-flagsmith` | `ggg` | **always** |  | Numeric Flagsmith project id the Management API scopes features to. Integer |
 | `ADMIN_EMAIL` | `ggg/system/identity` | `ggg` |  |  | First sign-in with this address is granted the full admin role. Empty means nobody is staff |
 | `CLERK_FRONTEND_API_URL` | `ggg/system/identity-clerk` | `ggg` |  |  | Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise |
 | `CLERK_PORTAL_URL` | `ggg/system/identity-clerk` | `ggg` | **production** |  | Hosted Account Portal base, e.g. `https://accounts.your-app.com` |
@@ -55,6 +62,10 @@ degradation behave.
 | `POLAR_PRODUCT_TEAM` | `ggg/system/billing-polar` | `ggg` |  |  | Polar product id for the Team plan |
 | `POLAR_SERVER` | `ggg/system/billing-polar` | `ggg` |  | `sandbox` | sandbox \| production |
 | `POLAR_WEBHOOK_SECRET` | `ggg/system/billing-polar` | `ggg` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
+| `KNOCK_API_KEY` | `ggg/system/notifications-knock` | `ggg` | **always** |  | Knock API key; required when this adapter is selected. Secret: ships blank in `.env.example` |
+| `KNOCK_URL` | `ggg/system/notifications-knock` | `ggg` |  |  | Knock API base URL override; empty uses https://api.knock.app |
+| `TYPESENSE_API_KEY` | `ggg/system/search-typesense` | `ggg` |  |  | Typesense Api Key. Secret: ships blank in `.env.example` |
+| `TYPESENSE_URL` | `ggg/system/search-typesense` | `ggg` |  |  | Typesense Url |
 | `STORAGE_R2_ACCESS_KEY_ID` | `ggg/system/storage-s3` | `ggg` | **always** |  | S3 access key id. Secret: ships blank in `.env.example` |
 | `STORAGE_R2_ACCOUNT_ID` | `ggg/system/storage-s3` | `ggg` | **always** |  | R2 account id used for the default endpoint |
 | `STORAGE_R2_BUCKET` | `ggg/system/storage-s3` | `ggg` | **always** |  | S3 bucket name |
@@ -62,6 +73,10 @@ degradation behave.
 | `STORAGE_S3_ENDPOINT` | `ggg/system/storage-s3` | `ggg` |  |  | S3-compatible endpoint override; empty uses the R2 account endpoint |
 | `OTLP_API_KEY` | `ggg/system/telemetry-otlp` | `ggg` |  |  | Otlp Api Key. Secret: ships blank in `.env.example` |
 | `OTLP_ENDPOINT` | `ggg/system/telemetry-otlp` | `ggg` |  |  | Otlp Endpoint |
+| `OPENMETER_API_KEY` | `ggg/system/usage-openmeter` | `ggg` | **always** |  | OpenMeter API key; required when this adapter is selected. Secret: ships blank in `.env.example` |
+| `OPENMETER_URL` | `ggg/system/usage-openmeter` | `ggg` |  |  | OpenMeter API base URL override; empty uses https://openmeter.cloud |
 | `PORT` | `ggg/system/server` | `ggg` |  | `8080` | HTTP listen port. Integer between 1 and 65535 |
 | `METRICS_TOKEN` | `ggg/system/metrics` | `ggg` |  |  | Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default. Secret: ships blank in `.env.example` |
 | `MAINTENANCE_MODE` | `ggg/system/security` | `ggg` |  |  | true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/` |
+| `SVIX_API_KEY` | `ggg/system/webhooks-svix` | `ggg` | **always** |  | Svix auth token; required when this adapter is selected. Secret: ships blank in `.env.example` |
+| `SVIX_URL` | `ggg/system/webhooks-svix` | `ggg` |  |  | Svix API base URL override; empty uses https://api.svix.com, a regional host is https://api.us.svix.com |

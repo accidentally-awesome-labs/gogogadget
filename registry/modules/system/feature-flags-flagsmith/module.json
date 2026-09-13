@@ -40,7 +40,7 @@
         "source": "internal/flags/flagsmith/flagsmith_test.go",
         "target": "internal/flags/flagsmith/flagsmith_test.go",
         "class": "test",
-        "sha256": "e6528acbb6f89bb6b54c2aca97fa77d74faa1a62eb477624afe29e74ada40bd5",
+        "sha256": "fdfdce4a71fd6456c971f280ed4afa5208ca74ec8c797c85f0e1740847360290",
         "rewrite_module": true,
         "contract": false
       }
@@ -101,7 +101,7 @@
                 {
                   "key": "management_token",
                   "env_key": "FLAGSMITH_MANAGEMENT_TOKEN",
-                  "label": "Organisation API token (secret, Management API; sent as `Authorization: Api-Key <token>`)",
+                  "label": "Organisation API token (secret, Management API; sent as `Authorization: Api-Key \u003ctoken\u003e`)",
                   "type": "string",
                   "required": true,
                   "secret": true
@@ -151,8 +151,6 @@
         "field": "FlagsmithAPIURL",
         "type": "string",
         "description": "Flagsmith Management API base URL; empty uses https://api.flagsmith.com",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
@@ -162,8 +160,6 @@
         "field": "FlagsmithConsole",
         "type": "string",
         "description": "Flagsmith console URL surfaced by the admin flags page; empty hides the link",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
@@ -174,7 +170,6 @@
         "type": "int",
         "description": "Numeric Flagsmith environment id the Management API scopes feature states to",
         "required": true,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
@@ -185,7 +180,6 @@
         "type": "string",
         "description": "Public Environment Key sent as X-Environment-Key on the Flags API; Flagsmith documents it as non-secret and exposable in client-side code",
         "required": true,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
@@ -195,8 +189,6 @@
         "field": "FlagsmithFlagsAPIURL",
         "type": "string",
         "description": "Flagsmith Flags API base URL; empty uses https://edge.api.flagsmith.com",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
@@ -218,7 +210,6 @@
         "type": "int",
         "description": "Numeric Flagsmith project id the Management API scopes features to",
         "required": true,
-        "secret": false,
         "targets": [
           "ggg/system/feature-flags-flagsmith@flagsmith"
         ]
