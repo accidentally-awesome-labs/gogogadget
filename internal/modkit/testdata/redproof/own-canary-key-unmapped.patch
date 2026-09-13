@@ -2,13 +2,12 @@ Redproof-Patch: own-canary-key-unmapped
 Redproof-Family: ownership
 Redproof-Run: TestEveryLiveCanaryKeyIsMappedInTheWorkflow
 Redproof-Package: ./internal/canary
-Redproof-Expect: never sets it, so the row would skip in CI forever
-Redproof-Summary: A canary key the live-canary workflow does not map — SENTRY_DSN removed from the job env. The suite stays green: the row simply skips as [inapplicable] in every run forever, reporting a clean line while checking nothing, which is the green-by-skip failure the marker's accounting exists to make visible.
+Redproof-Expect: EVEN AFTER the operator sets the repository secret
+Redproof-Summary: A canary key the live-canary workflow does not map — SENTRY_DSN removed from the job env. The suite stays green: the row simply skips as [inapplicable] in every run forever, reporting a clean line while checking nothing. The expensive part is that the operator cannot fix it — they set CANARY_SENTRY_DSN, the row keeps skipping because nothing carries the secret into the job, and the skip reason names the key as missing, so a true sentence about a credential they already supplied reads as a broken canary. The refusal must state that consequence, not the mismatch.
 diff --git a/.github/workflows/live-canary.yml b/.github/workflows/live-canary.yml
-index 5b13a388..4c54f1af 100644
 --- a/.github/workflows/live-canary.yml
 +++ b/.github/workflows/live-canary.yml
-@@ -99,7 +99,6 @@ jobs:
+@@ -104,7 +104,6 @@
  
        # ggg/observability — ggg/system/observability-sentry@sentry. Leaves one
        # immutable event per run; point it at a throwaway project.

@@ -1,0 +1,17 @@
+Redproof-Patch: own-canary-key-orphaned
+Redproof-Family: ownership
+Redproof-Run: TestNoLiveCanaryWorkflowMappingIsUnclaimed
+Redproof-Package: ./internal/canary
+Redproof-Expect: Nothing reads them
+Redproof-Summary: The other direction: an env mapping no canary row declares — LLM_ORGANISATION taken from CANARY_LLM_ORGANISATION, which no row reads. Nothing fails and nothing skips; the operator simply sets a secret, names an account and pays for it for nothing. It also costs the opposite direction its meaning: once this block may carry entries no row reads, its agreement with the operator's checklist stops being evidence that a configured provider is a probed provider.
+diff --git a/.github/workflows/live-canary.yml b/.github/workflows/live-canary.yml
+--- a/.github/workflows/live-canary.yml
++++ b/.github/workflows/live-canary.yml
+@@ -107,6 +107,7 @@
+       SENTRY_DSN: ${{ secrets.CANARY_SENTRY_DSN }}
+ 
+       # ggg/llm — ggg/system/llm-openai-compatible@openai. Spends tokens.
++      LLM_ORGANISATION: ${{ secrets.CANARY_LLM_ORGANISATION }}
+       LLM_API_KEY: ${{ secrets.CANARY_LLM_API_KEY }}
+       LLM_MODEL: ${{ secrets.CANARY_LLM_MODEL }}
+       LLM_BASE_URL: ${{ secrets.CANARY_LLM_BASE_URL }}

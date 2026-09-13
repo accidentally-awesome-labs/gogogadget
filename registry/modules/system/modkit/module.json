@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 91,
+    "revision": 92,
     "contract": 6,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -56,7 +56,7 @@
         "source": "internal/canary/live_canary_selfhost_test.go",
         "target": "internal/canary/live_canary_selfhost_test.go",
         "class": "test",
-        "sha256": "f7137d016379ba27e67867c776e404dfa79fb88315dc0f45366680e24e854c3f",
+        "sha256": "da6c53b863ec64106a2f8376d42866589c94536d2c74ac938f601904bbf74220",
         "rewrite_module": true,
         "contract": false,
         "self_host": true
@@ -1284,7 +1284,7 @@
         "source": "internal/modkit/testdata/redproof/inventory.txt",
         "target": "internal/modkit/testdata/redproof/inventory.txt",
         "class": "test",
-        "sha256": "fc738580b470f7476e5fb2869eb8099ef62c79e909f653020b8ad825bc1559ca",
+        "sha256": "fa546387c353491cde813d62f9eef5023490ee98370da116223e0c962932de10",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1351,10 +1351,19 @@
         "self_host": true
       },
       {
+        "source": "internal/modkit/testdata/redproof/own-canary-key-orphaned.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-key-orphaned.patch",
+        "class": "test",
+        "sha256": "6feefa0ea0eaaeb837b3d4fc95f08f1d8a7876604c28e2bf318417c725ca2689",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
         "source": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "target": "internal/modkit/testdata/redproof/own-canary-key-unmapped.patch",
         "class": "test",
-        "sha256": "faea28175bde3d83057da2613751a1d08a1be70d3401b0413034511805ef00be",
+        "sha256": "842656dd337cccaa7a1a0bbbf4e2e07c01e80a3e016b80908e9267e6803a593f",
         "rewrite_module": false,
         "contract": false,
         "self_host": true
@@ -1373,6 +1382,15 @@
         "target": "internal/modkit/testdata/redproof/own-canary-row-uninstalled.patch",
         "class": "test",
         "sha256": "1240f8bff283ea43c4469435c051e5481554a1f74febf2636e6638a5d124a96b",
+        "rewrite_module": false,
+        "contract": false,
+        "self_host": true
+      },
+      {
+        "source": "internal/modkit/testdata/redproof/own-canary-secret-unlisted.patch",
+        "target": "internal/modkit/testdata/redproof/own-canary-secret-unlisted.patch",
+        "class": "test",
+        "sha256": "e12096c1c6f2092cf68b50757c21cbfbc814bd8f24bfcb8f8446cc0c96bb2f3a",
         "rewrite_module": false,
         "contract": false,
         "self_host": true

@@ -33,8 +33,13 @@ name: live-canary
 # names are the operator's checklist and are documented in
 # content/docs/testing.md; internal/modkit/ci_workflow_test.go pins this
 # job's wiring so deleting it cannot leave the suite green-by-skip
-# everywhere, and internal/canary/live_canary_selfhost_test.go pins that
-# every key a row declares is actually mapped here.
+# everywhere, and internal/canary/live_canary_selfhost_test.go holds this
+# block, the canary table and that checklist in agreement in BOTH
+# directions: every key a row declares is mapped here under the secret name
+# the table declares, and every entry here belongs to a row. An entry that
+# does not is refused — nothing reads it, so it is a checklist line the
+# operator sets for nothing, and tolerating it would cost the other
+# direction its meaning.
 #
 # POLAR_SERVER is pinned to the literal `sandbox` rather than taken from a
 # secret. The suite refuses POLAR_SERVER=production outright — the probe
@@ -144,12 +149,12 @@ jobs:
       # The three delivery adapters. Until the delivery slice landed, these
       # made no network call in production wiring at all — NewModule passed a
       # nil delivery client — so the canary suite excused them by name. They
-      # now POST after a durable local write, which makes them canariable,
-      # and the rows that canary them are owned by that slice. These mappings
-      # exist ahead of the rows on purpose: the suite refuses a row whose keys
-      # this workflow does not map, and an unmapped key would otherwise make a
-      # new row skip in CI forever while reporting a clean line. An unused
-      # mapping costs nothing; a missing one costs the check.
+      # now POST after a durable local write, and each has its own row. These
+      # mappings once existed ahead of those rows, on the reasoning that an
+      # unused mapping costs nothing while a missing one costs the check.
+      # Half of that is now false: the parity is enforced in both directions,
+      # so a mapping with no row is refused here too. A mapping and its row
+      # land together or neither does.
       #
       # ggg/notifications — ggg/system/notifications-knock@knock.
       KNOCK_API_KEY: ${{ secrets.CANARY_KNOCK_API_KEY }}

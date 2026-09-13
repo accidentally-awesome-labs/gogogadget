@@ -49,6 +49,7 @@ TestEveryInputSizeIsStyledForEveryFormControl	web	allow:sweep web.md row 15 DECL
 TestEveryKindIsStyledForEveryStateFamily	web	allow:sweep web.md row 16 DECLARATION-DERIVED (literal family list); compensated by the rendered-output universal patched as web-badge-xxl
 TestEveryLiveCanaryKeyIsMappedInTheWorkflow	modkit	own-canary-key-unmapped
 TestEveryLiveCanaryRowStatesItsSafetyAndItsAssertion	modkit	own-canary-leaves-unstated
+TestEveryLiveCanarySecretIsOnTheOperatorChecklist	modkit	own-canary-secret-unlisted
 TestEveryManagedTargetHasALiveCanaryOrAnAdmissibleExcuse	modkit	own-canary-target-unprobed
 TestEveryModuleChangedSinceTheLastReleaseCarriesAHigherRevision	modkit	allow:a scratch-copy patch cannot turn this guard red: the proof runner strips .git and gives the copy a fresh identity, so the scratch has no release tag and a plant would meet the guard's [inapplicable] skip — a masquerade, not a proof. Its reds were driven by hand against real history and are quoted in .superpowers/sdd/framework-followups/task-be-report.md (the four-module v0.26.0 incident tree refused by name with both revisions, a bumped module green, an untouched module green without a bump), and the first of those is wired in permanently as TestReleaseBaselineGateRefusesTheV0260IntegrationIncident. A patch becomes possible once redproofPatch can carry a baseline ref
 TestEveryRendererPropagatesItsAttrs	web	web-plantwidget
@@ -59,6 +60,7 @@ TestEveryUITestPayloadCompilesInItsOwnClosure	modkit	allow:fixture-closure compi
 TestEveryUnsafeFormInThePackageRendersTheToken	web	allow:sweep web.md row 11 UNDER-SCOPED at file granularity (PLANT-P documented the escape: one compliant form hides a second bare one); the element-scoping patch is unwritten — the honest red is that widening, not yet taken
 TestEveryVendoredFileIsDeclared	modkit	allow:vendored-bytes ownership gate (vendor_selfhost); no plant transcribed — add one
 TestHeldModuleGeneratedFileReachesConflictStaging	modkit	modkit-held-generated-carry
+TestNoLiveCanaryWorkflowMappingIsUnclaimed	modkit	own-canary-key-orphaned
 TestNoProductionTemplateFallsBackToWindowConfirm	web	web-hxconfirm
 TestNoRendererEmitsTwoIDsOnOneElement	web	web-dropdown-ids
 TestNoTemplateHandRollsAComponentRoot	web	allow:sweep web.md row 10 UNDER-SCOPED (set B, top level only; PLANT-O documented the slots/ escape); the widening is unwritten — the honest red is that patch, not yet taken

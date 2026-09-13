@@ -114,11 +114,14 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/gogogadget/gogogadget/internal/gggcli"
 	"github.com/gogogadget/gogogadget/internal/modkit"
@@ -175,13 +178,44 @@ const liveCanaryStableID = "ggg-live-canary"
 // without learning its value.
 func liveCanaryRedaction(key string) string { return "[redacted " + key + "]" }
 
+// liveCanarySecretPrefix is the repository-secret naming convention every
+// key this suite reads is mapped from. Namespaced so an operator reading the
+// repository's secret list can tell, without opening this file, which secrets
+// exist only for the weekly canary and can be revoked without breaking a
+// deployment.
+const liveCanarySecretPrefix = "CANARY_"
+
+// liveCanaryHarnessEnvPrefix is what a canary-harness variable carries in the
+// process and its repository secret does not: `GGG_CANARY_` is this
+// harness's name for the variable, and the secret is the operator's name for
+// the thing it carries.
+const liveCanaryHarnessEnvPrefix = "GGG_CANARY_"
+
 // liveCanaryKey is one environment variable a row consumes.
 type liveCanaryKey struct {
 	// Env is the variable's name.
 	Env string
 	// Required rows skip when it is unset; optional keys widen a probe's
-	// assertions when present and are omitted from the skip reason.
+	// assertions when present and are omitted from the skip reason. The
+	// distinction is load-bearing outside this file too: the operator needs
+	// to know which secrets a row cannot run at all without, and which ones
+	// merely widen a row that already runs, so
+	// TestEveryLiveCanarySecretIsOnTheOperatorChecklist files each secret
+	// into whichever of the checklist's two tables this field names.
 	Required bool
+	// Secret overrides the repository secret the workflow maps this key
+	// from. Empty means the convention: liveCanarySecretPrefix plus the env
+	// key with any liveCanaryHarnessEnvPrefix removed.
+	//
+	// It exists because the two names answer different questions. The env
+	// key is named after the SEAM that reads it; the secret is named after
+	// the TARGET the operator configured, and those diverge where one seam
+	// serves several targets — the four `STORAGE_R2_*` keys are `CANARY_R2_*`
+	// secrets, because an operator holding a Cloudflare R2 token is not
+	// holding a "storage" token. An override is a declaration, not an
+	// escape: the guard still requires the liveCanarySecretPrefix namespace
+	// and still requires the checklist to list exactly what is declared here.
+	Secret string
 	// Credential marks a value that carries authority and must never appear
 	// in rendered output. It is deliberately independent of the owning
 	// manifest's `secret` flag: POSTHOG_API_KEY is a credential that the
@@ -195,6 +229,16 @@ type liveCanaryKey struct {
 	// are checked against the owning manifest; harness keys are not, because
 	// no manifest declares them.
 	Harness bool
+}
+
+// secretName is the repository secret this key is mapped from: the name the
+// OPERATOR actually sets, which is the half of the mapping a guard over env
+// keys alone never sees.
+func (k liveCanaryKey) secretName() string {
+	if k.Secret != "" {
+		return k.Secret
+	}
+	return liveCanarySecretPrefix + strings.TrimPrefix(k.Env, liveCanaryHarnessEnvPrefix)
 }
 
 // liveCanaryCleanup is what a run leaves behind, as an enumerated claim
@@ -409,10 +453,10 @@ var liveCanaryProviders = []liveCanaryProvider{
 	{
 		Slot: "ggg/storage", Module: "ggg/system/storage-s3", Target: "r2",
 		Keys: []liveCanaryKey{
-			{Env: "STORAGE_R2_ACCOUNT_ID", Required: true},
-			{Env: "STORAGE_R2_ACCESS_KEY_ID", Required: true, Credential: true},
-			{Env: "STORAGE_R2_SECRET_ACCESS_KEY", Required: true, Credential: true},
-			{Env: "STORAGE_R2_BUCKET", Required: true},
+			{Env: "STORAGE_R2_ACCOUNT_ID", Required: true, Secret: "CANARY_R2_ACCOUNT_ID"},
+			{Env: "STORAGE_R2_ACCESS_KEY_ID", Required: true, Credential: true, Secret: "CANARY_R2_ACCESS_KEY_ID"},
+			{Env: "STORAGE_R2_SECRET_ACCESS_KEY", Required: true, Credential: true, Secret: "CANARY_R2_SECRET_ACCESS_KEY"},
+			{Env: "STORAGE_R2_BUCKET", Required: true, Secret: "CANARY_R2_BUCKET"},
 		},
 		Cleanup: liveCanaryCleans,
 		Leaves:  "nothing. The probe Puts one object under the `ggg-live-canary/` prefix and Deletes it through storage.Store.Delete (internal/storage/storage.go:30, internal/storage/s3/r2.go:83), then proves the presigned GET of the deleted key 404s. A failed run between Put and Delete can leave one small object at that prefix; the bucket's own lifecycle rule is the backstop.",
@@ -1900,87 +1944,736 @@ func TestLiveCanaryRedactsEveryCredentialValueFromFailures(t *testing.T) {
 // liveCanaryWorkflowPath is the only thing that sets GGG_LIVE_CANARY.
 const liveCanaryWorkflowPath = ".github/workflows/live-canary.yml"
 
+// liveCanaryWorkflowJob is the one job whose env block reaches the suite's
+// process. The env block is read from that job rather than from the file's
+// text because a `KEY: value` line anywhere else — a `with:` input, a
+// comment's example — is not a mapping, and a guard that counted one would
+// report agreement the operator never gets.
+const liveCanaryWorkflowJob = "live-canary"
+
+// liveCanaryChecklistPath holds the operator's secret checklist: the third
+// surface, and the only one the person setting the secrets reads.
+const liveCanaryChecklistPath = "content/docs/testing.md"
+
 // liveCanaryPinnedWorkflowValues are the keys the workflow sets to a literal
 // rather than mapping from a repository secret, with the reason. A literal is
 // the stronger choice for a selector whose wrong value the suite refuses: a
-// misconfigured repository secret cannot even present the refusal.
+// misconfigured repository secret cannot even present the refusal. A pinned
+// key is therefore NOT a repository secret and must not appear on the
+// operator's checklist.
 var liveCanaryPinnedWorkflowValues = map[string]string{
 	"POLAR_SERVER": "pinned to `sandbox` because the probe creates a checkout session and ingests an immutable metered event; the suite refuses `production` and the pin means a wrong secret cannot reach the refusal",
 }
 
-// Every key a row declares must be mapped in the workflow that runs the
-// suite. Without this, adding a row is half a change: the row exists, the CI
-// job cannot supply it, and the canary reports a clean [inapplicable] line
-// forever while checking nothing — which is precisely the green-by-skip
-// failure the marker's accounting exists to make visible.
-func TestEveryLiveCanaryKeyIsMappedInTheWorkflow(t *testing.T) {
+// liveCanaryWorkflowNonRowEnv are the job's env entries that are not a row's
+// credential mapping, with the reason each is there. Everything else in that
+// block must belong to a row: this map is what makes the orphan direction
+// checkable at all, and an entry added here is an entry a reader must justify
+// rather than one the guard quietly tolerates.
+var liveCanaryWorkflowNonRowEnv = map[string]string{
+	liveCanaryEnvVar: "the gate that un-skips the suite; without it every row skips itself and the job is a green report on nothing",
+}
+
+// liveCanaryParityBound is what this parity does NOT establish, quoted into
+// its own refusals and restated in content/docs/testing.md where the
+// checklist lives. Three surfaces agreeing is worth having and is worth
+// exactly that: the guard reads NAMES. It cannot read a value, so it cannot
+// know whether a token is live, whether it addresses a sandbox rather than a
+// production tenant, or whether the project behind it is throwaway. A guard
+// whose existence implies more than it checks is worse than no guard, because
+// the operator stops looking.
+const liveCanaryParityBound = "This parity holds three surfaces in agreement — the canary table, the workflow's job env block, and the operator's checklist — and holds nothing else. It reads names, never values: that a secret is live, that it addresses a sandbox and not a production tenant, and that the account behind it is throwaway remain the operator's, and content/docs/testing.md states them where the checklist lives."
+
+// liveCanaryWorkflowFile is the shape this guard reads, decoded with
+// gopkg.in/yaml.v3 — the parser internal/modkit/ci_workflow_test.go already
+// reads this same file with, rather than a second one.
+type liveCanaryWorkflowFile struct {
+	Jobs map[string]struct {
+		Env map[string]string `yaml:"env"`
+	} `yaml:"jobs"`
+}
+
+// liveCanarySecretExpression matches the only mapping shape a credential may
+// reach the job by. Anchored: `${{ secrets.X }}` concatenated with anything
+// else is not a mapping this guard will vouch for.
+var liveCanarySecretExpression = regexp.MustCompile(`^\$\{\{\s*secrets\.([A-Za-z_][A-Za-z0-9_]*)\s*\}\}$`)
+
+// liveCanaryMappedSecret returns the repository secret a workflow env value
+// maps from.
+func liveCanaryMappedSecret(value string) (string, bool) {
+	match := liveCanarySecretExpression.FindStringSubmatch(strings.TrimSpace(value))
+	if match == nil {
+		return "", false
+	}
+	return match[1], true
+}
+
+// liveCanarySortedNames is the deterministic key order every refusal below
+// renders in. A refusal whose list reorders between runs is a refusal nobody
+// can diff.
+func liveCanarySortedNames[V any](set map[string]V) []string {
+	names := make([]string, 0, len(set))
+	for name := range set {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+// liveCanaryDeclaration is one row's claim on one environment variable.
+type liveCanaryDeclaration struct {
+	key    liveCanaryKey
+	module string
+}
+
+// liveCanaryDeclaredKeys indexes the table by env key. A key two rows declare
+// is not a defect — OTLP_ENDPOINT could legitimately serve two adapters — so
+// the last writer wins for the module attribution and the parity is over the
+// key set either way.
+func liveCanaryDeclaredKeys(rows []liveCanaryProvider) map[string]liveCanaryDeclaration {
+	declared := map[string]liveCanaryDeclaration{}
+	for _, row := range rows {
+		for _, key := range row.Keys {
+			declared[key.Env] = liveCanaryDeclaration{key: key, module: row.Module}
+		}
+	}
+	return declared
+}
+
+// liveCanaryEnvParity is the judgement of the table against the workflow's
+// job env block, in every direction that can go wrong.
+type liveCanaryEnvParity struct {
+	// Unmapped: a row declares the key and the job env does not set it. The
+	// expensive one — see liveCanaryUnmappedRefusal.
+	Unmapped []string
+	// Orphaned: the job env sets a key no row declares and no entry in
+	// liveCanaryWorkflowNonRowEnv justifies.
+	Orphaned []string
+	// Misnamed: the key is mapped, from the wrong repository secret.
+	Misnamed []string
+	// Literal: the key is set to something that is not a secret reference and
+	// is not declared pinned.
+	Literal []string
+	// PinnedFromSecret: a key declared pinned is taken from a secret anyway.
+	PinnedFromSecret []string
+	// DeadPin, DeadNonRow: a declaration that describes nothing.
+	DeadPin, DeadNonRow []string
+}
+
+func (p liveCanaryEnvParity) clean() bool {
+	return len(p.Unmapped) == 0 && len(p.Orphaned) == 0 && len(p.Misnamed) == 0 &&
+		len(p.Literal) == 0 && len(p.PinnedFromSecret) == 0 &&
+		len(p.DeadPin) == 0 && len(p.DeadNonRow) == 0
+}
+
+// liveCanaryClassifyEnv is the whole judgement, pure so every branch can be
+// driven on a synthetic env block: the real workflow carries none of these
+// defects once the gate passes, and a refusal nobody can observe is a refusal
+// nobody maintains.
+func liveCanaryClassifyEnv(rows []liveCanaryProvider, env, pinned, nonRow map[string]string) liveCanaryEnvParity {
+	declared := liveCanaryDeclaredKeys(rows)
+
+	var parity liveCanaryEnvParity
+	for _, name := range liveCanarySortedNames(declared) {
+		declaration := declared[name]
+		value, mapped := env[name]
+		if !mapped {
+			parity.Unmapped = append(parity.Unmapped, fmt.Sprintf("%s declares %s, which the job env never sets (the operator would set %s)",
+				declaration.module, name, declaration.key.secretName()))
+			continue
+		}
+		if reason, isPinned := pinned[name]; isPinned {
+			if strings.Contains(value, "secrets.") {
+				parity.PinnedFromSecret = append(parity.PinnedFromSecret, fmt.Sprintf("%s is taken from a secret (%q) though it is declared pinned: %s", name, value, reason))
+			}
+			continue
+		}
+		secret, isSecret := liveCanaryMappedSecret(value)
+		if !isSecret {
+			parity.Literal = append(parity.Literal, fmt.Sprintf("%s = %q", name, value))
+			continue
+		}
+		if want := declaration.key.secretName(); secret != want {
+			parity.Misnamed = append(parity.Misnamed, fmt.Sprintf("%s is mapped from %s; %s declares %s", name, secret, declaration.module, want))
+		}
+	}
+
+	for _, name := range liveCanarySortedNames(env) {
+		if _, isRow := declared[name]; isRow {
+			continue
+		}
+		if _, justified := nonRow[name]; justified {
+			continue
+		}
+		parity.Orphaned = append(parity.Orphaned, fmt.Sprintf("%s = %q", name, env[name]))
+	}
+
+	for _, name := range liveCanarySortedNames(pinned) {
+		if _, isRow := declared[name]; !isRow {
+			parity.DeadPin = append(parity.DeadPin, name)
+		}
+	}
+	for _, name := range liveCanarySortedNames(nonRow) {
+		if _, set := env[name]; !set {
+			parity.DeadNonRow = append(parity.DeadNonRow, name)
+		}
+	}
+	return parity
+}
+
+// liveCanaryUnmappedRefusal is what a row key the workflow does not map gets.
+// It states the CONSEQUENCE rather than the mismatch, because the mismatch is
+// cheap to read and the consequence is not: the row does not fail, it skips —
+// and it keeps skipping after the operator sets the secret, because nothing
+// carries the secret into the job. The skip reason names the missing key, so
+// the operator reads a correct sentence about a credential they have already
+// supplied and concludes the canary is broken rather than the mapping.
+func liveCanaryUnmappedRefusal(unmapped []string) string {
+	return fmt.Sprintf("%s never sets it, so the row would skip in CI forever while reporting a clean [inapplicable] line:\n  %s\nThe cost is not the mismatch. An unmapped key makes its row skip EVEN AFTER the operator sets the repository secret — the secret exists and nothing carries it into the job — and the row's own skip reason names the key as missing, so the operator reads a true sentence about a credential they already supplied and concludes the canary is broken. Map each key in the %s job env of %s.",
+		liveCanaryWorkflowPath, strings.Join(unmapped, "\n  "), liveCanaryWorkflowJob, liveCanaryWorkflowPath)
+}
+
+// liveCanaryOrphanRefusal is what an env entry no row declares gets. An
+// orphan costs the operator a secret they set for nothing, and it costs the
+// checklist its meaning: once the workflow may carry mappings nothing reads,
+// the checklist's set equality stops being evidence that a configured
+// provider is a probed provider.
+func liveCanaryOrphanRefusal(orphaned []string) string {
+	return fmt.Sprintf("the %s job of %s sets env entries no canary row declares:\n  %s\nNothing reads them. An orphan mapping is a checklist line the operator sets for nothing, and it is the same defect as the opposite direction wearing the other face: once this block may carry entries no row reads, its agreement with the checklist stops being evidence that a configured provider is a probed provider. Delete the mapping, declare the key on the row that needs it, or — if it is not a row's credential at all — record it in liveCanaryWorkflowNonRowEnv with its reason.",
+		liveCanaryWorkflowJob, liveCanaryWorkflowPath, strings.Join(orphaned, "\n  "))
+}
+
+// liveCanaryWorkflowEnv is the one job's env block, read through
+// gopkg.in/yaml.v3. Shared by the two directions below, which are separate
+// tests rather than one because a guard gets one red proof in
+// internal/modkit/testdata/redproof and these two defects are not the same
+// defect: the first is a row nobody can supply, the second is a secret
+// nobody reads.
+func liveCanaryWorkflowEnv(t *testing.T) map[string]string {
+	t.Helper()
 	root := liveCanaryRepositoryRoot(t)
 	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(liveCanaryWorkflowPath)))
 	if err != nil {
 		t.Fatalf("read %s: %v", liveCanaryWorkflowPath, err)
 	}
-	workflow := string(raw)
-
-	// Parsed as `KEY: value` assignments rather than by substring, because
-	// every key is also named in that file's prose and a substring match
-	// would accept a comment as a mapping.
-	assignments := map[string]string{}
-	for line := range strings.SplitSeq(workflow, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
-			continue
-		}
-		at := strings.Index(trimmed, ": ")
-		if at <= 0 {
-			continue
-		}
-		assignments[trimmed[:at]] = strings.TrimSpace(trimmed[at+2:])
+	var workflow liveCanaryWorkflowFile
+	if err := yaml.Unmarshal(raw, &workflow); err != nil {
+		t.Fatalf("parse %s: %v", liveCanaryWorkflowPath, err)
 	}
-	if got := assignments["GGG_LIVE_CANARY"]; got != `"1"` {
-		t.Fatalf("%s sets GGG_LIVE_CANARY to %q, want \"1\"; without it every row skips itself and the job checks nothing",
-			liveCanaryWorkflowPath, got)
+	job, ok := workflow.Jobs[liveCanaryWorkflowJob]
+	if !ok {
+		t.Fatalf("%s has no %s job, so nothing maps a credential into this suite and every row skips forever", liveCanaryWorkflowPath, liveCanaryWorkflowJob)
+	}
+	return job.Env
+}
+
+// Every key a row declares must be mapped in the workflow that runs the
+// suite, under the secret name the row declares. Without this, adding a row
+// is half a change: the row exists, the CI job cannot supply it, and the
+// canary reports a clean [inapplicable] line forever while checking nothing —
+// which is precisely the green-by-skip failure the marker's accounting exists
+// to make visible, and the one defect the operator cannot fix by setting the
+// secret.
+func TestEveryLiveCanaryKeyIsMappedInTheWorkflow(t *testing.T) {
+	env := liveCanaryWorkflowEnv(t)
+	if got := env[liveCanaryEnvVar]; got != "1" {
+		t.Fatalf("the %s job sets %s to %q, want \"1\"; without it every row skips itself and the job checks nothing",
+			liveCanaryWorkflowJob, liveCanaryEnvVar, got)
 	}
 
-	for _, row := range liveCanaryProviders {
+	parity := liveCanaryClassifyEnv(liveCanaryProviders, env, liveCanaryPinnedWorkflowValues, liveCanaryWorkflowNonRowEnv)
+	if len(parity.Unmapped) > 0 {
+		t.Fatal(liveCanaryUnmappedRefusal(parity.Unmapped))
+	}
+	if len(parity.Misnamed) > 0 {
+		t.Fatalf("%s maps these keys from a repository secret the table does not declare:\n  %s\nThe value side of the mapping is what the operator actually sets, so a secret name that disagrees with the table is an unset secret: the row skips forever with a reason that reads as a missing credential. Fix the mapping, or — where the operator's name for the thing legitimately differs from the seam's name for the variable — declare it in the row's liveCanaryKey.Secret.",
+			liveCanaryWorkflowPath, strings.Join(parity.Misnamed, "\n  "))
+	}
+	if len(parity.Literal) > 0 {
+		t.Fatalf("%s sets these keys to a literal rather than mapping them from a repository secret:\n  %s\nA live credential must never be a literal in this tree; if the literal is deliberate, record it in liveCanaryPinnedWorkflowValues with its reason.",
+			liveCanaryWorkflowPath, strings.Join(parity.Literal, "\n  "))
+	}
+	if len(parity.PinnedFromSecret) > 0 {
+		t.Fatalf("%s takes a declared-pinned key from a repository secret:\n  %s",
+			liveCanaryWorkflowPath, strings.Join(parity.PinnedFromSecret, "\n  "))
+	}
+	if len(parity.DeadPin) > 0 {
+		t.Fatalf("these liveCanaryPinnedWorkflowValues rows name no key any row declares: %v.\nDelete each one.", parity.DeadPin)
+	}
+
+	required, optional := liveCanaryKeyCounts(liveCanaryProviders)
+	t.Logf("%d rows declare %d keys (%d required, %d optional); the %s job env carries %d entries, mapping %d repository secrets, %d pinned, %d non-row.\n%s",
+		len(liveCanaryProviders), required+optional, required, optional, liveCanaryWorkflowJob,
+		len(env), len(liveCanaryDeclaredSecrets(liveCanaryProviders, liveCanaryPinnedWorkflowValues)),
+		len(liveCanaryPinnedWorkflowValues), len(liveCanaryWorkflowNonRowEnv), liveCanaryParityBound)
+}
+
+// The other direction. Every entry that env block carries must belong to a
+// row, or be declared a non-row entry with its reason. Without this the block
+// accumulates mappings nothing reads: the operator sets a secret, names an
+// account, pays for it, and no probe touches it — and worse, the checklist's
+// agreement with this file stops being evidence that a configured provider is
+// a probed provider, which is the whole value of holding the three surfaces
+// together.
+func TestNoLiveCanaryWorkflowMappingIsUnclaimed(t *testing.T) {
+	env := liveCanaryWorkflowEnv(t)
+	parity := liveCanaryClassifyEnv(liveCanaryProviders, env, liveCanaryPinnedWorkflowValues, liveCanaryWorkflowNonRowEnv)
+	if len(parity.Orphaned) > 0 {
+		t.Fatal(liveCanaryOrphanRefusal(parity.Orphaned))
+	}
+	if len(parity.DeadNonRow) > 0 {
+		t.Fatalf("these liveCanaryWorkflowNonRowEnv rows name no entry the %s job env carries: %v.\nDelete each one.", liveCanaryWorkflowJob, parity.DeadNonRow)
+	}
+	claimed := len(env) - len(liveCanaryWorkflowNonRowEnv)
+	t.Logf("all %d of the %d entries in the %s job env belong to a canary row; %d are declared non-row.",
+		claimed, len(env), liveCanaryWorkflowJob, len(liveCanaryWorkflowNonRowEnv))
+}
+
+// liveCanaryKeyCounts is the required/optional split, reported by both guards
+// so the numbers appear in the log of a passing run rather than only in a
+// refusal.
+func liveCanaryKeyCounts(rows []liveCanaryProvider) (required, optional int) {
+	for _, row := range rows {
 		for _, key := range row.Keys {
-			value, mapped := assignments[key.Env]
-			if !mapped {
-				t.Fatalf("the %s canary declares %s and %s never sets it, so the row would skip in CI forever while reporting a clean [inapplicable] line",
-					row.Module, key.Env, liveCanaryWorkflowPath)
-			}
-			if reason, pinned := liveCanaryPinnedWorkflowValues[key.Env]; pinned {
-				if strings.Contains(value, "secrets.") {
-					t.Fatalf("%s maps %s from a repository secret, but it is declared pinned: %s", liveCanaryWorkflowPath, key.Env, reason)
-				}
+			if key.Required {
+				required++
 				continue
 			}
-			// Everything else must come from a repository secret. A literal
-			// would be a credential committed to the tree.
-			if !strings.HasPrefix(value, "${{ secrets.") {
-				t.Fatalf("%s sets %s to %q rather than mapping it from a repository secret; a live credential must never be a literal in this tree (and if the literal is deliberate, record it in liveCanaryPinnedWorkflowValues with its reason)",
-					liveCanaryWorkflowPath, key.Env, value)
+			optional++
+		}
+	}
+	return required, optional
+}
+
+// liveCanaryDeclaredSecrets is every repository secret the table implies, with
+// the row and requiredness behind it. Pinned keys are excluded: a pinned value
+// is not a secret and must not reach the operator's checklist.
+func liveCanaryDeclaredSecrets(rows []liveCanaryProvider, pinned map[string]string) map[string]liveCanaryDeclaration {
+	secrets := map[string]liveCanaryDeclaration{}
+	for _, row := range rows {
+		for _, key := range row.Keys {
+			if _, isPinned := pinned[key.Env]; isPinned {
+				continue
 			}
+			secrets[key.secretName()] = liveCanaryDeclaration{key: key, module: row.Module}
+		}
+	}
+	return secrets
+}
+
+// The checklist headings. The checklist is CHECKED against the table rather
+// than generated from it, and the reason is the second column: it carries
+// editorial guidance the table does not and should not hold — which throwaway
+// resource a secret should point at, why Flagsmith needs two credentials, that
+// a Typesense collection must already exist. Generating the table would
+// either delete that guidance or drag it into the canary rows, which already
+// carry two prose fields (Leaves, Asserts) for the reader of the code rather
+// than the operator. What must not drift is the SET of names, and a set is
+// exactly what a check can hold without owning the prose.
+//
+// The split into two tables is the required/optional distinction made visible
+// where the operator works: liveCanaryKey.Required decides which table a
+// secret belongs in, and filing one in the wrong table is refused, because an
+// operator who reads "optional" about a key whose absence skips the whole row
+// has been told the opposite of the truth.
+const (
+	liveCanaryChecklistHeading         = "### The operator's secret checklist"
+	liveCanaryChecklistRequiredHeading = "#### Required — an unset secret skips its row"
+	liveCanaryChecklistOptionalHeading = "#### Optional — an unset secret narrows its row, which still runs"
+)
+
+// liveCanaryChecklistEntry matches a secret name in a checklist cell. Names
+// are backticked in that document, so the pattern cannot match the prose that
+// discusses them.
+var liveCanaryChecklistEntry = regexp.MustCompile("`(" + liveCanarySecretPrefix + "[A-Z0-9_]+)`")
+
+// liveCanaryChecklistBounds are the phrases the checklist section must carry:
+// the statement of what no guard here can check. They live in the same
+// section as the checklist on purpose — a bound stated three pages away from
+// the thing it bounds is a bound nobody reads — and they are asserted rather
+// than trusted because this guard's own existence is what makes them
+// necessary.
+// Each phrase is a whole clause rather than a word, because a word like
+// "sandbox" occurs incidentally in that section's other tables and a bound
+// satisfied by an incidental occurrence is not a bound.
+var liveCanaryChecklistBounds = []struct{ Phrase, Why string }{
+	{"No guard can check a secret's value", "the parity is over names; a checklist in perfect agreement can name a revoked token"},
+	{"whether it addresses a sandbox or a production tenant", "unreadable from a name, and POLAR_SERVER's pin protects exactly one provider from exactly one direction"},
+	{"whether the account behind it is throwaway", "the operator's judgement, and several rows leave state in that account that no seam can remove"},
+}
+
+// liveCanaryChecklistSection returns the checklist section's text. Scoped to
+// the section because the page's other tables name canary secrets in prose
+// ("one usage event on CANARY_OPENMETER_SUBJECT"), and a page-wide scan would
+// read those as checklist entries.
+func liveCanaryChecklistSection(doc string) (string, error) {
+	at := strings.Index(doc, liveCanaryChecklistHeading)
+	if at < 0 {
+		return "", fmt.Errorf("%s carries no %q section, so the operator has no checklist to work from", liveCanaryChecklistPath, liveCanaryChecklistHeading)
+	}
+	section := doc[at+len(liveCanaryChecklistHeading):]
+	if end := strings.Index(section, "\n### "); end >= 0 {
+		section = section[:end]
+	}
+	if end := strings.Index(section, "\n## "); end >= 0 {
+		section = section[:end]
+	}
+	return section, nil
+}
+
+// liveCanaryChecklistSecrets reads the secret names out of one subsection's
+// table, first column only: the second column names env keys and prose.
+func liveCanaryChecklistSecrets(section, heading string) (map[string]bool, error) {
+	at := strings.Index(section, heading)
+	if at < 0 {
+		return nil, fmt.Errorf("the checklist in %s carries no %q table; the required/optional split is how the operator learns which secrets a row cannot run without", liveCanaryChecklistPath, heading)
+	}
+	block := section[at+len(heading):]
+	if end := strings.Index(block, "\n#### "); end >= 0 {
+		block = block[:end]
+	}
+	listed := map[string]bool{}
+	for line := range strings.SplitSeq(block, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "|") {
+			continue
+		}
+		cells := strings.Split(strings.Trim(trimmed, "|"), "|")
+		if len(cells) == 0 {
+			continue
+		}
+		for _, match := range liveCanaryChecklistEntry.FindAllStringSubmatch(cells[0], -1) {
+			listed[match[1]] = true
+		}
+	}
+	return listed, nil
+}
+
+// liveCanaryChecklistParity is the judgement of the table's secrets against
+// the two checklist tables, in every direction.
+type liveCanaryChecklistParity struct {
+	// Missing: a declared secret on neither table. The operator never sets it.
+	Missing []string
+	// Stale: a checklist entry no row declares. The operator sets it for nothing.
+	Stale []string
+	// Misfiled: listed, in the table that states the opposite of its
+	// requiredness — or in both.
+	Misfiled []string
+	// Shared: two env keys deriving one secret name.
+	Shared []string
+}
+
+func (p liveCanaryChecklistParity) clean() bool {
+	return len(p.Missing) == 0 && len(p.Stale) == 0 && len(p.Misfiled) == 0 && len(p.Shared) == 0
+}
+
+// liveCanaryClassifyChecklist is the whole judgement, pure so every branch is
+// drivable on a synthetic checklist.
+func liveCanaryClassifyChecklist(rows []liveCanaryProvider, pinned map[string]string, required, optional map[string]bool) liveCanaryChecklistParity {
+	declared := liveCanaryDeclaredSecrets(rows, pinned)
+
+	byEnv := map[string][]string{}
+	for _, row := range rows {
+		for _, key := range row.Keys {
+			if _, isPinned := pinned[key.Env]; isPinned {
+				continue
+			}
+			byEnv[key.secretName()] = append(byEnv[key.secretName()], key.Env)
 		}
 	}
 
-	var dead []string
-	for key := range liveCanaryPinnedWorkflowValues {
-		declared := false
-		for _, row := range liveCanaryProviders {
-			for _, candidate := range row.Keys {
-				if candidate.Env == key {
-					declared = true
-				}
+	var parity liveCanaryChecklistParity
+	for _, secret := range liveCanarySortedNames(declared) {
+		declaration := declared[secret]
+		if envs := byEnv[secret]; len(envs) > 1 {
+			sort.Strings(envs)
+			parity.Shared = append(parity.Shared, fmt.Sprintf("%s feeds %s", secret, strings.Join(envs, " and ")))
+		}
+		inRequired, inOptional := required[secret], optional[secret]
+		if !inRequired && !inOptional {
+			where := "Optional"
+			if declaration.key.Required {
+				where = "Required"
+			}
+			parity.Missing = append(parity.Missing, fmt.Sprintf("%s (%s reads it as %s; belongs under %s)", secret, declaration.module, declaration.key.Env, where))
+			continue
+		}
+		if inRequired && inOptional {
+			parity.Misfiled = append(parity.Misfiled, fmt.Sprintf("%s is on both tables; it is %s", secret, liveCanaryRequiredness(declaration.key.Required)))
+			continue
+		}
+		if declaration.key.Required != inRequired {
+			parity.Misfiled = append(parity.Misfiled, fmt.Sprintf("%s is listed as %s and is %s", secret, liveCanaryRequiredness(inRequired), liveCanaryRequiredness(declaration.key.Required)))
+		}
+	}
+
+	// One line per stale name even when both tables carry it: the refusal is
+	// a list the reader deletes from, and a name repeated in it reads as two
+	// separate defects.
+	reported := map[string]bool{}
+	for _, listed := range []map[string]bool{required, optional} {
+		for _, secret := range liveCanarySortedNames(listed) {
+			if _, ok := declared[secret]; ok || reported[secret] {
+				continue
+			}
+			reported[secret] = true
+			parity.Stale = append(parity.Stale, secret)
+		}
+	}
+	sort.Strings(parity.Stale)
+	return parity
+}
+
+func liveCanaryRequiredness(required bool) string {
+	if required {
+		return "required: its absence SKIPS the row"
+	}
+	return "optional: its absence only NARROWS a row that still runs"
+}
+
+// The value side of the mapping, and the surface the operator actually reads.
+// The workflow parity above proves the job carries every key a row declares;
+// it says nothing about whether the names on the right-hand side are the names
+// anyone was told to set. This is that half, in both directions, plus the
+// required/optional filing and the statement of what none of it can check.
+func TestEveryLiveCanarySecretIsOnTheOperatorChecklist(t *testing.T) {
+	root := liveCanaryRepositoryRoot(t)
+	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(liveCanaryChecklistPath)))
+	if err != nil {
+		t.Fatalf("read %s: %v", liveCanaryChecklistPath, err)
+	}
+	section, err := liveCanaryChecklistSection(string(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	required, err := liveCanaryChecklistSecrets(section, liveCanaryChecklistRequiredHeading)
+	if err != nil {
+		t.Fatal(err)
+	}
+	optional, err := liveCanaryChecklistSecrets(section, liveCanaryChecklistOptionalHeading)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parity := liveCanaryClassifyChecklist(liveCanaryProviders, liveCanaryPinnedWorkflowValues, required, optional)
+	if len(parity.Missing) > 0 {
+		t.Fatalf("the checklist in %s does not list these repository secrets the canary table declares:\n  %s\nThe checklist is the only one of the three surfaces the operator reads. A secret nobody is told to set is never set, so its row skips every run — reported as a clean [inapplicable] line, never as a failure — and nothing anywhere says the coverage is missing. Add each to the table named.",
+			liveCanaryChecklistPath, strings.Join(parity.Missing, "\n  "))
+	}
+	if len(parity.Stale) > 0 {
+		t.Fatalf("the checklist in %s lists repository secrets no canary row declares:\n  %s\nThe operator sets them, pays for whatever account they name, and nothing reads them. A stale entry also erodes the checklist's only guarantee — that configuring everything on it configures every row — so the next missing entry is indistinguishable from this one. Delete each, or declare the key on the row that needs it.",
+			liveCanaryChecklistPath, strings.Join(parity.Stale, "\n  "))
+	}
+	if len(parity.Misfiled) > 0 {
+		t.Fatalf("the checklist in %s files these secrets under the wrong table:\n  %s\nThe two tables are the operator's only statement of which secrets a row cannot run at all without. Telling them a row-gating secret is optional guarantees an unconfigured row nobody notices; telling them a widening secret is required guarantees an account opened for nothing. liveCanaryKey.Required decides, and it is the table that must move.",
+			liveCanaryChecklistPath, strings.Join(parity.Misfiled, "\n  "))
+	}
+	if len(parity.Shared) > 0 {
+		t.Fatalf("these canary keys derive one repository secret:\n  %s\nOne checklist line would then configure two env keys, and the parity above could not tell a deliberate share from a typo in liveCanaryKey.Secret. Give each its own secret.",
+			strings.Join(parity.Shared, "\n  "))
+	}
+
+	// Over whitespace-collapsed prose: a phrase that spans the page's wrap
+	// column is still stated, and a bound that failed on a reflow would be
+	// refreshed by rewording rather than by rereading.
+	flowed := strings.Join(strings.Fields(section), " ")
+	for _, bound := range liveCanaryChecklistBounds {
+		if !strings.Contains(flowed, bound.Phrase) {
+			t.Fatalf("the checklist section of %s does not state %q. %s\nThe three-surface parity is checked by a guard now, and a guard's existence is read as a promise: state the bound where the checklist lives, or the operator stops checking the things only they can check.\n%s",
+				liveCanaryChecklistPath, bound.Phrase, bound.Why, liveCanaryParityBound)
+		}
+	}
+
+	requiredKeys, optionalKeys := liveCanaryKeyCounts(liveCanaryProviders)
+	t.Logf("%d rows declare %d keys (%d required, %d optional), %d of which map %d repository secrets; the checklist lists %d required and %d optional.\n%s",
+		len(liveCanaryProviders), requiredKeys+optionalKeys, requiredKeys, optionalKeys,
+		requiredKeys+optionalKeys-len(liveCanaryPinnedWorkflowValues),
+		len(liveCanaryDeclaredSecrets(liveCanaryProviders, liveCanaryPinnedWorkflowValues)),
+		len(required), len(optional), liveCanaryParityBound)
+}
+
+// Both parities, driven on synthetic populations. The real three surfaces
+// carry none of these defects once the two gates above pass, so this is the
+// only place the classifications' branches are observable — and a refusal
+// that can only be seen by breaking the repository is a refusal nobody
+// re-checks.
+func TestLiveCanaryWorkflowParityRefusesEveryDirection(t *testing.T) {
+	rows := []liveCanaryProvider{{
+		Slot: "ggg/mail", Module: "ggg/system/mail-fixture", Target: "fixture",
+		Keys: []liveCanaryKey{
+			{Env: "FIXTURE_API_KEY", Required: true, Credential: true},
+			{Env: "GGG_CANARY_FIXTURE_SINK", Required: true, Harness: true},
+			{Env: "FIXTURE_REGION", Secret: "CANARY_FIXTURE_HOME_REGION"},
+			{Env: "FIXTURE_SERVER"},
+		},
+	}}
+	pinned := map[string]string{"FIXTURE_SERVER": "pinned to sandbox"}
+	nonRow := map[string]string{liveCanaryEnvVar: "the gate"}
+	sound := map[string]string{
+		liveCanaryEnvVar:          "1",
+		"FIXTURE_API_KEY":         "${{ secrets.CANARY_FIXTURE_API_KEY }}",
+		"GGG_CANARY_FIXTURE_SINK": "${{ secrets.CANARY_FIXTURE_SINK }}",
+		"FIXTURE_REGION":          "${{ secrets.CANARY_FIXTURE_HOME_REGION }}",
+		"FIXTURE_SERVER":          "sandbox",
+	}
+
+	t.Run("the sound population is clean", func(t *testing.T) {
+		if parity := liveCanaryClassifyEnv(rows, sound, pinned, nonRow); !parity.clean() {
+			t.Fatalf("a sound env block was refused: %+v", parity)
+		}
+	})
+
+	mutate := func(change func(map[string]string)) map[string]string {
+		copied := map[string]string{}
+		for key, value := range sound {
+			copied[key] = value
+		}
+		change(copied)
+		return copied
+	}
+
+	t.Run("a row key the workflow does not map", func(t *testing.T) {
+		parity := liveCanaryClassifyEnv(rows, mutate(func(env map[string]string) {
+			delete(env, "FIXTURE_API_KEY")
+		}), pinned, nonRow)
+		if len(parity.Unmapped) != 1 || !strings.Contains(parity.Unmapped[0], "FIXTURE_API_KEY") {
+			t.Fatalf("an unmapped row key was not refused: %+v", parity)
+		}
+		// The refusal must name the consequence, not the mismatch: this is
+		// the one direction whose cost survives the operator fixing what the
+		// skip reason told them to fix.
+		refusal := liveCanaryUnmappedRefusal(parity.Unmapped)
+		for _, want := range []string{"skip in CI forever", "EVEN AFTER the operator sets the repository secret", "CANARY_FIXTURE_API_KEY"} {
+			if !strings.Contains(refusal, want) {
+				t.Fatalf("the unmapped refusal does not state %q:\n%s", want, refusal)
 			}
 		}
-		if !declared {
-			dead = append(dead, key)
+	})
+
+	t.Run("an env entry no row declares", func(t *testing.T) {
+		parity := liveCanaryClassifyEnv(rows, mutate(func(env map[string]string) {
+			env["FIXTURE_LEGACY_TOKEN"] = "${{ secrets.CANARY_FIXTURE_LEGACY_TOKEN }}"
+		}), pinned, nonRow)
+		if len(parity.Orphaned) != 1 || !strings.Contains(parity.Orphaned[0], "FIXTURE_LEGACY_TOKEN") {
+			t.Fatalf("an orphan env entry was not refused: %+v", parity)
 		}
-	}
-	sort.Strings(dead)
-	if len(dead) > 0 {
-		t.Fatalf("these liveCanaryPinnedWorkflowValues rows name no key any row declares: %v.\nDelete each one.", dead)
-	}
+		if refusal := liveCanaryOrphanRefusal(parity.Orphaned); !strings.Contains(refusal, "Nothing reads them") {
+			t.Fatalf("the orphan refusal does not state the consequence:\n%s", refusal)
+		}
+	})
+
+	t.Run("a mapping from the wrong secret name", func(t *testing.T) {
+		parity := liveCanaryClassifyEnv(rows, mutate(func(env map[string]string) {
+			env["FIXTURE_REGION"] = "${{ secrets.CANARY_FIXTURE_REGION }}"
+		}), pinned, nonRow)
+		if len(parity.Misnamed) != 1 || !strings.Contains(parity.Misnamed[0], "CANARY_FIXTURE_HOME_REGION") {
+			t.Fatalf("a misnamed secret was not refused: %+v", parity)
+		}
+	})
+
+	t.Run("a credential literal, and a pin taken from a secret", func(t *testing.T) {
+		parity := liveCanaryClassifyEnv(rows, mutate(func(env map[string]string) {
+			env["FIXTURE_API_KEY"] = "sk-live-not-a-reference"
+			env["FIXTURE_SERVER"] = "${{ secrets.CANARY_FIXTURE_SERVER }}"
+		}), pinned, nonRow)
+		if len(parity.Literal) != 1 || len(parity.PinnedFromSecret) != 1 {
+			t.Fatalf("a literal credential and a secret-sourced pin were not both refused: %+v", parity)
+		}
+	})
+
+	t.Run("a declaration that describes nothing", func(t *testing.T) {
+		parity := liveCanaryClassifyEnv(rows, mutate(func(env map[string]string) {
+			delete(env, liveCanaryEnvVar)
+		}), map[string]string{"FIXTURE_GONE": "pinned"}, nonRow)
+		if len(parity.DeadPin) != 1 || len(parity.DeadNonRow) != 1 {
+			t.Fatalf("a dead pin and a dead non-row exemption were not both refused: %+v", parity)
+		}
+	})
+}
+
+func TestLiveCanaryChecklistParityRefusesEveryDirection(t *testing.T) {
+	rows := []liveCanaryProvider{{
+		Slot: "ggg/mail", Module: "ggg/system/mail-fixture", Target: "fixture",
+		Keys: []liveCanaryKey{
+			{Env: "FIXTURE_API_KEY", Required: true, Credential: true},
+			{Env: "FIXTURE_BASE_URL"},
+			{Env: "FIXTURE_SERVER"},
+		},
+	}}
+	pinned := map[string]string{"FIXTURE_SERVER": "pinned to sandbox"}
+	required := map[string]bool{"CANARY_FIXTURE_API_KEY": true}
+	optional := map[string]bool{"CANARY_FIXTURE_BASE_URL": true}
+
+	t.Run("the sound checklist is clean", func(t *testing.T) {
+		if parity := liveCanaryClassifyChecklist(rows, pinned, required, optional); !parity.clean() {
+			t.Fatalf("a sound checklist was refused: %+v", parity)
+		}
+	})
+
+	t.Run("a deleted checklist entry", func(t *testing.T) {
+		parity := liveCanaryClassifyChecklist(rows, pinned, map[string]bool{}, optional)
+		if len(parity.Missing) != 1 || !strings.Contains(parity.Missing[0], "CANARY_FIXTURE_API_KEY") {
+			t.Fatalf("a missing checklist entry was not refused: %+v", parity)
+		}
+		if !strings.Contains(parity.Missing[0], "belongs under Required") {
+			t.Fatalf("the missing entry does not name the table it belongs in: %q", parity.Missing[0])
+		}
+	})
+
+	t.Run("a stale checklist entry", func(t *testing.T) {
+		stale := map[string]bool{"CANARY_FIXTURE_API_KEY": true, "CANARY_FIXTURE_RETIRED": true}
+		parity := liveCanaryClassifyChecklist(rows, pinned, stale, optional)
+		if len(parity.Stale) != 1 || parity.Stale[0] != "CANARY_FIXTURE_RETIRED" {
+			t.Fatalf("a stale checklist entry was not refused: %+v", parity)
+		}
+	})
+
+	t.Run("a pinned key is not a secret and may not be listed", func(t *testing.T) {
+		parity := liveCanaryClassifyChecklist(rows, pinned, required, map[string]bool{
+			"CANARY_FIXTURE_BASE_URL": true, "CANARY_FIXTURE_SERVER": true,
+		})
+		if len(parity.Stale) != 1 || parity.Stale[0] != "CANARY_FIXTURE_SERVER" {
+			t.Fatalf("a checklist entry for a pinned literal was not refused: %+v", parity)
+		}
+	})
+
+	t.Run("requiredness filed backwards, in both directions", func(t *testing.T) {
+		parity := liveCanaryClassifyChecklist(rows, pinned,
+			map[string]bool{"CANARY_FIXTURE_BASE_URL": true},
+			map[string]bool{"CANARY_FIXTURE_API_KEY": true})
+		if len(parity.Misfiled) != 2 {
+			t.Fatalf("two backwards filings were not both refused: %+v", parity)
+		}
+		joined := strings.Join(parity.Misfiled, "\n")
+		for _, want := range []string{"absence SKIPS the row", "only NARROWS a row that still runs"} {
+			if !strings.Contains(joined, want) {
+				t.Fatalf("the misfiling refusal does not state %q:\n%s", want, joined)
+			}
+		}
+	})
+
+	t.Run("a secret on both tables", func(t *testing.T) {
+		parity := liveCanaryClassifyChecklist(rows, pinned, required, map[string]bool{
+			"CANARY_FIXTURE_API_KEY": true, "CANARY_FIXTURE_BASE_URL": true,
+		})
+		if len(parity.Misfiled) != 1 || !strings.Contains(parity.Misfiled[0], "on both tables") {
+			t.Fatalf("a secret listed as both required and optional was not refused: %+v", parity)
+		}
+	})
+
+	t.Run("two keys deriving one secret", func(t *testing.T) {
+		shared := []liveCanaryProvider{{
+			Slot: "ggg/mail", Module: "ggg/system/mail-fixture", Target: "fixture",
+			Keys: []liveCanaryKey{
+				{Env: "FIXTURE_API_KEY", Required: true},
+				{Env: "FIXTURE_TOKEN", Required: true, Secret: "CANARY_FIXTURE_API_KEY"},
+			},
+		}}
+		parity := liveCanaryClassifyChecklist(shared, pinned, required, map[string]bool{})
+		if len(parity.Shared) != 1 || !strings.Contains(parity.Shared[0], "FIXTURE_API_KEY and FIXTURE_TOKEN") {
+			t.Fatalf("two keys deriving one secret were not refused: %+v", parity)
+		}
+	})
 }
 
 // liveCanaryRepositoryRoot resolves this repository's root from the test's own

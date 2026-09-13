@@ -743,9 +743,12 @@ no needs chain, never required — which is the only thing that sets
 `GGG_LIVE_CANARY=1`. `TestCILiveCanaryWorkflowIsNotAContributorGate` parses
 that workflow so narrowing it to `push`, adding a `needs` edge, gating the
 step, or repointing `-run` fails by name;
-`TestEveryLiveCanaryKeyIsMappedInTheWorkflow` checks the other direction, that
-every key a row declares is actually mapped there, because an unmapped key
-would make a new row skip in CI forever while reporting a clean line.
+`TestEveryLiveCanaryKeyIsMappedInTheWorkflow` and
+`TestEveryLiveCanarySecretIsOnTheOperatorChecklist` check the other
+directions, holding the canary table, that workflow's `env:` block and the
+secret checklist below in agreement both ways, because an unmapped key would
+make a new row skip in CI forever while reporting a clean line — and would
+keep skipping after the secret was set.
 
 Weekly rather than per-push for one reason: the failure this catches is a
 **provider** moving, which no change to this repository can trigger. Per-push
@@ -800,34 +803,73 @@ accounts by design.
 
 ### The operator's secret checklist
 
-Every key is optional. An unset repository secret expands to the empty string,
-so the row skips with its reason instead of failing — configure the providers
-you care about and leave the rest. The env variable each secret feeds is the
-adapter's own declared key, so the mapping is the adapter's contract, not the
-canary's invention.
+Every key is optional in the sense that nothing fails without it: an unset
+repository secret expands to the empty string, so the row skips with its
+reason instead of failing — configure the providers you care about and leave
+the rest. The env variable each secret feeds is the adapter's own declared
+key, so the mapping is the adapter's contract, not the canary's invention.
+
+What is *not* interchangeable is the two tables below. A **required** secret
+is one whose absence skips its row entirely; an **optional** secret widens a
+row that runs without it. That distinction is declared once, on the canary
+row (`liveCanaryKey.Required`), and
+`TestEveryLiveCanarySecretIsOnTheOperatorChecklist` refuses a secret filed
+under the wrong heading: being told a row-gating secret is optional buys an
+unconfigured row nobody notices, and being told a widening secret is required
+buys an account opened for nothing.
+
+#### Required — an unset secret skips its row
 
 | Repository secret | Feeds |
 |---|---|
 | `CANARY_RESEND_API_KEY`, `CANARY_MAIL_FROM`, `CANARY_MAIL_TO` | `RESEND_API_KEY` and the throwaway sink the canary mails |
-| `CANARY_R2_ACCOUNT_ID`, `CANARY_R2_ACCESS_KEY_ID`, `CANARY_R2_SECRET_ACCESS_KEY`, `CANARY_R2_BUCKET` | the four `STORAGE_R2_*` keys |
+| `CANARY_R2_ACCOUNT_ID`, `CANARY_R2_ACCESS_KEY_ID`, `CANARY_R2_SECRET_ACCESS_KEY`, `CANARY_R2_BUCKET` | the four `STORAGE_R2_*` keys. The secrets are named after the target, not the seam: an R2 token is not a "storage" token |
 | `CANARY_POLAR_ACCESS_TOKEN`, `CANARY_POLAR_PRODUCT_PRO` | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_PRO`. `POLAR_SERVER` is pinned to `sandbox` in the workflow and is not a secret |
 | `CANARY_CLERK_SECRET_KEY`, `CANARY_CLERK_FRONTEND_API_URL` | `CLERK_SECRET_KEY`, `CLERK_FRONTEND_API_URL` |
-| `CANARY_CLERK_USER_SUBJECT`, `CANARY_CLERK_SESSION_JWT`, `CANARY_CLERK_ORG_SUBJECT` | optional; each widens the Clerk row from the JWKS document to the Backend API user read and the v2 organisation claim block |
-| `CANARY_POSTHOG_API_KEY`, `CANARY_POSTHOG_HOST` | `POSTHOG_API_KEY`, `POSTHOG_HOST` (host defaults to the manifest's) |
+| `CANARY_POSTHOG_API_KEY` | `POSTHOG_API_KEY` |
 | `CANARY_SENTRY_DSN` | `SENTRY_DSN` |
-| `CANARY_LLM_API_KEY`, `CANARY_LLM_MODEL`, `CANARY_LLM_BASE_URL` | `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL` |
+| `CANARY_LLM_API_KEY`, `CANARY_LLM_MODEL` | `LLM_API_KEY`, `LLM_MODEL` |
 | `CANARY_CACHE_REDIS_URL`, `CANARY_CACHE_REDIS_TOKEN` | `CACHE_REDIS_URL`, `CACHE_REDIS_TOKEN` |
 | `CANARY_RATE_LIMIT_REDIS_URL`, `CANARY_RATE_LIMIT_REDIS_TOKEN` | `RATE_LIMIT_REDIS_URL`, `RATE_LIMIT_REDIS_TOKEN` |
 | `CANARY_TYPESENSE_URL`, `CANARY_TYPESENSE_API_KEY`, `CANARY_TYPESENSE_COLLECTION` | `TYPESENSE_URL`, `TYPESENSE_API_KEY`, and the pre-created collection the probe writes into |
 | `CANARY_ABLY_ENDPOINT`, `CANARY_ABLY_API_KEY` | `ABLY_ENDPOINT`, `ABLY_API_KEY` |
-| `CANARY_OTLP_ENDPOINT`, `CANARY_OTLP_API_KEY` | `OTLP_ENDPOINT`, `OTLP_API_KEY` |
+| `CANARY_OTLP_ENDPOINT` | `OTLP_ENDPOINT` |
 | `CANARY_OTLP_AUDIT_EXPORT_URL` | `OTLP_AUDIT_EXPORT_URL` |
 | `CANARY_NEON_API_KEY`, `CANARY_NEON_PROJECT_ID` | `NEON_API_KEY`, `NEON_PROJECT_ID` |
 | `CANARY_KNOCK_API_KEY`, `CANARY_KNOCK_WORKFLOW`, `CANARY_KNOCK_RECIPIENT` | `KNOCK_API_KEY`, plus the throwaway workflow key and recipient the canary triggers |
 | `CANARY_SVIX_API_KEY`, `CANARY_SVIX_APP` | `SVIX_API_KEY`, plus the throwaway consumer application the canary messages |
-| `CANARY_OPENMETER_API_KEY`, `CANARY_OPENMETER_URL`, `CANARY_OPENMETER_SUBJECT` | `OPENMETER_API_KEY`, `OPENMETER_URL`, plus the throwaway metering subject |
+| `CANARY_OPENMETER_API_KEY`, `CANARY_OPENMETER_SUBJECT` | `OPENMETER_API_KEY`, plus the throwaway metering subject |
 | `CANARY_FLAGSMITH_ENVIRONMENT_KEY`, `CANARY_FLAGSMITH_MANAGEMENT_TOKEN`, `CANARY_FLAGSMITH_PROJECT_ID`, `CANARY_FLAGSMITH_ENVIRONMENT_ID` | the four `FLAGSMITH_*` keys. Two credentials because Flagsmith has two APIs: the Environment Key is public by Flagsmith's own documentation and authenticates evaluation only, while the organisation token is secret and authorises every mutation. Both are repository secrets here anyway — a public key still names someone's environment. Use a throwaway project: the probe creates and deletes a feature |
-| `CANARY_FLAGSMITH_FLAGS_API_URL`, `CANARY_FLAGSMITH_API_URL` | optional; set both to canary a self-hosted Flagsmith, which serves the Flags and Management APIs from one host |
+
+#### Optional — an unset secret narrows its row, which still runs
+
+| Repository secret | Feeds |
+|---|---|
+| `CANARY_CLERK_USER_SUBJECT`, `CANARY_CLERK_SESSION_JWT`, `CANARY_CLERK_ORG_SUBJECT` | each widens the Clerk row from the JWKS document to the Backend API user read and the v2 organisation claim block |
+| `CANARY_POSTHOG_HOST` | `POSTHOG_HOST`; unset uses the manifest's default host |
+| `CANARY_LLM_BASE_URL` | `LLM_BASE_URL`; unset uses the adapter's default OpenAI-compatible endpoint |
+| `CANARY_OTLP_API_KEY` | `OTLP_API_KEY`. The exporter sends no authorization header, so the endpoint must accept unauthenticated OTLP either way |
+| `CANARY_OPENMETER_URL` | `OPENMETER_URL`; unset uses the adapter's default |
+| `CANARY_FLAGSMITH_FLAGS_API_URL`, `CANARY_FLAGSMITH_API_URL` | set both to canary a self-hosted Flagsmith, which serves the Flags and Management APIs from one host |
+
+Three surfaces have to agree for a configured provider to actually be a
+probed one: the canary table, this workflow's `env:` block, and the checklist
+above. `TestEveryLiveCanaryKeyIsMappedInTheWorkflow` and
+`TestEveryLiveCanarySecretIsOnTheOperatorChecklist` hold them in agreement in
+every direction — a row key the workflow does not map, an `env:` entry no row
+reads, a secret name that disagrees with the table, a checklist entry that is
+missing or stale. The first of those is the expensive one: an unmapped key
+makes its row skip *even after the secret is set*, and the skip reason names
+the key as missing, so it reads exactly like a credential nobody supplied.
+
+And what those guards cannot check, which is most of what matters here. They
+read **names**. No guard can check a secret's value: not that the token is
+live, not whether it addresses a sandbox or a production tenant, not whether
+the account behind it is throwaway. Those three are yours, and the "what each
+canary leaves behind" table above is the input to them — several rows leave
+immutable state in whatever account you name, and one metered event on a real
+customer reaches an invoice. A green parity check means the plumbing agrees
+with itself, nothing more.
 
 To run one row locally, export its keys and `GGG_LIVE_CANARY=1`; the skip line
 for every unconfigured row prints the exact assignment it wants.
