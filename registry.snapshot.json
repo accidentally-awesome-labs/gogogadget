@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/ci-github/module.json",
-      "sha256": "27962413db2596fe34c6699d81018218d19af5699840a178c2c07207dc746ac6"
+      "sha256": "b77ab003d056b2c57799e931459c863beadff5a10d203896f29c95584205c28c"
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "c3c2c879a68a4a0f935a0204c9d6ce6d58c67391c4d367986af3cf7aa77560c4"
+      "sha256": "8440595dcccd3c1513e259fc19038288459609e0fd653a80fe96a8957bdb83d1"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "9bae39471ce6841e975847cade8645b130efbe36c7b7a01ecd974cbff77e34a1"
+      "sha256": "46a75a3ebd4d12863976095638f51fb59d78945d36d0619fc3790223255a7a7f"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
